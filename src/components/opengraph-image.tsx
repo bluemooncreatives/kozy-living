@@ -20,7 +20,8 @@ export default async function OpengraphImage(
 
   let logoDataUrl = "";
   try {
-    const logoBuffer = fs.readFileSync(path.join(process.cwd(), "public", "logo.png"));
+    const logoPath = path.join(process.cwd(), "public", "logo", "Kozy Logo.png");
+    const logoBuffer = fs.readFileSync(logoPath);
     logoDataUrl = `data:image/png;base64,${logoBuffer.toString("base64")}`;
   } catch {
     // Fallback if logo not found
@@ -38,9 +39,8 @@ export default async function OpengraphImage(
             <img
               src={logoDataUrl}
               alt=""
-              width={96}
-              height={96}
-              style={{ borderRadius: "9999px" }}
+              height={70}
+              style={{ objectFit: "contain" }}
             />
           ) : null}
           <p

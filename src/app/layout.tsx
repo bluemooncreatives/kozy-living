@@ -15,7 +15,7 @@ const baseUrl =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000");
 
-const logoUrl = new URL("/logo.png", baseUrl).toString();
+const logoUrl = new URL("/logo/Kozy Logo.png", baseUrl).toString();
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -25,8 +25,8 @@ const organizationJsonLd = {
   logo: {
     "@type": "ImageObject",
     url: logoUrl,
-    width: 571,
-    height: 571,
+    width: 3836,
+    height: 2160,
   },
 };
 
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   description: site.description,
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png", sizes: "571x571" }],
-    shortcut: ["/logo.png"],
-    apple: [{ url: "/logo.png", type: "image/png", sizes: "571x571" }],
+    icon: [{ url: "/logo/Kozy Logo.png", type: "image/png" }],
+    shortcut: ["/logo/Kozy Logo.png"],
+    apple: [{ url: "/logo/Kozy Logo.png", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
   openGraph: {

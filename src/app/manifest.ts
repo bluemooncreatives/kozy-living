@@ -12,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#2a221e",
     icons: [
       {
-        src: "/logo.png",
-        sizes: "571x571",
+        src: "/logo/Kozy Logo.png",
+        sizes: "3836x2160",
         type: "image/png",
         purpose: "any",
       },
