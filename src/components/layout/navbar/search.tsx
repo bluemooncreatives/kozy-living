@@ -239,7 +239,7 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
           type="text"
           name="search"
           autoFocus
-          placeholder="Search the estate…"
+          placeholder="Search objects, spaces, materials…"
           autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -263,10 +263,10 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
         />
       )}
 
-      {/* Browse-by-brew pills - visible only when input is empty */}
+      {/* Browse-by-space pills - visible only when input is empty */}
       {showBrowse && (
         <div className="mt-10">
-          <p className="eyebrow mb-4">Browse by brew</p>
+          <p className="eyebrow mb-4">Browse by space & category</p>
           <ul className="flex flex-wrap gap-2">
             {brewFormats.map((format) => (
               <li key={format.handle}>

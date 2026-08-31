@@ -146,13 +146,13 @@ async function RelatedProducts({ id }: { id: string }) {
   return (
     <section aria-labelledby="related">
       <SectionHead
-        eyebrow="Also from the estate"
+        eyebrow="Complete the sanctuary"
         title={<span id="related">You May Also Like</span>}
         count={shelf.length}
         action="View all"
         actionHref="/search"
       />
-      <Carousel label="Related coffee">
+      <Carousel label="Related objects">
         {shelf.map((product) => (
           <ProductCard key={product.handle} product={product} />
         ))}

@@ -5,8 +5,8 @@ import { getProducts } from "@/lib/shopify";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Shop coffee",
-  description: "Search single-origin Coorg Robusta from Vaishnavi Estate.",
+  title: "Shop Collection",
+  description: "Search curated home decor, artisanal furniture, and organic textiles from Kozy Living.",
 };
 
 export default async function SearchPage({
@@ -33,7 +33,7 @@ export default async function SearchPage({
       {searchValue ? (
         <p className="eyebrow mb-10">
           {products.length === 0
-            ? "No coffee matches"
+            ? "No objects match"
             : `${products.length} ${resultsText} for`}{" "}
           <span className="text-oxblood">&ldquo;{searchValue}&rdquo;</span>
         </p>
@@ -48,11 +48,11 @@ export default async function SearchPage({
           <p className="serif text-display-md">Nothing on this shelf yet</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
             {searchValue
-              ? "Try a broader term - a roast level, a brew method, or simply “Robusta”."
-              : "The current harvest is being listed. Check back shortly."}
+              ? "Try a broader search term — a space, material, or category like 'Linen', 'Oak', or 'Lighting'."
+              : "Our collection is being updated. Explore all handcrafted pieces."}
           </p>
           <Link href="/search" className="btn-outline mt-8">
-            View all coffee
+            View all objects
           </Link>
         </div>
       )}

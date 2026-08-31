@@ -1,6 +1,6 @@
 const plugin = require("tailwindcss/plugin");
 
-/** @type {import('tailwindcss').config} */
+/** @type {import('tailwindcss').Config} */
 
 module.exports = {
   content: [
@@ -11,29 +11,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Roles are assigned by measured contrast, not by taste. See
-        // DESIGN.md §1 for the ratio table and the two hard rules.
-        paper: "#FFFFFF",
-        // The ink. Body, nav, UI, prices, table cells. 16.5:1 on paper.
-        ink: "#341706",
+        // Kozy Living warm sanctuary palette
+        paper: "#FAF8F5",
+        // The ink. Body, nav, UI, prices, table cells. Warm deep espresso charcoal.
+        ink: "#2A221E",
         // The brand voice: display headings, links, buttons, active states,
-        // and — since Light Brown was retired — secondary/meta text and the
-        // hairline hue as well. 10.6:1 on paper.
-        oxblood: "#7B1526",
-        // Fill-only accent. NEVER text on paper (1.5:1) — see DESIGN.md §1.
-        amber: "#FFCF71",
-        // Oxblood at 8% over paper: the product-image tile ground.
-        tint: "#F4ECEE",
-        rule: "rgba(123, 21, 38, 0.22)",
-        wash: "rgba(123, 21, 38, 0.06)",
-        // Dark ground. Takes paper or amber text only.
-        coal: "#341706",
+        // secondary/meta text and the hairline hue. Warm terracotta / clay rust.
+        oxblood: "#8C4328",
+        // Fill-only accent: soft golden honey glow.
+        amber: "#E9B973",
+        // Warm oat tint for product-image tile grounds.
+        tint: "#F3EFE9",
+        rule: "rgba(140, 67, 40, 0.18)",
+        wash: "rgba(140, 67, 40, 0.05)",
+        // Dark ground. Takes paper or amber text.
+        coal: "#2A221E",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
-        // Nothing in this system is set in a sans — alias it to the mono so a
-        // stray `font-sans` cannot silently introduce a third typeface.
         sans: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
@@ -84,11 +80,10 @@ module.exports = {
         micro: "0.1em",
       },
       borderRadius: {
-        // Every photograph in the system shares this radius.
         plate: "0.75rem",
       },
       borderColor: {
-        DEFAULT: "rgba(123, 21, 38, 0.22)",
+        DEFAULT: "rgba(140, 67, 40, 0.18)",
       },
       maxWidth: {
         measure: "38rem",

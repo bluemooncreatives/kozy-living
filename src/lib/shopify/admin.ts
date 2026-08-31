@@ -23,7 +23,10 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
 // the storefront constant so a version bump moves both endpoints together.
 const endpoint = `${domain}/admin${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
 
-const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+const token =
+  process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ||
+  process.env.SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN ||
+  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN;
 
 /** Thrown when the Admin credentials are absent - a deploy problem, not a user one. */
 export class ShopifyAdminNotConfiguredError extends Error {

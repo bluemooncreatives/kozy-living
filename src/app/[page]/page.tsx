@@ -1,6 +1,7 @@
 import Prose from "@/components/prose";
 import { Eyebrow } from "@/components/ui/section";
 import { getPage } from "@/lib/shopify";
+import { site } from "@/lib/site";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -37,7 +38,7 @@ export default async function Page({
 
   return (
     <article className="mx-auto max-w-3xl">
-      <Eyebrow align="left">Vaishnavi Estate</Eyebrow>
+      <Eyebrow align="left">{site.name}</Eyebrow>
       <h1 className="serif mt-5 text-display-xl">{page.title}</h1>
       <hr className="my-10 border-rule" />
       <Prose html={page.body as string} />

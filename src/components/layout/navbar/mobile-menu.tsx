@@ -94,7 +94,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   ))}
                 </ul>
 
-                <p className="eyebrow mb-4 mt-10">Browse by brew</p>
+                <p className="eyebrow mb-4 mt-10">Browse by space</p>
                 <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
                   {brewFormats.map((format) => (
                     <li key={format.handle}>

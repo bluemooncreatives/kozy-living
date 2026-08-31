@@ -1,13 +1,14 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
+import fs from "fs";
+import path from "path";
 
 export type Props = {
   title?: string;
 };
 
 /**
- * Social card in the brand's paper-and-oxblood palette. Satori has no access
- * to the site stylesheet, so the palette values are repeated literally here.
+ * Social card in the brand's paper-and-terracotta palette.
  */
 export default async function OpengraphImage(
   props?: Props
@@ -16,31 +17,35 @@ export default async function OpengraphImage(
     ...{ title: process.env.SITE_NAME || site.name },
     ...props,
   };
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "http://localhost:3000");
-  const logoUrl = new URL("/logo.png", baseUrl).toString();
+
+  let logoDataUrl = "";
+  try {
+    const logoBuffer = fs.readFileSync(path.join(process.cwd(), "public", "logo.png"));
+    logoDataUrl = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+  } catch {
+    // Fallback if logo not found
+  }
 
   return new ImageResponse(
     (
       <div
         tw="flex h-full w-full flex-col justify-between p-20"
-        style={{ backgroundColor: "#1C1210" }}
+        style={{ backgroundColor: "#2A221E" }}
       >
         <div tw="flex items-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logoUrl}
-            alt=""
-            width={96}
-            height={96}
-            style={{ borderRadius: "9999px" }}
-          />
+          {logoDataUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={logoDataUrl}
+              alt=""
+              width={96}
+              height={96}
+              style={{ borderRadius: "9999px" }}
+            />
+          ) : null}
           <p
             tw="ml-5 text-2xl"
-            style={{ color: "#C08A4E", letterSpacing: "0.14em" }}
+            style={{ color: "#E9B973", letterSpacing: "0.14em" }}
           >
             {site.origin.toUpperCase()} · EST. {site.since}
           </p>
@@ -48,14 +53,14 @@ export default async function OpengraphImage(
 
         <p
           tw="text-8xl"
-          style={{ color: "#FBF4E6", fontFamily: "serif", lineHeight: 1.05 }}
+          style={{ color: "#FAF8F5", fontFamily: "serif", lineHeight: 1.05 }}
         >
           {title}
         </p>
 
         <p
           tw="text-2xl"
-          style={{ color: "#FBF4E6", opacity: 0.65, letterSpacing: "0.14em" }}
+          style={{ color: "#FAF8F5", opacity: 0.75, letterSpacing: "0.14em" }}
         >
           {site.tagline.toUpperCase()}
         </p>

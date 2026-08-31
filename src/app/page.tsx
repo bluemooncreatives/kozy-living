@@ -35,13 +35,10 @@ export const metadata = {
 };
 
 /**
- * Homepage. Section order follows DESIGN.md: hero → filters → bestsellers →
- * promo pair → philosophy → blends → about → the single-origin table → brew of
- * the month → merch → guides → journal.
- *
- * Every product-backed section resolves its own data and degrades to nothing
- * when the store has no matching products, so a fresh or partially configured
- * Shopify store still renders a coherent page rather than empty scaffolding.
+ * Homepage. Section order:
+ * hero → category filters → living philosophy & reel → bestsellers →
+ * promo pair → curated edits → about → studio catalog table → design of the month →
+ * accents → design guides → journal dispatch.
  */
 export default function Home() {
   return (
@@ -110,13 +107,7 @@ async function productsFrom(
 function Hero() {
   return (
     <section className="shell pt-3">
-      {/* `bg-coal` overrides the plate's light tint: the amber statement sits
-          on this panel before the video paints, and amber needs a dark ground. */}
       <div className="plate relative aspect-[4/5] w-full overflow-hidden bg-coal sm:aspect-[16/10] lg:aspect-[16/8]">
-        {/* Leading slash matters on every clip - a bare filename resolves
-            against the current route, so it would 404 on any page but "/".
-            Coffee.mp4 opens the loop; each clip crossfades into the next,
-            then the final clip crossfades back to Coffee.mp4. */}
         <HeroVideo
           clips={[
             { src: "/Coffee.mp4" },
@@ -127,25 +118,15 @@ function Hero() {
             { src: "/45358-443057031.mp4" },
           ]}
         />
-        {/* Scrim first: the statement has to hold over whatever the
-            footage is doing behind it. */}
         <div
           aria-hidden
           className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-coal/70 to-transparent"
         />
-        {/* The statement rides across the lower third of the frame, in amber -
-            the palette's on-dark accent. Lifted off the very edge (rather than
-            a bottom-0/percentage offset) so descenders never brush the plate's
-            own clipping boundary, and pulled down from the previous offsets so
-            the huge hero type has headroom at the top too, on short/wide crops
-            of the frame (e.g. the lg:aspect-[16/8] breakpoint). */}
         <div className="absolute inset-x-0 bottom-0 sm:bottom-2 md:bottom-4">
           <Marquee
             phrases={heroPhrases}
             size="hero"
             separator=""
-            // Slow, legible crawl - three short statements rather than one
-            // long one repeated, so each gets a moment to actually be read.
             duration={50}
             className="text-amber"
           />
@@ -162,7 +143,7 @@ function Hero() {
 
 function CollectionFilters() {
   return (
-    <section aria-label="Browse collections" className="py-10 md:py-12">
+    <section aria-label="Browse spaces and categories" className="py-10 md:py-12">
       <CollectionPillRail />
     </section>
   );
@@ -181,12 +162,12 @@ async function Bestsellers() {
     <section aria-labelledby="bestsellers">
       <SectionHead
         eyebrow="Bestsellers"
-        title={<span id="bestsellers">Hot off the Roaster</span>}
+        title={<span id="bestsellers">Curated Favorites</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
       />
-      <Carousel label="Bestselling coffee">
+      <Carousel label="Bestselling objects">
         {products.map((product, index) => (
           <ProductCard
             key={product.handle}
@@ -221,7 +202,7 @@ function RailFallback() {
 function PromoPair() {
   return (
     <section
-      aria-label="Shop by brew method"
+      aria-label="Shop by curated atmosphere"
       className="rule-b grid grid-cols-1 gap-3 px-[var(--gutter)] py-3 md:grid-cols-2"
     >
       {promoTiles.map((tile) => (
@@ -240,33 +221,16 @@ function PromoPair() {
 
 /* ----------------------------------------------------------- philosophy */
 
-/**
- * Estate philosophy, then the reel. One section rather than two: the band
- * states the position and the plates below are the evidence for it, so a
- * hairline between them would read as a change of subject.
- *
- * The head is deliberately not `SectionHead` - every product rail on this
- * page opens centred, and holding this one to a left-hung asymmetric column
- * is what marks it as the page's editorial pause rather than another rail.
- */
 function Philosophy() {
   return (
     <section aria-labelledby="philosophy">
       <div className="shell flex flex-col items-center py-12 text-center md:py-16">
         <Eyebrow>{estatePhilosophy.eyebrow}</Eyebrow>
         <Headline id="philosophy" className="mt-5">
-          {/* The break is authored rather than left to `text-balance`:
-              at display-xl the balanced break lands mid-phrase. */}
           {estatePhilosophy.title.map((line) => (
-            <span key={line}>
-              {line}
-            </span>
+            <span key={line}>{line}</span>
           ))}
         </Headline>
-        {/* Wider than `max-w-measure`: centred copy under a two-line display
-            heading needs the extra width to avoid a ragged four-line stack.
-            The opening paragraph is set a step up from the two beneath it, so
-            the eye has somewhere to land before the detail. */}
         <div className="mt-6 max-w-4xl space-y-5">
           {estatePhilosophy.body.map((paragraph, index) => (
             <p
@@ -286,25 +250,24 @@ function Philosophy() {
       </div>
 
       <div className="pb-12 md:pb-16">
-        <EstateReel items={estateReel} label="Life on the estate" />
+        <EstateReel items={estateReel} label="Life in the sanctuary" />
       </div>
     </section>
   );
 }
 
 async function LatestBlends() {
-  const products = (await productsFrom("blend", { sortKey: "CREATED_AT", reverse: true })).slice(
-    0,
-    9
-  );
+  const products = (
+    await productsFrom("blend", { sortKey: "CREATED_AT", reverse: true })
+  ).slice(0, 9);
 
   if (!products.length) return null;
 
   return (
-    <section aria-labelledby="blends">
+    <section aria-labelledby="curated-edits">
       <SectionHead
-        eyebrow="Latest blends"
-        title={<span id="blends">Let&apos;s Mix Things Up</span>}
+        eyebrow="Curated Edits"
+        title={<span id="curated-edits">Warmth & Texture</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
@@ -336,7 +299,7 @@ function About() {
         </Headline>
       </div>
 
-      <Carousel label="About the estate" perView={2}>
+      <Carousel label="About Kozy Living" perView={2}>
         {aboutCards.flatMap((copy, index) => [
           <div key={`copy-${index}`} className="h-full p-6">
             <p className="body-mono">{copy}</p>
@@ -344,8 +307,12 @@ function About() {
           <div key={`image-${index}`} className="h-full p-3">
             <div className="plate aspect-[4/3] w-full">
               <Image
-                src={index % 2 === 0 ? "/mens-collection.png" : "/kids-collection.png"}
-                alt=""
+                src={
+                  index % 2 === 0
+                    ? "/cozy-living-room.jpg"
+                    : "/cozy-ceramics.jpg"
+                }
+                alt="Kozy Living craftsmanship"
                 fill
                 sizes="(min-width: 640px) 50vw, 85vw"
                 className="object-cover"
@@ -358,7 +325,7 @@ function About() {
   );
 }
 
-/* --------------------------------------------------------- single origin */
+/* --------------------------------------------------------- single origin / catalog */
 
 async function SingleOrigin() {
   const products = (
@@ -368,10 +335,10 @@ async function SingleOrigin() {
   if (!products.length) return null;
 
   return (
-    <section aria-labelledby="single-origin">
+    <section aria-labelledby="catalog">
       <SectionHead
-        eyebrow="Single origin"
-        title={<span id="single-origin">Straight from the Source</span>}
+        eyebrow="Studio Catalog"
+        title={<span id="catalog">Objects by Space & Material</span>}
         count={products.length}
       />
       <ProductTable products={products} />
@@ -379,7 +346,7 @@ async function SingleOrigin() {
   );
 }
 
-/* ------------------------------------------------------ brew of the month */
+/* ------------------------------------------------------ spotlight */
 
 async function BrewOfTheMonth() {
   let product: Product | undefined;
@@ -398,7 +365,13 @@ async function BrewOfTheMonth() {
   return (
     <section aria-labelledby="feature" className="rule-t">
       <div className="rule-b py-2">
-        <Marquee phrases={band} size="display" separator="↓↓↓↓" duration={45} className="text-oxblood" />
+        <Marquee
+          phrases={band}
+          size="display"
+          separator="↓↓↓↓"
+          duration={45}
+          className="text-oxblood"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -435,10 +408,10 @@ async function BrewOfTheMonth() {
               href={`/product/${product.handle}`}
               className="btn-outline"
             >
-              View the roast <span aria-hidden>&rarr;</span>
+              View piece <span aria-hidden>&rarr;</span>
             </Link>
             <Link href="/search" className="link-arrow self-center">
-              All coffee <span aria-hidden>&rarr;</span>
+              All objects <span aria-hidden>&rarr;</span>
             </Link>
           </div>
         </div>
@@ -458,17 +431,17 @@ async function BrewOfTheMonth() {
   );
 }
 
-/* ---------------------------------------------------------------- merch */
+/* ---------------------------------------------------------------- accents */
 
 async function Merch() {
   const products = (await productsFrom("merch")).slice(0, 3);
   if (!products.length) return null;
 
   return (
-    <section aria-labelledby="merch">
+    <section aria-labelledby="accents">
       <SectionHead
-        eyebrow="Merch"
-        title={<span id="merch">Fits for Drips</span>}
+        eyebrow="Accents"
+        title={<span id="accents">Textiles & Accents</span>}
         count={products.length}
       />
       <ul className="rule-y grid grid-cols-1 divide-y divide-rule sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
@@ -505,8 +478,8 @@ function Guides() {
       <div className="p-3">
         <div className="plate aspect-[4/3] w-full">
           <Image
-            src="/womens-collection.png"
-            alt=""
+            src="/cozy-living-room.jpg"
+            alt="Interior design styling"
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
@@ -519,11 +492,6 @@ function Guides() {
 
 /* -------------------------------------------------------------- journal */
 
-/**
- * Dispatch rail. Reads the three newest Shopify articles and links them at
- * their canonical `/blogs/<blog>/<article>` paths; the editorial placeholders
- * in `site.ts` only appear when the store has no blog configured.
- */
 async function Journal() {
   const articles = await getArticles(3).catch(() => []);
 
@@ -531,8 +499,8 @@ async function Journal() {
     <section aria-labelledby="journal">
       <SectionHead
         eyebrow="Dispatch"
-        title={<span id="journal">From the Journal</span>}
-        action="More news"
+        title={<span id="journal">From the Living Journal</span>}
+        action="More entries"
         actionHref="/blogs"
       />
       <ul className="rule-y grid grid-cols-1 divide-y divide-rule md:grid-cols-3 md:divide-x md:divide-y-0">
@@ -548,10 +516,14 @@ async function Journal() {
                   <div className="plate aspect-[4/3] w-full">
                     <Image
                       src={
-                        ["/sales-collection.png", "/mens-collection.png", "/kids-collection.png"][index] ??
-                        "/banner.png"
+                        [
+                          "/cozy-living-room.jpg",
+                          "/cozy-ceramics.jpg",
+                          "/cozy-living-room.jpg",
+                        ][index] ??
+                        "/cozy-ceramics.jpg"
                       }
-                      alt=""
+                      alt={post.title}
                       fill
                       sizes="(min-width: 768px) 33vw, 100vw"
                       className="object-cover"

@@ -6,8 +6,8 @@ import { useProduct, useUpdateURL } from "./product-context";
 
 /**
  * Product gallery: one rounded plate on the mist ground with pill arrow
- * controls, and a thumbnail rail beneath. Packshots are contained rather than
- * cropped - a coffee bag cropped to fill loses its label.
+ * controls, and a thumbnail rail beneath. Product images are contained rather than
+ * cropped to preserve full handcrafted silhouettes.
  */
 export default function Gallery({
   images,

@@ -20,8 +20,8 @@ export default function SearchLayout({
   return (
     <>
       <div className="shell rule-b py-10 text-center md:py-14">
-        <Eyebrow>The shop</Eyebrow>
-        <Headline className="mt-4">Every bag from a single estate</Headline>
+        <Eyebrow>The Collection</Eyebrow>
+        <Headline className="mt-4">Thoughtful Objects for Mindful Spaces</Headline>
         <p className="body-mono mx-auto mt-5 max-w-measure text-balance">
           {site.description}
         </p>

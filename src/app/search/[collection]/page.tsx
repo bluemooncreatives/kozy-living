@@ -2,6 +2,7 @@ import Grid from "@/components/grid";
 import ProductGridItems from "@/components/layout/product-grid-items";
 import { defaultSort, sorting } from "@/lib/constants";
 import { getCollections, getCollectionProducts } from "@/lib/shopify";
+import { site } from "@/lib/site";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -11,8 +12,6 @@ export async function generateMetadata({
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection: handle } = await params;
-  // The storefront client exposes the collection list rather than a
-  // single-collection lookup, so match on the handle within its path.
   const collections = await getCollections();
   const collection = collections.find((item) => item.path === `/search/${handle}`);
 
@@ -23,7 +22,7 @@ export async function generateMetadata({
     description:
       collection.seo?.description ||
       collection.description ||
-      `${collection.title} from Vaishnavi Estate.`,
+      `${collection.title} from ${site.name}.`,
   };
 }
 
@@ -52,11 +51,10 @@ export default async function CategoryPage({
         <div className="rounded-plate border border-rule px-8 py-20 text-center">
           <p className="serif text-display-md">This collection is empty</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
-            Nothing from this lot is in stock right now. The rest of the harvest
-            is still on the shelf.
+            Pieces in this collection are currently being crafted. Explore the rest of our catalog.
           </p>
           <Link href="/search" className="btn-outline mt-8">
-            View all coffee
+            View all objects
           </Link>
         </div>
       ) : (

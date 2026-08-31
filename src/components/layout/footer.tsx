@@ -30,9 +30,9 @@ export default async function Footer() {
       {/* Newsletter line */}
       <div className="shell rule-b flex flex-col gap-6 py-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="serif text-display-lg">Join the club</h2>
+          <h2 className="serif text-display-lg">Join the inner circle</h2>
           <p className="body-mono mt-2 max-w-measure">
-            Receive special offers and first look at new roasts.
+            Receive curated interior styling notes and early access to new releases.
           </p>
         </div>
         <Newsletter className="md:max-w-sm" />
@@ -48,7 +48,7 @@ export default async function Footer() {
 
         <div className="px-5 py-8">
           <p className="body-mono">
-            Grown, roasted and packed by us in {site.origin}. Estate-owned since{" "}
+            Thoughtfully designed and handcrafted in {site.origin}. Mindful living since{" "}
             {site.since}.
           </p>
         </div>

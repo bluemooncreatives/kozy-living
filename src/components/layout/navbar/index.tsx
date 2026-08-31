@@ -16,12 +16,12 @@ import Link from "next/link";
  * as one unit so `--header-h` stays the single offset for sticky children.
  */
 export async function Navbar() {
-  const shopifyMenu = await getMenu("vaishnavi-estate-nextjs-menu").catch(
-    (error) => {
+  const shopifyMenu = await getMenu("kozy-living-nextjs-menu")
+    .catch(() => getMenu("main-menu"))
+    .catch((error) => {
       console.error("Failed to load the Shopify navigation", error);
       return [] as Menu[];
-    }
-  );
+    });
   const customerSession = await getCustomerSession();
 
   // Shopify owns the menu when it is configured; the site config is the

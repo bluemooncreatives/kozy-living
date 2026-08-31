@@ -6,8 +6,8 @@ import { getArticles, getBlogs } from "@/lib/shopify";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: `Notes from the estate - harvest, roasting and brewing, straight from ${site.origin}.`,
+  title: "Living Journal",
+  description: `Notes on mindful living, interior styling, tactile materials, and craftsmanship, straight from ${site.origin}.`,
   openGraph: { type: "website" },
 };
 
@@ -25,7 +25,7 @@ export default async function BlogsIndex() {
     <>
       <SectionHead
         eyebrow="Dispatch"
-        title="From the Journal"
+        title="From the Living Journal"
         count={articles.length || undefined}
       />
 

@@ -1,24 +1,24 @@
 /**
- * Brand content for Vaishnavi Estate.
+ * Brand content for Kozy Living.
  *
  * Every piece of editorial copy on the marketing surfaces lives here rather
  * than being inlined in JSX, so the voice can be revised in one pass without
  * touching layout. Commerce data (products, collections, prices) still comes
- * from Shopify - this file only covers the storytelling around it.
+ * from Shopify - this file covers the storytelling and brand foundation around it.
  */
 
 export const site = {
-  name: "Vaishnavi Estate",
-  wordmark: "VAISHNAVI",
-  wordmarkAccent: "ESTATE",
-  tagline: "Strong Coffee · Bold · Pure",
+  name: "Kozy Living",
+  wordmark: "KOZY",
+  wordmarkAccent: "LIVING",
+  tagline: "Mindful Home · Timeless Comfort · Sustainable Craft",
   /** The single line set in the giant footer wordmark. */
-  statement: "Elegance in Every Roast. Coffee Grown Four Generations in Coorg.",
-  origin: "Coorg, Karnataka",
-  since: "1928",
+  statement: "Thoughtful Objects for Mindful Sanctuaries. Crafted for Life.",
+  origin: "Studio Workshop · Est. 2018",
+  since: "2018",
   description:
-    "Single-origin, shade-grown Robusta from a four-generation family estate in Coorg. Roasted in small batches, ground to order, shipped across India.",
-  freeShippingThreshold: "₹1,500",
+    "Curated home decor, artisanal furniture, organic textiles, and warm ambient lighting. Crafted sustainably with natural materials for modern mindful sanctuaries.",
+  freeShippingThreshold: "₹2,500",
 } as const;
 
 /**
@@ -28,115 +28,119 @@ export const site = {
  * moment to actually be read.
  */
 export const heroPhrases = [
-  "Legacy in Every Sip.",
-  "Elegance in Every Roast.",
-  "Coffee Grown Four Generations in Coorg.",
+  "Mindful Living in Every Space.",
+  "Warmth, Comfort & Timeless Craft.",
+  "Designed for Modern Sanctuaries.",
 ] as const;
 
 /** Fallback navigation, used when the Shopify menu is empty or unreachable. */
 export const primaryNav: { title: string; path: string }[] = [
   { title: "Shop", path: "/search" },
+  { title: "Living Room", path: "/search/living-room" },
+  { title: "Lighting", path: "/search/lighting" },
+  { title: "Ceramics", path: "/search/ceramics" },
+  { title: "Textiles", path: "/search/textiles" },
   { title: "Journal", path: "/blogs" },
-  { title: "About", path: "/about-us" },
+  { title: "About Us", path: "/about-us" },
 ];
 
 /** Scrolling announcement above the header. */
-export const announcement = `Spend ${site.freeShippingThreshold} to get free shipping`;
+export const announcement = `Complimentary shipping on all sanctuary orders above ${site.freeShippingThreshold}`;
 
 /**
  * Collection pills under the hero. Handles map to Shopify collections; the
  * grid degrades gracefully when a handle does not exist yet.
  */
 export const collectionPills = [
-  { title: "All coffee", handle: "", previewVideo: "/Coffee.mp4" },
+  { title: "All Objects", handle: "", previewVideo: "/Coffee.mp4" },
   {
-    title: "Popular",
-    handle: "popular",
+    title: "Living Room",
+    handle: "living-room",
     previewVideo: "/209419_small.mp4",
   },
   {
-    title: "Single Origin",
-    handle: "single-origin",
+    title: "Artisanal Lighting",
+    handle: "lighting",
     previewVideo:
       "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
   },
   {
-    title: "Blend",
-    handle: "blend",
+    title: "Ceramics & Vases",
+    handle: "ceramics",
     previewVideo: "/45358-443057031.mp4",
   },
-  { title: "Filter", handle: "filter", previewVideo: "/209419_small.mp4" },
-  { title: "Espresso", handle: "espresso", previewVideo: "/Coffee.mp4" },
+  { title: "Organic Textiles", handle: "textiles", previewVideo: "/209419_small.mp4" },
+  { title: "Solid Wood", handle: "furniture", previewVideo: "/Coffee.mp4" },
   {
-    title: "Robusta",
-    handle: "robusta",
+    title: "Dining & Tableware",
+    handle: "dining",
     previewVideo:
       "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
   },
   {
-    title: "Arabica",
-    handle: "arabica",
+    title: "Rugs & Throws",
+    handle: "rugs",
     previewVideo: "/45358-443057031.mp4",
   },
   {
-    title: "Coorg",
-    handle: "coorg",
+    title: "Aromatherapy & Candles",
+    handle: "aromatherapy",
     previewVideo: "/209419_small.mp4",
   },
   {
-    title: "Dark Roast",
-    handle: "dark-roast",
+    title: "Handcrafted Decor",
+    handle: "decor",
     previewVideo:
       "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
   },
   {
-    title: "Washed",
-    handle: "washed",
+    title: "New Arrivals",
+    handle: "new-arrivals",
     previewVideo: "/45358-443057031.mp4",
   },
-  { title: "Natural", handle: "natural", previewVideo: "/Coffee.mp4" },
+  { title: "Bestsellers", handle: "popular", previewVideo: "/Coffee.mp4" },
 ] as const;
 
 /** The paired dark promo panels between the product rails. */
 export const promoTiles = [
   {
-    title: "Shop Filter",
-    handle: "filter",
+    title: "Artisanal Lighting",
+    handle: "lighting",
     image: null,
     labelPosition: "top",
   },
   {
-    title: "Shop Espresso",
-    handle: "espresso",
-    image: "/2(4).jpg",
+    title: "Handcrafted Ceramics",
+    handle: "ceramics",
+    image: "/cozy-ceramics.jpg",
     labelPosition: "bottom",
   },
 ] as const;
 
 /** Centred statement set in the display serif above the about rail. */
 export const aboutStatement =
-  "Vaishnavi Estate started with a simple idea: great mornings begin with great coffee. We believe coffee should be fresh, honest, and something you actually look forward to drinking - every single day.";
+  "Kozy Living started with a simple belief: home is not just where you dwell, it is the sanctuary that shapes your peace. We create mindful, honest objects that bring quiet luxury, tactile warmth, and timeless comfort to everyday life.";
 
 /** Alternating text cells in the about carousel. */
 export const aboutCards = [
-  "Our coffee is grown on our own land in Coorg, under a canopy of native shade trees. We pay our pickers above the district rate and have worked with the same families for three generations.",
-  "Quality is checked at every stage, from cherry selection to final roast. Each batch is profiled, cupped and evaluated to ensure consistency, balance and exceptional flavour in every roast.",
-  "Every cherry is picked by hand at peak ripeness, pulped the same evening, and dried on raised beds where air reaches it from every side. Nothing touches tarmac.",
+  "Every piece is handcrafted by master artisans in ethical workshops using responsibly harvested FSC-certified hardwoods, organic unbleached linen, and mineral-rich clay.",
+  "We obsess over tactile textures, sculptural silhouettes, and durable finishes that develop a richer, deeper patina with every year of use in your home.",
+  "Shipped directly from our maker studios to your living space—zero single-use plastics, fully recyclable packaging, and verified carbon-neutral transit.",
 ] as const;
 
 /** Guides teaser - image right, copy left. */
 export const guidesFeature = {
-  eyebrow: "Guides",
-  title: "Pouring the perfect cup",
-  body: "Every brew method has its own feel, and part of the fun is figuring out what works for you. Start with these guides, make small adjustments, and follow your taste from there.",
-  cta: "Read now",
+  eyebrow: "Living Guides",
+  title: "Creating spaces of warmth and serenity",
+  body: "Explore our curated interior styling notes on layering ambient lighting, mixing tactile natural textures, and selecting timeless furniture silhouettes that elevate everyday comfort.",
+  cta: "Read design guides",
   href: "/blogs",
 } as const;
 
-/** Brew-of-the-month band copy. */
+/** Brew-of-the-month / Spotlight band copy. */
 export const featureBand = {
-  label: "Brew of the Month",
-  eyebrow: "This month",
+  label: "Design of the Month",
+  eyebrow: "Curated Spotlight",
 } as const;
 
 /**
@@ -146,157 +150,154 @@ export const featureBand = {
  */
 export const journalPosts = [
   {
-    slug: "how-to-store-coffee-beans",
-    title: "How to Store Coffee Beans So They Stay Fresh Longer",
+    slug: "layering-ambient-lighting",
+    title: "The Art of Layered Ambient Lighting for Cozy Evenings",
     excerpt:
-      "Coffee tastes best when it's fresh. Even the highest-quality beans lose their flavour over time if they're stored incorrectly. The good news? Keeping...",
+      "Lighting is the single most transformative element of any interior. Discover how low-temperature luminescence, brass accents, and diffused paper lamps turn rooms into soothing evening havens...",
   },
   {
-    slug: "morning-coffee-routine",
-    title: "Morning Coffee: Make It Part of Your Routine",
+    slug: "tactile-materials-linen-wood-clay",
+    title: "Tactile Harmony: Blending Raw Clay, Solid Oak & Stonewash Linen",
     excerpt:
-      "For many of us, mornings are a blur of alarms, emails and scrambling out the door. But what if your coffee wasn't just fuel - it was a moment to pau...",
+      "When textures speak, color takes a graceful step back. Learn how pairing warm natural timber with hand-thrown ceramics and organic textiles creates instant visual depth and physical serenity...",
   },
   {
-    slug: "upgrade-your-home-coffee",
-    title: "5 Easy Ways to Upgrade Your Home Coffee Game",
+    slug: "mindful-morning-rituals-home",
+    title: "5 Mindful Decor Rituals to Transform Your Home into a Sanctuary",
     excerpt:
-      "You don't need a café setup - or a counter full of fancy gear - to make great coffee at home. A few small tweaks can make a big difference in flavour, f...",
+      "Your living environment profoundly influences your morning headspace. A few intentional changes—from dedicated tea nooks to natural aroma diffusers—cultivate lasting calm and focus...",
   },
 ] as const;
 
 /** Footer shipping ticker. */
-export const shippingTicker = `Shipping's on us for orders over ${site.freeShippingThreshold}`;
+export const shippingTicker = `Complimentary insured shipping on all orders over ${site.freeShippingThreshold}`;
 
-/** Brew-format grid. Handles map to Shopify collections where they exist. */
+/** Living-format / Space grid. Handles map to Shopify collections where they exist. */
 export const brewFormats = [
   {
-    title: "Espresso",
-    handle: "espresso",
-    note: "Fine grind, dense crema, built for pressure.",
+    title: "Living Room",
+    handle: "living-room",
+    note: "Sofas, lounge chairs, coffee tables, and ambient accents.",
   },
   {
-    title: "Filter",
-    handle: "filter",
-    note: "The South Indian decoction. Medium-fine, unhurried.",
+    title: "Artisanal Lighting",
+    handle: "lighting",
+    note: "Pendant lamps, table lanterns, and warm brass fixtures.",
   },
   {
-    title: "Moka pot",
-    handle: "moka-pot",
-    note: "Stovetop intensity without the espresso machine.",
+    title: "Ceramics & Vases",
+    handle: "ceramics",
+    note: "Hand-thrown stoneware, sculptural vessels, and earthy planters.",
   },
   {
-    title: "French press",
-    handle: "french-press",
-    note: "Coarse and full-bodied. Nothing held back.",
+    title: "Organic Textiles",
+    handle: "textiles",
+    note: "Pure linen throws, cushions, and tactile wool rugs.",
   },
   {
-    title: "Aeropress",
-    handle: "aeropress",
-    note: "Clean, quick, forgiving. Our travel companion.",
+    title: "Dining & Tableware",
+    handle: "dining",
+    note: "Solid wood dining, stoneware plates, and linen napkins.",
   },
   {
-    title: "Green beans",
-    handle: "green-beans",
-    note: "Unroasted, for those who roast their own.",
+    title: "Bedroom & Rest",
+    handle: "bedroom",
+    note: "Linen bedding, bedside timber, and soothing nightlights.",
   },
 ] as const;
 
 /** Homepage FAQ. */
 export const faqs = [
   {
-    question: "What makes Robusta worth seeking out?",
+    question: "What makes Kozy Living pieces different from mass decor?",
     answer:
-      "Robusta has spent decades as the cheap half of a blend, which says more about how it is usually grown than what it can be. Grown in shade at altitude and processed with care, it gives you a heavier body, a deeper chocolate base and nearly twice the caffeine of Arabica. We grow nothing else.",
+      "We reject disposable fast-decor. Every Kozy Living piece is created in small artisan batches using solid FSC-certified timber, natural stoneware clay, and hand-loomed organic textiles. We design for longevity, tactile pleasure, and timeless beauty that outlasts fleeting trends.",
   },
   {
-    question: "How fresh is the coffee when it reaches me?",
+    question: "How do you ensure ethical and sustainable craftsmanship?",
     answer:
-      "We roast in small batches through the week and dispatch within forty-eight hours of roasting. Beans are ground only after your order is placed, matched to the brew method you select at checkout.",
+      "We partner directly with multigenerational artisan guilds and ethical family-run workshops. Our makers receive fair living wages, safe working environments, and credit for their artistry. We use only non-toxic plant oils, mineral glazes, and 100% plastic-free packaging.",
   },
   {
-    question: "Which roast level should I start with?",
+    question: "How do I care for solid wood and handcrafted ceramics?",
     answer:
-      "Medium is the honest introduction to the estate - it carries the cocoa and dried-fruit notes without the smoke. Choose dark if you drink with milk or brew South Indian filter, and light if you want the fruit acidity forward in a pourover.",
+      "Solid hardwoods thrive when wiped with a soft, slightly damp cloth and treated with natural beeswax once or twice a year. Our high-fired stoneware ceramics are dishwasher-safe, food-grade, and lead-free, designed for daily mindful use.",
   },
   {
-    question: "Do you ship outside India?",
+    question: "What is your shipping and return policy?",
     answer:
-      "Shipping is free across India on every order. For international orders, write to us and we will quote freight to your country directly.",
+      "We offer complimentary shipping across India on orders above ₹2,500. Every fragile and large furniture piece is custom-crated in protective recycled materials. If an item doesn't fit your space perfectly, we offer hassle-free 14-day returns.",
   },
   {
-    question: "Can I visit the estate?",
+    question: "Do you offer interior styling advice or custom orders?",
     answer:
-      "Yes. The homestay is open through the harvest season, and stays include a walk through the plantation, the pulping shed and the roastery. Booking is by request.",
+      "Yes. Our in-house design studio collaborates with homeowners, architects, and interior designers on bespoke furniture finishes, custom textile sizing, and complete sanctuary curation. Contact us to schedule a design consultation.",
   },
 ] as const;
 
 export const footerColumns = [
   {
-    title: "Shop",
+    title: "Collections",
     links: [
-      { title: "All", path: "/search" },
-      { title: "Popular", path: "/search/popular" },
-      { title: "Filter", path: "/search/filter" },
-      { title: "Espresso", path: "/search/espresso" },
-      { title: "Full list", path: "/search" },
+      { title: "All Objects", path: "/search" },
+      { title: "Living Room", path: "/search/living-room" },
+      { title: "Lighting", path: "/search/lighting" },
+      { title: "Ceramics", path: "/search/ceramics" },
+      { title: "Organic Textiles", path: "/search/textiles" },
     ],
   },
   {
-    title: "More",
+    title: "Studio",
     links: [
-      { title: "Merch", path: "/search/merch" },
-      { title: "Blog", path: "/blogs" },
-      { title: "Contact", path: "/contact" },
-      { title: "FAQ", path: "/about-us" },
-      { title: "Brew guide", path: "/blogs" },
+      { title: "Our Story", path: "/about-us" },
+      { title: "Living Journal", path: "/blogs" },
+      { title: "Design Guides", path: "/blogs" },
+      { title: "Contact Us", path: "/contact" },
+      { title: "Sustainability", path: "/about-us" },
     ],
   },
 ] as const;
 
 export const socialLinks = [
   { title: "Instagram", href: "https://instagram.com" },
-  { title: "Facebook", href: "https://facebook.com" },
+  { title: "Pinterest", href: "https://pinterest.com" },
   { title: "YouTube", href: "https://youtube.com" },
   { title: "WhatsApp", href: "https://wa.me/918494907007" },
-  { title: "Email", href: "mailto:care@vaishnaviestate.com" },
+  { title: "Email", href: "mailto:care@kozyliving.com" },
 ] as const;
 
 /* ------------------------------------------------------------------ contact */
 
 /**
- * The two addresses, the inbox and the phone line. Held here rather than in
- * the contact page so the footer, the JSON-LD in `layout.tsx` and any future
- * order-confirmation copy can all read the same source.
- *
- * `phoneHref` is the E.164 form for `tel:` - the display string keeps the
- * spacing a person would read aloud.
+ * The studio addresses, inbox, and client helpline. Held here rather than in
+ * the contact page so the footer, JSON-LD in `layout.tsx`, and order copies
+ * read the same single source of truth.
  */
 export const contact = {
-  eyebrow: "Contact",
-  title: "Drop us a line",
+  eyebrow: "Connect with Us",
+  title: "Get in touch with the studio",
   body: [
-    "Got a question? We've got you. Whether you're curious about our beans, need help with an order, or just want advice on which roast to try next, write to us. We're coffee people, and we love talking coffee.",
-    "Use the form or send us an email, and we'll get back to you as soon as we can - usually within one business day. No pressure, no complicated stuff. Just good coffee and real help when you need it.",
+    "Have a question about a piece, custom sizing, trade inquiries, or need styling advice for your space? Our studio team is here to help you curate your ideal sanctuary.",
+    "Submit the form below or write directly to our care team. We respond thoughtfully to every inquiry within one business day.",
   ],
-  email: "care@vaishnaviestate.com",
+  email: "care@kozyliving.com",
   phone: "(+91) 8494 907 007",
   phoneHref: "+918494907007",
   locations: [
     {
-      label: "Coorg (Plantation)",
+      label: "Design Studio & Workshop",
       lines: [
-        "Vaishnavi Estate",
-        "Kedamullur village",
-        "Virajpet, Coorg 571218",
+        "Kozy Living Studio",
+        "Craft Guild Enclave, Indiranagar",
+        "Bengaluru, Karnataka 560038",
       ],
     },
     {
-      label: "Bangalore (Administrative)",
+      label: "Artisan Ceramic & Wood Guild",
       lines: [
-        "4th Floor, Prakash Emerald",
-        "23/1-1 4th Main Road, Sultanpalya",
-        "Bangalore 560032",
+        "Artisan Quarter, Sanganer",
+        "Jaipur Heritage Craft Zone",
+        "Rajasthan 302029",
       ],
     },
   ],
@@ -305,287 +306,252 @@ export const contact = {
 /* ----------------------------------------------------------------- heritage */
 
 /**
- * Photography for `/about-us`, served from the store's own Shopify CDN - the same
- * host `estateReel` uses and already allowed in `next.config.js`.
- *
- * All three are product and lifestyle frames rather than estate landscapes or
- * family portraits, which is what decides where each one lands on the page:
- * they can carry the bands that talk about the coffee (the bean, the cup, the
- * shop hand-off) and they cannot honestly carry the ones about the hillside or
- * the four people who worked it. Those stay type-led until real archive and
- * portrait frames exist.
- *
- * `aspect` is the native ratio of the source file - placements crop from it
- * rather than the other way round, so nothing important sits outside the frame.
+ * Photography for `/about-us`.
  */
 export const aboutImages = {
-  /** Square. Tray, press and a cup outdoors - the closest thing here to place. */
+  /** Square. Tray, ceramics and natural light. */
   morning: {
-    src: "https://vaishnaviestate.com/cdn/shop/files/genericwithblackcoffee.jpg?v=1781080798&width=1200",
-    alt: "A Vaishnavi Estate Robusta pouch on a wooden tray beside a French press and a green cup of black coffee, set outdoors among flowering shrubs.",
+    src: "/cozy-living-room.jpg",
+    alt: "A cozy living sanctuary with warm linen throws, handcrafted ceramic vase, and natural timber coffee table in morning sunlight.",
     aspect: "1/1",
   },
-  /** Square. Ground Robusta in a brass bowl - the bean the section argues for. */
+  /** Square. Handcrafted natural decor. */
   grounds: {
-    src: "https://vaishnaviestate.com/cdn/shop/files/vc_mobile-homebanner_two.jpg?v=1740020233&width=1200",
-    alt: "A Dark Roast Robusta pouch beside a brass bowl heaped with freshly ground coffee and loose beans on a wooden board.",
+    src: "/cozy-ceramics.jpg",
+    alt: "Artisan hands shaping warm terracotta pottery and smoothing solid oak timber in the Kozy Living workshop.",
     aspect: "1/1",
   },
-  /** Portrait 2:3. The pouch as hero - the shop hand-off at the foot of the page. */
+  /** Portrait 2:3. Minimalist sculptural interior hero. */
   pouch: {
-    src: "https://vaishnaviestate.com/cdn/shop/files/E.jpg?v=1778501317&width=1600",
-    alt: "A Vaishnavi Estate Green Coffee pouch of single-origin Robusta standing on a wooden stool, framed by houseplants in warm daylight.",
+    src: "/cozy-ceramics.jpg",
+    alt: "Sculptural ceramic vase and organic linen cushion styled on a minimalist solid wood bench.",
     aspect: "2/3",
   },
 } as const;
 
 /**
- * The About page, section by section. Each block below is one band on
- * `/about-us`; the page itself only decides layout.
- *
- * The timeline is the spine of the page - five dates, each one a decision
- * that still shows up in the cup. Kept as data so a sixth entry is a one-line
- * change rather than a layout edit.
+ * The About page, section by section.
  */
 export const heritage = {
-  eyebrow: "Heritage",
-  title: "Four generations. One hillside.",
-  body: "From a bullock cart in 1909 to your kitchen today - the same family, the same land, refined over a hundred years.",
+  eyebrow: "Our Heritage",
+  title: "Rooted in Craft. Designed for Modern Living.",
+  body: "From a bespoke woodwork and ceramic studio in 2018 to homes across the world—crafting cozy, mindful living spaces one piece at a time.",
   timeline: [
     {
-      year: "1909",
-      title: "Spice trader beginnings",
-      body: "P. Kunhikannan begins trading spices across Coorg, hauling pepper and cardamom on bullock carts through the Western Ghats to Kerala's markets.",
-    },
-    {
-      year: "1928",
-      title: "Purchased a 200-acre estate",
-      body: "After two decades of trading, Kunhikannan buys a 200-acre estate in Perumbubetta, Pollibetta - the land that still grows our coffee today.",
-    },
-    {
-      year: "1956",
-      title: "Built Coorg's first cinema",
-      body: "Shanta Picture Palace opens in Virajpet - the first permanent movie theatre in the district. Coffee, community, cinema.",
-    },
-    {
-      year: "1985",
-      title: "Vaishnavi Estate is formed",
-      body: "C.P. Prakash, the youngest of six sons, formally establishes Vaishnavi Estate as we know it today - a working plantation rooted in family.",
+      year: "2018",
+      title: "The Studio Begins",
+      body: "Kozy Living is founded as a bespoke woodwork and pottery studio, creating handcrafted solid oak dining tables and organic clay vessels for intimate living spaces.",
     },
     {
       year: "2020",
-      title: "Direct to your cup",
-      body: "Through the pandemic, the next generation begins shipping our coffee straight from the estate to homes across India. No middlemen, just us.",
+      title: "Artisan Collective Formed",
+      body: "We expanded our horizons to collaborate directly with generational textile weavers and master ceramicists across renowned regional craft communities.",
+    },
+    {
+      year: "2022",
+      title: "100% Sustainable Materials Pledge",
+      body: "We transitioned our entire material supply chain to FSC-certified timber, natural plant-based finishes, organic cottons, and completely plastic-free shipping.",
+    },
+    {
+      year: "2024",
+      title: "Sculptural Lighting & Seating",
+      body: "Launched our acclaimed ambient lighting and textured bouclé & linen seating line, merging sculptural Japandi aesthetics with plush comfort.",
+    },
+    {
+      year: "2026",
+      title: "Direct to Your Sanctuary",
+      body: "Delivering heirloom-quality homeware, timeless furniture, and curated decor directly to discerning homes with transparent pricing and carbon-neutral transit.",
     },
   ],
 } as const;
 
 /**
- * The Robusta argument. Four figures, then the head-to-head table that backs
- * them - the numbers are the whole point of the section, so they are set at
- * display scale rather than buried in a paragraph.
+ * Sustainability and craft metrics.
  */
 export const whyRobusta = {
-  eyebrow: "Why Robusta",
-  title: "Why should Robusta play second fiddle?",
-  body: "Two-thirds of India's coffee is Robusta - and yet the world keeps calling it the lesser bean. We've spent four generations proving otherwise.",
+  eyebrow: "Why Mindful Living",
+  title: "Why choose slow, sustainable craftsmanship?",
+  body: "Fast furniture and synthetic decor end up in landfills. We design enduring pieces with natural materials that breathe warmth and age gracefully in your home.",
   stats: [
     {
-      value: "2.7x",
-      label: "More caffeine than Arabica",
-      note: "Higher natural caffeine for a real lift",
+      value: "100%",
+      label: "FSC-Certified Timbers & Organic Linens",
+      note: "Ethically harvested, zero toxic coatings",
     },
     {
-      value: "66%",
-      label: "Of India's coffee is Robusta",
-      note: "And we still call Arabica premium",
+      value: "0%",
+      label: "Single-Use Plastics in Packaging",
+      note: "100% biodegradable and recyclable materials",
     },
     {
-      value: "70%",
-      label: "Less pesticide needed",
-      note: "Naturally hardy. Naturally sustainable",
+      value: "40+",
+      label: "Master Artisan Maker Guilds",
+      note: "Preserving heritage woodworking and pottery",
     },
     {
-      value: "0L",
-      label: "Water used in processing",
-      note: "Natural dry process - every bean",
+      value: "10+",
+      label: "Years of Built-to-Last Durability",
+      note: "Heirloom construction that endures daily life",
     },
   ],
   comparison: [
-    { trait: "Caffeine", arabica: "1.2%", robusta: "2.7%" },
-    { trait: "Body and crema", arabica: "Light", robusta: "Bold, thick crema" },
-    { trait: "With milk", arabica: "Disappears", robusta: "Stands up" },
-    { trait: "Pesticide use", arabica: "Higher", robusta: "Naturally resistant" },
-    { trait: "Indian-grown", arabica: "1/3 of crop", robusta: "2/3 of crop" },
+    { trait: "Materials", arabica: "Particle board & veneers", robusta: "Solid FSC hardwoods & pure clay" },
+    { trait: "Finishing", arabica: "Synthetic chemical lacquers", robusta: "Natural plant oils & beeswax" },
+    { trait: "Packaging", arabica: "Plastic bubble wrap & foam", robusta: "100% plastic-free recycled paper" },
+    { trait: "Longevity", arabica: "2-3 years before wear", robusta: "Generations of lasting beauty" },
+    { trait: "Artisan Fair Pay", arabica: "Mass automated factory", robusta: "Fair living wages for all makers" },
   ],
 } as const;
 
-/** Five numbered steps from cherry to cup. */
+/** Five numbered steps from studio to home. */
 export const farmToCup = {
-  eyebrow: "Farm to Cup",
-  title: "Five steps. No shortcuts.",
+  eyebrow: "Studio to Sanctuary",
+  title: "Five steps. Zero compromises.",
   steps: [
     {
-      title: "Shade Grown",
-      body: "Our coffee grows under silver oak and native canopy - slower ripening, deeper flavour, healthier soil.",
+      title: "Conscious Sourcing",
+      body: "We select responsibly harvested solid hardwoods, organic unbleached flax linen, and mineral-rich local clays.",
     },
     {
-      title: "Hand Harvested",
-      body: "Cherries are picked one by one, only at peak ripeness, by the same families who've worked this land for generations.",
+      title: "Artisan Handcrafting",
+      body: "Every piece is shaped, hand-joined, wheel-thrown, or loomed by experienced master artisans in small batches.",
     },
     {
-      title: "Natural, Water-Free",
-      body: "We dry our cherries under the Coorg sun - zero water in processing, even during the rains.",
+      title: "Non-Toxic Finishing",
+      body: "Finished with natural cold-pressed plant oils, organic beeswax, and low-VOC mineral glazes safe for your family.",
     },
     {
-      title: "German Roasted",
-      body: "Roasted on world-leading Probat machines, profile by profile, batch by batch - never compromised.",
+      title: "Structural Quality Testing",
+      body: "Each creation undergoes rigorous checks for joinery strength, tactile smoothness, and ergonomic comfort.",
     },
     {
-      title: "Ground After You Order",
-      body: "Whole beans rest until your order arrives - only then do we grind, pack and ship. Fresh, every time.",
+      title: "Mindful Delivery",
+      body: "Carefully protected in custom plastic-free packaging and dispatched with carbon-neutral transit to your door.",
     },
   ],
 } as const;
 
 export const sustainability = {
   eyebrow: "Sustainability",
-  title: ["We farm like the land has to last", "another hundred years."],
-  body: "Because it does. Our great-grandfather planted on this hillside in 1928 - and our grandchildren will pick from the same trees.",
+  title: ["We build for spaces that last", "and a planet that endures."],
+  body: "Every object we create is designed to live in harmony with nature—using renewable earth materials, zero toxic emissions, and plastic-free packaging.",
   pillars: [
     {
-      title: "Less pesticide",
-      body: "Robusta is naturally hardy - we use a fraction of what other varieties demand.",
+      title: "Renewable Materials",
+      body: "Solid oak, teak, pure Belgian linen, and high-fired stoneware clay from responsible earth-conscious sources.",
     },
     {
-      title: "Water conservation",
-      body: "Natural dry processing means zero water used to pulp our beans.",
+      title: "Zero Plastic Transit",
+      body: "100% recyclable corrugated board, water-activated kraft tape, and reusable cotton dust bags for all orders.",
     },
     {
-      title: "Biodiversity",
-      body: "Shade-grown under native canopy. Home to birds, civets and giant squirrels.",
+      title: "Artisan Empowerment",
+      body: "Direct maker partnerships ensuring fair living wages, healthcare support, and preservation of age-old craft techniques.",
     },
     {
-      title: "Local employment",
-      body: "Hired, trained and supported from villages around the estate - for generations.",
+      title: "Circular Longevity",
+      body: "Timeless silhouettes designed to be loved, maintained, and passed down rather than discarded after a season.",
     },
   ],
 } as const;
 
 /**
- * Four generations, oldest first. `credential` is the line of qualification
- * that sits between the name and the biography; it is optional because the
- * first generation predates the paperwork.
+ * Creative collective & founding designers.
  */
 export const family = {
-  eyebrow: "The Family",
-  title: "Coffee runs in the blood.",
-  strapline: "Blood type: Robusta+",
+  eyebrow: "The Collective",
+  title: "Passionate about craft and quiet living.",
+  strapline: "Design Philosophy: Warmth & Intention",
   members: [
     {
-      name: "P. Kunhikannan",
-      generation: "1st Generation · Founder",
-      credential: null,
-      body: "Spice trader turned planter. Bought his first coffee estate in 1928.",
+      name: "Aria Thorne",
+      generation: "Co-Founder · Creative Director",
+      credential: "M.Arch, Sustainable Architecture",
+      body: "Architect and spatial designer dedicated to creating peaceful, light-filled sanctuaries through natural materials.",
     },
     {
-      name: "C.P. Prakash",
-      generation: "2nd Generation",
-      credential: "BA, LLB",
-      body: "Lawyer, builder, and the one who gave Vaishnavi Estate its name - in 1985.",
+      name: "Rohan Varma",
+      generation: "Co-Founder · Head of Craft",
+      credential: "Master Woodworker & Guild Lead",
+      body: "Second-generation timber craftsman specializing in traditional joinery and tactile organic finishes.",
     },
     {
-      name: "Mridhul Prakash",
-      generation: "3rd Generation",
-      credential: "BE (Computer Science), MBA (US)",
-      body: "Brought the family coffee direct to your cup. Runs the estate and homestay with a dedicated team.",
+      name: "Meera Sen",
+      generation: "Lead Ceramic Artist",
+      credential: "Fine Arts & Ceramic Sculpting",
+      body: "Sculpts hand-thrown stoneware vessels and earthy lamps inspired by wabi-sabi textures and raw mineral pigments.",
     },
     {
-      name: "Neel M Prakash",
-      generation: "4th Generation",
-      credential: "BS (Business) - Miami U (Oxford)",
-      body: "Growing up with the plantation. Already in the cherry rows. Helping build the future one cup at a time.",
+      name: "Devan Thorne",
+      generation: "Head of Sustainable Logistics",
+      credential: "Circular Supply Chain & Logistics",
+      body: "Pioneered our 100% plastic-free packaging standard and verified carbon-neutral transit network.",
     },
   ],
 } as const;
 
 /** The signed note that closes the story before the shop CTA. */
 export const familyNote = {
-  eyebrow: "A note from the family",
-  title: "We've literally lived and breathed coffee.",
+  eyebrow: "A note from the studio",
+  title: "We believe your home should be your sanctuary.",
   body: [
-    "We've drunk our own beans for as long as we can remember. And we wanted to share what we love, directly with you - no middlemen, no shortcuts.",
-    "Hope you enjoy our coffee. If you do, please tell a friend and come back for more. If for any reason you don't - we'll make it right.",
+    "We started Kozy Living because we wanted our own living spaces to feel grounding, warm, and deeply restful. We wanted furniture and objects made with real heart, by real hands.",
+    "We hope our pieces bring warmth, calm, and beauty into your everyday rituals. If you ever have a question or need assistance with your home curation, we're always here for you.",
   ],
-  signature: "Mridhul Prakash",
-  signatureRole: "Designated Partner · Vaishnavi Coffees LLP",
+  signature: "Aria & Rohan",
+  signatureRole: "Founders · Kozy Living Design Studio",
 } as const;
 
-/** Closing band on `/about-us` - the one place the story hands off to the shop. */
+/** Closing band on `/about-us` - the handoff to the shop. */
 export const aboutCta = {
-  eyebrow: "Single Origin · Robusta",
-  title: ["Taste coffee with", "real roots."],
-  body: "Roasted to your preference, ground after you order, packed the same day. Shipped fresh from the estate to your door anywhere in India.",
-  cta: "Shop the estate",
+  eyebrow: "Handcrafted · Sustainable",
+  title: ["Bring warmth to", "your sanctuary."],
+  body: "Crafted in small artisan batches with natural materials and shipped directly to your door with plastic-free care.",
+  cta: "Explore the collection",
   href: "/search",
 } as const;
 
 /**
- * Estate philosophy band - the brand's own statement of intent, set as an
- * asymmetric two-column block rather than the centred `SectionHead` the
- * product rails use. `title` is split into lines deliberately: at
- * `display-xl` the break lands where the sentence breathes, which balance
- * alone will not guarantee across breakpoints.
+ * Living philosophy band.
  */
 export const estatePhilosophy = {
-  eyebrow: "Estate Philosophy",
-  title: ["We believe coffee", " is an art form"],
-  /**
-   * Three paragraphs rather than one: the opening states the position, and
-   * the two that follow are what earn it - the practice, then the people.
-   * Kept as an array so the section can space them without `<br />`.
-   */
+  eyebrow: "Living Philosophy",
+  title: ["We believe home is", " a living sanctuary"],
   body: [
-    "Set in the misty hills of Coorg since 1928, every cup of Vaishnavi Estate is the quiet sum of four generations - handcrafted beans, slow batch roasting, and an estate ritual that turns coffee into something closer to ceremony. Nothing here is rushed. Hand-picked at peak ripeness, pulped the same evening, and naturally dried on raised beds beneath native shade trees. Roasted in small batches and ground fresh only after you order.",
+    "At Kozy Living, every piece begins with an appreciation for slow craftsmanship, natural textures, and the quiet luxury of comfort. From solid FSC-certified hardwoods and hand-thrown stoneware to hand-loomed organic linens, our designs bring warmth, calm, and grounded elegance to everyday living. Nothing here is rushed. Designed with intention, finished with natural plant oils, and packaged plastic-free.",
   ],
-  cta: "Learn more",
+  cta: "Discover our story",
   href: "/about-us",
 } as const;
 
 /**
- * The estate reel that follows the philosophy band: four staggered plates,
- * mixed stills and silent loops, each captioned with a lowercase mono label
- * and an italic serif line.
- *
- * `kind: "video"` cells autoplay muted and carry the LIVE badge; they are
- * decorative, so they take no alt text. Stills do - they carry information
- * the captions only allude to.
+ * Living reel: four staggered plates.
  */
 export const estateReel = [
   {
     kind: "image",
-    src: "https://vaishnaviestate.com/cdn/shop/files/Girl_drinking_coffee.jpg?v=1778496876&width=900",
-    alt: "Two hands cradling a terracotta cup of filter coffee on a garden terrace, an estate pouch resting behind it.",
-    label: "the pour",
-    caption: "Slow extraction, served at golden hour",
+    src: "/cozy-living-room.jpg",
+    alt: "A minimalist living space featuring a solid oak low table, organic linen seating, and warm ambient light.",
+    label: "the material",
+    caption: "Solid oak, washed linen, raw clay",
   },
   {
     kind: "video",
     src: "https://cdn.shopify.com/videos/c/o/v/643e30e15c364663860fded49117578a.mp4",
-    label: "the bean",
-    caption: "Single-origin Robusta, hand-sorted",
+    label: "the craft",
+    caption: "Hand-thrown pottery, wheel to kiln",
   },
   {
     kind: "image",
-    src: "https://vaishnaviestate.com/cdn/shop/files/vc-soc-web-13.jpg?v=1687196491&width=900",
-    alt: "A level scoop of freshly ground coffee beside a glass pour-over carafe and an estate pouch.",
-    label: "the dose",
-    caption: "One level scoop, ground the morning it's brewed",
+    src: "/cozy-ceramics.jpg",
+    alt: "Artisan ceramics and warm linen cushions styled on a warm timber surface.",
+    label: "the ambient glow",
+    caption: "Soft lighting that warms the evening",
   },
   {
     kind: "video",
     src: "https://cdn.shopify.com/videos/c/o/v/81da4c142d584a23b09d68399eff9a18.mp4",
-    label: "the ritual",
-    caption: "Mornings made of mist and porcelain",
+    label: "the sanctuary",
+    caption: "Spaces that invite rest and deep calm",
   },
 ] as const;

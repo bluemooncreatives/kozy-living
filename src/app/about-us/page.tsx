@@ -16,27 +16,16 @@ import {
 } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About",
-  description: `Four generations of shade-grown Robusta from ${site.origin}. The estate's history, its case for Robusta, and how the coffee gets from the cherry row to your cup.`,
+  title: "About Us",
+  description: `The ${site.name} story: our studio heritage, sustainable artisan craft, and how our pieces are made with conscious materials.`,
   openGraph: { type: "website" },
 };
 
 /**
- * The estate story. Section order is the argument itself: who we are
- * (heritage) → why this bean (Robusta) → how we make it (farm to cup) → what
- * that costs the land (sustainability) → who is behind it (family) → the shop.
- *
- * Entirely static - every band reads from `site.ts`, so the page never waits on
- * Shopify and the copy is revised in one file.
- *
- * Photography carries two bands and no more: the two-up masthead row and the
- * shop hand-off at the foot. The available frames are all product and lifestyle
- * shots (see `aboutImages`), so they sit where the page talks about the coffee.
- * The timeline, the Robusta argument, the family and the sustainability band
- * stay type- and hairline-led, which is both the system's own instruction
- * (DESIGN.md §3) and the honest option: a packshot under a headline about a
- * hundred-year-old hillside, or standing in for a real person's portrait, would
- * be a lie the layout tells on the copy's behalf.
+ * The Kozy Living story. Section order:
+ * who we are (heritage timeline) → why mindful craft (materials & longevity) →
+ * how we make it (studio to sanctuary) → sustainability commitments →
+ * the founding collective → founders' note → shop CTA.
  */
 export default function AboutPage() {
   return (
@@ -64,16 +53,9 @@ function Masthead() {
         <Headline as="h1" id="heritage" className="mt-5 max-w-4xl">
           {heritage.title}
         </Headline>
-        {/* Wider than `max-w-measure`, matching the homepage philosophy band:
-            centred copy under a display heading needs the extra width, or it
-            stacks into a narrow ragged column under a very wide title. */}
         <p className="body-mono mt-6 max-w-4xl text-pretty">{heritage.body}</p>
       </div>
 
-      {/* Two-up opening row, split by the vertical hairline the system uses
-          between every other pair of cells. Both sources are square and both
-          subjects sit centred, so the 4:3 crop takes evenly off the top and
-          bottom of each. */}
       <div className="rule-t grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-rule">
         {[aboutImages.morning, aboutImages.grounds].map((image, index) => (
           <div key={image.src} className="p-3">
@@ -82,8 +64,6 @@ function Masthead() {
                 src={image.src}
                 alt={image.alt}
                 fill
-                // The first cell is the page's LCP - load it eagerly rather
-                // than waiting on the lazy observer.
                 priority={index === 0}
                 sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
@@ -98,14 +78,9 @@ function Masthead() {
 
 /* ---------------------------------------------------------------- timeline */
 
-/**
- * Five dates, one per row, ruled apart. The year hangs in its own column on
- * desktop so the dates read as a single vertical spine down the left edge -
- * the point being that they are a hundred years apart but one continuous line.
- */
 function Timeline() {
   return (
-    <section aria-label="Estate history" className="rule-b">
+    <section aria-label="Studio heritage" className="rule-b">
       <ol>
         {heritage.timeline.map((entry, index) => (
           <li
@@ -128,24 +103,19 @@ function Timeline() {
   );
 }
 
-/* ------------------------------------------------------------ why robusta */
+/* ------------------------------------------------------------ why mindful craft */
 
 function WhyRobusta() {
   return (
-    <section aria-labelledby="robusta" className="rule-b">
-      {/* Centred, like every other head on the page. The grounds shot that used
-          to hang beside this one moved up to the masthead row; the stats and the
-          comparison table are the section's evidence and they carry it alone. */}
+    <section aria-labelledby="mindful-craft" className="rule-b">
       <div className="shell flex flex-col items-center py-12 text-center md:py-16">
         <Eyebrow>{whyRobusta.eyebrow}</Eyebrow>
-        <Headline id="robusta" className="mt-5 max-w-4xl">
+        <Headline id="mindful-craft" className="mt-5 max-w-4xl">
           {whyRobusta.title}
         </Headline>
         <p className="body-mono mt-6 max-w-4xl text-pretty">{whyRobusta.body}</p>
       </div>
 
-      {/* Cell borders rather than `divide-*`: the grid rewraps from 1 to 2 to 4
-          columns, and `divide-x` alone leaves the wrapped rows unruled. */}
       <dl className="rule-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {whyRobusta.stats.map((stat) => (
           <div
@@ -166,24 +136,21 @@ function WhyRobusta() {
         ))}
       </dl>
 
-      {/* Lenis is told to keep its hands off the horizontal axis here, the same
-          way the single-origin table does - otherwise the smooth-scroll
-          provider swallows the sideways drag on a narrow screen. */}
       <div data-lenis-prevent-horizontal className="overflow-x-auto">
         <table className="w-full min-w-[36rem] border-collapse text-left">
           <caption className="sr-only">
-            Arabica and Robusta compared, trait by trait
+            Conventional Mass Decor vs Kozy Living Mindful Craft
           </caption>
           <thead>
             <tr className="rule-b">
               <th scope="col" className="spec-mono px-4 py-4 uppercase md:px-6">
-                Trait
+                Standard
               </th>
               <th scope="col" className="spec-mono px-4 py-4 uppercase md:px-6">
-                Arabica
+                Conventional Mass Decor
               </th>
               <th scope="col" className="spec-mono px-4 py-4 uppercase md:px-6">
-                Robusta
+                Kozy Living Mindful Craft
               </th>
             </tr>
           </thead>
@@ -194,8 +161,6 @@ function WhyRobusta() {
                   {row.trait}
                 </th>
                 <td className="spec-mono px-4 py-4 md:px-6">{row.arabica}</td>
-                {/* The estate's own bean carries the ink weight - this column is
-                    the reason the table exists. */}
                 <td className="ui-mono px-4 py-4 normal-case tracking-normal md:px-6">
                   {row.robusta}
                 </td>
@@ -208,7 +173,7 @@ function WhyRobusta() {
   );
 }
 
-/* ------------------------------------------------------------- farm to cup */
+/* ------------------------------------------------------------- studio to sanctuary */
 
 function FarmToCup() {
   return (
@@ -220,8 +185,6 @@ function FarmToCup() {
         </Headline>
       </div>
 
-      {/* Five cells will not halve or third cleanly, so the grid goes straight
-          from stacked to five-up rather than passing through a ragged row. */}
       <ol className="rule-t grid grid-cols-1 lg:grid-cols-5">
         {farmToCup.steps.map((step, index) => (
           <li
@@ -242,18 +205,12 @@ function FarmToCup() {
 
 /* ---------------------------------------------------------- sustainability */
 
-/**
- * The page's one dark band. `.on-dark` promotes the display and meta type to
- * amber and the body copy to paper - on coal, oxblood measures 1.6:1 and
- * disappears (DESIGN.md §1, Rule 2).
- */
 function Sustainability() {
   return (
     <section aria-labelledby="sustainability" className="on-dark bg-coal">
       <div className="shell py-12 md:py-16">
         <Eyebrow>{sustainability.eyebrow}</Eyebrow>
         <Headline id="sustainability" className="mt-5 max-w-4xl">
-          {/* Authored break: at display-xl a balanced break lands mid-phrase. */}
           {sustainability.title.map((line) => (
             <span key={line} className="block">
               {line}
@@ -277,7 +234,7 @@ function Sustainability() {
   );
 }
 
-/* ------------------------------------------------------------------ family */
+/* ------------------------------------------------------------------ family / collective */
 
 function TheFamily() {
   return (
@@ -296,12 +253,9 @@ function TheFamily() {
             key={member.name}
             className="border-b border-rule p-6 md:p-8 sm:[&:nth-child(odd)]:border-r lg:border-r lg:last:border-r-0"
           >
-            {/* Standing in for a portrait we do not have: the generation
-                ordinal set on the plate ground, which keeps the row's rhythm
-                without inventing a face for a real person. */}
             <div className="plate flex aspect-[4/5] w-full items-center justify-center">
               <span aria-hidden className="serif text-display-xl leading-none">
-                {member.generation.split(" ")[0]}
+                {member.name.charAt(0)}
               </span>
             </div>
             <p className="micro-mono mt-5 text-oxblood">{member.generation}</p>
@@ -317,7 +271,7 @@ function TheFamily() {
   );
 }
 
-/* -------------------------------------------------------------- the letter */
+/* -------------------------------------------------------------- the note */
 
 function FamilyNote() {
   return (
@@ -334,8 +288,6 @@ function FamilyNote() {
             </p>
           ))}
         </div>
-        {/* A signature, so it is set in the display italic rather than the mono
-            the rest of the meta uses. */}
         <p className="serif mt-10 text-display-sm italic">
           {familyNote.signature}
         </p>
@@ -351,13 +303,7 @@ function ShopCta() {
   return (
     <section aria-labelledby="shop" className="rule-b">
       <div className="grid grid-cols-1 items-center lg:grid-cols-2">
-        {/* Image first in the source and on the left at width - the page has
-            just finished the story, and the product is what the last band is
-            handing over to. `lg:order-*` is not needed: the natural order is
-            already the reading order we want. */}
         <div className="p-3">
-          {/* The source is 2:3; a 4:5 plate crops the empty headroom above the
-              pouch rather than the pouch itself. */}
           <div className="plate aspect-[4/5] w-full">
             <Image
               src={aboutImages.pouch.src}

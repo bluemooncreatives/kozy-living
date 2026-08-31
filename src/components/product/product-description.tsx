@@ -6,21 +6,48 @@ import { AddToCart } from "../cart/add-to-cart";
 import { Headline } from "../ui/section";
 
 /**
- * Buy panel. Order follows how the decision is actually made: what it is, what
- * it costs, which size and grind, then the commitment - with the specification
- * table underneath so the detail never pushes the button below the fold.
+ * Buy panel: Object title, pricing, variant selections (sizing/finishes),
+ * Add to Cart action, and architectural material & care specifications.
  */
 
 /** Spec rows read from Shopify tags; unmatched vocabularies are omitted. */
 const SPEC_VOCABULARIES: { label: string; terms: string[] }[] = [
   {
-    label: "Region",
-    terms: ["Coorg", "Chikmagalur", "Wayanad", "Araku", "Nilgiris", "India"],
+    label: "Space / Room",
+    terms: ["Living Room", "Bedroom", "Dining", "Study", "Entryway", "Outdoor"],
   },
-  { label: "Type", terms: ["Single Origin", "Blend"] },
-  { label: "Best for", terms: ["Espresso", "Filter", "Aeropress", "Pour over", "Cold brew"] },
-  { label: "Process", terms: ["Washed", "Natural", "Honey", "Monsooned"] },
-  { label: "Roast", terms: ["Light", "Medium", "Dark"] },
+  {
+    label: "Material",
+    terms: [
+      "Solid Oak",
+      "Organic Linen",
+      "Stoneware Clay",
+      "Brushed Brass",
+      "Hand-Woven Jute",
+      "Bouclé Wool",
+      "Travertine",
+      "Natural Teak",
+      "Walnut",
+    ],
+  },
+  {
+    label: "Craft Technique",
+    terms: [
+      "Hand-Joined Timber",
+      "Wheel-Thrown",
+      "Hand-Loomed",
+      "Mineral Glazed",
+      "Plant-Oil Finished",
+    ],
+  },
+  {
+    label: "Sustainability",
+    terms: ["100% FSC Certified", "Plastic-Free", "Zero Toxic VOC", "Organic GOTS"],
+  },
+  {
+    label: "Care",
+    terms: ["Wipe with Damp Cloth", "Hand Wash Only", "Dry Clean", "Natural Wax Care"],
+  },
 ];
 
 function specsFor(product: Product) {

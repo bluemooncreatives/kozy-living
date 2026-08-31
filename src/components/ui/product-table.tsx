@@ -4,41 +4,40 @@ import { Product } from "@/lib/shopify/types";
 import QuickAdd from "./quick-add";
 
 /**
- * The "Straight from the Source" listing (DESIGN.md §5). A dense mono table
- * that lets someone scan the whole single-origin range without scrolling a
- * carousel - the counterpoint to the image-led rails above it.
+ * The "Studio Catalog" listing. A dense mono table that lets someone
+ * scan the range by room, material, and craft finish.
  */
 
-/**
- * Shopify gives us free-text tags, not structured metafields, so the table
- * matches them against known vocabularies rather than guessing by position.
- * An unmatched product simply shows an em dash instead of a wrong value.
- */
-const REGIONS = [
-  "Coorg",
-  "Chikmagalur",
-  "Wayanad",
-  "Araku",
-  "Nilgiris",
-  "Brazil",
-  "Colombia",
-  "Ethiopia",
-  "Kenya",
-  "Indonesia",
-  "Peru",
-  "Vietnam",
-  "Nepal",
-  "India",
+const ROOMS = [
+  "Living Room",
+  "Bedroom",
+  "Dining Room",
+  "Study & Workspace",
+  "Entryway",
+  "Kitchen & Table",
+  "Outdoor & Patio",
+  "Living",
+  "Dining",
+  "Bedroom",
+  "Lighting",
+  "Decor",
 ];
 
-const BREW_METHODS = [
-  "Espresso",
-  "Filter",
-  "Aeropress",
-  "Moka pot",
-  "French press",
-  "Pour over",
-  "Cold brew",
+const MATERIALS = [
+  "Solid Oak",
+  "Organic Linen",
+  "Stoneware Clay",
+  "Brushed Brass",
+  "Hand-Woven Jute",
+  "Bouclé Wool",
+  "Travertine Stone",
+  "Natural Teak",
+  "Smoked Glass",
+  "Terracotta",
+  "Walnut Wood",
+  "Ceramic",
+  "Cotton",
+  "Wood",
 ];
 
 function matchTag(product: Product, vocabulary: string[]): string | null {
@@ -55,7 +54,7 @@ export default function ProductTable({ products }: { products: Product[] }) {
     <div data-lenis-prevent-horizontal className="rule-t overflow-x-auto">
       <table className="w-full min-w-[40rem] border-collapse text-left">
         <caption className="sr-only">
-          Single-origin coffee, by region and brew method
+          Kozy Living objects, by space and material
         </caption>
         <thead>
           <tr className="rule-b">
@@ -63,13 +62,13 @@ export default function ProductTable({ products }: { products: Product[] }) {
               <span aria-hidden className="mr-2">
                 &uarr;
               </span>
-              Title
+              Object
             </th>
             <th scope="col" className="spec-mono px-4 py-4 uppercase">
-              Region
+              Space / Room
             </th>
             <th scope="col" className="spec-mono px-4 py-4 uppercase">
-              Best for
+              Material & Craft
             </th>
             <th scope="col" className="spec-mono px-4 py-4 text-right uppercase">
               Price
@@ -100,10 +99,10 @@ export default function ProductTable({ products }: { products: Product[] }) {
                   </Link>
                 </th>
                 <td className="spec-mono px-4 py-4">
-                  {matchTag(product, REGIONS) ?? <span aria-hidden>&mdash;</span>}
+                  {matchTag(product, ROOMS) ?? <span aria-hidden>&mdash;</span>}
                 </td>
                 <td className="spec-mono px-4 py-4">
-                  {matchTag(product, BREW_METHODS) ?? (
+                  {matchTag(product, MATERIALS) ?? (
                     <span aria-hidden>&mdash;</span>
                   )}
                 </td>
