@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Vaishnavi Estate - design tokens.  Full spec in DESIGN.md.
+
+   Five colours, with roles assigned by measured contrast rather than taste:
+
+     Dark Brown  #341706  ink      - body, nav, UI, prices        16.5:1 on paper
+     Oxblood     #7B1526  accent   - display, links, buttons,
+                                     meta text, and the hairlines  10.6:1 on paper
+     Amber       #FFCF71  amber    - FILL ONLY / on-dark accent     1.5:1 on paper
+     White       #FFFFFF  paper    - ground, and text on fills
+
+   Four colours, not five: the old Light Brown (#8E3200) held both the meta
+   text and the hairline hue at 8.1:1, and Oxblood does both jobs at 10.6:1.
+   One fewer near-brown to confuse with the ink, and better contrast for it.
+
+   Two hard rules fall out of those numbers:
+     1. Amber is never text on paper. It is a fill (carrying Dark Brown at
+        11.3:1), or text on Dark Brown (11.3:1) / Oxblood (7.3:1).
+     2. Dark grounds take paper or amber only - Oxblood is invisible there
+        at 1.6:1.
+
+   Single light theme by design; the warmth of this palette is the brand.
+--------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --paper: #ffffff;
+  --ink: #341706;
+  --oxblood: #7b1526;
+  --amber: #ffcf71;
+
+  /* Oxblood at 8% over paper - the product-image tile ground. */
+  --tint: #f4ecee;
+  --rule: rgba(123, 21, 38, 0.22);
+  --wash: rgba(123, 21, 38, 0.06);
+
+  --gutter: 1rem;
+  --scroll-progress: 0;
+  --scroll-velocity: 0;
+  /* Announcement strip + nav. Sticky children offset by this. */
+  --header-h: 6.25rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 1.25rem;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-mono);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--oxblood);
+  }
+
+  /* Amber earns its keep as a fill: 11.3:1 against the ink it carries. */
+  ::selection {
+    background: var(--amber);
+    color: var(--ink);
+  }
+
+  a,
+  input,
+  button,
+  textarea,
+  select {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
+  }
+
+  /* On a dark ground oxblood disappears - amber is the visible focus ring. */
+  .on-dark {
+    color: var(--paper);
+  }
+
+  .on-dark a,
+  .on-dark button {
+    @apply focus-visible:ring-amber focus-visible:ring-offset-coal;
+  }
+
+  .on-dark h1,
+  .on-dark h2,
+  .on-dark h3,
+  .on-dark h4 {
+    color: var(--amber);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--oxblood);
+    opacity: 0.6;
+  }
+}
+
+@supports (font: -apple-system-body) and (-webkit-appearance: none) {
+  img[loading="lazy"] {
+    clip-path: inset(0.6px);
+  }
+}
+
+@layer components {
+  /* ---------------------------------------------------------------- layout */
+
+  /* Full bleed by design - the reference has no centred container, content
+     runs to the viewport edge with a consistent gutter. */
+  .shell {
+    width: 100%;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  /* Hairline: the primary structural device. Sections are separated by rules,
+     not by whitespace. Oxblood at 22% keeps them warm rather than grey. */
+  .rule-t {
+    @apply border-t border-rule;
+  }
+  .rule-b {
+    @apply border-b border-rule;
+  }
+  .rule-x {
+    @apply border-x border-rule;
+  }
+  .rule-y {
+    @apply border-y border-rule;
+  }
+
+  /* ------------------------------------------------------------ typography */
+
+  /* Meta labels sit in oxblood, same as the display type they sit above. */
+  .eyebrow {
+    @apply font-mono text-eyebrow uppercase text-oxblood;
+  }
+
+  .body-mono {
+    @apply font-mono text-body text-ink;
+  }
+
+  .ui-mono {
+    @apply font-mono text-ui uppercase tracking-ui text-ink;
+  }
+
+  .spec-mono {
+    @apply font-mono text-spec text-oxblood;
+  }
+
+  .micro-mono {
+    @apply font-mono text-micro uppercase tracking-micro;
+  }
+
+  /* Display type carries the brand voice, so it defaults to oxblood. On dark
+     grounds callers override to amber - oxblood is invisible there. */
+  .serif {
+    @apply font-display font-normal text-oxblood;
+  }
+
+  /* Rule 2, applied to the type utilities. `.on-dark` in the base layer already
+     promotes h1–h4 to amber, but each utility below sets its own colour in this
+     layer and would otherwise win on cascade order - leaving oxblood text at
+     1.6:1 on coal. Body-weight copy goes to paper (16.5:1), display and meta to
+     amber (11.3:1). */
+  .on-dark .body-mono,
+  .on-dark .ui-mono {
+    color: var(--paper);
+  }
+
+  .on-dark .serif,
+  .on-dark .spec-mono,
+  .on-dark .eyebrow,
+  .on-dark .eyebrow > * {
+    color: var(--amber);
+  }
+
+  /* Section headings carry their collection size as a superscript numeral -
+     "Hot off the Roaster⁶". A signature of the system. */
+  .count-sup {
+    font-size: 0.45em;
+    vertical-align: super;
+    line-height: 1;
+    margin-left: 0.08em;
+  }
+
+  /* -------------------------------------------------------------- controls */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-mono text-ui uppercase tracking-ui transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45;
+    padding: 0.9rem 1.75rem;
+  }
+
+  .btn-outline {
+    @apply btn border border-oxblood text-oxblood hover:bg-oxblood hover:text-paper;
+  }
+
+  .btn-solid {
+    @apply btn bg-oxblood text-paper hover:bg-ink;
+  }
+
+  /* Amber's headline use: a fill loud enough to stop the eye, carrying ink at
+     11.3:1. Reserved for the single primary action on a surface. */
+  .btn-amber {
+    @apply btn bg-amber text-ink hover:bg-ink hover:text-amber;
+  }
+
+  /* Underlined text link with a trailing arrow - "VIEW ALL →". */
+  .link-arrow {
+    @apply inline-flex items-center gap-2 font-mono text-ui uppercase tracking-ui text-oxblood underline decoration-rule decoration-1 underline-offset-[6px] transition-colors hover:decoration-oxblood;
+  }
+
+  /* Collection filter: serif inside a pill. Fills on select. */
+  .pill {
+    @apply inline-flex items-center rounded-full border border-ink px-6 py-2 font-display text-display-md font-normal text-ink transition-colors duration-150 hover:bg-wash hover:text-ink;
+  }
+
+  .pill-active {
+    @apply bg-ink text-paper;
+  }
+
+  /* Product status flag - amber fill, ink text. */
+  .badge {
+    @apply inline-flex items-center rounded-full bg-amber px-3 py-1 font-mono text-micro uppercase tracking-micro text-ink;
+  }
+
+  /* Bare underlined field - newsletter, search. No box, no fill. */
+  .field-bare {
+    @apply w-full border-b border-rule bg-transparent py-2 font-mono text-ui uppercase tracking-ui text-ink focus-visible:border-oxblood focus-visible:ring-0;
+  }
+
+  /* ----------------------------------------------------------------- media */
+
+  /* Every photograph in the system shares this radius and tile ground. */
+  .plate {
+    @apply relative overflow-hidden rounded-plate bg-tint;
+  }
+
+  /* ---------------------------------------------------------------- motion */
+
+  /* Children are duplicated in the component, so translating -50% loops
+     seamlessly. */
+  .marquee-track {
+    @apply flex w-max items-center animate-marquee;
+  }
+
+  .marquee-track-reverse {
+    @apply flex w-max items-center animate-marqueeReverse;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track,
+    .marquee-track-reverse {
+      animation: none;
+    }
+  }
+
+  /* Horizontal scroll-snap rail used by the carousels. */
+  .rail {
+    @apply flex snap-x snap-mandatory overflow-x-auto;
+    scrollbar-width: none;
+  }
+
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
