@@ -40,7 +40,7 @@ Rotate any private token that has been shared outside your secret manager.
 
 ## Current production URLs
 
-- Site URL: `https://vaishnavi-estate-next-js.vercel.app`
-- Callback URL: `https://vaishnavi-estate-next-js.vercel.app/api/auth/callback`
-- JavaScript origin: `https://vaishnavi-estate-next-js.vercel.app`
-- Logout URL: `https://vaishnavi-estate-next-js.vercel.app/`
+- Site URL: `https://kozy-living.vercel.app`
+- Callback URL: `https://kozy-living.vercel.app/api/auth/callback`
+- JavaScript origin: `https://kozy-living.vercel.app`
+- Logout URL: `https://kozy-living.vercel.app/`
