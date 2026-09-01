@@ -16,7 +16,7 @@ import Link from "next/link";
  * as one unit so `--header-h` stays the single offset for sticky children.
  */
 export async function Navbar() {
-  const shopifyMenu = await getMenu("kozy-living-nextjs-menu")
+  const shopifyMenu = await getMenu("kozy-living-menu")
     .catch(() => getMenu("main-menu"))
     .catch((error) => {
       console.error("Failed to load the Shopify navigation", error);
