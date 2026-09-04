@@ -67,7 +67,7 @@ export const hero = {
     lines: ["Krafted textiles", "by real hands", "for real rest"],
     /** Ringed by the hand-drawn ellipse. Must appear in `lines` verbatim. */
     circled: "real rest",
-    body: "Designed in-house and made with craft clusters across India, from cotton waffle weave, slub cotton, linen blends and wool.",
+    body: "Designed in-house, shaped by the hands and heritage of India’s craft clusters. From tactile cottons to linen blends and wool, every weave carries a story of place, patience, and craft.",
   },
   /** The two small plates that close the bento. */
   tiles: [

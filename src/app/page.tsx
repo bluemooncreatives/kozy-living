@@ -187,15 +187,15 @@ function Hero() {
         </Plate>
 
         {/* --------------------------------------------------------- saying */}
-        <div className="bento-say panel flex flex-col justify-center gap-4 p-5 md:p-7 lg:p-8">
-          <h2 className={clsx(displayFace, "text-display-md lg:text-display-lg")}>
+        <div className="bento-say panel flex flex-col justify-between gap-6 p-6 md:p-8 lg:p-9">
+          <h2 className={clsx(displayFace, "text-display-lg")}>
             {statement.lines.map((line) => (
               <span key={line} className="block">
                 {ringWord(line, statement.circled)}
               </span>
             ))}
           </h2>
-          <p className="body-mono max-w-measure">{statement.body}</p>
+          <p className="body-mono max-w]">{statement.body}</p>
         </div>
 
         {/* ---------------------------------------------------- two closers */}

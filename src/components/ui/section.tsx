@@ -42,10 +42,10 @@ export function Eyebrow({
 /**
  * The display face, as a class list.
  *
- * Franxurter is single-weight, and the `text-display-*` size utilities carry
- * the grotesk's weight and track - so the face has to be paired with
- * `font-normal` and a gentler letter-spacing as utilities, which beat the size
- * utility by source order. Exported so the handful of major headings written
+ * Franxurter is single-weight. The `text-display-*` utilities deliberately set
+ * no font-weight for that reason, and `font-normal` here is the explicit guard
+ * against anything else reintroducing one - a synthesised bold on this face is
+ * immediately visible. Exported so the handful of major headings written
  * outside `Headline` stay identical to the ones inside it.
  */
 export const displayFace =

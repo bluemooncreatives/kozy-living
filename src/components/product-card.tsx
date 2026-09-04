@@ -49,7 +49,7 @@ export default function ProductCard({
     <Link
       href={`/product/${product.handle}`}
       prefetch
-      data-reveal
+      data-reveal=""
       className={clsx("group flex h-full flex-col", className)}
     >
       <Plate

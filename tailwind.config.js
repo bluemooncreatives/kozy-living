@@ -68,6 +68,11 @@ module.exports = {
         mono: ["var(--font-ui)", "Inter", "system-ui", "sans-serif"],
         sans: ["var(--font-ui)", "Inter", "system-ui", "sans-serif"],
       },
+      // NOTE: the display-* sizes deliberately carry no fontWeight. A size
+      // utility that also sets weight loses to its own responsive variant -
+      // `lg:text-display-lg` is emitted after `font-normal` - which silently
+      // re-bolded the single-weight display face into a synthesised bold.
+      // Weight belongs to `.serif` (700) and `.display-face` (400) only.
       fontSize: {
         // The full-bleed wordmark ("kozy living", "shop now"). Sized in vw so
         // it always spans the frame edge to edge.
@@ -77,19 +82,19 @@ module.exports = {
         ],
         "display-xl": [
           "clamp(2.25rem, 6.4vw, 5rem)",
-          { lineHeight: "1.02", letterSpacing: "-0.035em", fontWeight: "700" },
+          { lineHeight: "1.02", letterSpacing: "-0.035em" },
         ],
         "display-lg": [
           "clamp(1.75rem, 4vw, 3.25rem)",
-          { lineHeight: "1.06", letterSpacing: "-0.03em", fontWeight: "700" },
+          { lineHeight: "1.06", letterSpacing: "-0.03em" },
         ],
         "display-md": [
           "clamp(1.375rem, 2.2vw, 2rem)",
-          { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" },
+          { lineHeight: "1.15", letterSpacing: "-0.02em" },
         ],
         "display-sm": [
           "clamp(1.0625rem, 0.9rem + 0.7vw, 1.3125rem)",
-          { lineHeight: "1.25", letterSpacing: "-0.015em", fontWeight: "700" },
+          { lineHeight: "1.25", letterSpacing: "-0.015em" },
         ],
         eyebrow: [
           "0.6875rem",
