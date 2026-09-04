@@ -31,41 +31,19 @@ export const site = {
   instagramUrl: "https://www.instagram.com/kozyliving_/",
 } as const;
 
-/** Fallback navigation, used when the Shopify menu is empty or unreachable. */
-export const primaryNav: { title: string; path: string }[] = [
-  { title: "Shop All", path: "/search" },
-  { title: "Kozy Lounge", path: "/search/kozy-lounge" },
-  { title: "Kessentials", path: "/search/kessentials" },
-  { title: "Morning Luxuries", path: "/search/morning-luxuries" },
-  { title: "Pet & Parent", path: "/search/pet-parent" },
-  { title: "Journal", path: "/blogs" },
-  { title: "About", path: "/about-us" },
-];
+/*
+ * NOTE: navigation lives in Shopify, not here.
+ *
+ * The header, the mobile drawer, the search overlay and the homepage category
+ * rail all read the "main-menu" menu through `getPrimaryMenu()`. There is
+ * deliberately no hard-coded nav in this file: a fallback list silently
+ * replaced the real menu for months here, and shipped links to collection
+ * handles the store never had.
+ */
 
 /** The quiet line above the header. */
 export const announcement =
   "Krafted to give you moments of rest - your in-between Kompanions";
-
-/**
- * Category pills under the hero. Handles must match real Shopify collection
- * handles; a handle that does not exist yet renders the empty-collection
- * panel rather than an error.
- *
- * TODO(brand): confirm these against the live collection handles.
- */
-export const collectionPills = [
-  { title: "All Kompanions", handle: "" },
-  { title: "Kozy Lounge", handle: "kozy-lounge" },
-  { title: "Floor Pillows", handle: "floor-pillows" },
-  { title: "Throw Pillows", handle: "throw-pillows" },
-  { title: "Kessentials", handle: "kessentials" },
-  { title: "Morning Luxuries", handle: "morning-luxuries" },
-  { title: "Waffle Robes", handle: "robes" },
-  { title: "Loungewear", handle: "loungewear" },
-  { title: "Pet & Parent", handle: "pet-parent" },
-  { title: "Dabu Prints", handle: "dabu" },
-  { title: "New Arrivals", handle: "new-arrivals" },
-] as const;
 
 /* ------------------------------------------------------------------ homepage
    The sections below map one-to-one onto the homepage layout, in page order.
@@ -143,7 +121,7 @@ export const lookbook = [
 ] as const;
 
 /**
- * The two-up experience band: a wide photographic panel, a yellow statement
+ * The two-up experience band: a wide photographic panel, a sage statement
  * card, and a smaller photographic panel stacked beside it.
  */
 export const experienceBand = {
@@ -152,7 +130,7 @@ export const experienceBand = {
       "We call them Kompanions, not products - krafted to support the moments of rest you already have.",
     href: "/search",
   },
-  yellow: {
+  accent: {
     chip: "kozyliving.com",
     title: "Turn your routine into a ritual",
     href: "/search",
@@ -250,44 +228,6 @@ export const journalPosts = [
     title: "The In-Between Moments Are the Ritual",
     excerpt:
       "Not the grand reset, but the ten minutes on the floor before the day starts. A case for textiles that support the routines already in your day rather than asking for new ones...",
-  },
-] as const;
-
-/**
- * Category list used by the mobile drawer and the search overlay.
- *
- * TODO(brand): confirm handles against the live Shopify collections.
- */
-export const collectionList = [
-  {
-    title: "Kozy Lounge",
-    handle: "kozy-lounge",
-    note: "Low floor seating, biscuit floor pillows and plush textile forms.",
-  },
-  {
-    title: "Throw Pillows",
-    handle: "throw-pillows",
-    note: "Organic shapes and prints, made to be leaned on rather than looked at.",
-  },
-  {
-    title: "Kessentials",
-    handle: "kessentials",
-    note: "Waffle weave robes, kits and everyday loungewear.",
-  },
-  {
-    title: "Morning Luxuries",
-    handle: "morning-luxuries",
-    note: "Ritual kits for the first hour of the day.",
-  },
-  {
-    title: "Pet & Parent",
-    handle: "pet-parent",
-    note: "Dabu-printed carriers, pet clothing and matching parent accessories.",
-  },
-  {
-    title: "B2B & Private Label",
-    handle: "b2b",
-    note: "Bespoke bulk production for boutiques, studios and hospitality.",
   },
 ] as const;
 

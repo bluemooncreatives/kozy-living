@@ -1,9 +1,11 @@
-import { getMenu } from "@/lib/shopify";
+import { getMenu, isFrameworkControlFlowError } from "@/lib/shopify";
 import { Menu } from "@/lib/shopify/types";
 import Link from "next/link";
 import LogoSquare from "@/components/logo-square";
 import Newsletter from "@/components/ui/newsletter";
 import BackToTop from "@/components/ui/back-to-top";
+import { displayFace } from "@/components/ui/section";
+import clsx from "clsx";
 import { footerColumns, legalLinks, site } from "@/lib/site";
 
 /**
@@ -16,7 +18,12 @@ import { footerColumns, legalLinks, site } from "@/lib/site";
  */
 export default async function Footer() {
   // Shopify owns the legal/policy links; the rest of the footer is editorial.
-  const legalMenu: Menu[] = await getMenu("next-js-footer-menu").catch(() => []);
+  const legalMenu: Menu[] = await getMenu("next-js-footer-menu").catch(
+    (error) => {
+      if (isFrameworkControlFlowError(error)) throw error;
+      return [];
+    }
+  );
   const links = legalMenu.length ? legalMenu : legalLinks;
   const year = new Date().getFullYear();
 
@@ -25,7 +32,9 @@ export default async function Footer() {
       {/* Newsletter */}
       <div className="shell rule-b flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between md:py-14">
         <div>
-          <h2 className="serif text-display-lg">Join the inner circle</h2>
+          <h2 className={clsx(displayFace, "text-display-lg")}>
+            Join the inner circle
+          </h2>
           <p className="body-mono mt-3 max-w-measure">
             Styling notes from the studio and first look at every new piece.
           </p>

@@ -6,7 +6,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Fragment, useState } from "react";
 import { SearchBar } from "./search";
-import { collectionList, site, socialLinks } from "@/lib/site";
+import { site, socialLinks } from "@/lib/site";
 import LogoSquare from "@/components/logo-square";
 
 export default function MobileMenu({ menu }: { menu: Menu[] }) {
@@ -18,7 +18,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Open menu"
-        className="flex items-center transition-opacity hover:opacity-60 md:hidden"
+        className="flex items-center transition-opacity hover:opacity-60 lg:hidden"
       >
         <Bars3Icon className="h-6 w-6" />
       </button>
@@ -34,7 +34,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-ink/50" aria-hidden />
+            <div className="fixed inset-0 bg-indigo/55" aria-hidden />
           </TransitionChild>
           <TransitionChild
             as={Fragment}
@@ -75,14 +75,14 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         {item.title}
                       </Link>
                       {item.items?.length ? (
-                        <ul className="-mt-1 grid grid-cols-2 gap-x-6 gap-y-2 pb-5">
+                        <ul className="-mt-2 grid grid-cols-2 gap-x-6 gap-y-2.5 pb-5 pl-3">
                           {item.items.map((child) => (
                             <li key={child.title}>
                               <Link
                                 href={child.path}
                                 prefetch
                                 onClick={close}
-                                className="ui-mono transition-opacity hover:opacity-60"
+                                className="text-ui text-muted transition-colors hover:text-ink"
                               >
                                 {child.title}
                               </Link>
@@ -94,20 +94,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   ))}
                 </ul>
 
-                <p className="eyebrow mb-4 mt-10 text-muted">Browse by collection</p>
-                <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {collectionList.map((format) => (
-                    <li key={format.handle}>
-                      <Link
-                        href={`/search/${format.handle}`}
-                        onClick={close}
-                        className="ui-mono transition-opacity hover:opacity-60"
-                      >
-                        {format.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
               </nav>
 
               <div className="rule-t mt-auto px-5 py-6">

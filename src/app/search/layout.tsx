@@ -4,6 +4,8 @@ import { sorting } from "@/lib/constants";
 import { Eyebrow, Headline } from "@/components/ui/section";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import { site } from "@/lib/site";
+import { getPrimaryMenu } from "@/lib/shopify";
+import { shopCategories } from "@/lib/menu";
 import { Suspense } from "react";
 
 /**
@@ -12,11 +14,13 @@ import { Suspense } from "react";
  * so browsing feels continuous - with the Shopify-driven collection list and
  * sort kept in a hairline rail beneath.
  */
-export default function SearchLayout({
+export default async function SearchLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const categories = shopCategories(await getPrimaryMenu());
+
   return (
     <>
       <div className="shell max-w-4xl py-10 md:py-14">
@@ -29,9 +33,11 @@ export default function SearchLayout({
         </p>
       </div>
 
-      <div className="shell pb-8">
-        <CollectionPillRail />
-      </div>
+      {categories.length ? (
+        <div className="shell pb-8">
+          <CollectionPillRail items={categories} />
+        </div>
+      ) : null}
 
       {/* Sticky under the header stack - `--header-h` is the single source. */}
       <div className="rule-y sticky top-[var(--header-h)] z-40 bg-paper/95 backdrop-blur-md">

@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useId } from "react";
 
 /**
- * The rotating yellow seal - the signature mark of this system. It appears
+ * The rotating sage seal - the signature mark of this system. It appears
  * over the hero wordmark, over the closing CTA, and as the footer's
  * back-to-top control, and nowhere else, which is what keeps it reading as a
  * stamp rather than as decoration.
@@ -67,7 +67,7 @@ export default function Seal({
             />
           </defs>
           <text
-            className="fill-ink font-display font-bold uppercase"
+            className="fill-ink font-sans font-bold uppercase"
             style={{ fontSize: "8.5px", letterSpacing: "0.1em" }}
           >
             <textPath href={`#${pathId}`} startOffset="0">

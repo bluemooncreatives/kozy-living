@@ -23,8 +23,8 @@ export default function Marquee({
   size?: "ui" | "display" | "hero";
   /** Glyph set between phrases. Pass "" for none. */
   separator?: string;
-  /** Yellow separators are the system's way of punctuating a black ticker. */
-  separatorTone?: "ink" | "yellow";
+  /** Sage separators are the system's way of punctuating an indigo ticker. */
+  separatorTone?: "ink" | "sage";
   reverse?: boolean;
   /** Seconds for one full pass. Longer text wants a longer duration. */
   duration?: number;
@@ -32,7 +32,7 @@ export default function Marquee({
 }) {
   const text = {
     ui: "font-display text-ui font-medium",
-    display: "font-display text-display-md font-bold tracking-tight",
+    display: "display-face text-display-md font-normal tracking-[-0.015em]",
     hero: "wordmark leading-[1.05]",
   }[size];
 
@@ -50,9 +50,11 @@ export default function Marquee({
     hero: "pb-3",
   }[size];
 
+  // sage-deep, not flat sage: a separator on the ivory ground has to be seen,
+  // and flat sage measures 1.81 there.
   const separatorClass = {
     ink: "text-ink",
-    yellow: "text-yellow",
+    sage: "text-sage-deep",
   }[separatorTone];
 
   // Scaled off the phrase size so a separator never out-shouts the words it

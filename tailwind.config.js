@@ -12,39 +12,53 @@ module.exports = {
     extend: {
       colors: {
         /* ------------------------------------------------------------------
-           Kozy Living - street-editorial system.
+           Kozy Living - four colours from the client palette.
 
-           Three values carry the whole site: a near-black ink, a single
-           saturated yellow, and a soft off-white ground. Everything else is
-           an alpha of the ink.
+             INDIGO   #23324B  ink: type, wordmarks, dark panels, buttons
+             IVORY    #F6F4F0  the page ground
+               CREAM  #FFF6EB  its lighter shade - card and panel surfaces
+             OAT MILK #E8D9C4  warm structure: plates, tints, type on dark
+             SAGE     #A9BDAF  the accent: seal, chips, badges, statement fills
+               deep   #5F7178  sage carried toward indigo, for hover and for
+                               small sage type that has to clear 4.5 on ivory
+               wash   #DBE1D9  sage lifted toward ivory, for soft fills
 
-           The legacy token names (paper / ink / oxblood / amber / tint /
-           coal) are kept and repointed rather than renamed, so every surface
-           already written against them inherits the new look untouched.
+           Rose Dust and Mushroom are unused: with sage holding the accent,
+           rose is a second saturated mid-tone chasing the same job, and oat
+           is the better ground under photography.
+
+           Measured contrast: indigo on ivory 11.73, indigo on cream 12.05,
+           indigo on oat 9.30, oat on indigo 9.30, sage on indigo 6.50,
+           indigo on sage 6.50, sage-deep on ivory 4.64, muted on ivory 5.12.
+
+           ONE HARD RULE: oat against sage is 1.43. They may sit next to each
+           other as blocks; neither may ever carry type on the other.
+
+           Legacy aliases (paper / ink / tint / coal) are kept and repointed so
+           surfaces written against them inherit the palette untouched.
         ------------------------------------------------------------------ */
 
-        // Page ground. Soft off-white, a hair warm so photography sits in it.
-        paper: "#F2F1ED",
-        // Card / panel ground. The one true white in the system.
-        card: "#FFFFFF",
-        // The ink. Headings, body, nav, dark panels. Near-black, never #000.
-        ink: "#131313",
-        // Repointed: headings and links used to be terracotta, now they are
-        // the ink. Keeping the name means no page has to be rewritten.
-        oxblood: "#131313",
-        // The single accent. Wordmarks, badges, fills, the rotating seal.
-        amber: "#FFC803",
-        yellow: "#FFC803",
-        // Deeper yellow, used only for pressed/hover states on yellow fills.
-        "yellow-deep": "#E8B400",
-        // Image-plate ground, visible only while media loads.
-        tint: "#E4E2DC",
-        // Muted body copy, captions, meta.
-        muted: "#8A8880",
-        rule: "rgba(19, 19, 19, 0.10)",
-        wash: "rgba(19, 19, 19, 0.04)",
-        // Dark ground. Takes paper or yellow text.
-        coal: "#131313",
+        indigo: "#23324B",
+        ivory: "#F6F4F0",
+        cream: "#FFF6EB",
+        oat: "#E8D9C4",
+        sage: "#A9BDAF",
+        "sage-deep": "#5F7178",
+        "sage-wash": "#DBE1D9",
+
+        // Role aliases. These are the names the markup actually uses.
+        paper: "#F6F4F0",
+        card: "#FFF6EB",
+        ink: "#23324B",
+        coal: "#23324B",
+        tint: "#E8D9C4",
+
+        // Indigo blended 72% into ivory. Secondary copy, captions, meta - the
+        // lightest indigo that still clears 4.5:1 for body text (5.12).
+        muted: "#5E6879",
+
+        rule: "rgba(35, 50, 75, 0.12)",
+        wash: "rgba(35, 50, 75, 0.05)",
       },
       fontFamily: {
         // One family does every job. `display` is the same face at heavy
@@ -59,7 +73,7 @@ module.exports = {
         // it always spans the frame edge to edge.
         "display-hero": [
           "clamp(3.25rem, 16.5vw, 16rem)",
-          { lineHeight: "0.82", letterSpacing: "-0.045em", fontWeight: "800" },
+          { lineHeight: "0.82", letterSpacing: "-0.045em" },
         ],
         "display-xl": [
           "clamp(2.25rem, 6.4vw, 5rem)",

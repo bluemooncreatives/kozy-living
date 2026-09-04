@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { Navbar } from "@/components/layout/navbar";
@@ -8,6 +9,23 @@ import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider"
 import { cookies } from "next/headers";
 import { getCart } from "@/lib/shopify";
 import { site } from "@/lib/site";
+
+/**
+ * Franxurter - the display face, self-hosted so it never flashes or shifts.
+ *
+ * It ships in ONE weight, so it is declared at 400 and must never be given a
+ * bold utility: asking for 700 makes the browser synthesise it, and a faked
+ * bold on a display face at hero scale is immediately visible. Weight in this
+ * system comes from the face you choose, not from a number.
+ */
+const franxurter = localFont({
+  src: "../../public/font/Franxurter.ttf",
+  variable: "--font-franxurter",
+  weight: "400",
+  style: "normal",
+  display: "swap",
+  fallback: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+});
 
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -70,7 +88,7 @@ export default async function RootLayout({
     return undefined;
   });
   return (
-    <html lang="en">
+    <html lang="en" className={franxurter.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -84,11 +102,12 @@ export default async function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* One family, no exceptions. Plus Jakarta Sans carries the giant
-            lowercase wordmarks at 800, the headlines at 700, and every label
-            and paragraph below them. */}
+        {/* Plus Jakarta Sans is the UI face: navigation, labels, body copy and
+            every heading below display-lg. The display face is Franxurter,
+            self-hosted via next/font in this file. 800 is no longer requested -
+            nothing uses it since the wordmark moved to the display face. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
           rel="stylesheet"
         />
       </head>

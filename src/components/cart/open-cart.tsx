@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 /**
  * Cart affordance. A circular outlined control matching the account and search
- * buttons beside it, with the line count as a yellow counter rather than a
+ * buttons beside it, with the line count as a sage counter rather than a
  * parenthetical - the reference keeps every header utility the same shape.
  */
 export default function OpenCart({
@@ -34,7 +34,7 @@ export default function OpenCart({
         <path d="M16 10a4 4 0 0 1-8 0" />
       </svg>
       {quantity ? (
-        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow px-1 text-[0.5625rem] font-bold text-ink">
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sage px-1 text-[0.5625rem] font-bold text-ink">
           {quantity}
         </span>
       ) : null}

@@ -64,7 +64,7 @@ export default function ContactPage() {
             </li>
           ))}
 
-          <li className="panel-yellow p-6 md:p-8">
+          <li className="panel-sage p-6 md:p-8">
             <p className="micro-mono text-muted">Direct</p>
             <div className="mt-4 flex flex-col items-start gap-3">
               <a href={`mailto:${contact.email}`} className="link-arrow">

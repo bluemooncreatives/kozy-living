@@ -18,7 +18,7 @@ export default function Plate({
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
   priority,
   arrow,
-  arrowTone = "white",
+  arrowTone = "cream",
   tag,
   title,
   caption,
@@ -30,13 +30,17 @@ export default function Plate({
 }: {
   src?: string | null;
   alt?: string;
-  /** Any CSS aspect-ratio value, e.g. "4/5", "16/9", "1/1". */
-  aspect?: string;
+  /**
+   * Any CSS aspect-ratio value, e.g. "4/5", "16/9", "1/1". Pass `null` when
+   * the height comes from `className` instead - the hero is sized to the
+   * viewport, not to a ratio.
+   */
+  aspect?: string | null;
   sizes?: string;
   priority?: boolean;
   /** Draws the corner ↗ button and the notch that receives it. */
   arrow?: boolean;
-  arrowTone?: "white" | "yellow";
+  arrowTone?: "cream" | "sage";
   /** Small white pill sitting low-left on the photograph. */
   tag?: string;
   /** Heavy display title under the tag, inside the frame. */
@@ -53,19 +57,21 @@ export default function Plate({
 }) {
   const ghost = placeholderText ?? title ?? tag ?? "kozy";
 
-  // Four warm greys. Deliberately close together - the placeholders should
-  // read as one material, not as four different coloured boxes.
+  // Four gradients built off oat milk, deliberately close together - the
+  // placeholders should read as one material, not four different boxes. Every
+  // stop stays in the oat family so a wall of plates reads as warm cloth
+  // rather than as a colour swatch grid.
   const washes = [
-    "linear-gradient(150deg,#E9E7E1 0%,#D8D5CD 55%,#C9C5BB 100%)",
-    "linear-gradient(150deg,#DEDBD3 0%,#CBC7BE 60%,#BAB6AB 100%)",
-    "linear-gradient(150deg,#E4E1DA 0%,#D2CEC5 50%,#C0BCB1 100%)",
-    "linear-gradient(150deg,#D6D2C9 0%,#C4C0B6 55%,#B2AEA3 100%)",
+    "linear-gradient(150deg,#F0E7D9 0%,#E8D9C4 55%,#DCCBB2 100%)",
+    "linear-gradient(150deg,#E8DBC8 0%,#DCCAB0 60%,#CDB897 100%)",
+    "linear-gradient(150deg,#EFEAE0 0%,#E4DCCB 50%,#D5C9B3 100%)",
+    "linear-gradient(150deg,#E0D0B8 0%,#D2BFA2 55%,#C2AC8B 100%)",
   ];
 
   return (
     <div
       className={clsx("plate @container", className)}
-      style={{ aspectRatio: aspect }}
+      style={aspect ? { aspectRatio: aspect } : undefined}
     >
       {/* The notch and the media share a wrapper so the cut-out only ever
           removes photograph, never the caption layer above it. */}
@@ -102,7 +108,7 @@ export default function Plate({
       {(tag || title || caption) && src ? (
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/55 to-transparent"
+          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-indigo/60 to-transparent"
         />
       ) : null}
 

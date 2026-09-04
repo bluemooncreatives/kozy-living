@@ -1,6 +1,6 @@
 /**
  * Estate monogram. Uses `currentColor` so the mark inverts cleanly when it sits
- * on the espresso and oxblood sections.
+ * on the indigo sections.
  */
 export default function LogoIcon(props: React.ComponentProps<"svg">) {
   return (

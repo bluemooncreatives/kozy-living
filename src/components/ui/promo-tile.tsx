@@ -71,9 +71,8 @@ export default function PromoTile({
           labelPosition === "bottom" ? "items-end" : "items-start"
         )}
       >
-        {/* Amber, not oxblood: oxblood on this ground measures 1.8:1 and
-            simply disappears. Amber reads at 9.2:1. */}
-        <h3 className="serif text-display-md text-yellow">{title}</h3>
+        {/* Oat milk on indigo, at 9.30. */}
+        <h3 className="serif text-display-md text-oat">{title}</h3>
       </div>
     </Link>
   );

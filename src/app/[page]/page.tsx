@@ -1,5 +1,6 @@
 import Prose from "@/components/prose";
-import { Eyebrow } from "@/components/ui/section";
+import clsx from "clsx";
+import { displayFace, Eyebrow } from "@/components/ui/section";
 import { getPage } from "@/lib/shopify";
 import { site } from "@/lib/site";
 import { Metadata } from "next";
@@ -39,7 +40,9 @@ export default async function Page({
   return (
     <article className="shell max-w-3xl py-4">
       <Eyebrow align="left">{site.name}</Eyebrow>
-      <h1 className="serif mt-4 text-display-xl">{page.title}</h1>
+      <h1 className={clsx(displayFace, "mt-4 text-display-xl")}>
+        {page.title}
+      </h1>
       <hr className="my-8 border-rule" />
       <Prose html={page.body as string} />
       <p className="eyebrow mt-14 border-t border-rule pt-6 text-muted">

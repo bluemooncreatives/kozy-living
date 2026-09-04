@@ -28,17 +28,17 @@ export function ArrowUpRight({ className }: { className?: string }) {
  * on the media wrapper and this alongside it inside the same relative box.
  */
 export default function CornerArrow({
-  tone = "white",
+  tone = "cream",
   className,
 }: {
-  tone?: "white" | "yellow";
+  tone?: "cream" | "sage";
   className?: string;
 }) {
   return (
     <span
       aria-hidden
       className={clsx(
-        tone === "yellow" ? "arrow-btn-yellow" : "arrow-btn",
+        tone === "sage" ? "arrow-btn-sage" : "arrow-btn",
         "absolute right-3 top-3 z-10",
         className
       )}

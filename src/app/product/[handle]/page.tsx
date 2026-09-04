@@ -98,14 +98,14 @@ export default async function ProductPage({
       </div>
 
       {/* One ticker, not two. The pair of bands that used to sandwich the
-          buy panel belonged to the old system's rhythm; here the yellow
+          buy panel belonged to the old system's rhythm; here the sage
           separator does the punctuating. */}
       <div className="rule-y py-5">
         <Marquee
           phrases={band}
           size="display"
           separator="✳"
-          separatorTone="yellow"
+          separatorTone="sage"
           duration={40}
         />
       </div>

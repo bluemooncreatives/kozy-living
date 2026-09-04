@@ -29,7 +29,9 @@ export function Eyebrow({
         className
       )}
     >
-      <span aria-hidden className="text-[1.1em] leading-none text-yellow">
+      {/* sage-deep, not sage: flat sage measures 1.81 on ivory and the
+          bullet simply would not be there. */}
+      <span aria-hidden className="text-[1.1em] leading-none text-sage-deep">
         &#9679;
       </span>
       {children}
@@ -38,8 +40,24 @@ export function Eyebrow({
 }
 
 /**
+ * The display face, as a class list.
+ *
+ * Franxurter is single-weight, and the `text-display-*` size utilities carry
+ * the grotesk's weight and track - so the face has to be paired with
+ * `font-normal` and a gentler letter-spacing as utilities, which beat the size
+ * utility by source order. Exported so the handful of major headings written
+ * outside `Headline` stay identical to the ones inside it.
+ */
+export const displayFace =
+  "display-face font-normal tracking-[-0.015em] text-ink";
+
+/**
  * Display heading. `count` renders as the superscript numeral marking how many
  * products sit in the section below - a signature of this system.
+ *
+ * The size decides the face: xl and lg are major section headings and get
+ * Franxurter; md and sm are subheads and cards, and stay on the UI grotesk,
+ * where a poster face would only cost legibility.
  */
 export function Headline({
   children,
@@ -56,11 +74,14 @@ export function Headline({
   id?: string;
   className?: string;
 }) {
+  const isDisplay = size === "xl" || size === "lg";
+
   return (
     <Tag
       id={id}
       className={clsx(
-        "serif text-balance",
+        "text-balance",
+        isDisplay ? displayFace : "serif",
         {
           "text-display-xl": size === "xl",
           "text-display-lg": size === "lg",

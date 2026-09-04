@@ -1,7 +1,13 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { Suspense } from "react";
-import { getArticles, getCollectionProducts, getProducts } from "@/lib/shopify";
+import {
+  getArticles,
+  getCollectionProducts,
+  getPrimaryMenu,
+  getProducts,
+} from "@/lib/shopify";
+import { shopCategories } from "@/lib/menu";
 import { Product } from "@/lib/shopify/types";
 import ProductCard from "@/components/product-card";
 import ArticleCard from "@/components/blog/article-card";
@@ -12,7 +18,12 @@ import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
-import { Eyebrow, Headline, SectionHead } from "@/components/ui/section";
+import {
+  displayFace,
+  Eyebrow,
+  Headline,
+  SectionHead,
+} from "@/components/ui/section";
 import {
   boldStatement,
   brandPartners,
@@ -46,7 +57,10 @@ export default function Home() {
     <>
       <Hero />
       <BoldStatement />
-      <CollectionFilters />
+
+      <Suspense fallback={null}>
+        <CollectionFilters />
+      </Suspense>
 
       <Suspense fallback={<RailFallback />}>
         <Bestsellers />
@@ -106,56 +120,57 @@ async function productsFrom(
  */
 function Hero() {
   return (
-    <section className="shell overflow-x-clip pt-2">
-      {/* The wordmark is anchored to the *frame's* bottom edge and then pushed
-          half its own height downwards, so it straddles the edge exactly as in
-          the reference. The section's bottom padding reserves the room that
-          descending half needs. */}
-      <div className="relative pb-[8.5vw]">
-        <div className="relative">
-          <Plate
-            aspect="2/1"
-            priority
-            tone={2}
-            placeholderText="kozy"
-            className="w-full min-h-[24rem]"
-            sizes="100vw"
-            alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
-          >
-            {/* Origin flag + blurb */}
-            <div className="glass absolute left-3 top-3 z-20 max-w-[60%] md:left-5 md:top-5 md:max-w-[19rem]">
-              <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
-                <span aria-hidden className="text-yellow">
-                  ✳
-                </span>
-                {hero.flag}
-              </p>
-              <p className="mt-2 text-spec leading-relaxed text-paper/90">
-                {hero.blurb}
-              </p>
-            </div>
-
-            {/* CTA */}
-            <Link
-              href={hero.ctaHref}
-              className="btn-solid absolute right-3 top-3 z-20 md:right-5 md:top-5"
-            >
-              {hero.cta}
-            </Link>
-          </Plate>
-
-          <p
-            aria-hidden
-            className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
-          >
-            {hero.wordmark}
-          </p>
-
-          <div className="absolute bottom-0 hidden md:block left-4 z-20 translate-y-[28%] md:left-12">
-            <Seal text={hero.seal} size="md" />
+    <section className="shell pt-[var(--hero-gap)]">
+      <Plate
+        aspect={null}
+        priority
+        tone={2}
+        placeholderText="kozy"
+        className="hero-frame w-full"
+        sizes="100vw"
+        alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
+      >
+        {/* One row at md and up, a stack below it. Absolutely positioning the
+            flag and the pill in opposite corners collided on a phone the
+            moment the CTA label grew. */}
+        <div className="absolute inset-x-3 top-3 z-20 flex flex-col items-start gap-3 md:inset-x-5 md:top-5 md:flex-row md:items-start md:justify-between md:gap-6">
+          <div className="glass md:max-w-[19rem]">
+            <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
+              <span aria-hidden className="text-sage">
+                ✳
+              </span>
+              {hero.flag}
+            </p>
+            <p className="mt-2 text-spec leading-relaxed text-paper/90">
+              {hero.blurb}
+            </p>
           </div>
+
+          <Link href={hero.ctaHref} className="btn-solid shrink-0">
+            {hero.cta}
+          </Link>
         </div>
-      </div>
+
+        {/* The wordmark now sits inside the frame rather than straddling its
+            bottom edge. Indigo type needs a light base to land on, so the
+            bottom of the photograph is lifted towards ivory rather than
+            darkened - darkening would fight the colour the wordmark is set in. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 z-[5] h-1/3 bg-gradient-to-t from-ivory/75 via-ivory/25 to-transparent"
+        />
+
+        <p
+          aria-hidden
+          className="wordmark pointer-events-none absolute inset-x-0 bottom-2 z-10 select-none whitespace-nowrap px-2 text-center leading-[0.9] text-ink md:bottom-4"
+        >
+          {hero.wordmark}
+        </p>
+
+        <div className="absolute bottom-4 left-4 z-20 hidden md:block lg:left-8">
+          <Seal text={hero.seal} size="md" />
+        </div>
+      </Plate>
 
       {/* Meta rule under the frame. */}
       <div className="flex items-center justify-between pb-10 pt-4">
@@ -184,7 +199,7 @@ function BoldStatement() {
   return (
     <section aria-labelledby="statement" className="shell pb-10 md:pb-16">
       <div className="flex items-end justify-between gap-8">
-        <h2 id="statement" className="serif text-display-xl">
+        <h2 id="statement" className={clsx(displayFace, "text-display-xl")}>
           {boldStatement.title.map((line) => (
             <span key={line} className="block">
               {line}
@@ -212,7 +227,7 @@ function BoldStatement() {
                 <Plate
                   aspect={span[item.span]}
                   arrow
-                  arrowTone={index === 1 ? "yellow" : "white"}
+                  arrowTone={index === 1 ? "sage" : "cream"}
                   tag={item.tag}
                   title={item.title}
                   tone={(index % 4) as 0 | 1 | 2 | 3}
@@ -249,13 +264,13 @@ function ArrowDownRight({ className }: { className?: string }) {
 
 /* --------------------------------------------------------------- filters */
 
-function CollectionFilters() {
+async function CollectionFilters() {
+  const categories = shopCategories(await getPrimaryMenu());
+  if (!categories.length) return null;
+
   return (
-    <section
-      aria-label="Browse spaces and categories"
-      className="shell pb-10 md:pb-14"
-    >
-      <CollectionPillRail />
+    <section aria-label="Browse categories" className="shell pb-10 md:pb-14">
+      <CollectionPillRail items={categories} />
     </section>
   );
 }
@@ -311,7 +326,7 @@ function RailFallback() {
 /* ------------------------------------------------------- experience band */
 
 /**
- * The asymmetric band: one wide photographic panel, and beside it a yellow
+ * The asymmetric band: one wide photographic panel, and beside it a sage
  * statement card stacked over a smaller panel.
  */
 function ExperienceBand() {
@@ -335,16 +350,16 @@ function ExperienceBand() {
 
       <div className="grid gap-3">
         <Link
-          href={experienceBand.yellow.href}
-          className="panel-yellow group relative flex flex-col justify-between overflow-hidden p-6 md:p-8"
+          href={experienceBand.accent.href}
+          className="panel-sage group relative flex flex-col justify-between overflow-hidden p-6 md:p-8"
         >
           <span aria-hidden className="text-2xl leading-none">
             ✳
           </span>
           <div className="mt-10">
-            <span className="chip">{experienceBand.yellow.chip}</span>
+            <span className="chip">{experienceBand.accent.chip}</span>
             <h2 className="serif mt-4 text-display-md">
-              {experienceBand.yellow.title}
+              {experienceBand.accent.title}
             </h2>
           </div>
           <span className="arrow-btn absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
@@ -410,7 +425,7 @@ function Testimonial() {
       <figure className="panel-ink flex flex-col justify-center p-8 md:p-12">
         <span
           aria-hidden
-          className="serif text-[4rem] leading-[0.6] text-yellow md:text-[5rem]"
+          className="serif text-[4rem] leading-[0.6] text-sage md:text-[5rem]"
         >
           &rdquo;
         </span>
@@ -430,7 +445,7 @@ function Testimonial() {
 
 /* ------------------------------------------------------------ rest ticker */
 
-/** Full-bleed ticker, each repeat punctuated by the yellow asterisk. */
+/** Full-bleed ticker, each repeat punctuated by the sage asterisk. */
 function RestTicker() {
   return (
     <section aria-label="Moments of rest" className="rule-y py-5 md:py-7">
@@ -440,7 +455,7 @@ function RestTicker() {
         )}
         size="display"
         separator="✳"
-        separatorTone="yellow"
+        separatorTone="sage"
         duration={38}
         className="[--sep-scale:1.4]"
       />
@@ -625,21 +640,20 @@ function ClosingBand() {
           sizes="100vw"
           alt="A lived-in floor lounge: biscuit pillows, a waffle throw and an unhurried morning."
         >
-          <Link
-            href={ctaBand.href}
-            className="btn-solid absolute left-3 top-3 z-20 md:left-5 md:top-5"
-          >
-            {ctaBand.pill}
-          </Link>
-          <p className="absolute right-3 top-3 z-20 max-w-[58%] text-right text-spec text-paper/90 md:right-5 md:top-5 md:max-w-[18rem]">
-            {ctaBand.body}
-          </p>
+          <div className="absolute inset-x-3 top-3 z-20 flex flex-col items-start gap-3 md:inset-x-5 md:top-5 md:flex-row md:items-start md:justify-between md:gap-6">
+            <Link href={ctaBand.href} className="btn-solid shrink-0">
+              {ctaBand.pill}
+            </Link>
+            <p className="max-w-[22rem] text-spec text-paper/90 md:max-w-[18rem] md:text-right">
+              {ctaBand.body}
+            </p>
+          </div>
         </Plate>
 
         <Link
           href={ctaBand.href}
           aria-label={ctaBand.wordmark}
-          className="wordmark absolute inset-x-0 bottom-0 z-10 block translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
+          className="wordmark absolute inset-x-0 bottom-0 z-10 block translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-ink"
         >
           {ctaBand.wordmark}
         </Link>

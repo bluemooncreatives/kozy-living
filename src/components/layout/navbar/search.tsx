@@ -17,7 +17,8 @@ import {
   KeyboardEvent,
 } from "react";
 import clsx from "clsx";
-import { collectionList } from "@/lib/site";
+import type { Menu } from "@/lib/shopify/types";
+import { shopCategories } from "@/lib/menu";
 import { useInstantSearch } from "@/hooks/use-instant-search";
 import SearchResults from "./search-results";
 
@@ -120,7 +121,7 @@ export function SearchBar({
 // ---------------------------------------------------------------------------
 // SearchTrigger - navbar affordance; opens the full-width overlay
 // ---------------------------------------------------------------------------
-export default function SearchTrigger() {
+export default function SearchTrigger({ menu = [] }: { menu?: Menu[] }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -147,7 +148,7 @@ export default function SearchTrigger() {
             leaveTo="opacity-0"
           >
             <div
-              className="fixed inset-0 bg-ink/50 backdrop-blur-sm"
+              className="fixed inset-0 bg-indigo/55 backdrop-blur-sm"
               aria-hidden
             />
           </TransitionChild>
@@ -182,7 +183,7 @@ export default function SearchTrigger() {
 
                 {/* Overlay search form + inline results */}
                 <div className="mt-6">
-                  <SearchOverlayForm onDone={() => setIsOpen(false)} />
+                  <SearchOverlayForm menu={menu} onDone={() => setIsOpen(false)} />
                 </div>
 
                 {/* Browse-by-collection pills - only shown when there is no query */}
@@ -200,7 +201,13 @@ export default function SearchTrigger() {
 // Results are rendered inline below the input (NO floating card).
 // The browse pills are shown only when the input is empty.
 // ---------------------------------------------------------------------------
-function SearchOverlayForm({ onDone }: { onDone: () => void }) {
+function SearchOverlayForm({
+  menu,
+  onDone,
+}: {
+  menu: Menu[];
+  onDone: () => void;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const onSubmit = useSearchSubmit(onDone);
@@ -208,7 +215,8 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
   const [query, setQuery] = useState(searchParams?.get("q") || "");
   const { results, hasResults, isLoading } = useInstantSearch(query);
   const showResults = !!query.trim() && (hasResults || isLoading);
-  const showBrowse = !query.trim();
+  const browse = shopCategories(menu);
+  const showBrowse = !query.trim() && browse.length > 0;
 
   function handleSelect(href: string) {
     setQuery("");
@@ -267,14 +275,10 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
         <div className="mt-10">
           <p className="eyebrow mb-4 text-muted">Browse by collection</p>
           <ul className="flex flex-wrap gap-2">
-            {collectionList.map((format) => (
-              <li key={format.handle}>
-                <a
-                  href={`/search/${format.handle}`}
-                  onClick={() => onDone()}
-                  className="pill"
-                >
-                  {format.title}
+            {browse.map((item, index) => (
+              <li key={`${item.title}-${index}`}>
+                <a href={item.path} onClick={() => onDone()} className="pill">
+                  {item.title}
                 </a>
               </li>
             ))}

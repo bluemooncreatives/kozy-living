@@ -287,14 +287,14 @@ export default function CartModal() {
                         customer mid-update checks them out against the previous
                         contents. */}
                     {canCheckout ? (
-                      <a href={cart!.checkoutUrl} className="btn-amber mt-5 w-full">
+                      <a href={cart!.checkoutUrl} className="btn-solid mt-5 w-full">
                         Proceed to checkout <span aria-hidden>&rarr;</span>
                       </a>
                     ) : (
                       <button
                         disabled
                         aria-busy={isMutating}
-                        className="btn-amber mt-5 w-full cursor-wait opacity-70"
+                        className="btn-solid mt-5 w-full cursor-wait opacity-70"
                       >
                         {isMutating ? "Updating…" : "Proceed to checkout"}
                       </button>

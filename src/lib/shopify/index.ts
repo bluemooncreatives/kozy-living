@@ -77,6 +77,29 @@ const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
 const key =
   process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
   process.env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN;
+/**
+ * Next and React signal control flow by throwing: the dynamic-rendering
+ * bailout, `notFound()`, `redirect()`. Those errors carry a `digest` and MUST
+ * reach the framework untouched - a `catch` that swallows one can leave a
+ * route statically rendered with the data it was about to fetch missing, and
+ * the failure is silent.
+ *
+ * Every Shopify call in this app sits behind a `catch` that degrades to empty
+ * data, so the check belongs at the bottom of the stack.
+ */
+export function isFrameworkControlFlowError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const digest = (error as { digest?: unknown }).digest;
+  if (typeof digest !== "string") return false;
+
+  return (
+    digest === "DYNAMIC_SERVER_USAGE" ||
+    digest === "NEXT_NOT_FOUND" ||
+    digest.startsWith("NEXT_REDIRECT") ||
+    digest.startsWith("BAILOUT_TO_CLIENT_SIDE_RENDERING")
+  );
+}
+
 type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
   : never;
@@ -128,6 +151,10 @@ export async function shopifyFetch<T>({
       body,
     };
   } catch (error) {
+    // Control-flow throws pass straight through: wrapping one turns a
+    // framework signal into an ordinary object that callers then swallow.
+    if (isFrameworkControlFlowError(error)) throw error;
+
     if (isShopifyError(error)) {
       throw {
         cause: error.cause?.toString() || "unknown",
@@ -194,6 +221,69 @@ function reshapeProducts(products: ShopifyProduct[]) {
 
   return reshapedProducts;
 }
+/**
+ * Rewrites a Shopify menu URL into a route this app actually serves.
+ *
+ * Parsed with `URL` rather than by stripping the configured domain: menu items
+ * come back on whichever domain the storefront is published under, so a store
+ * with a primary custom domain returns links that never match
+ * `SHOPIFY_STORE_DOMAIN` and would otherwise stay absolute.
+ */
+function normalizeMenuPath(url: string): string {
+  let pathname: string;
+
+  try {
+    pathname = new URL(url).pathname;
+  } catch {
+    // Already relative, or not a URL at all.
+    pathname = url.split("?")[0] || "/";
+  }
+
+  // Trailing slashes would defeat the prefix checks below and the active-state
+  // comparison in the nav.
+  if (pathname.length > 1) pathname = pathname.replace(/\/+$/, "");
+
+  if (pathname === "" || pathname === "/") return "/";
+
+  // Shopify pluralises where this app does not.
+  if (pathname.startsWith("/products/")) {
+    return pathname.replace("/products/", "/product/");
+  }
+
+  // `/collections`, `/collections/all` and `/collections/<handle>`.
+  if (pathname === "/collections") return "/search";
+  if (pathname.startsWith("/collections/")) {
+    const handle = pathname.split("/")[2];
+    return !handle || handle === "all" ? "/search" : `/search/${handle}`;
+  }
+
+  // Shopify pages are served at the app root: /pages/about-us -> /about-us.
+  if (pathname.startsWith("/pages/")) return pathname.replace("/pages", "");
+
+  // /blogs/... and everything else already matches a route.
+  return pathname;
+}
+
+type ShopifyMenuItemShape = {
+  title: string;
+  url: string;
+  items?: ShopifyMenuItemShape[];
+};
+
+function reshapeMenuItem(item: ShopifyMenuItemShape): Menu {
+  return {
+    title: item.title,
+    path: normalizeMenuPath(item.url),
+    ...(item.items?.length ? { items: item.items.map(reshapeMenuItem) } : {}),
+  };
+}
+
+/**
+ * One Shopify menu by handle. Returns `[]` when the handle does not exist -
+ * Shopify answers with a null menu rather than an error, so callers that need
+ * to try more than one handle must check the length, not catch. That is what
+ * `getPrimaryMenu` is for.
+ */
 export async function getMenu(handle: string): Promise<Menu[]> {
   const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,
@@ -206,39 +296,37 @@ export async function getMenu(handle: string): Promise<Menu[]> {
     },
   });
 
-  const normalizeMenuPath = (url: string) => {
-    const path = url.replace(domain, "");
-    const [pathname] = path.split("?");
-
-    if (pathname === "/collections") {
-      return "/search";
-    }
-
-    if (pathname.startsWith("/collections/")) {
-      const [, , collectionHandle] = pathname.split("/");
-      return collectionHandle ? `/search/${collectionHandle}` : "/search";
-    }
-
-    if (pathname.startsWith("/pages/")) {
-      return pathname.replace("/pages", "");
-    }
-
-    return pathname || path;
-  };
-
-  const reshapeMenuItem = (item: {
-    title: string;
-    url: string;
-    items?: typeof item[];
-  }): Menu => ({
-    title: item.title,
-    path: normalizeMenuPath(item.url),
-    ...(item.items?.length
-      ? { items: item.items.map(reshapeMenuItem) }
-      : {}),
-  });
-
   return res.body?.data?.menu?.items.map(reshapeMenuItem) || [];
+}
+
+/**
+ * The site navigation, resolved against the handles a Shopify store is likely
+ * to use for it. `main-menu` is Shopify's default handle and is what this
+ * store's "kozy-living-menu" actually resolves to - a menu's display name and
+ * its handle drift apart the moment someone renames it in Admin, so both are
+ * tried and the first that returns items wins.
+ *
+ * `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` takes priority when set, so a store that
+ * uses a third handle needs an env var rather than a code change.
+ */
+export async function getPrimaryMenu(): Promise<Menu[]> {
+  const handles = [
+    process.env.NEXT_PUBLIC_SHOPIFY_MENU_HANDLE,
+    "main-menu",
+    "kozy-living-menu",
+  ].filter((handle): handle is string => Boolean(handle));
+
+  for (const handle of handles) {
+    try {
+      const menu = await getMenu(handle);
+      if (menu.length) return menu;
+    } catch (error) {
+      if (isFrameworkControlFlowError(error)) throw error;
+      console.error(`Failed to load the "${handle}" Shopify menu`, error);
+    }
+  }
+
+  return [];
 }
 
 export async function getProducts({

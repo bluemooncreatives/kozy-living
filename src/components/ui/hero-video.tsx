@@ -142,7 +142,7 @@ export default function HeroVideo({
         // and a screen-reader user both learn the current state the same way.
         aria-label={playing ? "Pause background video" : "Play background video"}
         aria-pressed={!playing}
-        className="on-dark absolute bottom-4 right-4 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-yellow text-yellow transition-colors hover:bg-yellow hover:text-ink"
+        className="on-dark absolute bottom-4 right-4 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-sage text-sage transition-colors hover:bg-sage hover:text-ink"
       >
         {playing ? (
           <PauseIcon aria-hidden className="h-4 w-4" />

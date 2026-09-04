@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
-import { Eyebrow, Headline } from "@/components/ui/section";
+import clsx from "clsx";
+import { displayFace, Eyebrow, Headline } from "@/components/ui/section";
 import {
   aboutCta,
   aboutImages,
@@ -85,7 +86,7 @@ function Masthead() {
 
           <p
             aria-hidden
-            className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
+            className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-ink"
           >
             kompanions
           </p>
@@ -148,7 +149,7 @@ function WhyKraft() {
           >
             <dt className="sr-only">{stat.label}</dt>
             <dd>
-              <span className="serif block text-display-lg leading-none">
+              <span className={clsx(displayFace, "block text-display-lg leading-none")}>
                 {stat.value}
               </span>
               <span className="ui-mono mt-4 block normal-case tracking-normal">
@@ -280,7 +281,7 @@ function Collective() {
             key={member.name}
             className="panel p-6 md:p-8"
           >
-            <div className="plate flex aspect-[4/5] w-full items-center justify-center bg-yellow">
+            <div className="plate flex aspect-[4/5] w-full items-center justify-center bg-sage-wash">
               <span aria-hidden className="wordmark text-[5rem] leading-none text-ink/70">
                 {member.name.charAt(0)}
               </span>
@@ -338,7 +339,7 @@ function ShopCta() {
           sizes="(min-width: 1024px) 50vw, 100vw"
         />
 
-        <div className="panel-yellow flex flex-col items-start justify-center p-8 md:p-12">
+        <div className="panel-sage flex flex-col items-start justify-center p-8 md:p-12">
           <Eyebrow align="left">{aboutCta.eyebrow}</Eyebrow>
           <Headline id="shop" size="lg" className="mt-4">
             {aboutCta.title.map((line) => (

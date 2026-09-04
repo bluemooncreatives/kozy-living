@@ -5,52 +5,103 @@
 /* ---------------------------------------------------------------------------
    Kozy Living - Design Tokens
 
-   Street-editorial system. One heavy geometric grotesk, three colours, one
-   generous corner radius, and a single saturated yellow that does all the
-   shouting.
+   Four colours from the client palette, plus derived shades.
 
-     Paper  (page ground)   #F2F1ED  soft off-white
-     Card   (panel ground)  #FFFFFF  the one true white
-     Ink    (type / dark)   #131313  near-black
-     Yellow (accent)        #FFC803  wordmarks, seals, fills
-     Tint   (plate ground)  #E4E2DC  shows only while media loads
+     INDIGO   #23324B  ink: type, wordmarks, dark panels, buttons
+     IVORY    #F6F4F0  the page ground
+       CREAM  #FFF6EB  its lighter shade - card and panel surfaces
+     OAT MILK #E8D9C4  warm structure: image plates, tints, type on dark
+     SAGE     #A9BDAF  the accent: seal, chips, badges, statement fills
+       deep   #5F7178  sage toward indigo - hover, and small sage type
+       wash   #DBE1D9  sage toward ivory - soft fills
+
+   Rose Dust and Mushroom are unused: with sage holding the accent, rose is a
+   second saturated mid-tone chasing the same job, and oat is the better
+   ground to sit under photography.
+
+   THE PAIRS, in the order the page uses them:
+     indigo on ivory   11.73  every heading and paragraph
+     indigo on cream   12.05  copy inside cards
+     indigo on oat      9.30  captions and chips over image plates
+     oat on indigo      9.30  headings inside dark panels - warm on cool
+     sage on indigo     6.50  the quote mark and accents on dark
+     indigo on sage     6.50  type inside the seal and the sage panel
+
+   ONE HARD RULE: oat against sage measures 1.43. The two mid-tones may sit
+   beside each other as blocks; neither may ever carry type on the other.
+
+   The giant wordmark is INDIGO, not the accent. Sage measures 1.81 on ivory
+   and about 1.4 on the oat plates the wordmark straddles, so it would vanish
+   exactly where the gesture matters most. The colour moment is the sage seal
+   sitting over it, and the sage statement panel mid-page.
 
    Signature motifs, each with a class below:
      .wordmark      giant lowercase display type bleeding past the frame
-     .arrow-btn     circular ↗ button parked on a card corner
+     .arrow-btn     circular arrow button parked on a card corner
      .seal          rotating circular badge, text on a circular path
-     .chip          small white pill tag
-     .plate         rounded photographic card
+     .chip          small cream pill tag
+     .plate         rounded photographic card on the oat ground
 --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: light;
 
-  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  /* TWO FACES, TWO JOBS.
+
+     Franxurter is the display face and is reserved for major moments: the
+     three giant wordmarks, section headlines at xl/lg, the pull quote, and
+     the display ticker. It has a single weight - never set a bold on it.
+
+     Plus Jakarta Sans does all the work: navigation, buttons, labels, body
+     copy, product titles, captions, and every heading below display-lg.
+     A display face at 14px stops being a voice and starts being noise. */
+  --font-display: var(--font-franxurter), "Plus Jakarta Sans", "Inter",
+    system-ui, sans-serif;
   --font-ui: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   /* Legacy alias - a few files still reference --font-mono. */
   --font-mono: var(--font-ui);
 
-  --paper: #f2f1ed;
-  --card: #ffffff;
-  --ink: #131313;
-  --yellow: #ffc803;
-  --yellow-deep: #e8b400;
-  --muted: #8a8880;
+  --indigo: #23324b;
+  --ivory: #f6f4f0;
+  --cream: #fff6eb;
+  --oat: #e8d9c4;
+  --sage: #a9bdaf;
+  --sage-deep: #5f7178;
+  --sage-wash: #dbe1d9;
 
-  /* Repointed legacy aliases. */
-  --oxblood: var(--ink);
-  --amber: var(--yellow);
+  /* Indigo blended 72% into ivory: the lightest indigo that still clears
+     4.5:1 for body copy (5.12 measured). */
+  --muted: #5e6879;
 
-  --tint: #e4e2dc;
-  --rule: rgba(19, 19, 19, 0.1);
-  --wash: rgba(19, 19, 19, 0.04);
+  /* Role aliases - what the markup actually reads. */
+  --paper: var(--ivory);
+  --card: var(--cream);
+  --ink: var(--indigo);
+  --tint: var(--oat);
+
+  --rule: rgba(35, 50, 75, 0.12);
+  --wash: rgba(35, 50, 75, 0.05);
 
   --gutter: 0.75rem;
   --scroll-progress: 0;
   --scroll-velocity: 0;
-  /* Announcement strip + nav offset */
-  --header-h: 5.5rem;
+
+  /* Announcement strip + nav. A first-paint estimate only: the announcement
+     wraps to two lines on a narrow screen, so the value differs by breakpoint.
+     `HeaderHeight` replaces it with the measured pixel after hydration, and
+     everything sticky - the hero, the filter bar, the buy panel - reads it. */
+  --header-h: 6.9rem;
+
+  /* The breathing gap between the header rule and the hero frame. Declared
+     once because two things must agree on it: the section's top padding, and
+     the frame height that subtracts it. */
+  --hero-gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-h: 5.75rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -71,19 +122,21 @@
     font-family: var(--font-ui);
   }
 
-  /* Headings are the display face at heavy weight - not a second family. */
+  /* Headings default to the UI face at bold. The display face is opt-in, via
+     `.wordmark` or the `display` size on the Headline component - otherwise
+     every h3 in a product card would be set in a poster face. */
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-display);
+    font-family: var(--font-ui);
     font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--ink);
   }
 
   ::selection {
-    background: var(--yellow);
+    background: var(--sage);
     color: var(--ink);
   }
 
@@ -95,21 +148,23 @@
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
   }
 
-  /* Dark panels: paper type, yellow headings, yellow focus rings. */
+  /* Dark panels: ivory body copy, oat milk headings, sage focus rings. */
   .on-dark {
     color: var(--paper);
   }
 
   .on-dark a,
   .on-dark button {
-    @apply focus-visible:ring-yellow focus-visible:ring-offset-ink;
+    @apply focus-visible:ring-sage focus-visible:ring-offset-ink;
   }
 
+  /* Oat milk, not ivory. Warm type on the cool indigo ground is the pairing
+     this palette is built around, and it still measures 9.30. */
   .on-dark h1,
   .on-dark h2,
   .on-dark h3,
   .on-dark h4 {
-    color: var(--paper);
+    color: var(--oat);
   }
 
   input::placeholder,
@@ -160,7 +215,7 @@
 
   /* Small caps meta label. "2023" / "STREETWEAR" / column headers. */
   .eyebrow {
-    @apply font-display text-eyebrow uppercase tracking-eyebrow text-ink;
+    @apply font-sans text-eyebrow uppercase tracking-eyebrow text-ink;
   }
 
   .body-mono {
@@ -179,29 +234,48 @@
     @apply font-sans text-micro uppercase tracking-micro text-ink;
   }
 
-  /* Legacy name for the display face. No longer a serif - now the heavy
-     grotesk that carries every headline in the system. */
+  /* Legacy name, kept because every page is written against it. It is the UI
+     face at bold - the workhorse heading, used for everything below the major
+     sections. For those, see `.display-face`. */
   .serif {
-    @apply font-display font-bold tracking-tight text-ink;
+    @apply font-sans font-bold tracking-tight text-ink;
+  }
+
+  /* The display face. Applied by the Headline component at its xl and lg
+     sizes, and by hand on the few standalone major headings.
+
+     Franxurter has one weight and wider natural sidebearings than Jakarta, so
+     it takes `font-normal` and a gentler track than the -0.035em the size
+     utilities set for the grotesk. */
+  .display-face {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
   }
 
   /* The giant lowercase statement type. Set solid, tracked tight, and always
      lowercase - it is a graphic element first and a word second. */
   .wordmark {
     @apply font-display text-display-hero lowercase;
-    font-weight: 800;
+    /* 400, not 800: the face has one weight and a synthesised bold at this
+       scale is unmistakable. */
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
 
   .on-dark .body-mono,
   .on-dark .spec-mono {
-    color: rgba(242, 241, 237, 0.7);
+    color: rgba(246, 244, 240, 0.72);
   }
 
   .on-dark .ui-mono,
   .on-dark .micro-mono,
-  .on-dark .eyebrow,
-  .on-dark .serif {
+  .on-dark .eyebrow {
     color: var(--paper);
+  }
+
+  .on-dark .serif {
+    color: var(--oat);
   }
 
   .count-sup {
@@ -216,33 +290,28 @@
   /* -------------------------------------------------------------- controls */
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-chip font-display text-ui font-semibold uppercase tracking-eyebrow transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45;
+    @apply inline-flex items-center justify-center gap-2 rounded-chip font-sans text-ui font-semibold uppercase tracking-eyebrow transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45;
     font-size: 0.6875rem;
     padding: 0.9rem 1.6rem;
   }
 
-  /* The default. Black pill, white type - "SHOP NOW" in the reference. */
+  /* The default. Indigo pill, ivory type, sage on hover. */
   .btn-solid {
-    @apply btn bg-ink text-paper hover:bg-yellow hover:text-ink;
+    @apply btn bg-ink text-paper hover:bg-sage hover:text-ink;
   }
 
   .btn-outline {
     @apply btn border border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-paper;
   }
 
-  .btn-yellow {
-    @apply btn bg-yellow text-ink hover:bg-ink hover:text-yellow;
-  }
-
-  /* Legacy alias. */
-  .btn-amber {
-    @apply btn-yellow;
+  .btn-sage {
+    @apply btn bg-sage text-ink hover:bg-ink hover:text-oat;
   }
 
   /* Text link with a trailing arrow. Underline only on hover - the reference
      keeps its links quiet and lets the circular buttons do the pointing. */
   .link-arrow {
-    @apply inline-flex items-center gap-1.5 font-display text-ui font-semibold text-ink transition-opacity hover:opacity-60;
+    @apply inline-flex items-center gap-1.5 font-sans text-ui font-semibold text-ink transition-opacity hover:opacity-60;
   }
 
   /* Circular ↗ button. Parks on a card corner; see `.notch` for the cut-out
@@ -257,26 +326,26 @@
     @apply bg-ink text-paper;
   }
 
-  .arrow-btn-yellow {
-    @apply arrow-btn bg-yellow;
+  .arrow-btn-sage {
+    @apply arrow-btn bg-sage;
   }
 
-  .arrow-btn-yellow:hover {
-    @apply bg-ink text-yellow;
+  .arrow-btn-sage:hover {
+    @apply bg-ink text-oat;
   }
 
-  /* Small white pill tag sitting on photography ("erase", "vitus"). */
+  /* Small cream pill tag sitting on photography. */
   .chip {
-    @apply inline-flex items-center rounded-chip bg-card px-3 py-1.5 font-display text-spec font-medium lowercase text-ink shadow-chip;
+    @apply inline-flex items-center rounded-chip bg-card px-3 py-1.5 font-sans text-spec font-medium lowercase text-ink shadow-chip;
   }
 
-  .chip-yellow {
-    @apply chip bg-yellow;
+  .chip-sage {
+    @apply chip bg-sage;
   }
 
   /* Category pill. Outlined by default, solid ink when active. */
   .pill {
-    @apply inline-flex items-center rounded-chip border border-ink/15 bg-card px-5 py-2.5 font-display text-ui font-semibold text-ink transition-colors duration-150 hover:border-ink hover:bg-ink hover:text-paper;
+    @apply inline-flex items-center rounded-chip border border-ink/15 bg-card px-5 py-2.5 font-sans text-ui font-semibold text-ink transition-colors duration-150 hover:border-ink hover:bg-ink hover:text-paper;
   }
 
   .pill-active {
@@ -285,11 +354,26 @@
 
   /* Status flag on a product plate. */
   .badge {
-    @apply inline-flex items-center rounded-chip bg-yellow px-3 py-1 font-display text-micro uppercase tracking-micro text-ink;
+    @apply inline-flex items-center rounded-chip bg-sage px-3 py-1 font-sans text-micro uppercase tracking-micro text-ink;
   }
 
   .field-bare {
     @apply w-full rounded-chip border border-ink/15 bg-card px-5 py-3.5 font-sans text-ui text-ink transition-colors focus-visible:border-ink focus-visible:ring-0;
+  }
+
+  /* The hero frame: exactly the viewport minus the header, at every size.
+
+     Two declarations in ONE rule, which is the actual fallback idiom - a
+     browser without `svh` keeps the first and ignores the second. Two Tailwind
+     arbitrary-property classes would emit two rules whose order is not
+     guaranteed, so this belongs here rather than in the markup.
+
+     `svh` over `vh` because on mobile `100vh` is the height with the browser
+     chrome hidden: a `vh` hero overflows the screen and pushes the wordmark
+     below the fold until you scroll. */
+  .hero-frame {
+    height: calc(100vh - var(--header-h) - var(--hero-gap));
+    height: calc(100svh - var(--header-h) - var(--hero-gap));
   }
 
   /* ----------------------------------------------------------------- media */
@@ -307,13 +391,21 @@
     @apply on-dark rounded-plate bg-ink;
   }
 
-  .panel-yellow {
-    @apply rounded-plate bg-yellow text-ink;
+  .panel-sage {
+    @apply rounded-plate bg-sage text-ink;
   }
 
-  /* Frosted chip laid over photography - the rating + blurb in the hero. */
+  /* The quiet version, for large fills that would be heavy in full sage. */
+  .panel-sage-wash {
+    @apply rounded-plate bg-sage-wash text-ink;
+  }
+
+  /* Frosted chip laid over photography - the flag + blurb in the hero.
+     An indigo scrim rather than a neutral black one: black over the warm oat
+     plate goes muddy olive, where indigo stays in the palette and still puts
+     ivory type at roughly 6:1. */
   .glass {
-    @apply rounded-plate border border-white/20 bg-black/45 p-4 backdrop-blur-md;
+    @apply rounded-plate border border-ivory/20 bg-indigo/80 p-4 backdrop-blur-md;
   }
 
   /* The concave cut-out a card makes so an `.arrow-btn` can sit inside its
@@ -345,7 +437,7 @@
   /* Rotating seal. The wrapper spins; the glyph in the middle stays put by
      counter-rotating in its own element. */
   .seal {
-    @apply relative inline-flex items-center justify-center rounded-full bg-yellow text-ink;
+    @apply relative inline-flex items-center justify-center rounded-full bg-sage text-ink;
   }
 
   .seal-ring {
