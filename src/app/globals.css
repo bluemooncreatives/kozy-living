@@ -102,6 +102,11 @@
      once because two things must agree on it: the section's top padding, and
      the frame height that subtracts it. */
   --hero-gap: 0.5rem;
+
+  /* The notch corner, as a mask image. Kept here rather than inline in the
+     rule so the one place the arc numbers appear is beside the token that
+     names them. See `.notch-tr` for the construction. */
+  --notch-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cpath d='M0 0L23.010 0A14 14 0 0 1 36.727 16.800A36 36 0 0 0 79.200 59.273A14 14 0 0 1 96 72.990L96 96L0 96Z' fill='%23000'/%3E%3C/svg%3E");
 }
 
 @media (min-width: 640px) {
@@ -382,16 +387,21 @@
     @apply inline-flex items-center gap-1.5 font-sans text-ui font-semibold text-ink transition-opacity hover:opacity-60;
   }
 
-  /* Circular ↗ button. Parks on a card corner; see `.notch` for the cut-out
-     the card makes to receive it. */
+  /* Circular arrow button. Parks in the notch the card cuts for it - see
+     `.notch-tr`.
+
+     It needs the hairline and the lift because the notch exposes the PAGE
+     behind the card, and the button's own fill is the card surface: ivory on
+     cream measures 1.027, so with nothing else it is simply not there. It used
+     to sit on the oat plate, where its fill was contrast enough. */
   .arrow-btn {
-    @apply inline-flex items-center justify-center rounded-full bg-card text-ink transition-colors duration-200;
+    @apply inline-flex items-center justify-center rounded-full border border-ink/10 bg-card text-ink shadow-chip transition-colors duration-200;
     height: 2.75rem;
     width: 2.75rem;
   }
 
   .arrow-btn:hover {
-    @apply bg-ink text-paper;
+    @apply border-ink bg-ink text-paper;
   }
 
   .arrow-btn-sage {
@@ -519,20 +529,51 @@
     @apply rounded-plate border border-ivory/20 bg-indigo/80 p-4 backdrop-blur-md;
   }
 
-  /* The concave cut-out a card makes so an `.arrow-btn` can sit inside its
-     corner without covering the photograph. Applied to the card itself; the
-     button is positioned absolutely into the notch. */
+  /* --------------------------------------------------------------- the notch
+
+     The scooped top-right corner that receives an `.arrow-btn`.
+
+     The old version was a single `radial-gradient` and had two faults. It was
+     centred on `calc(100% - 0.75rem) 0.75rem` - the button's top-right CORNER,
+     not its centre at 34px - so the cut sat off-axis from the button it was
+     meant to frame. And a gradient can only give a hard circular bite: where
+     the circle met the card's edges it cut across them at an angle, with no
+     transition.
+
+     This is the shape properly constructed instead. Three tangent arcs:
+
+       fillet (r14) - tangent to the top edge, and externally tangent to
+       cut circle (r36) - concentric with the button, then
+       fillet (r14) - externally tangent again, out to the right edge
+
+     Because each fillet is tangent to both its neighbours, the boundary has no
+     corner anywhere along it: the edge eases in, wraps the button, and eases
+     back out. That continuity is the whole effect.
+
+     GEOMETRY, all in px in a 96px corner box (see the derivation in the
+     commit; the tangent points are exact to three places):
+       button      44px diameter, inset 2px  -> centre 24px from each edge
+       cut circle  r36, concentric           -> a 14px halo around the button
+       corner      33.94px from that centre  -> fully removed, since 36 > 33.94
+
+     Composed as three mask layers that tile the element exactly - the corner
+     shape, the block left of it, and the block below it - rather than with
+     `mask-composite`, whose keywords still differ between WebKit and everyone
+     else. Layers simply add, which every engine agrees on. */
   .notch-tr {
-    -webkit-mask-image: radial-gradient(
-      circle 2.25rem at calc(100% - 0.75rem) 0.75rem,
-      transparent 100%,
-      #000 100%
-    );
-    mask-image: radial-gradient(
-      circle 2.25rem at calc(100% - 0.75rem) 0.75rem,
-      transparent 100%,
-      #000 100%
-    );
+    --notch: 96px;
+    -webkit-mask-image: var(--notch-corner), linear-gradient(#000, #000),
+      linear-gradient(#000, #000);
+    mask-image: var(--notch-corner), linear-gradient(#000, #000),
+      linear-gradient(#000, #000);
+    -webkit-mask-size: var(--notch) var(--notch),
+      calc(100% - var(--notch)) 100%, var(--notch) calc(100% - var(--notch));
+    mask-size: var(--notch) var(--notch), calc(100% - var(--notch)) 100%,
+      var(--notch) calc(100% - var(--notch));
+    -webkit-mask-position: right top, left top, right bottom;
+    mask-position: right top, left top, right bottom;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 
   /* ---------------------------------------------------------------- motion */

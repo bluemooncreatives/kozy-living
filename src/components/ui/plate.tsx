@@ -13,6 +13,7 @@ import CornerArrow from "./arrow-badge";
  */
 export default function Plate({
   src,
+  video,
   alt = "",
   aspect = "4/5",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
@@ -31,6 +32,8 @@ export default function Plate({
   children,
 }: {
   src?: string | null;
+  /** Silent looping clip. Takes priority over `src` when both are given. */
+  video?: string | null;
   alt?: string;
   /**
    * Any CSS aspect-ratio value, e.g. "4/5", "16/9", "1/1". Pass `null` when
@@ -77,82 +80,103 @@ export default function Plate({
   return (
     <div
       {...(reveal ? { "data-reveal": "" } : {})}
-      className={clsx("plate @container", className)}
+      className={clsx("relative @container", className)}
       style={aspect ? { aspectRatio: aspect } : undefined}
     >
-      {/* The notch and the media share a wrapper so the cut-out only ever
-          removes photograph, never the caption layer above it. */}
-      <div
-        {...(parallax ? { "data-parallax": String(parallax) } : {})}
-        className={clsx(
-          "absolute inset-0",
-          arrow && "notch-tr",
-          // Parallax moves the layer, so it needs room to move into.
-          parallax && "-inset-y-[8%] h-[116%]"
-        )}
-      >
-        {src ? (
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            sizes={sizes}
-            priority={priority}
-            loading={priority ? undefined : "lazy"}
-            className={clsx(
-              "transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
-              objectFit === "contain" ? "object-contain p-8" : "object-cover"
-            )}
-          />
-        ) : (
+      {/* The notch is masked onto THIS element, the one carrying the plate's
+          own background - not onto an inner media wrapper. Masking only the
+          media left `bg-tint` sitting in the cut, so the scoop showed oat
+          rather than the page behind it.
+
+          A mask applies to an element and all its descendants, which is why
+          the arrow button is a sibling further down rather than a child: put
+          it in here and the notch would erase the very button it is cut for. */}
+      <div className={clsx("plate absolute inset-0", arrow && "notch-tr")}>
+        <div
+          {...(parallax ? { "data-parallax": String(parallax) } : {})}
+          className={clsx(
+            "absolute inset-0",
+            // Parallax moves the layer, so it needs room to move into.
+            parallax && "-inset-y-[8%] h-[116%]"
+          )}
+        >
+          {video ? (
+            <video
+              src={video}
+              aria-hidden
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className={clsx(
+                "absolute inset-0 h-full w-full transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
+                objectFit === "contain" ? "object-contain p-8" : "object-cover"
+              )}
+            />
+          ) : src ? (
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              sizes={sizes}
+              priority={priority}
+              loading={priority ? undefined : "lazy"}
+              className={clsx(
+                "transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
+                objectFit === "contain" ? "object-contain p-8" : "object-cover"
+              )}
+            />
+          ) : (
+            <div
+              aria-hidden
+              className="absolute inset-0 flex items-center justify-center overflow-hidden"
+              style={{ background: washes[tone] }}
+            >
+              <span className="wordmark whitespace-nowrap px-4 text-[22cqw] leading-none text-ink/[0.09]">
+                {ghost}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Scrim, only where there is copy to protect. */}
+        {(tag || title || caption) && (src || video) ? (
           <div
             aria-hidden
-            className="absolute inset-0 flex items-center justify-center overflow-hidden"
-            style={{ background: washes[tone] }}
-          >
-            <span className="wordmark whitespace-nowrap px-4 text-[22cqw] leading-none text-ink/[0.09]">
-              {ghost}
-            </span>
+            className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-indigo/60 to-transparent"
+          />
+        ) : null}
+
+        {tag || title ? (
+          <div className="absolute inset-x-4 bottom-4 z-10 flex flex-col items-start gap-2">
+            {tag ? <span className="chip">{tag}</span> : null}
+            {title ? (
+              <h3
+                className={clsx(
+                  "serif text-display-sm",
+                  src || video ? "text-paper" : "text-ink"
+                )}
+              >
+                {title}
+              </h3>
+            ) : null}
           </div>
-        )}
+        ) : null}
+
+        {caption ? (
+          <p
+            className={clsx(
+              "absolute bottom-4 right-4 z-10 max-w-[16rem] text-right text-spec",
+              src || video ? "text-paper/85" : "text-ink/60"
+            )}
+          >
+            {caption}
+          </p>
+        ) : null}
       </div>
 
       {arrow ? <CornerArrow tone={arrowTone} /> : null}
-
-      {/* Scrim, only where there is copy to protect. */}
-      {(tag || title || caption) && src ? (
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-indigo/60 to-transparent"
-        />
-      ) : null}
-
-      {tag || title ? (
-        <div className="absolute inset-x-4 bottom-4 z-10 flex flex-col items-start gap-2">
-          {tag ? <span className="chip">{tag}</span> : null}
-          {title ? (
-            <h3
-              className={clsx(
-                "serif text-display-sm",
-                src ? "text-paper" : "text-ink"
-              )}
-            >
-              {title}
-            </h3>
-          ) : null}
-        </div>
-      ) : null}
-
-      {caption ? (
-        <p
-          className={clsx(
-            "absolute bottom-4 right-4 z-10 max-w-[16rem] text-right text-spec",
-            src ? "text-paper/85" : "text-ink/60"
-          )}
-        >
-          {caption}
-        </p>
-      ) : null}
 
       {children}
     </div>

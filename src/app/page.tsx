@@ -17,7 +17,6 @@ import Carousel from "@/components/ui/carousel";
 import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
 import ActionButton from "@/components/ui/action-button";
-import CircleButton from "@/components/ui/circle-button";
 import CircledWord from "@/components/ui/circled-word";
 import WordmarkBand from "@/components/ui/wordmark-band";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
@@ -149,10 +148,9 @@ function Hero() {
         {/* ------------------------------------------------------- feature */}
         <Plate
           aspect={null}
-          priority
+          video="https://cdn.shopify.com/videos/c/o/v/e551ca2e50364d1cbf8f66838604dc10.mp4"
           tone={2}
           placeholderText="kozy"
-          parallax={10}
           className="bento-feature group h-full w-full"
           sizes="(min-width: 1024px) 55vw, 100vw"
           alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
@@ -164,10 +162,6 @@ function Hero() {
               </span>
               {hero.flag}
             </p>
-          </div>
-
-          <div className="absolute inset-0 z-20 flex items-center justify-center">
-            <CircleButton label={hero.circle.label} href={hero.circle.href} />
           </div>
 
           <div className="absolute inset-x-3 bottom-3 z-20 flex flex-wrap items-center gap-2 md:inset-x-5 md:bottom-5 md:gap-3">
@@ -203,6 +197,11 @@ function Hero() {
           <Plate
             key={tile.tag}
             aspect={null}
+            video={
+              index === 0
+                ? "https://cdn.shopify.com/videos/c/o/v/3329bb6694284f05be3d3ff8a0bb6f22.mp4"
+                : "https://cdn.shopify.com/videos/c/o/v/65fa358ea2ec488f9c62e7f86d758f3c.mp4"
+            }
             tone={index === 0 ? 0 : 3}
             tag={tile.tag}
             placeholderText={index === 0 ? "kraft" : "rest"}
