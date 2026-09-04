@@ -11,9 +11,8 @@ export const metadata: Metadata = {
 };
 
 /**
- * Contact. Copy on the left, form on the right, split by the same hairline
- * that divides every other pair of cells in the system; the two addresses and
- * the direct lines sit in a ruled band underneath.
+ * Contact. Copy on the left, form in a white panel on the right; the two
+ * studio addresses and the direct lines sit in a row of panels underneath.
  *
  * The form is the only client component on the page - the addresses are static
  * copy from `site.ts`, so they render on the server and stay in the HTML for
@@ -24,14 +23,16 @@ export default function ContactPage() {
     <>
       <Breadcrumb current={contact.title} />
 
-      <section aria-labelledby="contact" className="rule-b">
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="flex flex-col items-center px-[var(--gutter)] py-12 text-center md:py-16 lg:px-10">
-            <Eyebrow>{contact.eyebrow}</Eyebrow>
-            <Headline as="h1" id="contact" className="mt-5">
+      <section
+        aria-labelledby="contact"
+        className="shell grid grid-cols-1 items-start gap-3 pb-10 lg:grid-cols-2"
+      >
+          <div className="py-4 lg:py-8">
+            <Eyebrow align="left">{contact.eyebrow}</Eyebrow>
+            <Headline as="h1" id="contact" className="mt-4">
               {contact.title}
             </Headline>
-            <div className="mt-6 max-w-measure space-y-5">
+            <div className="mt-5 max-w-measure space-y-4">
               {contact.body.map((paragraph) => (
                 <p key={paragraph} className="body-mono text-pretty">
                   {paragraph}
@@ -40,26 +41,19 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* The divider is horizontal while the columns are stacked and
-              vertical once they sit side by side - it always separates them
-              along the axis they actually meet on. */}
-          <div className="border-t border-rule px-[var(--gutter)] py-12 md:py-16 lg:border-l lg:border-t-0 lg:px-10">
+          <div className="panel p-6 md:p-10">
             <ContactForm />
           </div>
-        </div>
       </section>
 
-      <section aria-labelledby="find-us" className="rule-b">
+      <section aria-labelledby="find-us" className="shell pb-14">
         <h2 id="find-us" className="sr-only">
           Where to find us
         </h2>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {contact.locations.map((location) => (
-            <li
-              key={location.label}
-              className="border-b border-rule p-6 md:p-10 sm:border-r sm:last:border-r-0 lg:border-b-0"
-            >
-              <p className="micro-mono text-oxblood">{location.label}</p>
+            <li key={location.label} className="panel p-6 md:p-8">
+              <p className="micro-mono text-muted">{location.label}</p>
               <address className="body-mono mt-4 not-italic">
                 {location.lines.map((line) => (
                   <span key={line} className="block">
@@ -70,15 +64,15 @@ export default function ContactPage() {
             </li>
           ))}
 
-          <li className="p-6 md:p-10">
-            <p className="micro-mono text-oxblood">Direct</p>
+          <li className="panel-yellow p-6 md:p-8">
+            <p className="micro-mono text-muted">Direct</p>
             <div className="mt-4 flex flex-col items-start gap-3">
-              <a href={`mailto:${contact.email}`} className="link-arrow normal-case">
+              <a href={`mailto:${contact.email}`} className="link-arrow">
                 {contact.email}
               </a>
               {/* `tel:` needs the E.164 form; the visible string keeps the
                   spacing someone would read aloud. */}
-              <a href={`tel:${contact.phoneHref}`} className="link-arrow normal-case">
+              <a href={`tel:${contact.phoneHref}`} className="link-arrow">
                 {contact.phone}
               </a>
             </div>

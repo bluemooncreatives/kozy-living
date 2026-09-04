@@ -90,16 +90,16 @@ export function SearchBar({
           type="text"
           name="search"
           autoFocus={autoFocus}
-          placeholder="Search the estate…"
+          placeholder="Search the studio…"
           autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="serif w-full border-b border-rule bg-transparent py-4 pr-10 text-display-md focus-visible:border-oxblood focus-visible:ring-0"
+          className="serif w-full rounded-plate border border-ink/15 bg-card px-5 py-4 pr-12 text-display-sm focus-visible:border-ink focus-visible:ring-0"
         />
         <MagnifyingGlassIcon
           aria-hidden
-          className="pointer-events-none absolute right-0 top-1/2 h-5 w-5 -translate-y-1/2"
+          className="pointer-events-none absolute right-5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
         />
       </form>
 
@@ -129,10 +129,9 @@ export default function SearchTrigger() {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Search"
-        className="ui-mono flex items-center gap-2 transition-opacity hover:opacity-60"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
       >
-        <span className="hidden sm:inline">Search</span>
-        <MagnifyingGlassIcon aria-hidden className="h-4 w-4 sm:hidden" />
+        <MagnifyingGlassIcon aria-hidden className="h-4 w-4" />
       </button>
 
       <Transition show={isOpen}>
@@ -148,7 +147,7 @@ export default function SearchTrigger() {
             leaveTo="opacity-0"
           >
             <div
-              className="fixed inset-0 bg-coal/40 backdrop-blur-sm"
+              className="fixed inset-0 bg-ink/50 backdrop-blur-sm"
               aria-hidden
             />
           </TransitionChild>
@@ -244,11 +243,11 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="serif w-full border-b border-rule bg-transparent py-4 pr-10 text-display-xl focus-visible:border-oxblood focus-visible:ring-0"
+          className="serif w-full rounded-plate border border-ink/15 bg-card px-6 py-6 pr-14 text-display-md focus-visible:border-ink focus-visible:ring-0"
         />
         <MagnifyingGlassIcon
           aria-hidden
-          className="pointer-events-none absolute right-0 top-1/2 h-6 w-6 -translate-y-1/2"
+          className="pointer-events-none absolute right-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted"
         />
       </form>
 
@@ -266,14 +265,14 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
       {/* Browse-by-space pills - visible only when input is empty */}
       {showBrowse && (
         <div className="mt-10">
-          <p className="eyebrow mb-4">Browse by space & category</p>
+          <p className="eyebrow mb-4 text-muted">Browse by space &amp; category</p>
           <ul className="flex flex-wrap gap-2">
             {brewFormats.map((format) => (
               <li key={format.handle}>
                 <a
                   href={`/search/${format.handle}`}
                   onClick={() => onDone()}
-                  className="pill text-display-sm"
+                  className="pill"
                 >
                   {format.title}
                 </a>
@@ -292,7 +291,7 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
 export function SearchSkeleton() {
   return (
     <div className="relative w-full">
-      <div className="h-14 w-full animate-pulse border-b border-rule" />
+      <div className="h-14 w-full animate-pulse rounded-plate bg-wash" />
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function SearchResults({
       {/* Loading state */}
       {isLoading && isEmpty && (
         <div className="flex items-center gap-3 py-6">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-oxblood border-t-transparent" />
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink/20 border-t-transparent" />
           <span className="eyebrow">Searching…</span>
         </div>
       )}
@@ -79,7 +79,7 @@ export default function SearchResults({
       {/* Empty state */}
       {!isLoading && isEmpty && (
         <div className="py-8">
-          <p className="body-mono text-oxblood">No results found for &ldquo;{query}&rdquo;</p>
+          <p className="body-mono">No results found for &ldquo;{query}&rdquo;</p>
           <button
             data-sr-item
             onClick={() => onSelect(allUrl)}
@@ -115,7 +115,7 @@ export default function SearchResults({
                     data-sr-item
                     tabIndex={0}
                     onClick={() => onSelect(`/product/${product.handle}`)}
-                    className="flex w-full items-center gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                    className="flex w-full items-center gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                   >
                     {/* Thumbnail */}
                     <span className="plate relative h-12 w-12 flex-none">
@@ -129,7 +129,7 @@ export default function SearchResults({
                         />
                       ) : (
                         <span className="flex h-full w-full items-center justify-center">
-                          <MagnifyingGlassIcon className="h-5 w-5 text-oxblood opacity-40" />
+                          <MagnifyingGlassIcon className="h-5 w-5 text-muted" />
                         </span>
                       )}
                     </span>
@@ -166,10 +166,10 @@ export default function SearchResults({
                     data-sr-item
                     tabIndex={0}
                     onClick={() => onSelect(`/search/${col.handle}`)}
-                    className="flex w-full items-center justify-between gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood"
+                    className="flex w-full items-center justify-between gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                   >
                     <span className="body-mono">{col.title}</span>
-                    <span className="spec-mono shrink-0 text-oxblood">Collection →</span>
+                    <span className="spec-mono shrink-0 text-muted">Collection →</span>
                   </button>
                 </li>
               ))}
@@ -199,10 +199,10 @@ export default function SearchResults({
                     data-sr-item
                     tabIndex={0}
                     onClick={() => onSelect(`/${pg.handle}`)}
-                    className="flex w-full items-center justify-between gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood"
+                    className="flex w-full items-center justify-between gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                   >
                     <span className="body-mono">{pg.title}</span>
-                    <span className="spec-mono shrink-0 text-oxblood">Page →</span>
+                    <span className="spec-mono shrink-0 text-muted">Page →</span>
                   </button>
                 </li>
               ))}

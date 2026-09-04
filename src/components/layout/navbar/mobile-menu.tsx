@@ -18,7 +18,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Open menu"
-        className="flex items-center transition-opacity hover:opacity-60"
+        className="flex items-center transition-opacity hover:opacity-60 md:hidden"
       >
         <Bars3Icon className="h-6 w-6" />
       </button>
@@ -34,7 +34,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-coal/40" aria-hidden />
+            <div className="fixed inset-0 bg-ink/50" aria-hidden />
           </TransitionChild>
           <TransitionChild
             as={Fragment}

@@ -25,7 +25,7 @@ function SubmitButton({
         "flex h-9 w-9 items-center justify-center transition-colors",
         disabled
           ? "cursor-not-allowed opacity-40"
-          : "hover:bg-oxblood hover:text-paper"
+          : "hover:bg-ink hover:text-paper"
       )}
     >
       {type === "plus" ? (

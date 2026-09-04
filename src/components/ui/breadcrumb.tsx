@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 /**
- * The hairline trail that opens a standalone editorial page - `HOME - ABOUT US`
- * centred in a full-bleed band, ruled top and bottom.
+ * The trail that opens a standalone editorial page - `Home / About us`, set
+ * flush left in the shell at meta scale.
  *
  * It carries the same weight as an announcement strip rather than a nav: the
  * separator is decorative and hidden from assistive tech, and only the
@@ -22,23 +22,23 @@ export default function Breadcrumb({
   const ancestors = trail ?? [{ title: "Home", href: "/" }];
 
   return (
-    <nav aria-label="Breadcrumb" className="rule-y">
-      <ol className="shell flex flex-wrap items-center justify-center gap-2 py-3">
+    <nav aria-label="Breadcrumb">
+      <ol className="shell flex flex-wrap items-center gap-2 py-5">
         {ancestors.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-2">
             <Link
               href={crumb.href}
-              className="ui-mono text-oxblood transition-opacity hover:opacity-60"
+              className="micro-mono text-muted transition-opacity hover:opacity-60"
             >
               {crumb.title}
             </Link>
-            <span aria-hidden className="ui-mono text-oxblood">
-              &mdash;
+            <span aria-hidden className="micro-mono text-muted">
+              /
             </span>
           </li>
         ))}
         <li>
-          <span aria-current="page" className="ui-mono text-oxblood">
+          <span aria-current="page" className="micro-mono">
             {current}
           </span>
         </li>

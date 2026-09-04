@@ -19,7 +19,7 @@ export default function Newsletter({ className }: { className?: string }) {
   if (done) {
     return (
       <p className={clsx("ui-mono", className)} role="status">
-        Thank you - we&apos;ll write when the next harvest is roasted.
+        Thank you - we&apos;ll write when the next collection lands.
       </p>
     );
   }
@@ -30,7 +30,7 @@ export default function Newsletter({ className }: { className?: string }) {
         event.preventDefault();
         if (email.trim()) setDone(true);
       }}
-      className={clsx("flex w-full items-end gap-4", className)}
+      className={clsx("flex w-full items-center gap-2", className)}
     >
       <div className="flex-1">
         <label htmlFor="newsletter-email" className="sr-only">
@@ -47,8 +47,8 @@ export default function Newsletter({ className }: { className?: string }) {
           className="field-bare"
         />
       </div>
-      <button type="submit" className="link-arrow shrink-0 pb-2">
-        Subscribe <span aria-hidden>&rarr;</span>
+      <button type="submit" className="btn-solid shrink-0">
+        Subscribe
       </button>
     </form>
   );

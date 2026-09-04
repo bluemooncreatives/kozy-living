@@ -1,16 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
+import Plate from "@/components/ui/plate";
 import { Article } from "@/lib/shopify/types";
-
-/** Shopify articles carry no image until one is uploaded - fall back to the
- *  house plate art rather than collapsing the card's aspect ratio. */
-const FALLBACK_IMAGES = [
-  "/sales-collection.png",
-  "/mens-collection.png",
-  "/kids-collection.png",
-  "/banner.png",
-];
 
 export function formatArticleDate(value: string): string {
   return new Intl.DateTimeFormat("en-IN", {
@@ -20,6 +11,15 @@ export function formatArticleDate(value: string): string {
   }).format(new Date(value));
 }
 
+/**
+ * Journal cell. A plate with the corner ↗, then the dateline, the headline,
+ * and the excerpt.
+ *
+ * An article without an image gets the plate's own toned placeholder rather
+ * than a house image standing in for editorial photography - the previous
+ * fallback list pointed at four files that do not exist in `public/`, so every
+ * imageless article rendered a broken image.
+ */
 export default function ArticleCard({
   article,
   index = 0,
@@ -33,22 +33,20 @@ export default function ArticleCard({
   priority?: boolean;
   className?: string;
 }) {
-  const fallback = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]!;
-
   return (
-    <article className={clsx("group", className)}>
+    <article className={clsx("group h-full", className)}>
       <Link href={article.path} className="block">
-        <div className="plate aspect-[4/3] w-full">
-          <Image
-            src={article.image?.url ?? fallback}
-            alt={article.image?.altText || article.title}
-            fill
-            sizes={sizes}
-            priority={priority}
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        </div>
-        <p className="eyebrow mt-4">
+        <Plate
+          src={article.image?.url}
+          alt={article.image?.altText || article.title}
+          aspect="4/3"
+          arrow
+          priority={priority}
+          sizes={sizes}
+          tone={(index % 4) as 0 | 1 | 2 | 3}
+          placeholderText="journal"
+        />
+        <p className="eyebrow mt-4 text-muted">
           {article.blogTitle}
           {article.publishedAt
             ? ` · ${formatArticleDate(article.publishedAt)}`
@@ -58,11 +56,8 @@ export default function ArticleCard({
           {article.title}
         </h3>
         {article.excerpt ? (
-          <p className="body-mono mt-3 line-clamp-3">{article.excerpt}</p>
+          <p className="body-mono mt-2 line-clamp-3">{article.excerpt}</p>
         ) : null}
-        <span className="link-arrow mt-4">
-          Read more <span aria-hidden>&rarr;</span>
-        </span>
       </Link>
     </article>
   );

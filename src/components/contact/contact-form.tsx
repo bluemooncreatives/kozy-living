@@ -109,7 +109,7 @@ export default function ContactForm({ className }: { className?: string }) {
           required
           aria-invalid={error("message") ? true : undefined}
           aria-describedby={error("message") ? `${id}-message-error` : undefined}
-          className="mt-3 w-full resize-y rounded-plate border border-rule bg-transparent p-4 font-mono text-ui tracking-normal text-ink focus-visible:border-oxblood focus-visible:ring-0"
+          className="mt-3 w-full resize-y rounded-plate border border-rule bg-transparent p-4 font-sans text-ui tracking-normal text-ink focus-visible:border-ink/20 focus-visible:ring-0"
         />
         <FieldError id={`${id}-message-error`}>{error("message")}</FieldError>
       </div>

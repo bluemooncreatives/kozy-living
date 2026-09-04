@@ -18,7 +18,7 @@ export default function NotFound() {
       </p>
       <div className="mt-10 flex flex-wrap gap-4">
         <Link href="/search" className="btn-solid">
-          Explore collection <span aria-hidden>&rarr;</span>
+          Explore collection
         </Link>
         <Link href="/" className="btn-outline">
           Back home

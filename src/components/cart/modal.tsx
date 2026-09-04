@@ -95,7 +95,7 @@ export default function CartModal() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-coal/40 backdrop-blur-sm" aria-hidden />
+            <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm" aria-hidden />
           </TransitionChild>
           <TransitionChild
             as={Fragment}
@@ -108,7 +108,7 @@ export default function CartModal() {
           >
             <DialogPanel
               data-lenis-prevent
-              className="fixed inset-y-0 right-0 flex w-full flex-col bg-paper text-oxblood md:w-[27rem]"
+              className="fixed inset-y-0 right-0 flex w-full flex-col bg-paper text-ink md:w-[27rem]"
             >
               <div className="rule-b flex items-center justify-between px-5 py-4">
                 <p className="eyebrow">
@@ -219,12 +219,12 @@ export default function CartModal() {
                             </div>
 
                             <div className="mt-auto flex items-end justify-between pt-4">
-                              <div className="flex items-center rounded-full border border-oxblood">
+                              <div className="flex items-center rounded-full border border-ink/20">
                                 <EditItemQuantityButton
                                   item={item}
                                   type="minus"
                                 />
-                                <span className="w-8 text-center font-mono text-spec">
+                                <span className="w-8 text-center font-sans text-spec">
                                   {item.quantity}
                                 </span>
                                 <EditItemQuantityButton

@@ -90,7 +90,7 @@ export default function VariantSelector({
                       !isAvailableForSale ? " (out of stock)" : ""
                     }`}
                     className={clsx(
-                      "flex items-center gap-2 py-0.5 text-left font-mono text-ui tracking-ui transition-opacity",
+                      "flex items-center gap-2 py-0.5 text-left font-sans text-ui tracking-ui transition-opacity",
                       {
                         "cursor-default": isActive,
                         "hover:opacity-60": !isActive && isAvailableForSale,

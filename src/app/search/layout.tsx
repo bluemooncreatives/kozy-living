@@ -19,24 +19,26 @@ export default function SearchLayout({
 }) {
   return (
     <>
-      <div className="shell rule-b py-10 text-center md:py-14">
-        <Eyebrow>The Collection</Eyebrow>
-        <Headline className="mt-4">Thoughtful Objects for Mindful Spaces</Headline>
-        <p className="body-mono mx-auto mt-5 max-w-measure text-balance">
+      <div className="shell max-w-4xl py-10 md:py-14">
+        <Eyebrow align="left">The Collection</Eyebrow>
+        <Headline className="mt-4">
+          Thoughtful objects for mindful spaces
+        </Headline>
+        <p className="body-mono mt-5 max-w-measure text-pretty">
           {site.description}
         </p>
       </div>
 
-      <div className="rule-b py-8">
+      <div className="shell pb-8">
         <CollectionPillRail />
       </div>
 
       {/* Sticky under the header stack - `--header-h` is the single source. */}
-      <div className="sticky top-[var(--header-h)] z-40 rule-b bg-paper/95 backdrop-blur-md">
+      <div className="rule-y sticky top-[var(--header-h)] z-40 bg-paper/95 backdrop-blur-md">
         <div className="shell flex flex-col gap-4 py-3 lg:flex-row lg:items-center lg:justify-between">
           <Suspense
             fallback={
-              <div className="h-4 w-64 animate-pulse rounded-full bg-wash" />
+              <div className="h-4 w-64 animate-pulse rounded-chip bg-wash" />
             }
           >
             <Collections />
@@ -47,7 +49,7 @@ export default function SearchLayout({
         </div>
       </div>
 
-      <div className="py-6">{children}</div>
+      <div className="shell py-8 md:py-10">{children}</div>
     </>
   );
 }

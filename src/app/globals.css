@@ -5,40 +5,57 @@
 /* ---------------------------------------------------------------------------
    Kozy Living - Design Tokens
 
-   Warm minimalism sanctuary palette:
-     Paper (Background)      #FAF8F5  warm ivory / oat linen
-     Ink (Body Text/UI)      #2A221E  deep warm espresso charcoal
-     Terracotta (Accent)     #8C4328  warm clay / rust
-     Amber (Glow Accent)     #E9B973  warm honey luminescence
-     Tint (Tile Ground)      #F3EFE9  soft oat wash
+   Street-editorial system. One heavy geometric grotesk, three colours, one
+   generous corner radius, and a single saturated yellow that does all the
+   shouting.
+
+     Paper  (page ground)   #F2F1ED  soft off-white
+     Card   (panel ground)  #FFFFFF  the one true white
+     Ink    (type / dark)   #131313  near-black
+     Yellow (accent)        #FFC803  wordmarks, seals, fills
+     Tint   (plate ground)  #E4E2DC  shows only while media loads
+
+   Signature motifs, each with a class below:
+     .wordmark      giant lowercase display type bleeding past the frame
+     .arrow-btn     circular ↗ button parked on a card corner
+     .seal          rotating circular badge, text on a circular path
+     .chip          small white pill tag
+     .plate         rounded photographic card
 --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: light;
 
-  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-ui: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  /* Legacy alias - a few files still reference --font-mono. */
+  --font-mono: var(--font-ui);
 
-  --paper: #faf8f5;
-  --ink: #2a221e;
-  --oxblood: #8c4328;
-  --amber: #e9b973;
+  --paper: #f2f1ed;
+  --card: #ffffff;
+  --ink: #131313;
+  --yellow: #ffc803;
+  --yellow-deep: #e8b400;
+  --muted: #8a8880;
 
-  /* Subtle warm oat ground for image tiles */
-  --tint: #f3efe9;
-  --rule: rgba(140, 67, 40, 0.18);
-  --wash: rgba(140, 67, 40, 0.05);
+  /* Repointed legacy aliases. */
+  --oxblood: var(--ink);
+  --amber: var(--yellow);
 
-  --gutter: 1rem;
+  --tint: #e4e2dc;
+  --rule: rgba(19, 19, 19, 0.1);
+  --wash: rgba(19, 19, 19, 0.04);
+
+  --gutter: 0.75rem;
   --scroll-progress: 0;
   --scroll-velocity: 0;
   /* Announcement strip + nav offset */
-  --header-h: 6.25rem;
+  --header-h: 5.5rem;
 }
 
 @media (min-width: 768px) {
   :root {
-    --gutter: 1.25rem;
+    --gutter: 1rem;
   }
 }
 
@@ -51,20 +68,22 @@
   body {
     background-color: var(--paper);
     color: var(--ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
   }
 
+  /* Headings are the display face at heavy weight - not a second family. */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 400;
-    color: var(--oxblood);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--ink);
   }
 
   ::selection {
-    background: var(--amber);
+    background: var(--yellow);
     color: var(--ink);
   }
 
@@ -73,29 +92,30 @@
   button,
   textarea,
   select {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
   }
 
+  /* Dark panels: paper type, yellow headings, yellow focus rings. */
   .on-dark {
     color: var(--paper);
   }
 
   .on-dark a,
   .on-dark button {
-    @apply focus-visible:ring-amber focus-visible:ring-offset-coal;
+    @apply focus-visible:ring-yellow focus-visible:ring-offset-ink;
   }
 
   .on-dark h1,
   .on-dark h2,
   .on-dark h3,
   .on-dark h4 {
-    color: var(--amber);
+    color: var(--paper);
   }
 
   input::placeholder,
   textarea::placeholder {
-    color: var(--oxblood);
-    opacity: 0.6;
+    color: var(--muted);
+    opacity: 1;
   }
 }
 
@@ -110,8 +130,17 @@
 
   .shell {
     width: 100%;
+    max-width: 96rem;
+    margin-left: auto;
+    margin-right: auto;
     padding-left: var(--gutter);
     padding-right: var(--gutter);
+  }
+
+  /* Inner shell for reading-width editorial blocks. */
+  .shell-tight {
+    @apply shell;
+    max-width: 72rem;
   }
 
   .rule-t {
@@ -129,92 +158,178 @@
 
   /* ------------------------------------------------------------ typography */
 
+  /* Small caps meta label. "2023" / "STREETWEAR" / column headers. */
   .eyebrow {
-    @apply font-mono text-eyebrow uppercase text-oxblood;
+    @apply font-display text-eyebrow uppercase tracking-eyebrow text-ink;
   }
 
   .body-mono {
-    @apply font-mono text-body text-ink;
+    @apply font-sans text-body text-muted;
   }
 
   .ui-mono {
-    @apply font-mono text-ui uppercase tracking-ui text-ink;
+    @apply font-sans text-ui text-ink;
   }
 
   .spec-mono {
-    @apply font-mono text-spec text-oxblood;
+    @apply font-sans text-spec text-muted;
   }
 
   .micro-mono {
-    @apply font-mono text-micro uppercase tracking-micro;
+    @apply font-sans text-micro uppercase tracking-micro text-ink;
   }
 
+  /* Legacy name for the display face. No longer a serif - now the heavy
+     grotesk that carries every headline in the system. */
   .serif {
-    @apply font-display font-normal text-oxblood;
+    @apply font-display font-bold tracking-tight text-ink;
+  }
+
+  /* The giant lowercase statement type. Set solid, tracked tight, and always
+     lowercase - it is a graphic element first and a word second. */
+  .wordmark {
+    @apply font-display text-display-hero lowercase;
+    font-weight: 800;
   }
 
   .on-dark .body-mono,
-  .on-dark .ui-mono {
+  .on-dark .spec-mono {
+    color: rgba(242, 241, 237, 0.7);
+  }
+
+  .on-dark .ui-mono,
+  .on-dark .micro-mono,
+  .on-dark .eyebrow,
+  .on-dark .serif {
     color: var(--paper);
   }
 
-  .on-dark .serif,
-  .on-dark .spec-mono,
-  .on-dark .eyebrow,
-  .on-dark .eyebrow > * {
-    color: var(--amber);
-  }
-
   .count-sup {
-    font-size: 0.45em;
+    font-size: 0.4em;
     vertical-align: super;
     line-height: 1;
-    margin-left: 0.08em;
+    margin-left: 0.15em;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   /* -------------------------------------------------------------- controls */
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full font-mono text-ui uppercase tracking-ui transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45;
-    padding: 0.9rem 1.75rem;
+    @apply inline-flex items-center justify-center gap-2 rounded-chip font-display text-ui font-semibold uppercase tracking-eyebrow transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45;
+    font-size: 0.6875rem;
+    padding: 0.9rem 1.6rem;
+  }
+
+  /* The default. Black pill, white type - "SHOP NOW" in the reference. */
+  .btn-solid {
+    @apply btn bg-ink text-paper hover:bg-yellow hover:text-ink;
   }
 
   .btn-outline {
-    @apply btn border border-oxblood text-oxblood hover:bg-oxblood hover:text-paper;
+    @apply btn border border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-paper;
   }
 
-  .btn-solid {
-    @apply btn bg-oxblood text-paper hover:bg-ink;
+  .btn-yellow {
+    @apply btn bg-yellow text-ink hover:bg-ink hover:text-yellow;
   }
 
+  /* Legacy alias. */
   .btn-amber {
-    @apply btn bg-amber text-ink hover:bg-ink hover:text-amber;
+    @apply btn-yellow;
   }
 
+  /* Text link with a trailing arrow. Underline only on hover - the reference
+     keeps its links quiet and lets the circular buttons do the pointing. */
   .link-arrow {
-    @apply inline-flex items-center gap-2 font-mono text-ui uppercase tracking-ui text-oxblood underline decoration-rule decoration-1 underline-offset-[6px] transition-colors hover:decoration-oxblood;
+    @apply inline-flex items-center gap-1.5 font-display text-ui font-semibold text-ink transition-opacity hover:opacity-60;
   }
 
-  .pill {
-    @apply inline-flex items-center rounded-full border border-ink px-6 py-2 font-display text-display-md font-normal text-ink transition-colors duration-150 hover:bg-wash hover:text-ink;
+  /* Circular ↗ button. Parks on a card corner; see `.notch` for the cut-out
+     the card makes to receive it. */
+  .arrow-btn {
+    @apply inline-flex items-center justify-center rounded-full bg-card text-ink transition-colors duration-200;
+    height: 2.75rem;
+    width: 2.75rem;
   }
 
-  .pill-active {
+  .arrow-btn:hover {
     @apply bg-ink text-paper;
   }
 
+  .arrow-btn-yellow {
+    @apply arrow-btn bg-yellow;
+  }
+
+  .arrow-btn-yellow:hover {
+    @apply bg-ink text-yellow;
+  }
+
+  /* Small white pill tag sitting on photography ("erase", "vitus"). */
+  .chip {
+    @apply inline-flex items-center rounded-chip bg-card px-3 py-1.5 font-display text-spec font-medium lowercase text-ink shadow-chip;
+  }
+
+  .chip-yellow {
+    @apply chip bg-yellow;
+  }
+
+  /* Category pill. Outlined by default, solid ink when active. */
+  .pill {
+    @apply inline-flex items-center rounded-chip border border-ink/15 bg-card px-5 py-2.5 font-display text-ui font-semibold text-ink transition-colors duration-150 hover:border-ink hover:bg-ink hover:text-paper;
+  }
+
+  .pill-active {
+    @apply border-ink bg-ink text-paper;
+  }
+
+  /* Status flag on a product plate. */
   .badge {
-    @apply inline-flex items-center rounded-full bg-amber px-3 py-1 font-mono text-micro uppercase tracking-micro text-ink;
+    @apply inline-flex items-center rounded-chip bg-yellow px-3 py-1 font-display text-micro uppercase tracking-micro text-ink;
   }
 
   .field-bare {
-    @apply w-full border-b border-rule bg-transparent py-2 font-mono text-ui uppercase tracking-ui text-ink focus-visible:border-oxblood focus-visible:ring-0;
+    @apply w-full rounded-chip border border-ink/15 bg-card px-5 py-3.5 font-sans text-ui text-ink transition-colors focus-visible:border-ink focus-visible:ring-0;
   }
 
   /* ----------------------------------------------------------------- media */
 
   .plate {
     @apply relative overflow-hidden rounded-plate bg-tint;
+  }
+
+  /* Panels: the two non-photographic card fills. */
+  .panel {
+    @apply rounded-plate bg-card;
+  }
+
+  .panel-ink {
+    @apply on-dark rounded-plate bg-ink;
+  }
+
+  .panel-yellow {
+    @apply rounded-plate bg-yellow text-ink;
+  }
+
+  /* Frosted chip laid over photography - the rating + blurb in the hero. */
+  .glass {
+    @apply rounded-plate border border-white/20 bg-black/45 p-4 backdrop-blur-md;
+  }
+
+  /* The concave cut-out a card makes so an `.arrow-btn` can sit inside its
+     corner without covering the photograph. Applied to the card itself; the
+     button is positioned absolutely into the notch. */
+  .notch-tr {
+    -webkit-mask-image: radial-gradient(
+      circle 2.25rem at calc(100% - 0.75rem) 0.75rem,
+      transparent 100%,
+      #000 100%
+    );
+    mask-image: radial-gradient(
+      circle 2.25rem at calc(100% - 0.75rem) 0.75rem,
+      transparent 100%,
+      #000 100%
+    );
   }
 
   /* ---------------------------------------------------------------- motion */
@@ -227,9 +342,20 @@
     @apply flex w-max items-center animate-marqueeReverse;
   }
 
+  /* Rotating seal. The wrapper spins; the glyph in the middle stays put by
+     counter-rotating in its own element. */
+  .seal {
+    @apply relative inline-flex items-center justify-center rounded-full bg-yellow text-ink;
+  }
+
+  .seal-ring {
+    @apply absolute inset-0 animate-spinSlow;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .marquee-track,
-    .marquee-track-reverse {
+    .marquee-track-reverse,
+    .seal-ring {
       animation: none;
     }
   }

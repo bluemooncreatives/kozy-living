@@ -3,64 +3,47 @@ import { Menu } from "@/lib/shopify/types";
 import Link from "next/link";
 import LogoSquare from "@/components/logo-square";
 import Newsletter from "@/components/ui/newsletter";
-import Marquee from "@/components/ui/marquee";
-import { footerColumns, shippingTicker, site, socialLinks } from "@/lib/site";
+import BackToTop from "@/components/ui/back-to-top";
+import { footerColumns, legalLinks, site } from "@/lib/site";
 
 /**
- * Footer (DESIGN.md §5): a shipping ticker, the newsletter line, hairline
- * columns, a legal row with payment marks, and then the brand statement set at
- * hero scale and clipped by the viewport - the closing gesture of the page.
+ * Footer: the newsletter line, four tracked-out link columns with the rotating
+ * seal parked at the right edge as the back-to-top control, then a thin legal
+ * rule - logo left, copyright centred, policies right.
+ *
+ * No giant closing wordmark here: the homepage's "shop now" band already plays
+ * that card immediately above, and repeating it would blunt both.
  */
 export default async function Footer() {
   // Shopify owns the legal/policy links; the rest of the footer is editorial.
-  const legalMenu: Menu[] = await getMenu("next-js-footer-menu");
+  const legalMenu: Menu[] = await getMenu("next-js-footer-menu").catch(() => []);
+  const links = legalMenu.length ? legalMenu : legalLinks;
   const year = new Date().getFullYear();
 
   return (
-    <footer className="rule-t">
-      <div className="rule-b py-2">
-        <Marquee
-          phrases={Array.from({ length: 6 }, () => shippingTicker)}
-          size="ui"
-          duration={55}
-          className="text-oxblood"
-        />
-      </div>
-
-      {/* Newsletter line */}
-      <div className="shell rule-b flex flex-col gap-6 py-8 md:flex-row md:items-end md:justify-between">
+    <footer className="rule-t mt-6">
+      {/* Newsletter */}
+      <div className="shell rule-b flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between md:py-14">
         <div>
           <h2 className="serif text-display-lg">Join the inner circle</h2>
-          <p className="body-mono mt-2 max-w-measure">
-            Receive curated interior styling notes and early access to new releases.
+          <p className="body-mono mt-3 max-w-measure">
+            Styling notes from the studio and first look at every new piece.
           </p>
         </div>
-        <Newsletter className="md:max-w-sm" />
+        <Newsletter className="md:max-w-md" />
       </div>
 
-      {/* Hairline columns */}
-      <div className="rule-b grid grid-cols-1 divide-y divide-rule md:grid-cols-4 md:divide-x md:divide-y-0">
-        <div className="flex items-center justify-center px-5 py-8 md:justify-start">
-          <Link href="/" aria-label={`${site.name} home`}>
-            <LogoSquare size="lg" />
-          </Link>
-        </div>
-
-        <div className="px-5 py-8">
-          <p className="body-mono">
-            Thoughtfully designed and handcrafted in {site.origin}. Mindful living since{" "}
-            {site.since}.
-          </p>
-        </div>
-
+      {/* Link columns + the seal */}
+      <div className="shell relative grid grid-cols-2 gap-x-8 gap-y-10 py-10 md:grid-cols-4 md:py-14 lg:pr-40">
         {footerColumns.map((column) => (
-          <nav key={column.title} aria-label={column.title} className="px-5 py-8">
-            <ul className="space-y-1.5">
+          <nav key={column.title} aria-label={column.title}>
+            <p className="eyebrow text-muted">{column.title}</p>
+            <ul className="mt-5 space-y-2.5">
               {column.links.map((link) => (
                 <li key={link.title}>
                   <Link
                     href={link.path}
-                    className="ui-mono transition-opacity hover:opacity-60"
+                    className="micro-mono transition-opacity hover:opacity-55"
                   >
                     {link.title}
                   </Link>
@@ -69,50 +52,34 @@ export default async function Footer() {
             </ul>
           </nav>
         ))}
+
+        <div className="absolute bottom-10 right-4 hidden lg:block">
+          <BackToTop />
+        </div>
       </div>
 
-      {/* Legal + social */}
-      <div className="shell rule-b flex flex-col gap-5 py-6 md:flex-row md:items-center md:justify-between">
-        <div className="micro-mono space-y-1">
-          <p>
-            &copy; {year} {site.name}
-          </p>
-          {legalMenu.length ? (
-            <ul className="flex flex-wrap gap-x-4 gap-y-1">
-              {legalMenu.map((item) => (
-                <li key={item.title}>
-                  <Link href={item.path} className="hover:opacity-60">
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>Powered by Shopify</p>
-          )}
-        </div>
+      {/* Legal rule */}
+      <div className="shell rule-t flex flex-col items-center gap-4 py-6 md:flex-row md:justify-between">
+        <Link href="/" aria-label={`${site.name} home`}>
+          <LogoSquare size="sm" />
+        </Link>
 
-        <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          {socialLinks.map((social) => (
-            <li key={social.title}>
-              <a
-                href={social.href}
-                rel="noreferrer noopener"
-                target="_blank"
-                className="micro-mono transition-opacity hover:opacity-60"
+        <p className="micro-mono text-muted">
+          &copy;{year} {site.name}. All rights reserved.
+        </p>
+
+        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {links.map((link) => (
+            <li key={link.title}>
+              <Link
+                href={link.path}
+                className="micro-mono transition-opacity hover:opacity-55"
               >
-                {social.title}
-              </a>
+                {link.title}
+              </Link>
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Closing statement - clipped by the viewport, as in the reference. */}
-      <div className="overflow-hidden py-6">
-        <p aria-hidden className="serif select-none whitespace-nowrap text-center text-display-hero leading-none">
-          {site.statement}
-        </p>
       </div>
     </footer>
   );

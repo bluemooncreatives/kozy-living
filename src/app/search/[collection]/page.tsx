@@ -48,12 +48,12 @@ export default async function CategoryPage({
   return (
     <section>
       {products.length === 0 ? (
-        <div className="rounded-plate border border-rule px-8 py-20 text-center">
+        <div className="panel px-8 py-20 text-center">
           <p className="serif text-display-md">This collection is empty</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
             Pieces in this collection are currently being crafted. Explore the rest of our catalog.
           </p>
-          <Link href="/search" className="btn-outline mt-8">
+          <Link href="/search" className="btn-solid mt-8">
             View all objects
           </Link>
         </div>

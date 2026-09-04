@@ -37,12 +37,12 @@ export default async function Page({
   if (!page) return notFound();
 
   return (
-    <article className="mx-auto max-w-3xl">
+    <article className="shell max-w-3xl py-4">
       <Eyebrow align="left">{site.name}</Eyebrow>
-      <h1 className="serif mt-5 text-display-xl">{page.title}</h1>
-      <hr className="my-10 border-rule" />
+      <h1 className="serif mt-4 text-display-xl">{page.title}</h1>
+      <hr className="my-8 border-rule" />
       <Prose html={page.body as string} />
-      <p className="eyebrow mt-14 border-t border-rule pt-6">
+      <p className="eyebrow mt-14 border-t border-rule pt-6 text-muted">
         {`Last updated ${new Intl.DateTimeFormat(undefined, {
           year: "numeric",
           month: "long",

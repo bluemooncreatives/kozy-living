@@ -153,7 +153,7 @@ export default function EstateReel({
               </div>
 
               <figcaption className="mt-5">
-                <span className="micro-mono block text-oxblood">
+                <span className="micro-mono block text-muted">
                   {item.label}
                 </span>
                 <span className="serif mt-2 block text-display-sm italic">

@@ -112,7 +112,7 @@ export const promoTiles = [
   {
     title: "Handcrafted Ceramics",
     handle: "ceramics",
-    image: "/cozy-ceramics.jpg",
+    image: null,
     labelPosition: "bottom",
   },
 ] as const;
@@ -237,25 +237,45 @@ export const faqs = [
 
 export const footerColumns = [
   {
-    title: "Collections",
+    title: "Product",
     links: [
-      { title: "All Objects", path: "/search" },
       { title: "Living Room", path: "/search/living-room" },
       { title: "Lighting", path: "/search/lighting" },
       { title: "Ceramics", path: "/search/ceramics" },
-      { title: "Organic Textiles", path: "/search/textiles" },
+      { title: "Textiles", path: "/search/textiles" },
     ],
   },
   {
-    title: "Studio",
+    title: "Company",
     links: [
-      { title: "Our Story", path: "/about-us" },
-      { title: "Living Journal", path: "/blogs" },
-      { title: "Design Guides", path: "/blogs" },
-      { title: "Contact Us", path: "/contact" },
-      { title: "Sustainability", path: "/about-us" },
+      { title: "About", path: "/about-us" },
+      { title: "Mission", path: "/about-us" },
+      { title: "Journal", path: "/blogs" },
+      { title: "Careers", path: "/contact" },
     ],
   },
+  {
+    title: "Contact",
+    links: [
+      { title: "(+91) 8494 907 007", path: "tel:+918494907007" },
+      { title: "@kozy.living", path: "https://instagram.com" },
+      { title: "care@kozyliving.com", path: "mailto:care@kozyliving.com" },
+    ],
+  },
+  {
+    title: "Social Media",
+    links: [
+      { title: "Instagram", path: "https://instagram.com" },
+      { title: "Pinterest", path: "https://pinterest.com" },
+      { title: "YouTube", path: "https://youtube.com" },
+    ],
+  },
+] as const;
+
+/** The two links that close the page, beside the copyright. */
+export const legalLinks = [
+  { title: "Terms & Condition", path: "/terms-of-service" },
+  { title: "Privacy Policy", path: "/privacy-policy" },
 ] as const;
 
 export const socialLinks = [
@@ -311,19 +331,19 @@ export const contact = {
 export const aboutImages = {
   /** Square. Tray, ceramics and natural light. */
   morning: {
-    src: "/cozy-living-room.jpg",
+    src: null,
     alt: "A cozy living sanctuary with warm linen throws, handcrafted ceramic vase, and natural timber coffee table in morning sunlight.",
     aspect: "1/1",
   },
   /** Square. Handcrafted natural decor. */
   grounds: {
-    src: "/cozy-ceramics.jpg",
+    src: null,
     alt: "Artisan hands shaping warm terracotta pottery and smoothing solid oak timber in the Kozy Living workshop.",
     aspect: "1/1",
   },
   /** Portrait 2:3. Minimalist sculptural interior hero. */
   pouch: {
-    src: "/cozy-ceramics.jpg",
+    src: null,
     alt: "Sculptural ceramic vase and organic linen cushion styled on a minimalist solid wood bench.",
     aspect: "2/3",
   },
@@ -530,7 +550,7 @@ export const estatePhilosophy = {
 export const estateReel = [
   {
     kind: "image",
-    src: "/cozy-living-room.jpg",
+    src: null,
     alt: "A minimalist living space featuring a solid oak low table, organic linen seating, and warm ambient light.",
     label: "the material",
     caption: "Solid oak, washed linen, raw clay",
@@ -543,7 +563,7 @@ export const estateReel = [
   },
   {
     kind: "image",
-    src: "/cozy-ceramics.jpg",
+    src: null,
     alt: "Artisan ceramics and warm linen cushions styled on a warm timber surface.",
     label: "the ambient glow",
     caption: "Soft lighting that warms the evening",
@@ -555,3 +575,98 @@ export const estateReel = [
     caption: "Spaces that invite rest and deep calm",
   },
 ] as const;
+
+/* ------------------------------------------------------------------ homepage
+   The sections below map one-to-one onto the homepage layout, in page order.
+------------------------------------------------------------------------- */
+
+/**
+ * Hero. A single photographic frame carrying a rating chip and blurb top-left,
+ * a black pill CTA top-right, and the brand wordmark bleeding across its
+ * bottom edge. The meta row under the frame is the year/category line.
+ */
+export const hero = {
+  rating: "4.9",
+  ratingNote: "2,400+ homes styled",
+  blurb:
+    "Discover our handcrafted collection of timeless objects that will bring warmth, calm and quiet character to every room of your home.",
+  cta: "Shop now",
+  ctaHref: "/search",
+  /** Set in the giant lowercase display face over the frame's bottom edge. */
+  wordmark: "kozy living",
+  seal: "get 20% off · start your sanctuary · ",
+  metaLeft: "Est. 2018",
+  metaRight: "Handcrafted Homeware",
+} as const;
+
+/** The oversized statement that opens the editorial half of the page. */
+export const boldStatement = {
+  title: ["Be Warm,", "Be Present"],
+  body: "Join a community of mindful makers and homeowners for early access to new drops, styling notes from our studio, and pieces chosen for the way you actually live.",
+} as const;
+
+/**
+ * The staggered lookbook cluster. Five plates at alternating vertical offsets;
+ * the `lift` value is the offset step, and `span` the relative height, so the
+ * row reads as a zigzag rather than a grid.
+ */
+export const lookbook = [
+  { tag: "oak", title: "Slow Table", handle: "furniture", lift: 0, span: "tall" },
+  { tag: "linen", title: "Washed Throw", handle: "textiles", lift: 2, span: "short" },
+  { tag: "clay", title: "Ember Vessel", handle: "ceramics", lift: 1, span: "mid" },
+  { tag: "brass", title: "Dusk Lantern", handle: "lighting", lift: 3, span: "short" },
+  { tag: "wool", title: "Quiet Rug", handle: "rugs", lift: 0, span: "mid" },
+] as const;
+
+/**
+ * The two-up experience band: a wide photographic panel, a yellow statement
+ * card, and a smaller photographic panel stacked beside it.
+ */
+export const experienceBand = {
+  wide: {
+    caption:
+      "Furnishing with us is not just about filling a room; it is about building a place you want to come home to.",
+    href: "/search",
+  },
+  yellow: {
+    chip: "kozyliving.com",
+    title: "Bring warmth home today!",
+    href: "/search",
+  },
+  small: {
+    caption: "we have the right piece to make the room finally feel finished.",
+    href: "/search/decor",
+  },
+} as const;
+
+/** Material partners strip. Wordmarks only - no logo files required. */
+export const brandPartners = [
+  "FSC Certified",
+  "OEKO-TEX",
+  "Fair Trade",
+  "Plastic Free",
+  "Carbon Neutral",
+] as const;
+
+/** The dark quote card beside a portrait plate. */
+export const testimonial = {
+  quote:
+    "A home is not about following what is fashionable. It is about surrounding yourself with the few things that actually make you feel like yourself.",
+  name: "Aria Thorne",
+  role: `Co-Founder, ${site.name}`,
+} as const;
+
+/** Scrolling discount strip between the testimonial and the closing CTA. */
+export const discountTicker = {
+  label: "Discount 20%",
+  repeat: 8,
+} as const;
+
+/** The closing call-to-action band that mirrors the hero. */
+export const ctaBand = {
+  pill: "Get started",
+  body: "Join our community of mindful homeowners for early access to new collections, styling notes, and pieces made to last a lifetime.",
+  wordmark: "shop now",
+  href: "/search",
+  seal: "get 20% off · start your sanctuary · ",
+} as const;

@@ -4,7 +4,7 @@ import Label from "../label";
 
 /**
  * Image tile used by the product gallery and its thumbnail rail. Rounded plate
- * on the mist ground, flame border when active.
+ * on the tint ground, with an ink ring when active.
  */
 export function GridTileImage({
   isInteractive = true,
@@ -29,8 +29,7 @@ export function GridTileImage({
         "group flex h-full w-full items-center justify-center overflow-hidden rounded-plate bg-tint",
         {
           relative: label,
-          "border border-oxblood": active,
-          "border border-transparent": !active,
+          "ring-2 ring-ink ring-offset-2 ring-offset-paper": active,
         },
         className
       )}

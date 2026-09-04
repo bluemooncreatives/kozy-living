@@ -1,20 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import Price from "./price";
 import { Badge } from "./ui/section";
+import Plate from "./ui/plate";
 import { Product } from "@/lib/shopify/types";
 
 /**
- * Product cell (DESIGN.md §5). A packshot on the mist tile with a status badge
- * inset top-left, then a single mono row: title left, price right. Cards carry
- * no border of their own - they sit flush inside the hairline grid, which owns
- * the dividing rules.
+ * Product cell. A packshot on a rounded plate with a corner ↗ and a status
+ * flag inset top-left, then a single row: title left, price right.
+ *
+ * Cards carry no border - they are separated by the grid's gap, and the plate's
+ * own radius is what reads as the card edge.
  */
 
 /** Shopify tags drive the flag; the first match wins. */
 const BADGE_TAGS: Record<string, string> = {
-  new: "New!",
+  new: "New",
   seasonal: "Seasonal",
   sale: "Sale",
   limited: "Limited",
@@ -41,50 +42,42 @@ export default function ProductCard({
   className?: string;
 }) {
   const price = product.priceRange.minVariantPrice;
-  const isRange =
-    price.amount !== product.priceRange.maxVariantPrice.amount;
+  const isRange = price.amount !== product.priceRange.maxVariantPrice.amount;
   const badge = badgeFor(product);
 
   return (
     <Link
       href={`/product/${product.handle}`}
       prefetch
-      className={clsx("group flex h-full flex-col p-3 md:p-4", className)}
+      className={clsx("group flex h-full flex-col", className)}
     >
-      <div className="plate aspect-square w-full">
-        {product.featuredImage?.url ? (
-          <Image
-            src={product.featuredImage.url}
-            alt={product.featuredImage.altText || product.title}
-            fill
-            sizes={sizes}
-            priority={priority}
-            loading={priority ? undefined : "lazy"}
-            className="object-contain p-6 transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <span className="eyebrow">No image</span>
-          </div>
-        )}
-
-        {/* Availability outranks a marketing tag - never flag a sold-out bag
-            as "New!". */}
+      <Plate
+        src={product.featuredImage?.url}
+        alt={product.featuredImage?.altText || product.title}
+        aspect="1/1"
+        placeholderText={product.title.split(" ")[0] ?? "kozy"}
+        sizes={sizes}
+        priority={priority}
+        arrow
+        tone={1}
+      >
+        {/* Availability outranks a marketing tag - never flag a sold-out
+            piece as "New". */}
         {!product.availableForSale || badge ? (
-          <span className="absolute left-4 top-4">
+          <span className="absolute left-4 top-4 z-10">
             <Badge>{product.availableForSale ? badge : "Sold out"}</Badge>
           </span>
         ) : null}
-      </div>
+      </Plate>
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
-        <h3 className="ui-mono normal-case group-hover:underline">
+      <div className="mt-3 flex items-baseline justify-between gap-4 px-1">
+        <h3 className="ui-mono font-semibold group-hover:underline">
           {product.title}
         </h3>
         <div className="flex shrink-0 items-baseline gap-1.5">
-          {isRange ? <span className="ui-mono normal-case">from</span> : null}
+          {isRange ? <span className="spec-mono">from</span> : null}
           <Price
-            className="ui-mono normal-case"
+            className="ui-mono font-semibold"
             amount={price.amount}
             currencyCode={price.currencyCode}
           />

@@ -76,8 +76,8 @@ export default function Carousel({
 
   const cellWidth =
     perView === 2
-      ? "w-[85%] sm:w-1/2 lg:w-1/2"
-      : "w-[85%] sm:w-1/2 lg:w-1/3";
+      ? "w-[82%] sm:w-[48%] lg:w-[49%]"
+      : "w-[78%] sm:w-[46%] lg:w-[31.5%]";
 
   return (
     <div className={className}>
@@ -86,23 +86,17 @@ export default function Carousel({
         data-lenis-prevent-horizontal
         onScroll={measure}
         aria-label={label}
-        className="rail rule-y border-y border-rule"
+        className="rail shell gap-3 pb-1"
       >
         {children.map((cell, index) => (
-          <li
-            key={index}
-            className={clsx(
-              "shrink-0 snap-start border-r border-rule",
-              cellWidth
-            )}
-          >
+          <li key={index} className={clsx("shrink-0 snap-start", cellWidth)}>
             {cell}
           </li>
         ))}
       </ul>
 
       {pageCount > 1 ? (
-        <div className="shell flex items-center justify-between py-4">
+        <div className="shell flex items-center justify-between pt-6">
           <ul className="flex items-center gap-2">
             {Array.from({ length: pageCount }).map((_, index) => (
               <li key={index}>
@@ -112,8 +106,8 @@ export default function Carousel({
                   aria-label={`Go to slide ${index + 1}`}
                   aria-current={index === page}
                   className={clsx(
-                    "block h-2 w-2 rounded-full border border-oxblood transition-colors",
-                    index === page ? "bg-oxblood" : "bg-transparent"
+                    "block h-1.5 rounded-full transition-all duration-300",
+                    index === page ? "w-6 bg-ink" : "w-1.5 bg-ink/25"
                   )}
                 />
               </li>
@@ -125,17 +119,21 @@ export default function Carousel({
               type="button"
               onClick={() => scrollByPage(-1)}
               aria-label="Previous"
-              className="text-2xl leading-none transition-opacity hover:opacity-60"
+              className="arrow-btn h-10 w-10 border border-ink/15"
             >
-              <span aria-hidden>&larr;</span>
+              <span aria-hidden className="text-lg leading-none">
+                &larr;
+              </span>
             </button>
             <button
               type="button"
               onClick={() => scrollByPage(1)}
               aria-label="Next"
-              className="text-2xl leading-none transition-opacity hover:opacity-60"
+              className="arrow-btn h-10 w-10 border border-ink/15"
             >
-              <span aria-hidden>&rarr;</span>
+              <span aria-hidden className="text-lg leading-none">
+                &rarr;
+              </span>
             </button>
           </div>
         </div>

@@ -5,15 +5,16 @@ import clsx from "clsx";
  * in `.marquee-track` loops without a visible seam; the duplicate is hidden
  * from assistive tech.
  *
- * Three sizes carry three jobs in the system (DESIGN.md §5):
- *   `ui`      - the announcement strip and the shipping band, mono.
- *   `display` - the "Brew of the Month" bands, serif at heading scale.
- *   `hero`    - the giant statement over the hero image and in the footer.
+ * Three sizes carry three jobs:
+ *   `ui`      - the announcement strip and the shipping band.
+ *   `display` - the discount ticker, set at heading scale and weight.
+ *   `hero`    - full-bleed wordmark scale.
  */
 export default function Marquee({
   phrases,
   size = "ui",
   separator = "·",
+  separatorTone = "ink",
   reverse = false,
   duration,
   className,
@@ -22,34 +23,44 @@ export default function Marquee({
   size?: "ui" | "display" | "hero";
   /** Glyph set between phrases. Pass "" for none. */
   separator?: string;
+  /** Yellow separators are the system's way of punctuating a black ticker. */
+  separatorTone?: "ink" | "yellow";
   reverse?: boolean;
   /** Seconds for one full pass. Longer text wants a longer duration. */
   duration?: number;
   className?: string;
 }) {
   const text = {
-    ui: "font-mono text-ui uppercase tracking-ui",
-    display: "font-display text-display-md",
-    // `leading-none` (line-height: 1) sets the line box tighter than
-    // Instrument Serif's actual descent, so glyphs with descenders - the "g"
-    // in "Coorg", the "y" in "Every" - render below the box and get clipped
-    // by this wrapper's own `overflow-hidden` (needed to hide the duplicated
-    // track). A touch of headroom fixes it without loosening the set visibly.
-    hero: "font-display text-display-hero leading-[1.15]",
+    ui: "font-display text-ui font-medium",
+    display: "font-display text-display-md font-bold tracking-tight",
+    hero: "wordmark leading-[1.05]",
   }[size];
 
   const gap = {
-    ui: "px-8",
-    display: "px-6",
+    ui: "px-6",
+    display: "px-5",
     hero: "px-8",
   }[size];
 
-  // Extra clipping headroom at the outer edge, belt-and-braces alongside the
-  // loosened line-height above.
+  // A touch of headroom so descenders are never clipped by the wrapper's own
+  // `overflow-hidden` (which is what hides the duplicated track).
   const bleed = {
     ui: "",
     display: "pb-1",
     hero: "pb-3",
+  }[size];
+
+  const separatorClass = {
+    ink: "text-ink",
+    yellow: "text-yellow",
+  }[separatorTone];
+
+  // Scaled off the phrase size so a separator never out-shouts the words it
+  // punctuates. `--sep-scale` lets one caller nudge it without a new prop.
+  const separatorSize = {
+    ui: "text-[calc(0.8em*var(--sep-scale,1))]",
+    display: "text-[calc(0.85em*var(--sep-scale,1))]",
+    hero: "text-[calc(0.7em*var(--sep-scale,1))]",
   }[size];
 
   const run = (ariaHidden: boolean) => (
@@ -61,7 +72,14 @@ export default function Marquee({
         <span key={`${phrase}-${i}`} className="flex items-center">
           <span className={clsx("whitespace-nowrap", gap, text)}>{phrase}</span>
           {separator ? (
-            <span aria-hidden className={clsx("shrink-0", text)}>
+            <span
+              aria-hidden
+              className={clsx(
+                "shrink-0 leading-none",
+                separatorClass,
+                separatorSize
+              )}
+            >
               {separator}
             </span>
           ) : null}

@@ -30,13 +30,13 @@ export default async function BlogsIndex() {
       />
 
       {blogs.length > 1 ? (
-        <nav aria-label="Blogs" className="shell rule-y py-4">
+        <nav aria-label="Blogs" className="shell pb-6">
           <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {blogs.map((blog) => (
               <li key={blog.handle}>
                 <Link
                   href={blog.path}
-                  className="ui-mono transition-opacity hover:opacity-60"
+                  className="pill"
                 >
                   {blog.title}
                 </Link>
@@ -47,9 +47,9 @@ export default async function BlogsIndex() {
       ) : null}
 
       {articles.length ? (
-        <ul className="rule-y grid grid-cols-1 divide-y divide-rule md:grid-cols-3 md:divide-x md:divide-y-0">
+        <ul className="shell grid grid-cols-1 gap-3 pb-14 md:grid-cols-3">
           {articles.map((article, index) => (
-            <li key={article.id} className="p-3">
+            <li key={article.id}>
               <ArticleCard
                 article={article}
                 index={index}
@@ -59,11 +59,11 @@ export default async function BlogsIndex() {
           ))}
         </ul>
       ) : (
-        <div className="shell rule-y py-16 text-center">
+        <div className="shell"><div className="panel px-8 py-20 text-center">
           <p className="body-mono">
             No posts yet. Publish an article in Shopify and it will appear here.
           </p>
-        </div>
+        </div></div>
       )}
     </>
   );

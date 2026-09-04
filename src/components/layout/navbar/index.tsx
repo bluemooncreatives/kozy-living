@@ -5,15 +5,18 @@ import DesktopMenu from "./desktop-menu";
 import SearchTrigger from "./search";
 import LogoSquare from "@/components/logo-square";
 import CartModal from "@/components/cart/modal";
-import Marquee from "@/components/ui/marquee";
 import { getCustomerSession } from "@/lib/customer-account";
 import { announcement, primaryNav, site } from "@/lib/site";
 import Link from "next/link";
+import { UserIcon } from "@heroicons/react/24/outline";
 
 /**
- * Header (DESIGN.md §5): a scrolling announcement strip over a three-part nav -
- * menu left, logo optically centred, utilities right. Hairline bottom, sticky
- * as one unit so `--header-h` stays the single offset for sticky children.
+ * Header: one quiet centred announcement line over a three-part nav - menu
+ * left, wordmark optically centred, utilities right.
+ *
+ * Deliberately low-contrast and short. The reference gives its header almost
+ * no weight so that the hero frame directly beneath it lands as the first real
+ * thing on the page; a loud header would compete with the wordmark.
  */
 export async function Navbar() {
   const shopifyMenu = await getMenu("kozy-living-menu")
@@ -29,26 +32,18 @@ export async function Navbar() {
   const menu: Menu[] = shopifyMenu.length ? shopifyMenu : primaryNav;
 
   return (
-    <header className="sticky top-0 z-[999] bg-paper">
-      {/* Inverted from the rest of the header: oxblood fill, paper text - the
-          announcement strip is meant to read as a banner, not body copy. */}
-      <div className="on-dark border-b border-ink/30 bg-ink py-2">
-        <Marquee
-          phrases={Array.from({ length: 6 }, () => announcement)}
-          size="ui"
-          separator=""
-          duration={60}
-          className="text-paper"
-        />
+    <header className="sticky top-0 z-[999] bg-paper/95 backdrop-blur-md">
+      {/* A single static line, centred. No ticker - at this size motion in
+          the header only pulls the eye away from the hero. */}
+      <div className="shell py-2 text-center">
+        <p className="text-spec text-muted">{announcement}</p>
       </div>
 
-      <nav className="rule-b bg-paper/95 backdrop-blur-md">
-        <div className="shell relative flex h-16 items-center justify-between gap-4">
+      <nav className="rule-t rule-b">
+        <div className="shell relative flex h-14 items-center justify-between gap-4">
           {/* Left rail */}
           <div className="flex items-center gap-6">
-            <div className="md:hidden">
-              <MobileMenu menu={menu} />
-            </div>
+            <MobileMenu menu={menu} />
             <DesktopMenu menu={menu} />
           </div>
 
@@ -63,19 +58,22 @@ export async function Navbar() {
           </Link>
 
           {/* Right rail */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-4">
             <SearchTrigger />
+            <CartModal />
             <Link
               href={
                 customerSession.isAuthenticated
                   ? "/account"
                   : "/api/auth/login?returnTo=/account"
               }
-              className="ui-mono hidden transition-opacity hover:opacity-60 lg:block"
+              aria-label={
+                customerSession.isAuthenticated ? "Account" : "Sign in"
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
             >
-              {customerSession.isAuthenticated ? "Account" : "Sign in"}
+              <UserIcon aria-hidden className="h-4 w-4" />
             </Link>
-            <CartModal />
           </div>
         </div>
       </nav>

@@ -132,7 +132,7 @@ export function AddToCart({ product }: { product: Product }) {
       {errorMessage ? (
         <p
           role="alert"
-          className="spec-mono mt-3 rounded-full border border-oxblood px-4 py-2 text-center"
+          className="spec-mono mt-3 rounded-full border border-ink/20 px-4 py-2 text-center"
         >
           {errorMessage}
         </p>

@@ -75,25 +75,19 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
 
-      <div className="rule-b py-2">
-        <Marquee phrases={band} size="display" separator="↓↓↓↓" duration={45} className="text-oxblood" />
-      </div>
+      <div className="shell grid grid-cols-1 gap-3 pb-10 pt-4 lg:grid-cols-[1.1fr_1fr]">
+        <Suspense
+          fallback={<div className="plate aspect-square w-full animate-pulse" />}
+        >
+          <Gallery
+            images={product.images.slice(0, 6).map((image: Image) => ({
+              src: image.url,
+              altText: image.altText,
+            }))}
+          />
+        </Suspense>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="p-3">
-          <Suspense
-            fallback={<div className="plate aspect-square w-full animate-pulse" />}
-          >
-            <Gallery
-              images={product.images.slice(0, 6).map((image: Image) => ({
-                src: image.url,
-                altText: image.altText,
-              }))}
-            />
-          </Suspense>
-        </div>
-
-        <div className="border-rule p-6 lg:border-l lg:p-10">
+        <div className="panel p-6 md:p-10">
           {/* Sticky so the buy panel stays reachable past a tall gallery. */}
           <div className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
             <Suspense fallback={null}>
@@ -103,14 +97,16 @@ export default async function ProductPage({
         </div>
       </div>
 
-      <div className="rule-y py-2">
+      {/* One ticker, not two. The pair of bands that used to sandwich the
+          buy panel belonged to the old system's rhythm; here the yellow
+          separator does the punctuating. */}
+      <div className="rule-y py-5">
         <Marquee
           phrases={band}
           size="display"
-          separator="↑↑↑↑"
-          duration={45}
-          reverse
-          className="text-oxblood"
+          separator="✳"
+          separatorTone="yellow"
+          duration={40}
         />
       </div>
 
@@ -118,7 +114,7 @@ export default async function ProductPage({
         <RelatedProducts id={product.id} />
       </Suspense>
 
-      <nav className="shell rule-t flex flex-wrap items-center gap-x-4 gap-y-2 py-4">
+      <nav className="shell flex flex-wrap items-center gap-x-3 gap-y-2 pb-10 pt-2">
         <Link href="/" className="spec-mono hover:underline">
           Home
         </Link>

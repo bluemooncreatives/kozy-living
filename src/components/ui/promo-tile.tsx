@@ -31,7 +31,7 @@ export default function PromoTile({
     <Link
       href={href}
       className={clsx(
-        "on-dark group relative block overflow-hidden rounded-plate bg-coal",
+        "on-dark group relative block overflow-hidden rounded-plate bg-ink",
         className
       )}
     >
@@ -73,7 +73,7 @@ export default function PromoTile({
       >
         {/* Amber, not oxblood: oxblood on this ground measures 1.8:1 and
             simply disappears. Amber reads at 9.2:1. */}
-        <h3 className="serif text-display-md text-amber">{title}</h3>
+        <h3 className="serif text-display-md text-yellow">{title}</h3>
       </div>
     </Link>
   );

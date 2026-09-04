@@ -8,25 +8,25 @@ import ArticleCard from "@/components/blog/article-card";
 import Price from "@/components/price";
 import Marquee from "@/components/ui/marquee";
 import Carousel from "@/components/ui/carousel";
-import HeroVideo from "@/components/ui/hero-video";
-import PromoTile from "@/components/ui/promo-tile";
-import ProductTable from "@/components/ui/product-table";
+import Plate from "@/components/ui/plate";
+import Seal from "@/components/ui/seal";
+import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
-import EstateReel from "@/components/ui/estate-reel";
 import { Eyebrow, Headline, SectionHead } from "@/components/ui/section";
 import {
-  aboutCards,
-  aboutStatement,
-  estatePhilosophy,
-  estateReel,
+  boldStatement,
+  brandPartners,
+  ctaBand,
+  discountTicker,
+  experienceBand,
   featureBand,
   guidesFeature,
-  heroPhrases,
+  hero,
+  lookbook,
   journalPosts,
-  promoTiles,
   site,
+  testimonial,
 } from "@/lib/site";
-import Image from "next/image";
 
 export const metadata = {
   title: `${site.name} - ${site.tagline}`,
@@ -35,41 +35,34 @@ export const metadata = {
 };
 
 /**
- * Homepage. Section order:
- * hero → category filters → living philosophy & reel → bestsellers →
- * promo pair → curated edits → about → studio catalog table → design of the month →
- * accents → design guides → journal dispatch.
+ * Homepage. Section order follows the reference layout top to bottom:
+ * hero frame + wordmark → meta rule → bold statement + staggered lookbook →
+ * category pills → bestsellers → experience band → material strip →
+ * testimonial → discount ticker → curated edits → spotlight → journal →
+ * closing "shop now" band.
  */
 export default function Home() {
   return (
     <>
       <Hero />
+      <BoldStatement />
       <CollectionFilters />
-
-      <Philosophy />
 
       <Suspense fallback={<RailFallback />}>
         <Bestsellers />
       </Suspense>
 
-      <PromoPair />
+      <ExperienceBand />
+      <MaterialStrip />
+      <Testimonial />
+      <DiscountTicker />
 
       <Suspense fallback={null}>
-        <LatestBlends />
-      </Suspense>
-
-      <About />
-
-      <Suspense fallback={null}>
-        <SingleOrigin />
+        <CuratedEdits />
       </Suspense>
 
       <Suspense fallback={null}>
-        <BrewOfTheMonth />
-      </Suspense>
-
-      <Suspense fallback={null}>
-        <Merch />
+        <Spotlight />
       </Suspense>
 
       <Guides />
@@ -77,6 +70,8 @@ export default function Home() {
       <Suspense fallback={null}>
         <Journal />
       </Suspense>
+
+      <ClosingBand />
     </>
   );
 }
@@ -104,34 +99,73 @@ async function productsFrom(
 
 /* -------------------------------------------------------------------- hero */
 
+/**
+ * One photographic frame with everything laid over it: the rating chip and
+ * blurb top-left, the CTA pill top-right, and the wordmark crossing the
+ * frame's bottom edge so it reads as ink on both the photograph and the page.
+ */
 function Hero() {
   return (
-    <section className="shell pt-3">
-      <div className="plate relative aspect-[4/5] w-full overflow-hidden bg-coal sm:aspect-[16/10] lg:aspect-[16/8]">
-        <HeroVideo
-          clips={[
-            { src: "/Coffee.mp4" },
-            {
-              src: "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
-            },
-            { src: "/209419_small.mp4" },
-            { src: "/45358-443057031.mp4" },
-          ]}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-coal/70 to-transparent"
-        />
-        <div className="absolute inset-x-0 bottom-0 sm:bottom-2 md:bottom-4">
-          <Marquee
-            phrases={heroPhrases}
-            size="hero"
-            separator=""
-            duration={50}
-            className="text-amber"
-          />
+    <section className="shell pt-2">
+      {/* The wordmark is anchored to the *frame's* bottom edge and then pushed
+          half its own height downwards, so it straddles the edge exactly as in
+          the reference. The section's bottom padding reserves the room that
+          descending half needs. */}
+      <div className="relative pb-[8.5vw]">
+        <div className="relative">
+          <Plate
+            aspect="2/1"
+            priority
+            tone={2}
+            placeholderText="kozy"
+            className="w-full min-h-[24rem]"
+            sizes="100vw"
+            alt="A calm, warmly lit living room furnished with solid oak, linen and hand-thrown ceramics."
+          >
+            {/* Rating + blurb */}
+            <div className="glass absolute left-3 top-3 z-20 max-w-[60%] md:left-5 md:top-5 md:max-w-[19rem]">
+              <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
+                <span aria-hidden className="text-yellow">
+                  ★
+                </span>
+                {hero.rating}
+                <span className="text-spec font-normal text-paper/65">
+                  {hero.ratingNote}
+                </span>
+              </p>
+              <p className="mt-2 text-spec leading-relaxed text-paper/90">
+                {hero.blurb}
+              </p>
+            </div>
+
+            {/* CTA */}
+            <Link
+              href={hero.ctaHref}
+              className="btn-solid absolute right-3 top-3 z-20 md:right-5 md:top-5"
+            >
+              {hero.cta}
+            </Link>
+          </Plate>
+
+          <p
+            aria-hidden
+            className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
+          >
+            {hero.wordmark}
+          </p>
+
+          <div className="absolute bottom-0 hidden md:block left-4 z-20 translate-y-[28%] md:left-12">
+            <Seal text={hero.seal} size="md" />
+          </div>
         </div>
       </div>
+
+      {/* Meta rule under the frame. */}
+      <div className="flex items-center justify-between pb-10 pt-4">
+        <p className="eyebrow">{hero.metaLeft}</p>
+        <p className="eyebrow">{hero.metaRight}</p>
+      </div>
+
       <h1 className="sr-only">
         {site.name} - {site.tagline}
       </h1>
@@ -139,11 +173,91 @@ function Hero() {
   );
 }
 
+/* ------------------------------------------------- statement + lookbook */
+
+/**
+ * The oversized statement, then the staggered lookbook cluster beneath it.
+ * Each plate carries its own vertical lift so the row zigzags; the connecting
+ * paragraph sits in the gap the tallest plates leave open at the top.
+ */
+function BoldStatement() {
+  const lift = ["lg:mt-0", "lg:mt-24", "lg:mt-14", "lg:mt-32", "lg:mt-6"];
+  const span = { tall: "5/7", mid: "4/5", short: "3/4" } as const;
+
+  return (
+    <section aria-labelledby="statement" className="shell pb-10 md:pb-16">
+      <div className="flex items-end justify-between gap-8">
+        <h2 id="statement" className="serif text-display-xl">
+          {boldStatement.title.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
+        </h2>
+        <ArrowDownRight className="mb-2 hidden h-10 w-10 shrink-0 md:block md:h-16 md:w-16" />
+      </div>
+
+      <div className="relative mt-8 md:mt-10">
+        {/* On wide screens this drops into the notch the staggered plates
+            leave open; below that it is simply the paragraph after the head. */}
+        <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[22%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[22rem]">
+          {boldStatement.body}
+        </p>
+
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:items-start">
+          {lookbook.map((item, index) => (
+            <li key={item.title} className={clsx(lift[index])}>
+              <Link
+                href={`/search/${item.handle}`}
+                className="group block"
+                prefetch={false}
+              >
+                <Plate
+                  aspect={span[item.span]}
+                  arrow
+                  arrowTone={index === 1 ? "yellow" : "white"}
+                  tag={item.tag}
+                  title={item.title}
+                  tone={(index % 4) as 0 | 1 | 2 | 3}
+                  placeholderText={item.tag}
+                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/** The heavy ↘ that answers the statement. Drawn to match the display weight. */
+function ArrowDownRight({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 7l10 10" />
+      <path d="M17 8v9H8" />
+    </svg>
+  );
+}
+
 /* --------------------------------------------------------------- filters */
 
 function CollectionFilters() {
   return (
-    <section aria-label="Browse spaces and categories" className="py-10 md:py-12">
+    <section
+      aria-label="Browse spaces and categories"
+      className="shell pb-10 md:pb-14"
+    >
       <CollectionPillRail />
     </section>
   );
@@ -162,7 +276,7 @@ async function Bestsellers() {
     <section aria-labelledby="bestsellers">
       <SectionHead
         eyebrow="Bestsellers"
-        title={<span id="bestsellers">Curated Favorites</span>}
+        title={<span id="bestsellers">Loved in real homes</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
@@ -183,13 +297,13 @@ async function Bestsellers() {
 
 function RailFallback() {
   return (
-    <div className="py-16">
-      <div className="shell mx-auto h-10 w-64 animate-pulse rounded-full bg-wash" />
-      <div className="rule-y mt-12 grid grid-cols-1 divide-x divide-rule sm:grid-cols-2 lg:grid-cols-3">
+    <div className="shell py-16">
+      <div className="mx-auto h-10 w-64 animate-pulse rounded-chip bg-wash" />
+      <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-4">
+          <div key={i} className="panel p-3">
             <div className="plate aspect-square w-full animate-pulse" />
-            <div className="mt-4 h-4 w-2/3 animate-pulse rounded-full bg-wash" />
+            <div className="mt-4 h-4 w-2/3 animate-pulse rounded-chip bg-wash" />
           </div>
         ))}
       </div>
@@ -197,69 +311,152 @@ function RailFallback() {
   );
 }
 
-/* ---------------------------------------------------------------- promo */
+/* ------------------------------------------------------- experience band */
 
-function PromoPair() {
+/**
+ * The asymmetric band: one wide photographic panel, and beside it a yellow
+ * statement card stacked over a smaller panel.
+ */
+function ExperienceBand() {
   return (
     <section
-      aria-label="Shop by curated atmosphere"
-      className="rule-b grid grid-cols-1 gap-3 px-[var(--gutter)] py-3 md:grid-cols-2"
+      aria-label="Why shop with us"
+      className="shell grid grid-cols-1 gap-3 py-10 md:py-14 lg:grid-cols-[1.55fr_1fr]"
     >
-      {promoTiles.map((tile) => (
-        <PromoTile
-          key={tile.handle}
-          title={tile.title}
-          href={`/search/${tile.handle}`}
-          src={tile.image}
-          labelPosition={tile.labelPosition}
-          className="aspect-[4/3] md:aspect-square"
+      <Link href={experienceBand.wide.href} className="group block">
+        <Plate
+          aspect="16/10"
+          arrow
+          tone={1}
+          placeholderText="warmth"
+          caption={experienceBand.wide.caption}
+          className="h-full"
+          sizes="(min-width: 1024px) 60vw, 100vw"
+          alt="A styled corner of a living room with layered textiles and warm lamplight."
         />
-      ))}
-    </section>
-  );
-}
+      </Link>
 
-/* ----------------------------------------------------------- philosophy */
+      <div className="grid gap-3">
+        <Link
+          href={experienceBand.yellow.href}
+          className="panel-yellow group relative flex flex-col justify-between overflow-hidden p-6 md:p-8"
+        >
+          <span aria-hidden className="text-2xl leading-none">
+            ✳
+          </span>
+          <div className="mt-10">
+            <span className="chip">{experienceBand.yellow.chip}</span>
+            <h2 className="serif mt-4 text-display-md">
+              {experienceBand.yellow.title}
+            </h2>
+          </div>
+          <span className="arrow-btn absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
+            <ArrowUpRight />
+          </span>
+        </Link>
 
-function Philosophy() {
-  return (
-    <section aria-labelledby="philosophy">
-      <div className="shell flex flex-col items-center py-12 text-center md:py-16">
-        <Eyebrow>{estatePhilosophy.eyebrow}</Eyebrow>
-        <Headline id="philosophy" className="mt-5">
-          {estatePhilosophy.title.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-        </Headline>
-        <div className="mt-6 max-w-4xl space-y-5">
-          {estatePhilosophy.body.map((paragraph, index) => (
-            <p
-              key={paragraph}
-              className={clsx(
-                "body-mono text-pretty tracking-normal",
-                index === 0 ? "text-ui" : "text-ink"
-              )}
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
-        <Link href={estatePhilosophy.href} className="link-arrow mt-8">
-          {estatePhilosophy.cta} <span aria-hidden>&rarr;</span>
+        <Link href={experienceBand.small.href} className="group block">
+          <Plate
+            aspect="16/10"
+            arrow
+            tone={3}
+            placeholderText="detail"
+            caption={experienceBand.small.caption}
+            className="h-full"
+            sizes="(min-width: 1024px) 35vw, 100vw"
+            alt="A hand-thrown ceramic vessel resting on a solid oak surface."
+          />
         </Link>
       </div>
-
-      <div className="pb-12 md:pb-16">
-        <EstateReel items={estateReel} label="Life in the sanctuary" />
-      </div>
     </section>
   );
 }
 
-async function LatestBlends() {
+/* -------------------------------------------------------- material strip */
+
+/** Hairline band of material and ethics credentials, set as wordmarks. */
+function MaterialStrip() {
+  return (
+    <section aria-label="Our standards" className="rule-y bg-card">
+      <ul className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-5 py-7">
+        {brandPartners.map((partner) => (
+          <li
+            key={partner}
+            className="serif text-display-sm uppercase tracking-[0.08em] text-ink/70"
+          >
+            {partner}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ----------------------------------------------------------- testimonial */
+
+/** Portrait plate beside a black quote card - the reference's quiet moment. */
+function Testimonial() {
+  return (
+    <section
+      aria-label="What our customers say"
+      className="shell grid grid-cols-1 gap-3 py-10 md:py-14 lg:grid-cols-2"
+    >
+      <Plate
+        aspect="4/3"
+        tone={0}
+        placeholderText="aria"
+        className="h-full min-h-[18rem]"
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        alt="Aria Thorne, co-founder of Kozy Living, at the studio workbench."
+      />
+
+      <figure className="panel-ink flex flex-col justify-center p-8 md:p-12">
+        <span
+          aria-hidden
+          className="serif text-[4rem] leading-[0.6] text-yellow md:text-[5rem]"
+        >
+          &rdquo;
+        </span>
+        <blockquote className="mt-6">
+          <p className="serif text-display-md text-paper">
+            &ldquo;{testimonial.quote}&rdquo;
+          </p>
+        </blockquote>
+        <figcaption className="mt-8">
+          <p className="ui-mono font-semibold text-paper">{testimonial.name}</p>
+          <p className="spec-mono mt-1">{testimonial.role}</p>
+        </figcaption>
+      </figure>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------- discount strip */
+
+/** Full-bleed ticker, each repeat separated by the yellow seal. */
+function DiscountTicker() {
+  return (
+    <section aria-label="Current offer" className="rule-y py-5 md:py-7">
+      <Marquee
+        phrases={Array.from({ length: discountTicker.repeat }, () =>
+          discountTicker.label
+        )}
+        size="display"
+        separator="✳"
+        separatorTone="yellow"
+        duration={38}
+        className="[--sep-scale:1.4]"
+      />
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------ commerce */
+
+async function CuratedEdits() {
   const products = (
     await productsFrom("blend", { sortKey: "CREATED_AT", reverse: true })
-  ).slice(0, 9);
+  ).slice(0, 3);
 
   if (!products.length) return null;
 
@@ -267,13 +464,13 @@ async function LatestBlends() {
     <section aria-labelledby="curated-edits">
       <SectionHead
         eyebrow="Curated Edits"
-        title={<span id="curated-edits">Warmth & Texture</span>}
+        title={<span id="curated-edits">Warmth &amp; Texture</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
       />
-      <ul className="rule-y grid grid-cols-1 divide-y divide-rule sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
-        {products.slice(0, 3).map((product) => (
+      <ul className="shell grid grid-cols-1 gap-3 pb-10 sm:grid-cols-2 lg:grid-cols-3 md:pb-14">
+        {products.map((product) => (
           <li key={product.handle}>
             <ProductCard product={product} />
           </li>
@@ -283,72 +480,9 @@ async function LatestBlends() {
   );
 }
 
-/* ---------------------------------------------------------------- about */
+/* ------------------------------------------------------------- spotlight */
 
-function About() {
-  return (
-    <section aria-labelledby="about" className="rule-b">
-      <div className="shell py-12 text-center md:py-16">
-        <Eyebrow>About us</Eyebrow>
-        <Headline
-          id="about"
-          size="lg"
-          className="mx-auto mt-5 max-w-5xl text-pretty"
-        >
-          {aboutStatement}
-        </Headline>
-      </div>
-
-      <Carousel label="About Kozy Living" perView={2}>
-        {aboutCards.flatMap((copy, index) => [
-          <div key={`copy-${index}`} className="h-full p-6">
-            <p className="body-mono">{copy}</p>
-          </div>,
-          <div key={`image-${index}`} className="h-full p-3">
-            <div className="plate aspect-[4/3] w-full">
-              <Image
-                src={
-                  index % 2 === 0
-                    ? "/cozy-living-room.jpg"
-                    : "/cozy-ceramics.jpg"
-                }
-                alt="Kozy Living craftsmanship"
-                fill
-                sizes="(min-width: 640px) 50vw, 85vw"
-                className="object-cover"
-              />
-            </div>
-          </div>,
-        ])}
-      </Carousel>
-    </section>
-  );
-}
-
-/* --------------------------------------------------------- single origin / catalog */
-
-async function SingleOrigin() {
-  const products = (
-    await productsFrom("single-origin", { sortKey: "RELEVANCE" })
-  ).slice(0, 16);
-
-  if (!products.length) return null;
-
-  return (
-    <section aria-labelledby="catalog">
-      <SectionHead
-        eyebrow="Studio Catalog"
-        title={<span id="catalog">Objects by Space & Material</span>}
-        count={products.length}
-      />
-      <ProductTable products={products} />
-    </section>
-  );
-}
-
-/* ------------------------------------------------------ spotlight */
-
-async function BrewOfTheMonth() {
+async function Spotlight() {
   let product: Product | undefined;
   try {
     const [first] = await getProducts({ sortKey: "BEST_SELLING" });
@@ -360,97 +494,45 @@ async function BrewOfTheMonth() {
   if (!product) return null;
 
   const price = product.priceRange.minVariantPrice;
-  const band = Array.from({ length: 8 }, () => featureBand.label);
 
   return (
-    <section aria-labelledby="feature" className="rule-t">
-      <div className="rule-b py-2">
-        <Marquee
-          phrases={band}
-          size="display"
-          separator="↓↓↓↓"
-          duration={45}
-          className="text-oxblood"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2">
+    <section aria-labelledby="feature" className="shell py-10 md:py-14">
+      <div className="panel grid grid-cols-1 overflow-hidden lg:grid-cols-2">
         <div className="p-3">
-          <div className="plate aspect-square w-full">
-            {product.featuredImage?.url ? (
-              <Image
-                src={product.featuredImage.url}
-                alt={product.featuredImage.altText || product.title}
-                fill
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-contain p-10"
-              />
-            ) : null}
-          </div>
+          <Plate
+            src={product.featuredImage?.url}
+            alt={product.featuredImage?.altText || product.title}
+            aspect="1/1"
+            placeholderText="spotlight"
+            tone={2}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+          />
         </div>
 
-        <div className="flex flex-col justify-center border-rule p-6 lg:border-l lg:p-10">
+        <div className="flex flex-col justify-center p-6 md:p-12">
           <Eyebrow align="left">{featureBand.eyebrow}</Eyebrow>
-          <Headline id="feature" className="mt-4">
+          <Headline id="feature" size="lg" className="mt-4">
             {product.title}
           </Headline>
-          <p className="ui-mono mt-4">
+          <p className="ui-mono mt-4 font-semibold">
             <Price amount={price.amount} currencyCode={price.currencyCode} />
           </p>
           {product.description ? (
-            <p className="body-mono mt-6 max-w-measure">
-              {product.description.slice(0, 260)}
-              {product.description.length > 260 ? "…" : ""}
+            <p className="body-mono mt-5 max-w-measure">
+              {product.description.slice(0, 240)}
+              {product.description.length > 240 ? "…" : ""}
             </p>
           ) : null}
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href={`/product/${product.handle}`}
-              className="btn-outline"
-            >
-              View piece <span aria-hidden>&rarr;</span>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Link href={`/product/${product.handle}`} className="btn-solid">
+              View piece
             </Link>
-            <Link href="/search" className="link-arrow self-center">
-              All objects <span aria-hidden>&rarr;</span>
+            <Link href="/search" className="link-arrow">
+              All objects <ArrowUpRight />
             </Link>
           </div>
         </div>
       </div>
-
-      <div className="rule-y py-2">
-        <Marquee
-          phrases={band}
-          size="display"
-          separator="↑↑↑↑"
-          duration={45}
-          reverse
-          className="text-oxblood"
-        />
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------- accents */
-
-async function Merch() {
-  const products = (await productsFrom("merch")).slice(0, 3);
-  if (!products.length) return null;
-
-  return (
-    <section aria-labelledby="accents">
-      <SectionHead
-        eyebrow="Accents"
-        title={<span id="accents">Textiles & Accents</span>}
-        count={products.length}
-      />
-      <ul className="rule-y grid grid-cols-1 divide-y divide-rule sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
-        {products.map((product) => (
-          <li key={product.handle}>
-            <ProductCard product={product} />
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -461,31 +543,29 @@ function Guides() {
   return (
     <section
       aria-labelledby="guides"
-      className="rule-b grid grid-cols-1 items-center lg:grid-cols-2"
+      className="shell grid grid-cols-1 items-stretch gap-3 pb-10 md:pb-14 lg:grid-cols-2"
     >
-      <div className="p-6 text-center lg:p-16">
-        <Eyebrow>{guidesFeature.eyebrow}</Eyebrow>
-        <Headline id="guides" className="mt-4">
+      <div className="panel flex flex-col justify-center p-8 md:p-12">
+        <Eyebrow align="left">{guidesFeature.eyebrow}</Eyebrow>
+        <Headline id="guides" size="lg" className="mt-4">
           {guidesFeature.title}
         </Headline>
-        <p className="body-mono mx-auto mt-5 max-w-measure text-balance">
-          {guidesFeature.body}
-        </p>
-        <Link href={guidesFeature.href} className="btn-outline mt-8">
-          {guidesFeature.cta} <span aria-hidden>&rarr;</span>
+        <p className="body-mono mt-5 max-w-measure">{guidesFeature.body}</p>
+        <Link href={guidesFeature.href} className="btn-solid mt-8 self-start">
+          {guidesFeature.cta}
         </Link>
       </div>
-      <div className="p-3">
-        <div className="plate aspect-[4/3] w-full">
-          <Image
-            src="/cozy-living-room.jpg"
-            alt="Interior design styling"
-            fill
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-      </div>
+      <Link href={guidesFeature.href} className="group block">
+        <Plate
+          aspect="4/3"
+          arrow
+          tone={1}
+          placeholderText="guides"
+          className="h-full min-h-[16rem]"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          alt="Styling notes laid out beside fabric swatches and a brass lamp."
+        />
+      </Link>
     </section>
   );
 }
@@ -503,41 +583,71 @@ async function Journal() {
         action="More entries"
         actionHref="/blogs"
       />
-      <ul className="rule-y grid grid-cols-1 divide-y divide-rule md:grid-cols-3 md:divide-x md:divide-y-0">
+      <ul className="shell grid grid-cols-1 gap-3 pb-10 md:grid-cols-3 md:pb-14">
         {articles.length
           ? articles.map((article, index) => (
-              <li key={article.id} className="p-3">
+              <li key={article.id}>
                 <ArticleCard article={article} index={index} />
               </li>
             ))
           : journalPosts.map((post, index) => (
-              <li key={post.slug} className="p-3">
-                <article>
-                  <div className="plate aspect-[4/3] w-full">
-                    <Image
-                      src={
-                        [
-                          "/cozy-living-room.jpg",
-                          "/cozy-ceramics.jpg",
-                          "/cozy-living-room.jpg",
-                        ][index] ??
-                        "/cozy-ceramics.jpg"
-                      }
-                      alt={post.title}
-                      fill
-                      sizes="(min-width: 768px) 33vw, 100vw"
-                      className="object-cover"
-                    />
-                  </div>
+              <li key={post.slug}>
+                <Link href="/blogs" className="group block">
+                  <Plate
+                    aspect="4/3"
+                    arrow
+                    tone={(index % 4) as 0 | 1 | 2 | 3}
+                    placeholderText="journal"
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                  />
                   <h3 className="serif mt-4 text-display-sm">{post.title}</h3>
-                  <p className="body-mono mt-3">{post.excerpt}</p>
-                  <Link href="/blogs" className="link-arrow mt-4">
-                    Read more <span aria-hidden>&rarr;</span>
-                  </Link>
-                </article>
+                  <p className="body-mono mt-2 line-clamp-3">{post.excerpt}</p>
+                </Link>
               </li>
             ))}
       </ul>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------- closing band */
+
+/** Mirrors the hero: one frame, a pill, a paragraph, and the wordmark. */
+function ClosingBand() {
+  return (
+    <section aria-label="Start shopping" className="shell pb-[9vw] pt-4">
+      <div className="relative">
+        <Plate
+          aspect="2/1"
+          tone={3}
+          placeholderText="home"
+          className="w-full min-h-[22rem]"
+          sizes="100vw"
+          alt="A finished room: layered rugs, warm lamplight, and hand-made objects on open shelving."
+        >
+          <Link
+            href={ctaBand.href}
+            className="btn-solid absolute left-3 top-3 z-20 md:left-5 md:top-5"
+          >
+            {ctaBand.pill}
+          </Link>
+          <p className="absolute right-3 top-3 z-20 max-w-[58%] text-right text-spec text-paper/90 md:right-5 md:top-5 md:max-w-[18rem]">
+            {ctaBand.body}
+          </p>
+        </Plate>
+
+        <Link
+          href={ctaBand.href}
+          aria-label={ctaBand.wordmark}
+          className="wordmark absolute inset-x-0 bottom-0 z-10 block translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
+        >
+          {ctaBand.wordmark}
+        </Link>
+
+        <div className="absolute bottom-0 hidden md:block right-4 z-20 translate-y-[28%] md:right-12">
+          <Seal text={ctaBand.seal} size="md" reverse />
+        </div>
+      </div>
     </section>
   );
 }

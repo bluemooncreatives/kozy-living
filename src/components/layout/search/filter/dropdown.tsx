@@ -50,7 +50,7 @@ export default function FilterItemDropDown({
         type="button"
         aria-expanded={openSelect}
         onClick={() => setOpenSelect(!openSelect)}
-        className="ui-mono flex w-full items-center justify-between gap-3 rounded-full border border-oxblood px-4 py-2.5"
+        className="ui-mono flex w-full items-center justify-between gap-3 rounded-full border border-ink/20 px-4 py-2.5"
       >
         <span className="truncate">
           {label ? `${label}: ` : ""}
@@ -67,7 +67,7 @@ export default function FilterItemDropDown({
       {openSelect ? (
         <ul
           onClick={() => setOpenSelect(false)}
-          className="absolute z-40 mt-1 flex w-full flex-col gap-3 rounded-plate border border-oxblood bg-paper p-4"
+          className="absolute z-40 mt-1 flex w-full flex-col gap-3 rounded-plate border border-ink/20 bg-paper p-4"
         >
           {list.map((item: ListItem, i) => (
             <FilterItem item={item} key={i} />

@@ -31,11 +31,11 @@ export default async function SearchPage({
   return (
     <section>
       {searchValue ? (
-        <p className="eyebrow mb-10">
+        <p className="eyebrow mb-8 text-muted">
           {products.length === 0
             ? "No objects match"
             : `${products.length} ${resultsText} for`}{" "}
-          <span className="text-oxblood">&ldquo;{searchValue}&rdquo;</span>
+          <span className="text-ink">&ldquo;{searchValue}&rdquo;</span>
         </p>
       ) : null}
 
@@ -44,14 +44,14 @@ export default async function SearchPage({
           <ProductGridItems products={products} />
         </Grid>
       ) : (
-        <div className="rounded-plate border border-rule px-8 py-20 text-center">
+        <div className="panel px-8 py-20 text-center">
           <p className="serif text-display-md">Nothing on this shelf yet</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
             {searchValue
               ? "Try a broader search term — a space, material, or category like 'Linen', 'Oak', or 'Lighting'."
               : "Our collection is being updated. Explore all handcrafted pieces."}
           </p>
-          <Link href="/search" className="btn-outline mt-8">
+          <Link href="/search" className="btn-solid mt-8">
             View all objects
           </Link>
         </div>

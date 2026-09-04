@@ -23,7 +23,7 @@ export default function Gallery({
     imageIndex === 0 ? images.length - 1 : imageIndex - 1;
 
   const arrowClass =
-    "flex h-10 w-10 items-center justify-center rounded-full border border-oxblood text-lg leading-none transition-colors hover:bg-oxblood hover:text-paper";
+    "arrow-btn h-11 w-11 border border-ink/10 text-lg leading-none shadow-chip";
 
   return (
     <form>
@@ -39,7 +39,7 @@ export default function Gallery({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="eyebrow">No image</span>
+            <span className="wordmark text-[6vw] text-ink/10">kozy</span>
           </div>
         )}
 
@@ -92,7 +92,7 @@ export default function Gallery({
                   className={clsx(
                     "relative block aspect-square w-full overflow-hidden rounded-plate bg-tint border transition-colors",
                     isActive
-                      ? "border-oxblood"
+                      ? "border-ink/20"
                       : "border-transparent hover:border-rule"
                   )}
                 >

@@ -1,7 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import Breadcrumb from "@/components/ui/breadcrumb";
+import Plate from "@/components/ui/plate";
+import Seal from "@/components/ui/seal";
 import { Eyebrow, Headline } from "@/components/ui/section";
 import {
   aboutCta,
@@ -47,30 +48,49 @@ export default function AboutPage() {
 
 function Masthead() {
   return (
-    <section aria-labelledby="heritage" className="rule-b">
-      <div className="shell flex flex-col items-center py-12 text-center md:py-16">
-        <Eyebrow>{heritage.eyebrow}</Eyebrow>
-        <Headline as="h1" id="heritage" className="mt-5 max-w-4xl">
+    <section aria-labelledby="heritage" className="shell pb-10 md:pb-14">
+      <div className="max-w-4xl pb-8 pt-2">
+        <Eyebrow align="left">{heritage.eyebrow}</Eyebrow>
+        <Headline as="h1" id="heritage" className="mt-4">
           {heritage.title}
         </Headline>
-        <p className="body-mono mt-6 max-w-4xl text-pretty">{heritage.body}</p>
+        <p className="body-mono mt-5 max-w-measure text-pretty">
+          {heritage.body}
+        </p>
       </div>
 
-      <div className="rule-t grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-rule">
-        {[aboutImages.morning, aboutImages.grounds].map((image, index) => (
-          <div key={image.src} className="p-3">
-            <div className="plate aspect-[4/3] w-full">
-              <Image
+      {/* The wordmark straddles the paired frames exactly as it does on the
+          homepage hero - the one gesture that ties every landing page
+          together. */}
+      <div className="relative pb-[8.5vw]">
+        <div className="relative">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {[aboutImages.morning, aboutImages.grounds].map((image, index) => (
+              <Plate
+                key={image.alt}
                 src={image.src}
                 alt={image.alt}
-                fill
+                aspect="4/3"
+                arrow
+                tone={index === 0 ? 0 : 2}
                 priority={index === 0}
+                placeholderText={index === 0 ? "studio" : "craft"}
                 sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
               />
-            </div>
+            ))}
           </div>
-        ))}
+
+          <p
+            aria-hidden
+            className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
+          >
+            since {site.since}
+          </p>
+
+          <div className="absolute bottom-0 hidden md:block left-4 z-20 translate-y-[28%] md:left-12">
+            <Seal text="handcrafted · sustainable · made to last · " size="sm" />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -80,15 +100,17 @@ function Masthead() {
 
 function Timeline() {
   return (
-    <section aria-label="Studio heritage" className="rule-b">
+    <section aria-label="Studio heritage" className="shell pb-10 md:pb-14">
       <ol>
         {heritage.timeline.map((entry, index) => (
           <li
             key={entry.year}
-            className={index < heritage.timeline.length - 1 ? "rule-b" : ""}
+            className="panel mb-3 last:mb-0"
           >
-            <div className="shell grid gap-3 py-8 md:grid-cols-[9rem_1fr] md:gap-12 md:py-12">
-              <p className="serif text-display-md leading-none">{entry.year}</p>
+            <div className="grid gap-3 p-6 md:grid-cols-[9rem_1fr] md:gap-12 md:p-8">
+              <p className="serif text-display-md leading-none text-ink/35">
+                {entry.year}
+              </p>
               <div>
                 <h2 className="serif text-display-sm">{entry.title}</h2>
                 <p className="body-mono mt-3 max-w-measure text-pretty">
@@ -107,20 +129,22 @@ function Timeline() {
 
 function WhyRobusta() {
   return (
-    <section aria-labelledby="mindful-craft" className="rule-b">
-      <div className="shell flex flex-col items-center py-12 text-center md:py-16">
-        <Eyebrow>{whyRobusta.eyebrow}</Eyebrow>
-        <Headline id="mindful-craft" className="mt-5 max-w-4xl">
+    <section aria-labelledby="mindful-craft" className="shell pb-10 md:pb-14">
+      <div className="max-w-4xl pb-8">
+        <Eyebrow align="left">{whyRobusta.eyebrow}</Eyebrow>
+        <Headline id="mindful-craft" size="lg" className="mt-4">
           {whyRobusta.title}
         </Headline>
-        <p className="body-mono mt-6 max-w-4xl text-pretty">{whyRobusta.body}</p>
+        <p className="body-mono mt-5 max-w-measure text-pretty">
+          {whyRobusta.body}
+        </p>
       </div>
 
-      <dl className="rule-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {whyRobusta.stats.map((stat) => (
           <div
             key={stat.value}
-            className="border-b border-rule p-6 md:p-8 sm:[&:nth-child(odd)]:border-r lg:border-r lg:last:border-r-0"
+            className="panel p-6 md:p-8"
           >
             <dt className="sr-only">{stat.label}</dt>
             <dd>
@@ -136,13 +160,16 @@ function WhyRobusta() {
         ))}
       </dl>
 
-      <div data-lenis-prevent-horizontal className="overflow-x-auto">
+      <div
+        data-lenis-prevent-horizontal
+        className="panel mt-3 overflow-x-auto p-2"
+      >
         <table className="w-full min-w-[36rem] border-collapse text-left">
           <caption className="sr-only">
             Conventional Mass Decor vs Kozy Living Mindful Craft
           </caption>
           <thead>
-            <tr className="rule-b">
+            <tr>
               <th scope="col" className="spec-mono px-4 py-4 uppercase md:px-6">
                 Standard
               </th>
@@ -156,12 +183,12 @@ function WhyRobusta() {
           </thead>
           <tbody>
             {whyRobusta.comparison.map((row) => (
-              <tr key={row.trait} className="rule-b transition-colors hover:bg-wash">
+              <tr key={row.trait} className="rule-t transition-colors hover:bg-wash">
                 <th scope="row" className="spec-mono px-4 py-4 font-normal md:px-6">
                   {row.trait}
                 </th>
                 <td className="spec-mono px-4 py-4 md:px-6">{row.arabica}</td>
-                <td className="ui-mono px-4 py-4 normal-case tracking-normal md:px-6">
+                <td className="ui-mono px-4 py-4 font-semibold md:px-6">
                   {row.robusta}
                 </td>
               </tr>
@@ -177,21 +204,21 @@ function WhyRobusta() {
 
 function FarmToCup() {
   return (
-    <section aria-labelledby="farm-to-cup" className="rule-b">
-      <div className="shell flex flex-col items-center py-14 text-center md:py-20">
-        <Eyebrow>{farmToCup.eyebrow}</Eyebrow>
-        <Headline id="farm-to-cup" className="mt-5">
+    <section aria-labelledby="farm-to-cup" className="shell pb-10 md:pb-14">
+      <div className="max-w-4xl pb-8">
+        <Eyebrow align="left">{farmToCup.eyebrow}</Eyebrow>
+        <Headline id="farm-to-cup" size="lg" className="mt-4">
           {farmToCup.title}
         </Headline>
       </div>
 
-      <ol className="rule-t grid grid-cols-1 lg:grid-cols-5">
+      <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {farmToCup.steps.map((step, index) => (
           <li
             key={step.title}
-            className="border-b border-rule p-6 md:p-8 lg:border-r lg:last:border-r-0"
+            className="panel p-6 md:p-8"
           >
-            <span className="micro-mono block text-oxblood">
+            <span className="micro-mono block text-ink/35">
               {String(index + 1).padStart(2, "0")}
             </span>
             <h3 className="serif mt-5 text-display-sm">{step.title}</h3>
@@ -207,10 +234,10 @@ function FarmToCup() {
 
 function Sustainability() {
   return (
-    <section aria-labelledby="sustainability" className="on-dark bg-coal">
-      <div className="shell py-12 md:py-16">
-        <Eyebrow>{sustainability.eyebrow}</Eyebrow>
-        <Headline id="sustainability" className="mt-5 max-w-4xl">
+    <section aria-labelledby="sustainability" className="shell pb-10 md:pb-14">
+      <div className="panel-ink p-8 md:p-12">
+        <Eyebrow align="left">{sustainability.eyebrow}</Eyebrow>
+        <Headline id="sustainability" size="lg" className="mt-4 max-w-4xl">
           {sustainability.title.map((line) => (
             <span key={line} className="block">
               {line}
@@ -221,9 +248,9 @@ function Sustainability() {
           {sustainability.body}
         </p>
 
-        <ul className="mt-12 grid grid-cols-1 gap-px border-t border-paper/20 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {sustainability.pillars.map((pillar) => (
-            <li key={pillar.title} className="border-b border-paper/20 py-8 pr-6">
+            <li key={pillar.title} className="border-t border-paper/20 pt-6">
               <h3 className="serif text-display-sm">{pillar.title}</h3>
               <p className="body-mono mt-3 text-pretty">{pillar.body}</p>
             </li>
@@ -238,27 +265,27 @@ function Sustainability() {
 
 function TheFamily() {
   return (
-    <section aria-labelledby="family" className="rule-b">
-      <div className="shell flex flex-col items-center py-14 text-center md:py-20">
-        <Eyebrow>{family.eyebrow}</Eyebrow>
-        <Headline id="family" className="mt-5">
+    <section aria-labelledby="family" className="shell pb-10 md:pb-14">
+      <div className="max-w-4xl pb-8">
+        <Eyebrow align="left">{family.eyebrow}</Eyebrow>
+        <Headline id="family" size="lg" className="mt-4">
           {family.title}
         </Headline>
-        <p className="spec-mono mt-5">{family.strapline}</p>
+        <p className="spec-mono mt-4">{family.strapline}</p>
       </div>
 
-      <ul className="rule-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {family.members.map((member) => (
           <li
             key={member.name}
-            className="border-b border-rule p-6 md:p-8 sm:[&:nth-child(odd)]:border-r lg:border-r lg:last:border-r-0"
+            className="panel p-6 md:p-8"
           >
-            <div className="plate flex aspect-[4/5] w-full items-center justify-center">
-              <span aria-hidden className="serif text-display-xl leading-none">
+            <div className="plate flex aspect-[4/5] w-full items-center justify-center bg-yellow">
+              <span aria-hidden className="wordmark text-[5rem] leading-none text-ink/70">
                 {member.name.charAt(0)}
               </span>
             </div>
-            <p className="micro-mono mt-5 text-oxblood">{member.generation}</p>
+            <p className="micro-mono mt-5 text-muted">{member.generation}</p>
             <h3 className="serif mt-2 text-display-sm">{member.name}</h3>
             {member.credential ? (
               <p className="spec-mono mt-2">{member.credential}</p>
@@ -275,23 +302,21 @@ function TheFamily() {
 
 function FamilyNote() {
   return (
-    <section aria-labelledby="note" className="rule-b">
-      <div className="shell flex flex-col items-center py-14 text-center md:py-20">
-        <Eyebrow>{familyNote.eyebrow}</Eyebrow>
-        <Headline id="note" size="lg" className="mt-5 max-w-4xl">
+    <section aria-labelledby="note" className="shell pb-10 md:pb-14">
+      <div className="panel p-8 md:p-12">
+        <Eyebrow align="left">{familyNote.eyebrow}</Eyebrow>
+        <Headline id="note" size="lg" className="mt-4 max-w-4xl">
           {familyNote.title}
         </Headline>
-        <div className="mt-6 max-w-measure space-y-5">
+        <div className="mt-5 max-w-measure space-y-4">
           {familyNote.body.map((paragraph) => (
             <p key={paragraph} className="body-mono text-pretty">
               {paragraph}
             </p>
           ))}
         </div>
-        <p className="serif mt-10 text-display-sm italic">
-          {familyNote.signature}
-        </p>
-        <p className="spec-mono mt-2">{familyNote.signatureRole}</p>
+        <p className="serif mt-10 text-display-md">{familyNote.signature}</p>
+        <p className="spec-mono mt-1">{familyNote.signatureRole}</p>
       </div>
     </section>
   );
@@ -301,34 +326,32 @@ function FamilyNote() {
 
 function ShopCta() {
   return (
-    <section aria-labelledby="shop" className="rule-b">
-      <div className="grid grid-cols-1 items-center lg:grid-cols-2">
-        <div className="p-3">
-          <div className="plate aspect-[4/5] w-full">
-            <Image
-              src={aboutImages.pouch.src}
-              alt={aboutImages.pouch.alt}
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
+    <section aria-labelledby="shop" className="shell pb-14 pt-4">
+      <div className="grid grid-cols-1 items-stretch gap-3 lg:grid-cols-2">
+        <Plate
+          src={aboutImages.pouch.src}
+          alt={aboutImages.pouch.alt}
+          aspect="4/5"
+          arrow
+          tone={3}
+          placeholderText="sanctuary"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
 
-        <div className="flex flex-col items-start px-[var(--gutter)] py-12 md:py-16 lg:pl-10">
+        <div className="panel-yellow flex flex-col items-start justify-center p-8 md:p-12">
           <Eyebrow align="left">{aboutCta.eyebrow}</Eyebrow>
-          <Headline id="shop" className="mt-5">
+          <Headline id="shop" size="lg" className="mt-4">
             {aboutCta.title.map((line) => (
               <span key={line} className="block">
                 {line}
               </span>
             ))}
           </Headline>
-          <p className="body-mono mt-6 max-w-measure text-pretty">
+          <p className="mt-5 max-w-measure text-body text-ink/70 text-pretty">
             {aboutCta.body}
           </p>
-          <Link href={aboutCta.href} className="btn-outline mt-8">
-            {aboutCta.cta} <span aria-hidden>&rarr;</span>
+          <Link href={aboutCta.href} className="btn-solid mt-8">
+            {aboutCta.cta}
           </Link>
         </div>
       </div>
