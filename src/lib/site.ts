@@ -4,143 +4,227 @@
  * Every piece of editorial copy on the marketing surfaces lives here rather
  * than being inlined in JSX, so the voice can be revised in one pass without
  * touching layout. Commerce data (products, collections, prices) still comes
- * from Shopify - this file covers the storytelling and brand foundation around it.
+ * from Shopify - this file covers the storytelling around it.
+ *
+ * VOICE: "Kompanions", not products or pieces. Rest, ritual and intention,
+ * not luxury or indulgence. "Krafted" with a K is the house spelling and is
+ * used deliberately - never correct it to "crafted" in brand lines.
+ *
+ * UNVERIFIED VALUES are marked `TODO(brand)`. They are placeholders that keep
+ * a surface from rendering empty; replace them before launch.
  */
 
 export const site = {
   name: "Kozy Living",
   wordmark: "KOZY",
   wordmarkAccent: "LIVING",
-  tagline: "Mindful Home · Timeless Comfort · Sustainable Craft",
-  /** The single line set in the giant footer wordmark. */
-  statement: "Thoughtful Objects for Mindful Sanctuaries. Crafted for Life.",
-  origin: "Studio Workshop · Est. 2018",
-  since: "2018",
+  tagline: "Krafted to Give You Moments of Rest",
+  /** The brand's own closing line. Used wherever one sentence has to carry it. */
+  statement:
+    "You don't need to add more to your day. Just do what you do with more intention.",
+  origin: "India",
   description:
-    "Curated home decor, artisanal furniture, organic textiles, and warm ambient lighting. Crafted sustainably with natural materials for modern mindful sanctuaries.",
-  freeShippingThreshold: "₹2,500",
+    "Craft-led, conscious textiles from India. Cotton waffle weaves, slub cottons, percale, linen blends and wool - designed in-house, made with craft clusters across the country, and finished with traditional Dabu hand-block printing.",
+  founder: "Khushi Faruqi",
+  founderCredential: "Textile Design, NIFT Delhi",
+  instagram: "@kozyliving_",
+  instagramUrl: "https://www.instagram.com/kozyliving_/",
 } as const;
-
-/**
- * Rotating hero-marquee statements. Kept as short, distinct lines rather than
- * one long sentence - at hero scale a single run-on phrase reads as a blur by
- * the time it's midway across the frame, where three short ones each get a
- * moment to actually be read.
- */
-export const heroPhrases = [
-  "Mindful Living in Every Space.",
-  "Warmth, Comfort & Timeless Craft.",
-  "Designed for Modern Sanctuaries.",
-] as const;
 
 /** Fallback navigation, used when the Shopify menu is empty or unreachable. */
 export const primaryNav: { title: string; path: string }[] = [
-  { title: "Shop", path: "/search" },
-  { title: "Living Room", path: "/search/living-room" },
-  { title: "Lighting", path: "/search/lighting" },
-  { title: "Ceramics", path: "/search/ceramics" },
-  { title: "Textiles", path: "/search/textiles" },
+  { title: "Shop All", path: "/search" },
+  { title: "Kozy Lounge", path: "/search/kozy-lounge" },
+  { title: "Kessentials", path: "/search/kessentials" },
+  { title: "Morning Luxuries", path: "/search/morning-luxuries" },
+  { title: "Pet & Parent", path: "/search/pet-parent" },
   { title: "Journal", path: "/blogs" },
-  { title: "About Us", path: "/about-us" },
+  { title: "About", path: "/about-us" },
 ];
 
-/** Scrolling announcement above the header. */
-export const announcement = `Complimentary shipping on all sanctuary orders above ${site.freeShippingThreshold}`;
+/** The quiet line above the header. */
+export const announcement =
+  "Krafted to give you moments of rest - your in-between Kompanions";
 
 /**
- * Collection pills under the hero. Handles map to Shopify collections; the
- * grid degrades gracefully when a handle does not exist yet.
+ * Category pills under the hero. Handles must match real Shopify collection
+ * handles; a handle that does not exist yet renders the empty-collection
+ * panel rather than an error.
+ *
+ * TODO(brand): confirm these against the live collection handles.
  */
 export const collectionPills = [
-  { title: "All Objects", handle: "", previewVideo: "/Coffee.mp4" },
-  {
-    title: "Living Room",
-    handle: "living-room",
-    previewVideo: "/209419_small.mp4",
-  },
-  {
-    title: "Artisanal Lighting",
-    handle: "lighting",
-    previewVideo:
-      "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
-  },
-  {
-    title: "Ceramics & Vases",
-    handle: "ceramics",
-    previewVideo: "/45358-443057031.mp4",
-  },
-  { title: "Organic Textiles", handle: "textiles", previewVideo: "/209419_small.mp4" },
-  { title: "Solid Wood", handle: "furniture", previewVideo: "/Coffee.mp4" },
-  {
-    title: "Dining & Tableware",
-    handle: "dining",
-    previewVideo:
-      "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
-  },
-  {
-    title: "Rugs & Throws",
-    handle: "rugs",
-    previewVideo: "/45358-443057031.mp4",
-  },
-  {
-    title: "Aromatherapy & Candles",
-    handle: "aromatherapy",
-    previewVideo: "/209419_small.mp4",
-  },
-  {
-    title: "Handcrafted Decor",
-    handle: "decor",
-    previewVideo:
-      "/vecteezy_slow-motion-of-raw-coffee-beans-fall-to-the-ground_1620174.mp4",
-  },
-  {
-    title: "New Arrivals",
-    handle: "new-arrivals",
-    previewVideo: "/45358-443057031.mp4",
-  },
-  { title: "Bestsellers", handle: "popular", previewVideo: "/Coffee.mp4" },
+  { title: "All Kompanions", handle: "" },
+  { title: "Kozy Lounge", handle: "kozy-lounge" },
+  { title: "Floor Pillows", handle: "floor-pillows" },
+  { title: "Throw Pillows", handle: "throw-pillows" },
+  { title: "Kessentials", handle: "kessentials" },
+  { title: "Morning Luxuries", handle: "morning-luxuries" },
+  { title: "Waffle Robes", handle: "robes" },
+  { title: "Loungewear", handle: "loungewear" },
+  { title: "Pet & Parent", handle: "pet-parent" },
+  { title: "Dabu Prints", handle: "dabu" },
+  { title: "New Arrivals", handle: "new-arrivals" },
 ] as const;
 
-/** The paired dark promo panels between the product rails. */
-export const promoTiles = [
+/* ------------------------------------------------------------------ homepage
+   The sections below map one-to-one onto the homepage layout, in page order.
+------------------------------------------------------------------------- */
+
+/**
+ * Hero. One photographic frame carrying a flagged blurb top-left, a black pill
+ * CTA top-right, and the wordmark bleeding across its bottom edge.
+ *
+ * There is deliberately no star rating here. The previous copy carried an
+ * invented "4.9 / 2,400+ homes styled" - social proof is the one thing a
+ * storefront must never make up, so the slot carries a factual origin flag
+ * instead.
+ */
+export const hero = {
+  flag: "Made in India",
+  blurb:
+    "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
+  cta: "Shop Kompanions",
+  ctaHref: "/search",
+  /** Set in the giant lowercase display face over the frame's bottom edge. */
+  wordmark: "kozy living",
+  seal: "krafted for moments of rest · ",
+  metaLeft: "Rooted in Indian Kraft",
+  metaRight: "100% Natural Fibres",
+} as const;
+
+/** The oversized statement that opens the editorial half of the page. */
+export const boldStatement = {
+  title: ["Do Less,", "With Intention"],
+  body: "Rooted in Indian craft and expressed through a modern design language - colour, print and organic form that refresh your space and enhance daily living.",
+} as const;
+
+/**
+ * The staggered lookbook cluster. Five plates at alternating vertical offsets;
+ * `lift` is the offset step and `span` the relative height, so the row reads
+ * as a zigzag rather than a grid. Tags name the fibre, titles the Kompanion.
+ */
+export const lookbook = [
   {
-    title: "Artisanal Lighting",
-    handle: "lighting",
-    image: null,
-    labelPosition: "top",
+    tag: "waffle",
+    title: "Kessentials",
+    handle: "kessentials",
+    lift: 0,
+    span: "tall",
   },
   {
-    title: "Handcrafted Ceramics",
-    handle: "ceramics",
-    image: null,
-    labelPosition: "bottom",
+    tag: "slub cotton",
+    title: "Kloud Series",
+    handle: "kloud",
+    lift: 2,
+    span: "short",
+  },
+  {
+    tag: "dabu",
+    title: "Pet & Parent",
+    handle: "pet-parent",
+    lift: 1,
+    span: "mid",
+  },
+  {
+    tag: "linen blend",
+    title: "Floor Lounge",
+    handle: "kozy-lounge",
+    lift: 3,
+    span: "short",
+  },
+  {
+    tag: "wool",
+    title: "Throw Pillows",
+    handle: "throw-pillows",
+    lift: 0,
+    span: "mid",
   },
 ] as const;
 
-/** Centred statement set in the display serif above the about rail. */
-export const aboutStatement =
-  "Kozy Living started with a simple belief: home is not just where you dwell, it is the sanctuary that shapes your peace. We create mindful, honest objects that bring quiet luxury, tactile warmth, and timeless comfort to everyday life.";
+/**
+ * The two-up experience band: a wide photographic panel, a yellow statement
+ * card, and a smaller photographic panel stacked beside it.
+ */
+export const experienceBand = {
+  wide: {
+    caption:
+      "We call them Kompanions, not products - krafted to support the moments of rest you already have.",
+    href: "/search",
+  },
+  yellow: {
+    chip: "kozyliving.com",
+    title: "Turn your routine into a ritual",
+    href: "/search",
+  },
+  small: {
+    caption:
+      "designed in-house, made in collaboration with craft clusters across India.",
+    href: "/about-us",
+  },
+} as const;
 
-/** Alternating text cells in the about carousel. */
-export const aboutCards = [
-  "Every piece is handcrafted by master artisans in ethical workshops using responsibly harvested FSC-certified hardwoods, organic unbleached linen, and mineral-rich clay.",
-  "We obsess over tactile textures, sculptural silhouettes, and durable finishes that develop a richer, deeper patina with every year of use in your home.",
-  "Shipped directly from our maker studios to your living space—zero single-use plastics, fully recyclable packaging, and verified carbon-neutral transit.",
+/**
+ * The hairline strip between the experience band and the quote.
+ *
+ * These are the brand's actual material palette, not certification marks. The
+ * previous copy listed FSC / OEKO-TEX / Fair Trade badges the brand has not
+ * claimed; naming the fibres says more and is true.
+ */
+export const brandPartners = [
+  "Cotton Waffle",
+  "Slub Cotton",
+  "Cotton Percale",
+  "Linen Blends",
+  "Wool",
 ] as const;
 
-/** Guides teaser - image right, copy left. */
+/**
+ * The dark quote card. This is the brand's own closing line, so it is
+ * attributed to the studio rather than to a named person - putting invented
+ * words in a real founder's mouth is not a thing a storefront should do.
+ *
+ * TODO(brand): swap for a real line from Khushi if one is on record.
+ */
+export const testimonial = {
+  quote: site.statement,
+  name: site.name,
+  role: "The studio philosophy",
+} as const;
+
+/**
+ * Scrolling strip between the quote and the closing CTA.
+ *
+ * Carries a brand line rather than a discount: the previous "Discount 20%"
+ * ticker advertised an offer that does not exist.
+ */
+export const restTicker = {
+  label: "Moments of Rest",
+  repeat: 8,
+} as const;
+
+/** The closing call-to-action band that mirrors the hero. */
+export const ctaBand = {
+  pill: "Get started",
+  body: "Meet the Kompanions krafted to sit alongside the routines you already have - and to make them feel like rituals.",
+  wordmark: "shop now",
+  href: "/search",
+  seal: "krafted for moments of rest · ",
+} as const;
+
+/** Journal teaser - copy left, image right. */
 export const guidesFeature = {
-  eyebrow: "Living Guides",
-  title: "Creating spaces of warmth and serenity",
-  body: "Explore our curated interior styling notes on layering ambient lighting, mixing tactile natural textures, and selecting timeless furniture silhouettes that elevate everyday comfort.",
-  cta: "Read design guides",
+  eyebrow: "The Journal",
+  title: "Notes on rest, ritual and kraft",
+  body: "How a waffle weave earns its texture, what Dabu hand-block printing actually involves, and how to care for natural fibres so they soften rather than wear out.",
+  cta: "Read the journal",
   href: "/blogs",
 } as const;
 
-/** Brew-of-the-month / Spotlight band copy. */
+/** Spotlight band copy. */
 export const featureBand = {
-  label: "Design of the Month",
-  eyebrow: "Curated Spotlight",
+  label: "Kompanion of the Month",
+  eyebrow: "In the Spotlight",
 } as const;
 
 /**
@@ -150,122 +234,123 @@ export const featureBand = {
  */
 export const journalPosts = [
   {
-    slug: "layering-ambient-lighting",
-    title: "The Art of Layered Ambient Lighting for Cozy Evenings",
+    slug: "why-waffle-weave",
+    title: "Why Waffle Weave Belongs in Your Slowest Hour",
     excerpt:
-      "Lighting is the single most transformative element of any interior. Discover how low-temperature luminescence, brass accents, and diffused paper lamps turn rooms into soothing evening havens...",
+      "The honeycomb structure holds air, which is what makes a waffle robe dry quickly and breathe against skin. A look at how the weave is built and why it suits an unhurried morning...",
   },
   {
-    slug: "tactile-materials-linen-wood-clay",
-    title: "Tactile Harmony: Blending Raw Clay, Solid Oak & Stonewash Linen",
+    slug: "dabu-hand-block-printing",
+    title: "Dabu: The Mud-Resist Print Behind Our Indigo",
     excerpt:
-      "When textures speak, color takes a graceful step back. Learn how pairing warm natural timber with hand-thrown ceramics and organic textiles creates instant visual depth and physical serenity...",
+      "Before dye touches cloth, a mud-and-gum resist is hand-stamped onto it block by block. Nothing about the process is fast, and every repeat carries the hand that placed it...",
   },
   {
-    slug: "mindful-morning-rituals-home",
-    title: "5 Mindful Decor Rituals to Transform Your Home into a Sanctuary",
+    slug: "in-between-moments",
+    title: "The In-Between Moments Are the Ritual",
     excerpt:
-      "Your living environment profoundly influences your morning headspace. A few intentional changes—from dedicated tea nooks to natural aroma diffusers—cultivate lasting calm and focus...",
+      "Not the grand reset, but the ten minutes on the floor before the day starts. A case for textiles that support the routines already in your day rather than asking for new ones...",
   },
 ] as const;
 
-/** Footer shipping ticker. */
-export const shippingTicker = `Complimentary insured shipping on all orders over ${site.freeShippingThreshold}`;
-
-/** Living-format / Space grid. Handles map to Shopify collections where they exist. */
-export const brewFormats = [
+/**
+ * Category list used by the mobile drawer and the search overlay.
+ *
+ * TODO(brand): confirm handles against the live Shopify collections.
+ */
+export const collectionList = [
   {
-    title: "Living Room",
-    handle: "living-room",
-    note: "Sofas, lounge chairs, coffee tables, and ambient accents.",
+    title: "Kozy Lounge",
+    handle: "kozy-lounge",
+    note: "Low floor seating, biscuit floor pillows and plush textile forms.",
   },
   {
-    title: "Artisanal Lighting",
-    handle: "lighting",
-    note: "Pendant lamps, table lanterns, and warm brass fixtures.",
+    title: "Throw Pillows",
+    handle: "throw-pillows",
+    note: "Organic shapes and prints, made to be leaned on rather than looked at.",
   },
   {
-    title: "Ceramics & Vases",
-    handle: "ceramics",
-    note: "Hand-thrown stoneware, sculptural vessels, and earthy planters.",
+    title: "Kessentials",
+    handle: "kessentials",
+    note: "Waffle weave robes, kits and everyday loungewear.",
   },
   {
-    title: "Organic Textiles",
-    handle: "textiles",
-    note: "Pure linen throws, cushions, and tactile wool rugs.",
+    title: "Morning Luxuries",
+    handle: "morning-luxuries",
+    note: "Ritual kits for the first hour of the day.",
   },
   {
-    title: "Dining & Tableware",
-    handle: "dining",
-    note: "Solid wood dining, stoneware plates, and linen napkins.",
+    title: "Pet & Parent",
+    handle: "pet-parent",
+    note: "Dabu-printed carriers, pet clothing and matching parent accessories.",
   },
   {
-    title: "Bedroom & Rest",
-    handle: "bedroom",
-    note: "Linen bedding, bedside timber, and soothing nightlights.",
+    title: "B2B & Private Label",
+    handle: "b2b",
+    note: "Bespoke bulk production for boutiques, studios and hospitality.",
   },
 ] as const;
 
-/** Homepage FAQ. */
+/** Homepage / support FAQ. */
 export const faqs = [
   {
-    question: "What makes Kozy Living pieces different from mass decor?",
+    question: "What are Kompanions?",
     answer:
-      "We reject disposable fast-decor. Every Kozy Living piece is created in small artisan batches using solid FSC-certified timber, natural stoneware clay, and hand-loomed organic textiles. We design for longevity, tactile pleasure, and timeless beauty that outlasts fleeting trends.",
+      "It is what we call our textiles. They are not decor objects to be looked at - they are krafted to be used, leaned on and lived with, supporting the moments of rest already in your day.",
   },
   {
-    question: "How do you ensure ethical and sustainable craftsmanship?",
+    question: "What are your textiles made from?",
     answer:
-      "We partner directly with multigenerational artisan guilds and ethical family-run workshops. Our makers receive fair living wages, safe working environments, and credit for their artistry. We use only non-toxic plant oils, mineral glazes, and 100% plastic-free packaging.",
+      "100% natural fibres. Our material palette is cotton waffle weave, slub cotton, cotton percale, linen blends, wool and other premium natural Indian textiles. We use consciously sourced natural dyes and surplus fabric from the industry.",
   },
   {
-    question: "How do I care for solid wood and handcrafted ceramics?",
+    question: "Who makes them?",
     answer:
-      "Solid hardwoods thrive when wiped with a soft, slightly damp cloth and treated with natural beeswax once or twice a year. Our high-fired stoneware ceramics are dishwasher-safe, food-grade, and lead-free, designed for daily mindful use.",
+      "Every Kompanion is designed in-house and made in collaboration with craft clusters across India, using artisanal processes including traditional Dabu hand-block printing.",
   },
   {
-    question: "What is your shipping and return policy?",
+    question: "How do I care for natural fibres?",
     answer:
-      "We offer complimentary shipping across India on orders above ₹2,500. Every fragile and large furniture piece is custom-crated in protective recycled materials. If an item doesn't fit your space perfectly, we offer hassle-free 14-day returns.",
+      "Wash cool and gently, dry in shade, and skip the fabric softener - it coats the fibre and flattens a waffle weave's texture. Naturally dyed and hand-printed pieces will soften and settle with use; that shift is the material behaving as it should.",
   },
   {
-    question: "Do you offer interior styling advice or custom orders?",
+    question: "Do you take bulk or private label orders?",
     answer:
-      "Yes. Our in-house design studio collaborates with homeowners, architects, and interior designers on bespoke furniture finishes, custom textile sizing, and complete sanctuary curation. Contact us to schedule a design consultation.",
+      "Yes. Alongside retail we run bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands. Write to us with your brief to start a conversation.",
   },
 ] as const;
 
 export const footerColumns = [
   {
-    title: "Product",
+    title: "Shop",
     links: [
-      { title: "Living Room", path: "/search/living-room" },
-      { title: "Lighting", path: "/search/lighting" },
-      { title: "Ceramics", path: "/search/ceramics" },
-      { title: "Textiles", path: "/search/textiles" },
+      { title: "Kozy Lounge", path: "/search/kozy-lounge" },
+      { title: "Kessentials", path: "/search/kessentials" },
+      { title: "Morning Luxuries", path: "/search/morning-luxuries" },
+      { title: "Pet & Parent", path: "/search/pet-parent" },
     ],
   },
   {
-    title: "Company",
+    title: "Studio",
     links: [
       { title: "About", path: "/about-us" },
-      { title: "Mission", path: "/about-us" },
+      { title: "Kraft & Materials", path: "/about-us" },
       { title: "Journal", path: "/blogs" },
-      { title: "Careers", path: "/contact" },
+      { title: "B2B & Private Label", path: "/contact" },
     ],
   },
   {
     title: "Contact",
     links: [
-      { title: "(+91) 8494 907 007", path: "tel:+918494907007" },
-      { title: "@kozy.living", path: "https://instagram.com" },
+      { title: site.instagram, path: site.instagramUrl },
       { title: "care@kozyliving.com", path: "mailto:care@kozyliving.com" },
+      { title: "Get in touch", path: "/contact" },
     ],
   },
   {
     title: "Social Media",
     links: [
-      { title: "Instagram", path: "https://instagram.com" },
+      { title: "Instagram", path: site.instagramUrl },
       { title: "Pinterest", path: "https://pinterest.com" },
       { title: "YouTube", path: "https://youtube.com" },
     ],
@@ -279,394 +364,269 @@ export const legalLinks = [
 ] as const;
 
 export const socialLinks = [
-  { title: "Instagram", href: "https://instagram.com" },
+  { title: "Instagram", href: site.instagramUrl },
   { title: "Pinterest", href: "https://pinterest.com" },
   { title: "YouTube", href: "https://youtube.com" },
-  { title: "WhatsApp", href: "https://wa.me/918494907007" },
   { title: "Email", href: "mailto:care@kozyliving.com" },
 ] as const;
 
 /* ------------------------------------------------------------------ contact */
 
 /**
- * The studio addresses, inbox, and client helpline. Held here rather than in
- * the contact page so the footer, JSON-LD in `layout.tsx`, and order copies
- * read the same single source of truth.
+ * TODO(brand): the email, phone and studio addresses below are placeholders
+ * carried over from the site scaffold and have NOT been verified. Instagram is
+ * the only channel confirmed. Replace before launch - these also feed the
+ * footer and the organisation JSON-LD in `layout.tsx`.
  */
 export const contact = {
-  eyebrow: "Connect with Us",
-  title: "Get in touch with the studio",
+  eyebrow: "Get in touch",
+  title: "Say hello to the studio",
   body: [
-    "Have a question about a piece, custom sizing, trade inquiries, or need styling advice for your space? Our studio team is here to help you curate your ideal sanctuary.",
-    "Submit the form below or write directly to our care team. We respond thoughtfully to every inquiry within one business day.",
+    "Questions about a Kompanion, fabric and care, custom sizing, or a bulk and private label brief? The studio reads everything that comes in.",
+    "Send the form below, write to us directly, or reach us on Instagram - whichever is easiest for you.",
   ],
   email: "care@kozyliving.com",
+  instagram: site.instagram,
+  instagramUrl: site.instagramUrl,
   phone: "(+91) 8494 907 007",
   phoneHref: "+918494907007",
   locations: [
     {
-      label: "Design Studio & Workshop",
-      lines: [
-        "Kozy Living Studio",
-        "Craft Guild Enclave, Indiranagar",
-        "Bengaluru, Karnataka 560038",
-      ],
+      label: "Design Studio",
+      lines: ["Kozy Living Studio", "India"],
     },
     {
-      label: "Artisan Ceramic & Wood Guild",
+      label: "B2B & Private Label",
       lines: [
-        "Artisan Quarter, Sanganer",
-        "Jaipur Heritage Craft Zone",
-        "Rajasthan 302029",
+        "Bespoke bulk production for boutiques,",
+        "interior studios and hospitality.",
+        "Share your brief to begin.",
       ],
     },
   ],
 } as const;
 
-/* ----------------------------------------------------------------- heritage */
+/* ---------------------------------------------------------------- about page */
 
 /**
- * Photography for `/about-us`.
+ * Photography for `/about-us`. `src: null` renders the designed placeholder
+ * plate rather than a broken image - drop real paths in as shoots land.
  */
 export const aboutImages = {
-  /** Square. Tray, ceramics and natural light. */
-  morning: {
+  studio: {
     src: null,
-    alt: "A cozy living sanctuary with warm linen throws, handcrafted ceramic vase, and natural timber coffee table in morning sunlight.",
+    alt: "Waffle weave and slub cotton Kompanions laid out on the studio table.",
     aspect: "1/1",
   },
-  /** Square. Handcrafted natural decor. */
-  grounds: {
+  kraft: {
     src: null,
-    alt: "Artisan hands shaping warm terracotta pottery and smoothing solid oak timber in the Kozy Living workshop.",
+    alt: "A Dabu hand-block being pressed into mud resist before the indigo dye bath.",
     aspect: "1/1",
   },
-  /** Portrait 2:3. Minimalist sculptural interior hero. */
-  pouch: {
+  lounge: {
     src: null,
-    alt: "Sculptural ceramic vase and organic linen cushion styled on a minimalist solid wood bench.",
+    alt: "A floor lounge setup with biscuit floor pillows and a linen blend throw.",
     aspect: "2/3",
   },
 } as const;
 
 /**
- * The About page, section by section.
+ * The About masthead and the four collections beneath it. The numerals are the
+ * ordering of the verticals - this section used to carry a fabricated
+ * year-by-year company timeline.
  */
 export const heritage = {
-  eyebrow: "Our Heritage",
-  title: "Rooted in Craft. Designed for Modern Living.",
-  body: "From a bespoke woodwork and ceramic studio in 2018 to homes across the world—crafting cozy, mindful living spaces one piece at a time.",
-  timeline: [
+  eyebrow: "What we make",
+  title: "Krafted to Give You Moments of Rest.",
+  body: "Kozy Living Textiles are your in-between Kompanions - designed in-house, made with craft clusters across India, and krafted to turn everyday moments into mindful daily rituals.",
+  collections: [
     {
-      year: "2018",
-      title: "The Studio Begins",
-      body: "Kozy Living is founded as a bespoke woodwork and pottery studio, creating handcrafted solid oak dining tables and organic clay vessels for intimate living spaces.",
+      index: "01",
+      title: "The Kozy Lounge",
+      body: "Low seating built for the floor - mini soft floor lounge seating, structured biscuit floor pillows, and playful throw pillows and plush textile shapes that stand in for fragile ceramic decor.",
     },
     {
-      year: "2020",
-      title: "Artisan Collective Formed",
-      body: "We expanded our horizons to collaborate directly with generational textile weavers and master ceramicists across renowned regional craft communities.",
+      index: "02",
+      title: "Kessentials & Morning Luxuries",
+      body: "A lifestyle vertical built around the first hour of the day: high-absorbency natural waffle weave robes, ritual kits and everyday loungewear.",
     },
     {
-      year: "2022",
-      title: "100% Sustainable Materials Pledge",
-      body: "We transitioned our entire material supply chain to FSC-certified timber, natural plant-based finishes, organic cottons, and completely plastic-free shipping.",
+      index: "03",
+      title: "Pet & Parent",
+      body: "Dabu-printed artisan pet carriers, pet clothing and matching parent accessories - the same fibres and prints, scaled for both ends of the leash.",
     },
     {
-      year: "2024",
-      title: "Sculptural Lighting & Seating",
-      body: "Launched our acclaimed ambient lighting and textured bouclé & linen seating line, merging sculptural Japandi aesthetics with plush comfort.",
-    },
-    {
-      year: "2026",
-      title: "Direct to Your Sanctuary",
-      body: "Delivering heirloom-quality homeware, timeless furniture, and curated decor directly to discerning homes with transparent pricing and carbon-neutral transit.",
+      index: "04",
+      title: "B2B & Private Label",
+      body: "Bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands.",
     },
   ],
 } as const;
 
 /**
- * Sustainability and craft metrics.
+ * Why craft-led textiles. The stat values are words, not invented percentages
+ * - every figure here is a claim the brand actually makes.
  */
-export const whyRobusta = {
-  eyebrow: "Why Mindful Living",
-  title: "Why choose slow, sustainable craftsmanship?",
-  body: "Fast furniture and synthetic decor end up in landfills. We design enduring pieces with natural materials that breathe warmth and age gracefully in your home.",
+export const whyKraft = {
+  eyebrow: "Why kraft-led",
+  title: "Why slow, natural and made by hand?",
+  body: "Synthetic decor is made to be looked at and replaced. Natural fibres worked by hand are made to be used, and they get better at it.",
   stats: [
     {
       value: "100%",
-      label: "FSC-Certified Timbers & Organic Linens",
-      note: "Ethically harvested, zero toxic coatings",
+      label: "Natural Fibres",
+      note: "Cotton, linen blends and wool - no synthetics",
     },
     {
-      value: "0%",
-      label: "Single-Use Plastics in Packaging",
-      note: "100% biodegradable and recyclable materials",
+      value: "Dabu",
+      label: "Hand-Block Printed",
+      note: "Traditional mud-resist printing, block by block",
     },
     {
-      value: "40+",
-      label: "Master Artisan Maker Guilds",
-      note: "Preserving heritage woodworking and pottery",
+      value: "In-House",
+      label: "Designed in the Studio",
+      note: "Made with craft clusters across India",
     },
     {
-      value: "10+",
-      label: "Years of Built-to-Last Durability",
-      note: "Heirloom construction that endures daily life",
+      value: "Surplus",
+      label: "Consciously Sourced",
+      note: "Natural dyes and surplus industry fabric",
     },
   ],
   comparison: [
-    { trait: "Materials", arabica: "Particle board & veneers", robusta: "Solid FSC hardwoods & pure clay" },
-    { trait: "Finishing", arabica: "Synthetic chemical lacquers", robusta: "Natural plant oils & beeswax" },
-    { trait: "Packaging", arabica: "Plastic bubble wrap & foam", robusta: "100% plastic-free recycled paper" },
-    { trait: "Longevity", arabica: "2-3 years before wear", robusta: "Generations of lasting beauty" },
-    { trait: "Artisan Fair Pay", arabica: "Mass automated factory", robusta: "Fair living wages for all makers" },
+    {
+      trait: "Fibre",
+      conventional: "Synthetic blends and microfibre",
+      kozy: "100% natural fibres",
+    },
+    {
+      trait: "Print",
+      conventional: "Bulk machine screen printing",
+      kozy: "Dabu hand-block printing with craft clusters",
+    },
+    {
+      trait: "Sourcing",
+      conventional: "Virgin fabric ordered in volume",
+      kozy: "Consciously sourced natural and surplus fabric",
+    },
+    {
+      trait: "Purpose",
+      conventional: "Decor that is looked at",
+      kozy: "Kompanions that are used, every day",
+    },
+    {
+      trait: "Function",
+      conventional: "One styled position, one job",
+      kozy: "Multipurpose by design",
+    },
   ],
 } as const;
 
-/** Five numbered steps from studio to home. */
-export const farmToCup = {
-  eyebrow: "Studio to Sanctuary",
-  title: "Five steps. Zero compromises.",
+/** Five numbered steps from the studio to your everyday. */
+export const studioToEveryday = {
+  eyebrow: "Studio to everyday",
+  title: "Five steps. No shortcuts.",
   steps: [
     {
-      title: "Conscious Sourcing",
-      body: "We select responsibly harvested solid hardwoods, organic unbleached flax linen, and mineral-rich local clays.",
+      title: "Designed In-House",
+      body: "Every print, form and Kompanion starts in our own studio, drawn around a routine somebody already has.",
     },
     {
-      title: "Artisan Handcrafting",
-      body: "Every piece is shaped, hand-joined, wheel-thrown, or loomed by experienced master artisans in small batches.",
+      title: "Natural Fibres Only",
+      body: "Cotton waffle weave, slub cotton, cotton percale, linen blends and wool - consciously sourced, including surplus fabric from the industry.",
     },
     {
-      title: "Non-Toxic Finishing",
-      body: "Finished with natural cold-pressed plant oils, organic beeswax, and low-VOC mineral glazes safe for your family.",
+      title: "Made With Craft Clusters",
+      body: "Production happens in collaboration with craft clusters across India, using artisanal processes rather than volume machinery.",
     },
     {
-      title: "Structural Quality Testing",
-      body: "Each creation undergoes rigorous checks for joinery strength, tactile smoothness, and ergonomic comfort.",
+      title: "Hand-Block Printed",
+      body: "Dabu mud-resist printing is stamped block by block before dyeing, so no two repeats are identical.",
     },
     {
-      title: "Mindful Delivery",
-      body: "Carefully protected in custom plastic-free packaging and dispatched with carbon-neutral transit to your door.",
+      title: "Built Multipurpose",
+      body: "Each Kompanion is designed to do more than one job, so it fits into everyday living instead of waiting for an occasion.",
     },
   ],
 } as const;
 
 export const sustainability = {
-  eyebrow: "Sustainability",
-  title: ["We build for spaces that last", "and a planet that endures."],
-  body: "Every object we create is designed to live in harmony with nature—using renewable earth materials, zero toxic emissions, and plastic-free packaging.",
+  eyebrow: "Conscious by default",
+  title: ["Kraft that respects the hand", "and the material."],
+  body: "Being conscious is not a line on our packaging - it decides which fibre we buy, who makes the cloth, and how long the Kompanion is expected to last.",
   pillars: [
     {
-      title: "Renewable Materials",
-      body: "Solid oak, teak, pure Belgian linen, and high-fired stoneware clay from responsible earth-conscious sources.",
+      title: "Natural Fibres Only",
+      body: "100% natural Indian textiles - cotton waffle weave, slub cotton, percale, linen blends and wool.",
     },
     {
-      title: "Zero Plastic Transit",
-      body: "100% recyclable corrugated board, water-activated kraft tape, and reusable cotton dust bags for all orders.",
+      title: "Surplus & Natural Dyes",
+      body: "Consciously sourced natural dyes and surplus fabric from the industry, kept in use rather than discarded.",
     },
     {
-      title: "Artisan Empowerment",
-      body: "Direct maker partnerships ensuring fair living wages, healthcare support, and preservation of age-old craft techniques.",
+      title: "Craft Cluster Collaboration",
+      body: "Made with craft clusters across India, sustaining artisanal processes like Dabu hand-block printing.",
     },
     {
-      title: "Circular Longevity",
-      body: "Timeless silhouettes designed to be loved, maintained, and passed down rather than discarded after a season.",
+      title: "Multipurpose Longevity",
+      body: "Designed to be multipurpose and lived with daily, so one Kompanion replaces several single-use pieces.",
     },
   ],
 } as const;
 
 /**
- * Creative collective & founding designers.
+ * Who makes it. Only the founder is a named individual - the previous version
+ * of this section invented a four-person leadership team.
  */
-export const family = {
-  eyebrow: "The Collective",
-  title: "Passionate about craft and quiet living.",
-  strapline: "Design Philosophy: Warmth & Intention",
+export const collective = {
+  eyebrow: "The collective",
+  title: "Designed in-house. Made by hand.",
+  strapline: "Rooted in Indian kraft, expressed through a modern design language",
   members: [
     {
-      name: "Aria Thorne",
-      generation: "Co-Founder · Creative Director",
-      credential: "M.Arch, Sustainable Architecture",
-      body: "Architect and spatial designer dedicated to creating peaceful, light-filled sanctuaries through natural materials.",
+      name: site.founder,
+      role: "Founder & Design Lead",
+      credential: site.founderCredential,
+      body: "A textile design graduate of NIFT Delhi, Khushi founded Kozy Living on the belief that intention doesn't come from adding more, but from engaging deeply with the routines that already exist.",
     },
     {
-      name: "Rohan Varma",
-      generation: "Co-Founder · Head of Craft",
-      credential: "Master Woodworker & Guild Lead",
-      body: "Second-generation timber craftsman specializing in traditional joinery and tactile organic finishes.",
+      name: "Craft Clusters",
+      role: "Makers across India",
+      credential: "Artisanal processes, including Dabu",
+      body: "Our Kompanions are made in collaboration with craft clusters across the country, whose hand-block printing and finishing carry techniques no machine reproduces.",
     },
     {
-      name: "Meera Sen",
-      generation: "Lead Ceramic Artist",
-      credential: "Fine Arts & Ceramic Sculpting",
-      body: "Sculpts hand-thrown stoneware vessels and earthy lamps inspired by wabi-sabi textures and raw mineral pigments.",
-    },
-    {
-      name: "Devan Thorne",
-      generation: "Head of Sustainable Logistics",
-      credential: "Circular Supply Chain & Logistics",
-      body: "Pioneered our 100% plastic-free packaging standard and verified carbon-neutral transit network.",
+      name: "The Studio",
+      role: "Design & Development",
+      credential: "In-house print and product design",
+      body: "Prints, organic forms and colour are developed in-house, then worked out on the cloth itself - so what ships is what the material actually wants to do.",
     },
   ],
 } as const;
 
-/** The signed note that closes the story before the shop CTA. */
-export const familyNote = {
+/**
+ * The signed note that closes the story.
+ *
+ * TODO(brand): written in studio voice and signed by the studio on purpose.
+ * If Khushi wants this in first person, replace the body with her own words
+ * before changing the signature to her name.
+ */
+export const studioNote = {
   eyebrow: "A note from the studio",
-  title: "We believe your home should be your sanctuary.",
+  title: "Intention doesn't come from adding more.",
   body: [
-    "We started Kozy Living because we wanted our own living spaces to feel grounding, warm, and deeply restful. We wanted furniture and objects made with real heart, by real hands.",
-    "We hope our pieces bring warmth, calm, and beauty into your everyday rituals. If you ever have a question or need assistance with your home curation, we're always here for you.",
+    "It comes from engaging deeply with the routines that already exist. The ten minutes on the floor before the day starts. The robe after a shower. The corner you keep coming back to.",
+    "We krafted Kozy Living Textiles to sit inside those moments rather than ask for new ones - your in-between Kompanions, made from natural fibres by hands we know.",
   ],
-  signature: "Aria & Rohan",
-  signatureRole: "Founders · Kozy Living Design Studio",
+  signature: `The ${site.name} Studio`,
+  signatureRole: `Founded by ${site.founder} · ${site.founderCredential}`,
 } as const;
 
 /** Closing band on `/about-us` - the handoff to the shop. */
 export const aboutCta = {
-  eyebrow: "Handcrafted · Sustainable",
-  title: ["Bring warmth to", "your sanctuary."],
-  body: "Crafted in small artisan batches with natural materials and shipped directly to your door with plastic-free care.",
-  cta: "Explore the collection",
+  eyebrow: "Natural fibres · Hand-block printed",
+  title: ["Meet your", "in-between Kompanions."],
+  body: "Krafted in small batches from 100% natural fibres, in collaboration with craft clusters across India.",
+  cta: "Shop all Kompanions",
   href: "/search",
-} as const;
-
-/**
- * Living philosophy band.
- */
-export const estatePhilosophy = {
-  eyebrow: "Living Philosophy",
-  title: ["We believe home is", " a living sanctuary"],
-  body: [
-    "At Kozy Living, every piece begins with an appreciation for slow craftsmanship, natural textures, and the quiet luxury of comfort. From solid FSC-certified hardwoods and hand-thrown stoneware to hand-loomed organic linens, our designs bring warmth, calm, and grounded elegance to everyday living. Nothing here is rushed. Designed with intention, finished with natural plant oils, and packaged plastic-free.",
-  ],
-  cta: "Discover our story",
-  href: "/about-us",
-} as const;
-
-/**
- * Living reel: four staggered plates.
- */
-export const estateReel = [
-  {
-    kind: "image",
-    src: null,
-    alt: "A minimalist living space featuring a solid oak low table, organic linen seating, and warm ambient light.",
-    label: "the material",
-    caption: "Solid oak, washed linen, raw clay",
-  },
-  {
-    kind: "video",
-    src: "https://cdn.shopify.com/videos/c/o/v/643e30e15c364663860fded49117578a.mp4",
-    label: "the craft",
-    caption: "Hand-thrown pottery, wheel to kiln",
-  },
-  {
-    kind: "image",
-    src: null,
-    alt: "Artisan ceramics and warm linen cushions styled on a warm timber surface.",
-    label: "the ambient glow",
-    caption: "Soft lighting that warms the evening",
-  },
-  {
-    kind: "video",
-    src: "https://cdn.shopify.com/videos/c/o/v/81da4c142d584a23b09d68399eff9a18.mp4",
-    label: "the sanctuary",
-    caption: "Spaces that invite rest and deep calm",
-  },
-] as const;
-
-/* ------------------------------------------------------------------ homepage
-   The sections below map one-to-one onto the homepage layout, in page order.
-------------------------------------------------------------------------- */
-
-/**
- * Hero. A single photographic frame carrying a rating chip and blurb top-left,
- * a black pill CTA top-right, and the brand wordmark bleeding across its
- * bottom edge. The meta row under the frame is the year/category line.
- */
-export const hero = {
-  rating: "4.9",
-  ratingNote: "2,400+ homes styled",
-  blurb:
-    "Discover our handcrafted collection of timeless objects that will bring warmth, calm and quiet character to every room of your home.",
-  cta: "Shop now",
-  ctaHref: "/search",
-  /** Set in the giant lowercase display face over the frame's bottom edge. */
-  wordmark: "kozy living",
-  seal: "get 20% off · start your sanctuary · ",
-  metaLeft: "Est. 2018",
-  metaRight: "Handcrafted Homeware",
-} as const;
-
-/** The oversized statement that opens the editorial half of the page. */
-export const boldStatement = {
-  title: ["Be Warm,", "Be Present"],
-  body: "Join a community of mindful makers and homeowners for early access to new drops, styling notes from our studio, and pieces chosen for the way you actually live.",
-} as const;
-
-/**
- * The staggered lookbook cluster. Five plates at alternating vertical offsets;
- * the `lift` value is the offset step, and `span` the relative height, so the
- * row reads as a zigzag rather than a grid.
- */
-export const lookbook = [
-  { tag: "oak", title: "Slow Table", handle: "furniture", lift: 0, span: "tall" },
-  { tag: "linen", title: "Washed Throw", handle: "textiles", lift: 2, span: "short" },
-  { tag: "clay", title: "Ember Vessel", handle: "ceramics", lift: 1, span: "mid" },
-  { tag: "brass", title: "Dusk Lantern", handle: "lighting", lift: 3, span: "short" },
-  { tag: "wool", title: "Quiet Rug", handle: "rugs", lift: 0, span: "mid" },
-] as const;
-
-/**
- * The two-up experience band: a wide photographic panel, a yellow statement
- * card, and a smaller photographic panel stacked beside it.
- */
-export const experienceBand = {
-  wide: {
-    caption:
-      "Furnishing with us is not just about filling a room; it is about building a place you want to come home to.",
-    href: "/search",
-  },
-  yellow: {
-    chip: "kozyliving.com",
-    title: "Bring warmth home today!",
-    href: "/search",
-  },
-  small: {
-    caption: "we have the right piece to make the room finally feel finished.",
-    href: "/search/decor",
-  },
-} as const;
-
-/** Material partners strip. Wordmarks only - no logo files required. */
-export const brandPartners = [
-  "FSC Certified",
-  "OEKO-TEX",
-  "Fair Trade",
-  "Plastic Free",
-  "Carbon Neutral",
-] as const;
-
-/** The dark quote card beside a portrait plate. */
-export const testimonial = {
-  quote:
-    "A home is not about following what is fashionable. It is about surrounding yourself with the few things that actually make you feel like yourself.",
-  name: "Aria Thorne",
-  role: `Co-Founder, ${site.name}`,
-} as const;
-
-/** Scrolling discount strip between the testimonial and the closing CTA. */
-export const discountTicker = {
-  label: "Discount 20%",
-  repeat: 8,
-} as const;
-
-/** The closing call-to-action band that mirrors the hero. */
-export const ctaBand = {
-  pill: "Get started",
-  body: "Join our community of mindful homeowners for early access to new collections, styling notes, and pieces made to last a lifetime.",
-  wordmark: "shop now",
-  href: "/search",
-  seal: "get 20% off · start your sanctuary · ",
 } as const;

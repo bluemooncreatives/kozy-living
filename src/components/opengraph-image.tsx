@@ -47,7 +47,7 @@ export default async function OpengraphImage(
             tw="ml-5 text-2xl"
             style={{ color: "#E9B973", letterSpacing: "0.14em" }}
           >
-            {site.origin.toUpperCase()} · EST. {site.since}
+            {site.tagline.toUpperCase()}
           </p>
         </div>
 

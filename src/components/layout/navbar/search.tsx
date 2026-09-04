@@ -17,7 +17,7 @@ import {
   KeyboardEvent,
 } from "react";
 import clsx from "clsx";
-import { brewFormats } from "@/lib/site";
+import { collectionList } from "@/lib/site";
 import { useInstantSearch } from "@/hooks/use-instant-search";
 import SearchResults from "./search-results";
 
@@ -185,7 +185,7 @@ export default function SearchTrigger() {
                   <SearchOverlayForm onDone={() => setIsOpen(false)} />
                 </div>
 
-                {/* Browse by brew pills - only shown when there is no query */}
+                {/* Browse-by-collection pills - only shown when there is no query */}
               </div>
             </DialogPanel>
           </TransitionChild>
@@ -198,7 +198,7 @@ export default function SearchTrigger() {
 // ---------------------------------------------------------------------------
 // SearchOverlayForm - large controlled input inside the overlay dialog.
 // Results are rendered inline below the input (NO floating card).
-// The "Browse by brew" pills are shown only when the input is empty.
+// The browse pills are shown only when the input is empty.
 // ---------------------------------------------------------------------------
 function SearchOverlayForm({ onDone }: { onDone: () => void }) {
   const router = useRouter();
@@ -238,7 +238,7 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
           type="text"
           name="search"
           autoFocus
-          placeholder="Search objects, spaces, materials…"
+          placeholder="Search Kompanions, prints, fibres…"
           autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -265,9 +265,9 @@ function SearchOverlayForm({ onDone }: { onDone: () => void }) {
       {/* Browse-by-space pills - visible only when input is empty */}
       {showBrowse && (
         <div className="mt-10">
-          <p className="eyebrow mb-4 text-muted">Browse by space &amp; category</p>
+          <p className="eyebrow mb-4 text-muted">Browse by collection</p>
           <ul className="flex flex-wrap gap-2">
-            {brewFormats.map((format) => (
+            {collectionList.map((format) => (
               <li key={format.handle}>
                 <a
                   href={`/search/${format.handle}`}

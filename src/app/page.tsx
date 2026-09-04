@@ -17,7 +17,7 @@ import {
   boldStatement,
   brandPartners,
   ctaBand,
-  discountTicker,
+  restTicker,
   experienceBand,
   featureBand,
   guidesFeature,
@@ -38,7 +38,7 @@ export const metadata = {
  * Homepage. Section order follows the reference layout top to bottom:
  * hero frame + wordmark → meta rule → bold statement + staggered lookbook →
  * category pills → bestsellers → experience band → material strip →
- * testimonial → discount ticker → curated edits → spotlight → journal →
+ * testimonial → rest ticker → new arrivals → spotlight → journal →
  * closing "shop now" band.
  */
 export default function Home() {
@@ -55,7 +55,7 @@ export default function Home() {
       <ExperienceBand />
       <MaterialStrip />
       <Testimonial />
-      <DiscountTicker />
+      <RestTicker />
 
       <Suspense fallback={null}>
         <CuratedEdits />
@@ -100,13 +100,13 @@ async function productsFrom(
 /* -------------------------------------------------------------------- hero */
 
 /**
- * One photographic frame with everything laid over it: the rating chip and
+ * One photographic frame with everything laid over it: the origin flag and
  * blurb top-left, the CTA pill top-right, and the wordmark crossing the
  * frame's bottom edge so it reads as ink on both the photograph and the page.
  */
 function Hero() {
   return (
-    <section className="shell pt-2">
+    <section className="shell overflow-x-clip pt-2">
       {/* The wordmark is anchored to the *frame's* bottom edge and then pushed
           half its own height downwards, so it straddles the edge exactly as in
           the reference. The section's bottom padding reserves the room that
@@ -120,18 +120,15 @@ function Hero() {
             placeholderText="kozy"
             className="w-full min-h-[24rem]"
             sizes="100vw"
-            alt="A calm, warmly lit living room furnished with solid oak, linen and hand-thrown ceramics."
+            alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
           >
-            {/* Rating + blurb */}
+            {/* Origin flag + blurb */}
             <div className="glass absolute left-3 top-3 z-20 max-w-[60%] md:left-5 md:top-5 md:max-w-[19rem]">
               <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
                 <span aria-hidden className="text-yellow">
-                  ★
+                  ✳
                 </span>
-                {hero.rating}
-                <span className="text-spec font-normal text-paper/65">
-                  {hero.ratingNote}
-                </span>
+                {hero.flag}
               </p>
               <p className="mt-2 text-spec leading-relaxed text-paper/90">
                 {hero.blurb}
@@ -332,7 +329,7 @@ function ExperienceBand() {
           caption={experienceBand.wide.caption}
           className="h-full"
           sizes="(min-width: 1024px) 60vw, 100vw"
-          alt="A styled corner of a living room with layered textiles and warm lamplight."
+          alt="A corner of a room layered with floor pillows, a throw and a linen blend cushion."
         />
       </Link>
 
@@ -364,7 +361,7 @@ function ExperienceBand() {
             caption={experienceBand.small.caption}
             className="h-full"
             sizes="(min-width: 1024px) 35vw, 100vw"
-            alt="A hand-thrown ceramic vessel resting on a solid oak surface."
+            alt="A Dabu hand-block print in indigo, close on the weave."
           />
         </Link>
       </div>
@@ -404,10 +401,10 @@ function Testimonial() {
       <Plate
         aspect="4/3"
         tone={0}
-        placeholderText="aria"
+        placeholderText="kraft"
         className="h-full min-h-[18rem]"
         sizes="(min-width: 1024px) 50vw, 100vw"
-        alt="Aria Thorne, co-founder of Kozy Living, at the studio workbench."
+        alt="Cloth on the studio table mid-way through a hand-block print run."
       />
 
       <figure className="panel-ink flex flex-col justify-center p-8 md:p-12">
@@ -431,15 +428,15 @@ function Testimonial() {
   );
 }
 
-/* -------------------------------------------------------- discount strip */
+/* ------------------------------------------------------------ rest ticker */
 
-/** Full-bleed ticker, each repeat separated by the yellow seal. */
-function DiscountTicker() {
+/** Full-bleed ticker, each repeat punctuated by the yellow asterisk. */
+function RestTicker() {
   return (
-    <section aria-label="Current offer" className="rule-y py-5 md:py-7">
+    <section aria-label="Moments of rest" className="rule-y py-5 md:py-7">
       <Marquee
-        phrases={Array.from({ length: discountTicker.repeat }, () =>
-          discountTicker.label
+        phrases={Array.from({ length: restTicker.repeat }, () =>
+          restTicker.label
         )}
         size="display"
         separator="✳"
@@ -463,8 +460,8 @@ async function CuratedEdits() {
   return (
     <section aria-labelledby="curated-edits">
       <SectionHead
-        eyebrow="Curated Edits"
-        title={<span id="curated-edits">Warmth &amp; Texture</span>}
+        eyebrow="Just In"
+        title={<span id="curated-edits">New Kompanions</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
@@ -563,7 +560,7 @@ function Guides() {
           placeholderText="guides"
           className="h-full min-h-[16rem]"
           sizes="(min-width: 1024px) 50vw, 100vw"
-          alt="Styling notes laid out beside fabric swatches and a brass lamp."
+          alt="Fibre swatches and print blocks laid out on the studio table."
         />
       </Link>
     </section>
@@ -615,7 +612,10 @@ async function Journal() {
 /** Mirrors the hero: one frame, a pill, a paragraph, and the wordmark. */
 function ClosingBand() {
   return (
-    <section aria-label="Start shopping" className="shell pb-[9vw] pt-4">
+    <section
+      aria-label="Start shopping"
+      className="shell overflow-x-clip pb-[9vw] pt-4"
+    >
       <div className="relative">
         <Plate
           aspect="2/1"
@@ -623,7 +623,7 @@ function ClosingBand() {
           placeholderText="home"
           className="w-full min-h-[22rem]"
           sizes="100vw"
-          alt="A finished room: layered rugs, warm lamplight, and hand-made objects on open shelving."
+          alt="A lived-in floor lounge: biscuit pillows, a waffle throw and an unhurried morning."
         >
           <Link
             href={ctaBand.href}

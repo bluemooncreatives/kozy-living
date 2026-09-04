@@ -51,10 +51,10 @@ export default async function CategoryPage({
         <div className="panel px-8 py-20 text-center">
           <p className="serif text-display-md">This collection is empty</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
-            Pieces in this collection are currently being crafted. Explore the rest of our catalog.
+            Kompanions in this collection are on their way. Explore the rest of the catalogue.
           </p>
           <Link href="/search" className="btn-solid mt-8">
-            View all objects
+            View all Kompanions
           </Link>
         </div>
       ) : (

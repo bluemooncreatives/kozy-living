@@ -20,9 +20,9 @@ export default function SearchLayout({
   return (
     <>
       <div className="shell max-w-4xl py-10 md:py-14">
-        <Eyebrow align="left">The Collection</Eyebrow>
+        <Eyebrow align="left">All Kompanions</Eyebrow>
         <Headline className="mt-4">
-          Thoughtful objects for mindful spaces
+          Your in-between Kompanions
         </Headline>
         <p className="body-mono mt-5 max-w-measure text-pretty">
           {site.description}

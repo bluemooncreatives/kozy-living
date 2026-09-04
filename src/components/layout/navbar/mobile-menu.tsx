@@ -6,7 +6,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Fragment, useState } from "react";
 import { SearchBar } from "./search";
-import { brewFormats, site, socialLinks } from "@/lib/site";
+import { collectionList, site, socialLinks } from "@/lib/site";
 import LogoSquare from "@/components/logo-square";
 
 export default function MobileMenu({ menu }: { menu: Menu[] }) {
@@ -94,9 +94,9 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   ))}
                 </ul>
 
-                <p className="eyebrow mb-4 mt-10">Browse by space</p>
+                <p className="eyebrow mb-4 mt-10 text-muted">Browse by collection</p>
                 <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {brewFormats.map((format) => (
+                  {collectionList.map((format) => (
                     <li key={format.handle}>
                       <Link
                         href={`/search/${format.handle}`}
@@ -127,9 +127,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     </li>
                   ))}
                 </ul>
-                <p className="eyebrow mt-6">
-                  {site.origin} · Est. {site.since}
-                </p>
+                <p className="eyebrow mt-6 text-muted">{site.tagline}</p>
               </div>
             </DialogPanel>
           </TransitionChild>

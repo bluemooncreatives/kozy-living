@@ -7,38 +7,38 @@ import { Eyebrow, Headline } from "@/components/ui/section";
 import {
   aboutCta,
   aboutImages,
-  family,
-  familyNote,
-  farmToCup,
+  collective,
   heritage,
   site,
+  studioNote,
+  studioToEveryday,
   sustainability,
-  whyRobusta,
+  whyKraft,
 } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: `The ${site.name} story: our studio heritage, sustainable artisan craft, and how our pieces are made with conscious materials.`,
+  description: `The ${site.name} story: what we make, the natural fibres we work in, and how our Kompanions are made with craft clusters across India.`,
   openGraph: { type: "website" },
 };
 
 /**
  * The Kozy Living story. Section order:
- * who we are (heritage timeline) → why mindful craft (materials & longevity) →
- * how we make it (studio to sanctuary) → sustainability commitments →
- * the founding collective → founders' note → shop CTA.
+ * what we make (the four collections) → why kraft-led (fibre & process) →
+ * studio to everyday (five steps) → conscious-by-default pillars →
+ * the collective → a note from the studio → shop CTA.
  */
 export default function AboutPage() {
   return (
     <>
       <Breadcrumb current="About us" />
       <Masthead />
-      <Timeline />
-      <WhyRobusta />
-      <FarmToCup />
+      <Collections />
+      <WhyKraft />
+      <StudioToEveryday />
       <Sustainability />
-      <TheFamily />
-      <FamilyNote />
+      <Collective />
+      <StudioNote />
       <ShopCta />
     </>
   );
@@ -48,7 +48,10 @@ export default function AboutPage() {
 
 function Masthead() {
   return (
-    <section aria-labelledby="heritage" className="shell pb-10 md:pb-14">
+    <section
+      aria-labelledby="heritage"
+      className="shell overflow-x-clip pb-10 md:pb-14"
+    >
       <div className="max-w-4xl pb-8 pt-2">
         <Eyebrow align="left">{heritage.eyebrow}</Eyebrow>
         <Headline as="h1" id="heritage" className="mt-4">
@@ -65,7 +68,7 @@ function Masthead() {
       <div className="relative pb-[8.5vw]">
         <div className="relative">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {[aboutImages.morning, aboutImages.grounds].map((image, index) => (
+            {[aboutImages.studio, aboutImages.kraft].map((image, index) => (
               <Plate
                 key={image.alt}
                 src={image.src}
@@ -74,7 +77,7 @@ function Masthead() {
                 arrow
                 tone={index === 0 ? 0 : 2}
                 priority={index === 0}
-                placeholderText={index === 0 ? "studio" : "craft"}
+                placeholderText={index === 0 ? "studio" : "kraft"}
                 sizes="(min-width: 768px) 50vw, 100vw"
               />
             ))}
@@ -84,7 +87,7 @@ function Masthead() {
             aria-hidden
             className="wordmark pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-yellow"
           >
-            since {site.since}
+            kompanions
           </p>
 
           <div className="absolute bottom-0 hidden md:block left-4 z-20 translate-y-[28%] md:left-12">
@@ -96,20 +99,17 @@ function Masthead() {
   );
 }
 
-/* ---------------------------------------------------------------- timeline */
+/* -------------------------------------------------------------- collections */
 
-function Timeline() {
+function Collections() {
   return (
-    <section aria-label="Studio heritage" className="shell pb-10 md:pb-14">
+    <section aria-label="What we make" className="shell pb-10 md:pb-14">
       <ol>
-        {heritage.timeline.map((entry, index) => (
-          <li
-            key={entry.year}
-            className="panel mb-3 last:mb-0"
-          >
+        {heritage.collections.map((entry) => (
+          <li key={entry.index} className="panel mb-3 last:mb-0">
             <div className="grid gap-3 p-6 md:grid-cols-[9rem_1fr] md:gap-12 md:p-8">
               <p className="serif text-display-md leading-none text-ink/35">
-                {entry.year}
+                {entry.index}
               </p>
               <div>
                 <h2 className="serif text-display-sm">{entry.title}</h2>
@@ -125,23 +125,23 @@ function Timeline() {
   );
 }
 
-/* ------------------------------------------------------------ why mindful craft */
+/* ---------------------------------------------------------------- why kraft */
 
-function WhyRobusta() {
+function WhyKraft() {
   return (
-    <section aria-labelledby="mindful-craft" className="shell pb-10 md:pb-14">
+    <section aria-labelledby="why-kraft" className="shell pb-10 md:pb-14">
       <div className="max-w-4xl pb-8">
-        <Eyebrow align="left">{whyRobusta.eyebrow}</Eyebrow>
-        <Headline id="mindful-craft" size="lg" className="mt-4">
-          {whyRobusta.title}
+        <Eyebrow align="left">{whyKraft.eyebrow}</Eyebrow>
+        <Headline id="why-kraft" size="lg" className="mt-4">
+          {whyKraft.title}
         </Headline>
         <p className="body-mono mt-5 max-w-measure text-pretty">
-          {whyRobusta.body}
+          {whyKraft.body}
         </p>
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {whyRobusta.stats.map((stat) => (
+        {whyKraft.stats.map((stat) => (
           <div
             key={stat.value}
             className="panel p-6 md:p-8"
@@ -182,14 +182,14 @@ function WhyRobusta() {
             </tr>
           </thead>
           <tbody>
-            {whyRobusta.comparison.map((row) => (
+            {whyKraft.comparison.map((row) => (
               <tr key={row.trait} className="rule-t transition-colors hover:bg-wash">
                 <th scope="row" className="spec-mono px-4 py-4 font-normal md:px-6">
                   {row.trait}
                 </th>
-                <td className="spec-mono px-4 py-4 md:px-6">{row.arabica}</td>
+                <td className="spec-mono px-4 py-4 md:px-6">{row.conventional}</td>
                 <td className="ui-mono px-4 py-4 font-semibold md:px-6">
-                  {row.robusta}
+                  {row.kozy}
                 </td>
               </tr>
             ))}
@@ -200,20 +200,20 @@ function WhyRobusta() {
   );
 }
 
-/* ------------------------------------------------------------- studio to sanctuary */
+/* ---------------------------------------------------------- studio to everyday */
 
-function FarmToCup() {
+function StudioToEveryday() {
   return (
-    <section aria-labelledby="farm-to-cup" className="shell pb-10 md:pb-14">
+    <section aria-labelledby="studio-to-everyday" className="shell pb-10 md:pb-14">
       <div className="max-w-4xl pb-8">
-        <Eyebrow align="left">{farmToCup.eyebrow}</Eyebrow>
-        <Headline id="farm-to-cup" size="lg" className="mt-4">
-          {farmToCup.title}
+        <Eyebrow align="left">{studioToEveryday.eyebrow}</Eyebrow>
+        <Headline id="studio-to-everyday" size="lg" className="mt-4">
+          {studioToEveryday.title}
         </Headline>
       </div>
 
       <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {farmToCup.steps.map((step, index) => (
+        {studioToEveryday.steps.map((step, index) => (
           <li
             key={step.title}
             className="panel p-6 md:p-8"
@@ -261,21 +261,21 @@ function Sustainability() {
   );
 }
 
-/* ------------------------------------------------------------------ family / collective */
+/* ------------------------------------------------------------- the collective */
 
-function TheFamily() {
+function Collective() {
   return (
-    <section aria-labelledby="family" className="shell pb-10 md:pb-14">
+    <section aria-labelledby="collective" className="shell pb-10 md:pb-14">
       <div className="max-w-4xl pb-8">
-        <Eyebrow align="left">{family.eyebrow}</Eyebrow>
-        <Headline id="family" size="lg" className="mt-4">
-          {family.title}
+        <Eyebrow align="left">{collective.eyebrow}</Eyebrow>
+        <Headline id="collective" size="lg" className="mt-4">
+          {collective.title}
         </Headline>
-        <p className="spec-mono mt-4">{family.strapline}</p>
+        <p className="spec-mono mt-4">{collective.strapline}</p>
       </div>
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {family.members.map((member) => (
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {collective.members.map((member) => (
           <li
             key={member.name}
             className="panel p-6 md:p-8"
@@ -285,7 +285,7 @@ function TheFamily() {
                 {member.name.charAt(0)}
               </span>
             </div>
-            <p className="micro-mono mt-5 text-muted">{member.generation}</p>
+            <p className="micro-mono mt-5 text-muted">{member.role}</p>
             <h3 className="serif mt-2 text-display-sm">{member.name}</h3>
             {member.credential ? (
               <p className="spec-mono mt-2">{member.credential}</p>
@@ -300,23 +300,23 @@ function TheFamily() {
 
 /* -------------------------------------------------------------- the note */
 
-function FamilyNote() {
+function StudioNote() {
   return (
     <section aria-labelledby="note" className="shell pb-10 md:pb-14">
       <div className="panel p-8 md:p-12">
-        <Eyebrow align="left">{familyNote.eyebrow}</Eyebrow>
+        <Eyebrow align="left">{studioNote.eyebrow}</Eyebrow>
         <Headline id="note" size="lg" className="mt-4 max-w-4xl">
-          {familyNote.title}
+          {studioNote.title}
         </Headline>
         <div className="mt-5 max-w-measure space-y-4">
-          {familyNote.body.map((paragraph) => (
+          {studioNote.body.map((paragraph) => (
             <p key={paragraph} className="body-mono text-pretty">
               {paragraph}
             </p>
           ))}
         </div>
-        <p className="serif mt-10 text-display-md">{familyNote.signature}</p>
-        <p className="spec-mono mt-1">{familyNote.signatureRole}</p>
+        <p className="serif mt-10 text-display-md">{studioNote.signature}</p>
+        <p className="spec-mono mt-1">{studioNote.signatureRole}</p>
       </div>
     </section>
   );
@@ -329,12 +329,12 @@ function ShopCta() {
     <section aria-labelledby="shop" className="shell pb-14 pt-4">
       <div className="grid grid-cols-1 items-stretch gap-3 lg:grid-cols-2">
         <Plate
-          src={aboutImages.pouch.src}
-          alt={aboutImages.pouch.alt}
+          src={aboutImages.lounge.src}
+          alt={aboutImages.lounge.alt}
           aspect="4/5"
           arrow
           tone={3}
-          placeholderText="sanctuary"
+          placeholderText="lounge"
           sizes="(min-width: 1024px) 50vw, 100vw"
         />
 

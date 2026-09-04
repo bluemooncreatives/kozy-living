@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Living Journal",
-  description: `Notes on mindful living, interior styling, tactile materials, and craftsmanship, straight from ${site.origin}.`,
+  description: `Notes on rest, ritual and kraft - fibres, Dabu hand-block printing, and caring for natural textiles, from the ${site.name} studio.`,
   openGraph: { type: "website" },
 };
 

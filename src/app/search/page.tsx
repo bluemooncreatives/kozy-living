@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Shop Collection",
-  description: "Search curated home decor, artisanal furniture, and organic textiles from Kozy Living.",
+  description: "Search craft-led, conscious textiles from Kozy Living - waffle weave, slub cotton, linen blends and Dabu hand-block prints.",
 };
 
 export default async function SearchPage({
@@ -33,7 +33,7 @@ export default async function SearchPage({
       {searchValue ? (
         <p className="eyebrow mb-8 text-muted">
           {products.length === 0
-            ? "No objects match"
+            ? "No Kompanions match"
             : `${products.length} ${resultsText} for`}{" "}
           <span className="text-ink">&ldquo;{searchValue}&rdquo;</span>
         </p>
@@ -48,11 +48,11 @@ export default async function SearchPage({
           <p className="serif text-display-md">Nothing on this shelf yet</p>
           <p className="body-mono mx-auto mt-4 max-w-measure">
             {searchValue
-              ? "Try a broader search term — a space, material, or category like 'Linen', 'Oak', or 'Lighting'."
-              : "Our collection is being updated. Explore all handcrafted pieces."}
+              ? "Try a broader term - a fibre or a collection, like 'waffle', 'linen' or 'Dabu'."
+              : "The collection is being updated. Explore all Kompanions."}
           </p>
           <Link href="/search" className="btn-solid mt-8">
-            View all objects
+            View all Kompanions
           </Link>
         </div>
       )}

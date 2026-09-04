@@ -141,7 +141,7 @@ export default function CartModal() {
                 <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
                   <p className="serif text-display-md">Your cart is empty</p>
                   <p className="body-mono mt-3">
-                    Your sanctuary awaits. Explore our handcrafted collections.
+                    Nothing here yet. Go meet your in-between Kompanions.
                   </p>
                   <Link href="/search" onClick={closeCart} className="btn-outline mt-8">
                     Explore collection

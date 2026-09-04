@@ -142,7 +142,7 @@ async function RelatedProducts({ id }: { id: string }) {
   return (
     <section aria-labelledby="related">
       <SectionHead
-        eyebrow="Complete the sanctuary"
+        eyebrow="Pairs well with"
         title={<span id="related">You May Also Like</span>}
         count={shelf.length}
         action="View all"
