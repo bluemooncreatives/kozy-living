@@ -18,7 +18,7 @@ export default function Plate({
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
   priority,
   arrow,
-  arrowTone = "cream",
+  arrowTone = "card",
   tag,
   title,
   caption,
@@ -42,7 +42,7 @@ export default function Plate({
   priority?: boolean;
   /** Draws the corner ↗ button and the notch that receives it. */
   arrow?: boolean;
-  arrowTone?: "cream" | "sage";
+  arrowTone?: "card" | "sage";
   /** Small white pill sitting low-left on the photograph. */
   tag?: string;
   /** Heavy display title under the tag, inside the frame. */

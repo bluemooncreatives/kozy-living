@@ -71,8 +71,8 @@ export const hero = {
   },
   /** The two small plates that close the bento. */
   tiles: [
-    { tag: "#kraftedbyhand", handle: "kessentials" },
-    { tag: "#momentsofrest", handle: "kozy-lounge" },
+    { tag: "#KRAFTEDBYHAND", handle: "kessentials" },
+    { tag: "#MOMENTSOFREST", handle: "kozy-lounge" },
   ],
   primary: { label: "Shop Kompanions", href: "/search" },
   secondary: { label: "Our story", href: "/about-us" },

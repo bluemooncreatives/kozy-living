@@ -16,6 +16,15 @@ import { useId } from "react";
  * A client component purely for `useId`: several seals can share a page and
  * each needs its own path id.
  */
+
+/**
+ * Ring geometry, in the SVG's own 100x100 user units. The radius sets how far
+ * in from the edge the type sits; the circumference is what the type is then
+ * stretched to fill so the loop always closes.
+ */
+const RING_RADIUS = 37;
+const RING_CIRCUMFERENCE = +(2 * Math.PI * RING_RADIUS).toFixed(3);
+
 export default function Seal({
   text = "kozy living · handcrafted · sustainable · ",
   glyph = "✳",
@@ -79,17 +88,37 @@ export default function Seal({
       >
         <svg viewBox="0 0 100 100" className="h-full w-full">
           <defs>
+            {/* Starts at twelve o'clock and runs clockwise, so the seam
+                between the last character and the first sits at the top of
+                the disc where it reads as deliberate. */}
             <path
               id={pathId}
-              d="M 50 50 m -37 0 a 37 37 0 1 1 74 0 a 37 37 0 1 1 -74 0"
+              d={`M 50 50 m 0 -${RING_RADIUS} a ${RING_RADIUS} ${RING_RADIUS} 0 1 1 0 ${
+                RING_RADIUS * 2
+              } a ${RING_RADIUS} ${RING_RADIUS} 0 1 1 0 -${RING_RADIUS * 2}`}
               fill="none"
             />
           </defs>
           <text
             className={clsx(ring, "font-sans font-bold uppercase")}
-            style={{ fontSize: "8.5px", letterSpacing: "0.1em" }}
+            style={{ fontSize: "9px" }}
           >
-            <textPath href={`#${pathId}`} startOffset="0">
+            {/* `textLength` is the whole circumference and `lengthAdjust` is
+                "spacing", so the ring always closes on itself: the tracking
+                stretches or tightens to fit whatever text it is handed, and
+                there is no gap left where the words simply ran out. "spacing"
+                rather than "spacingAndGlyphs" - the letterforms must not be
+                distorted, only the space between them.
+
+                The explicit letter-spacing that used to be here fought this,
+                since the two are solving the same problem in opposite
+                directions. */}
+            <textPath
+              href={`#${pathId}`}
+              startOffset="0"
+              textLength={RING_CIRCUMFERENCE}
+              lengthAdjust="spacing"
+            >
               {text}
             </textPath>
           </text>

@@ -28,10 +28,10 @@ export function ArrowUpRight({ className }: { className?: string }) {
  * on the media wrapper and this alongside it inside the same relative box.
  */
 export default function CornerArrow({
-  tone = "cream",
+  tone = "card",
   className,
 }: {
-  tone?: "cream" | "sage";
+  tone?: "card" | "sage";
   className?: string;
 }) {
   return (

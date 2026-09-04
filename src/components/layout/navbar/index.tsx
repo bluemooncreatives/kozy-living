@@ -41,7 +41,7 @@ export async function Navbar() {
           line of muted copy floating above the nav. Ivory on indigo is 11.73. */}
       <div className="bg-indigo">
         <div className="shell py-2 text-center">
-          <p className="text-spec text-ivory/85">{announcement}</p>
+          <p className="text-spec text-paper/85">{announcement}</p>
         </div>
       </div>
 

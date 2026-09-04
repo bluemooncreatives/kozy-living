@@ -29,7 +29,7 @@ export function Eyebrow({
         className
       )}
     >
-      {/* sage-deep, not sage: flat sage measures 1.81 on ivory and the
+      {/* sage-deep, not sage: flat sage measures 1.85 on cream and the
           bullet simply would not be there. */}
       <span aria-hidden className="text-[1.1em] leading-none text-sage-deep">
         &#9679;

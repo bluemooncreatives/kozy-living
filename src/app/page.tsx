@@ -207,7 +207,7 @@ function Hero() {
             tag={tile.tag}
             placeholderText={index === 0 ? "kraft" : "rest"}
             arrow
-            arrowTone={index === 0 ? "cream" : "sage"}
+            arrowTone={index === 0 ? "card" : "sage"}
             className={clsx(
               "group h-full w-full",
               index === 0 ? "bento-one" : "bento-two"
@@ -281,7 +281,7 @@ function BoldStatement() {
                 <Plate
                   aspect={span[item.span]}
                   arrow
-                  arrowTone={index === 1 ? "sage" : "cream"}
+                  arrowTone={index === 1 ? "sage" : "card"}
                   tag={item.tag}
                   title={item.title}
                   tone={(index % 4) as 0 | 1 | 2 | 3}

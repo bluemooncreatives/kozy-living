@@ -50,8 +50,8 @@ export default function Marquee({
     hero: "pb-3",
   }[size];
 
-  // sage-deep, not flat sage: a separator on the ivory ground has to be seen,
-  // and flat sage measures 1.81 there.
+  // sage-deep, not flat sage: a separator on the cream ground has to be seen,
+  // and flat sage measures 1.85 there.
   const separatorClass = {
     ink: "text-ink",
     sage: "text-sage-deep",

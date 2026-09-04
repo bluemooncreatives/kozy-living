@@ -8,8 +8,8 @@
    Four colours from the client palette, plus derived shades.
 
      INDIGO   #23324B  ink: type, wordmarks, dark panels, buttons
-     IVORY    #F6F4F0  the page ground
-       CREAM  #FFF6EB  its lighter shade - card and panel surfaces
+     CREAM    #FFF6EB  the page ground
+       IVORY  #F6F4F0  its neighbour - card and panel surfaces
      OAT MILK #E8D9C4  warm structure: image plates, tints, type on dark
      SAGE     #A9BDAF  the accent: seal, chips, badges, statement fills
        deep   #5F7178  sage toward indigo - hover, and small sage type
@@ -20,8 +20,8 @@
    ground to sit under photography.
 
    THE PAIRS, in the order the page uses them:
-     indigo on ivory   11.73  every heading and paragraph
-     indigo on cream   12.05  copy inside cards
+     indigo on cream   12.05  every heading and paragraph
+     indigo on ivory   11.73  copy inside cards
      indigo on oat      9.30  captions and chips over image plates
      oat on indigo      9.30  headings inside dark panels - warm on cool
      sage on indigo     6.50  the quote mark and accents on dark
@@ -30,7 +30,7 @@
    ONE HARD RULE: oat against sage measures 1.43. The two mid-tones may sit
    beside each other as blocks; neither may ever carry type on the other.
 
-   The giant wordmark is INDIGO, not the accent. Sage measures 1.81 on ivory
+   The giant wordmark is INDIGO, not the accent. Sage measures 1.85 on cream
    and about 1.4 on the oat plates the wordmark straddles, so it would vanish
    exactly where the gesture matters most. The colour moment is the sage seal
    sitting over it, and the sage statement panel mid-page.
@@ -69,13 +69,19 @@
   --sage-deep: #5f7178;
   --sage-wash: #dbe1d9;
 
-  /* Indigo blended 72% into ivory: the lightest indigo that still clears
-     4.5:1 for body copy (5.12 measured). */
+  /* Indigo blended 72% into the light neutral: the lightest indigo that still
+     clears 4.5:1 for body copy. 5.26 measured against cream. */
   --muted: #5e6879;
 
-  /* Role aliases - what the markup actually reads. */
-  --paper: var(--ivory);
-  --card: var(--cream);
+  /* Role aliases - what the markup actually reads.
+
+     Cream is the ground and ivory the card, not the other way round: the two
+     sit 1.027 apart, which is the whole point. That sliver is what lets a
+     rounded card read as a distinct surface without a border, and it works in
+     either direction - this way the page is the warmer of the two and the
+     cards settle back a shade. */
+  --paper: var(--cream);
+  --card: var(--ivory);
   --ink: var(--indigo);
   --tint: var(--oat);
 
@@ -148,7 +154,7 @@
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
   }
 
-  /* Dark panels: ivory body copy, oat milk headings, sage focus rings. */
+  /* Dark panels: cream body copy, oat milk headings, sage focus rings. */
   .on-dark {
     color: var(--paper);
   }
@@ -158,7 +164,7 @@
     @apply focus-visible:ring-sage focus-visible:ring-offset-ink;
   }
 
-  /* Oat milk, not ivory. Warm type on the cool indigo ground is the pairing
+  /* Oat milk, not cream. Warm type on the cool indigo ground is the pairing
      this palette is built around, and it still measures 9.30. */
   .on-dark h1,
   .on-dark h2,
@@ -265,7 +271,7 @@
 
   .on-dark .body-mono,
   .on-dark .spec-mono {
-    color: rgba(246, 244, 240, 0.72);
+    color: rgba(255, 246, 235, 0.72);
   }
 
   .on-dark .ui-mono,
@@ -295,7 +301,7 @@
     padding: 0.9rem 1.6rem;
   }
 
-  /* The default. Indigo pill, ivory type, sage on hover. */
+  /* The default. Indigo pill, cream type, sage on hover. */
   .btn-solid {
     @apply btn bg-ink text-paper hover:bg-sage hover:text-ink;
   }
@@ -332,7 +338,7 @@
     @apply relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper;
   }
 
-  /* Solid: indigo pill, ivory label, sage icon well. The strongest CTA. */
+  /* Solid: indigo pill, cream label, sage icon well. The strongest CTA. */
   .action-btn-solid {
     @apply action-btn border-transparent bg-ink text-paper;
   }
@@ -341,7 +347,7 @@
     @apply bg-sage text-ink;
   }
 
-  /* On photography. Translucent ivory over the image, indigo icon. */
+  /* On photography. The card surface at 85%, over the image. */
   .action-btn-glass {
     @apply action-btn border-ivory/30 bg-ivory/85 text-ink backdrop-blur-md;
   }
@@ -351,7 +357,7 @@
      The mark that sits directly on a photograph, as in the reference. A ring
      of hairline over a blurred disc, label centred and set small. */
   .circle-btn {
-    /* An indigo scrim, not a light one. The disc has to carry ivory type over
+    /* An indigo scrim, not a light one. The disc has to carry cream type over
        whatever photograph it lands on, and light textile photography is
        exactly the case where a translucent white disc disappears. */
     @apply relative inline-flex items-center justify-center rounded-full border border-ivory/45 bg-indigo/60 text-center font-sans text-micro uppercase tracking-micro text-paper backdrop-blur-md transition-colors duration-300;
@@ -396,7 +402,7 @@
     @apply bg-ink text-oat;
   }
 
-  /* Small cream pill tag sitting on photography. */
+  /* Small pill tag on the card surface, sitting over photography. */
   .chip {
     @apply inline-flex items-center rounded-chip bg-card px-3 py-1.5 font-sans text-spec font-medium lowercase text-ink shadow-chip;
   }
@@ -508,7 +514,7 @@
   /* Frosted chip laid over photography - the flag + blurb in the hero.
      An indigo scrim rather than a neutral black one: black over the warm oat
      plate goes muddy olive, where indigo stays in the palette and still puts
-     ivory type at roughly 6:1. */
+     cream type at roughly 6:1. */
   .glass {
     @apply rounded-plate border border-ivory/20 bg-indigo/80 p-4 backdrop-blur-md;
   }

@@ -15,8 +15,8 @@ module.exports = {
            Kozy Living - four colours from the client palette.
 
              INDIGO   #23324B  ink: type, wordmarks, dark panels, buttons
-             IVORY    #F6F4F0  the page ground
-               CREAM  #FFF6EB  its lighter shade - card and panel surfaces
+             CREAM    #FFF6EB  the page ground
+               IVORY  #F6F4F0  its neighbour - card and panel surfaces
              OAT MILK #E8D9C4  warm structure: plates, tints, type on dark
              SAGE     #A9BDAF  the accent: seal, chips, badges, statement fills
                deep   #5F7178  sage carried toward indigo, for hover and for
@@ -27,9 +27,9 @@ module.exports = {
            rose is a second saturated mid-tone chasing the same job, and oat
            is the better ground under photography.
 
-           Measured contrast: indigo on ivory 11.73, indigo on cream 12.05,
+           Measured contrast: indigo on cream 12.05, indigo on ivory 11.73,
            indigo on oat 9.30, oat on indigo 9.30, sage on indigo 6.50,
-           indigo on sage 6.50, sage-deep on ivory 4.64, muted on ivory 5.12.
+           indigo on sage 6.50, sage-deep on cream 4.77, muted on cream 5.26.
 
            ONE HARD RULE: oat against sage is 1.43. They may sit next to each
            other as blocks; neither may ever carry type on the other.
@@ -47,14 +47,15 @@ module.exports = {
         "sage-wash": "#DBE1D9",
 
         // Role aliases. These are the names the markup actually uses.
-        paper: "#F6F4F0",
-        card: "#FFF6EB",
+        // Cream grounds the page; ivory is the card surface a shade back.
+        paper: "#FFF6EB",
+        card: "#F6F4F0",
         ink: "#23324B",
         coal: "#23324B",
         tint: "#E8D9C4",
 
-        // Indigo blended 72% into ivory. Secondary copy, captions, meta - the
-        // lightest indigo that still clears 4.5:1 for body text (5.12).
+        // Indigo blended 72% into the light neutral. Secondary copy, captions,
+        // meta - the lightest indigo still clearing 4.5:1 for body text (5.26).
         muted: "#5E6879",
 
         rule: "rgba(35, 50, 75, 0.12)",
