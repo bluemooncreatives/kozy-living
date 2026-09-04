@@ -5,6 +5,7 @@ import {
   getCustomerSession,
 } from "@/lib/customer-account";
 import Link from "next/link";
+import ActionButton from "@/components/ui/action-button";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -65,9 +66,7 @@ export default async function AccountPage({
             {customer.emailAddress?.emailAddress}
           </p>
         </div>
-        <Link href="/api/auth/logout" className="btn-outline">
-          Sign out
-        </Link>
+        <ActionButton label="Sign out" href="/api/auth/logout" icon="arrow" />
       </div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-10">

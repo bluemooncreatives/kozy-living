@@ -16,6 +16,10 @@ import Marquee from "@/components/ui/marquee";
 import Carousel from "@/components/ui/carousel";
 import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
+import ActionButton from "@/components/ui/action-button";
+import CircleButton from "@/components/ui/circle-button";
+import CircledWord from "@/components/ui/circled-word";
+import WordmarkBand from "@/components/ui/wordmark-band";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import {
@@ -118,61 +122,111 @@ async function productsFrom(
  * blurb top-left, the CTA pill top-right, and the wordmark crossing the
  * frame's bottom edge so it reads as ink on both the photograph and the page.
  */
-function Hero() {
+/**
+ * Wraps the ringed phrase where it appears inside a line, so the ellipse can
+ * loop a few words mid-sentence rather than a whole line.
+ */
+function ringWord(line: string, phrase: string) {
+  const at = line.indexOf(phrase);
+  if (at === -1) return line;
+
   return (
-    <section className="shell pt-[var(--hero-gap)]">
-      <Plate
-        aspect={null}
-        priority
-        tone={2}
-        placeholderText="kozy"
-        className="hero-frame w-full"
-        sizes="100vw"
-        alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
-      >
-        {/* One row at md and up, a stack below it. Absolutely positioning the
-            flag and the pill in opposite corners collided on a phone the
-            moment the CTA label grew. */}
-        <div className="absolute inset-x-3 top-3 z-20 flex flex-col items-start gap-3 md:inset-x-5 md:top-5 md:flex-row md:items-start md:justify-between md:gap-6">
-          <div className="glass md:max-w-[19rem]">
+    <>
+      {line.slice(0, at)}
+      <CircledWord>{phrase}</CircledWord>
+      {line.slice(at + phrase.length)}
+    </>
+  );
+}
+
+function Hero() {
+  const { statement } = hero;
+
+  return (
+    <section className="shell py-[var(--hero-gap)]">
+      {/* Exactly the viewport minus the header and the gap above and below. */}
+      <div className="hero-bento hero-frame" data-reveal-group>
+        {/* ------------------------------------------------------- feature */}
+        <Plate
+          aspect={null}
+          priority
+          tone={2}
+          placeholderText="kozy"
+          parallax={10}
+          className="bento-feature group h-full w-full"
+          sizes="(min-width: 1024px) 55vw, 100vw"
+          alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
+        >
+          <div className="glass absolute left-3 top-3 z-20 max-w-[16rem] md:left-5 md:top-5">
             <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
               <span aria-hidden className="text-sage">
                 ✳
               </span>
               {hero.flag}
             </p>
-            <p className="mt-2 text-spec leading-relaxed text-paper/90">
-              {hero.blurb}
-            </p>
           </div>
 
-          <Link href={hero.ctaHref} className="btn-solid shrink-0">
-            {hero.cta}
-          </Link>
+          <div className="absolute inset-0 z-20 flex items-center justify-center">
+            <CircleButton label={hero.circle.label} href={hero.circle.href} />
+          </div>
+
+          <div className="absolute inset-x-3 bottom-3 z-20 flex flex-wrap items-center gap-2 md:inset-x-5 md:bottom-5 md:gap-3">
+            <ActionButton
+              label={hero.primary.label}
+              href={hero.primary.href}
+              icon="arrow"
+              variant="glass"
+            />
+            <ActionButton
+              label={hero.secondary.label}
+              href={hero.secondary.href}
+              icon="down"
+              variant="glass"
+            />
+          </div>
+        </Plate>
+
+        {/* --------------------------------------------------------- saying */}
+        <div className="bento-say panel flex flex-col justify-center gap-4 p-5 md:p-7 lg:p-8">
+          <h2 className={clsx(displayFace, "text-display-md lg:text-display-lg")}>
+            {statement.lines.map((line) => (
+              <span key={line} className="block">
+                {ringWord(line, statement.circled)}
+              </span>
+            ))}
+          </h2>
+          <p className="body-mono max-w-measure">{statement.body}</p>
         </div>
 
-        {/* The wordmark now sits inside the frame rather than straddling its
-            bottom edge. Indigo type needs a light base to land on, so the
-            bottom of the photograph is lifted towards ivory rather than
-            darkened - darkening would fight the colour the wordmark is set in. */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 z-[5] h-1/3 bg-gradient-to-t from-ivory/75 via-ivory/25 to-transparent"
-        />
+        {/* ---------------------------------------------------- two closers */}
+        {hero.tiles.map((tile, index) => (
+          <Plate
+            key={tile.tag}
+            aspect={null}
+            tone={index === 0 ? 0 : 3}
+            tag={tile.tag}
+            placeholderText={index === 0 ? "kraft" : "rest"}
+            arrow
+            arrowTone={index === 0 ? "cream" : "sage"}
+            className={clsx(
+              "group h-full w-full",
+              index === 0 ? "bento-one" : "bento-two"
+            )}
+            sizes="(min-width: 1024px) 22vw, 50vw"
+            alt=""
+          />
+        ))}
+      </div>
 
-        <p
-          aria-hidden
-          className="wordmark pointer-events-none absolute inset-x-0 bottom-2 z-10 select-none whitespace-nowrap px-2 text-center leading-[0.9] text-ink md:bottom-4"
-        >
-          {hero.wordmark}
-        </p>
+      {/* The wordmark band. It used to live inside the frame; the bento has no
+          room for it, so it closes the section instead - with the seal
+          standing in for the O. */}
+      <WordmarkBand
+        text={hero.wordmark}
+        seal={hero.seal}
+        className="mt-6 md:mt-8"
+      />
 
-        <div className="absolute bottom-4 left-4 z-20 hidden md:block lg:left-8">
-          <Seal text={hero.seal} size="md" />
-        </div>
-      </Plate>
-
-      {/* Meta rule under the frame. */}
       <div className="flex items-center justify-between pb-10 pt-4">
         <p className="eyebrow">{hero.metaLeft}</p>
         <p className="eyebrow">{hero.metaRight}</p>
@@ -641,9 +695,11 @@ function ClosingBand() {
           alt="A lived-in floor lounge: biscuit pillows, a waffle throw and an unhurried morning."
         >
           <div className="absolute inset-x-3 top-3 z-20 flex flex-col items-start gap-3 md:inset-x-5 md:top-5 md:flex-row md:items-start md:justify-between md:gap-6">
-            <Link href={ctaBand.href} className="btn-solid shrink-0">
-              {ctaBand.pill}
-            </Link>
+            <ActionButton
+              label={ctaBand.pill}
+              href={ctaBand.href}
+              variant="glass"
+            />
             <p className="max-w-[22rem] text-spec text-paper/90 md:max-w-[18rem] md:text-right">
               {ctaBand.body}
             </p>

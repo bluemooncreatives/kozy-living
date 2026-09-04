@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
+import ActionButton from "@/components/ui/action-button";
 
 /**
  * Newsletter capture: a bare underlined field and an arrow link, no box and no
@@ -47,9 +48,12 @@ export default function Newsletter({ className }: { className?: string }) {
           className="field-bare"
         />
       </div>
-      <button type="submit" className="btn-solid shrink-0">
-        Subscribe
-      </button>
+      <ActionButton
+        label="Subscribe"
+        type="submit"
+        variant="solid"
+        icon="arrow"
+      />
     </form>
   );
 }

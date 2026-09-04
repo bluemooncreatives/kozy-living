@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import ActionButton from "@/components/ui/action-button";
 import { displayFace } from "@/components/ui/section";
 
 export default function Error({ reset }: { reset: () => void }) {
@@ -14,9 +15,13 @@ export default function Error({ reset }: { reset: () => void }) {
         This is usually temporary. Try the action again - if it keeps happening,
         write to us and we will look into it.
       </p>
-      <button onClick={() => reset()} className="btn-solid mt-10 self-start">
-        Try again
-      </button>
+      <ActionButton
+        label="Try again"
+        onClick={() => reset()}
+        variant="solid"
+        icon="plus"
+        className="mt-10 self-start"
+      />
     </div>
   );
 }

@@ -20,6 +20,7 @@ export default function Seal({
   text = "kozy living · handcrafted · sustainable · ",
   glyph = "✳",
   size = "md",
+  tone = "sage",
   href,
   label,
   className,
@@ -30,7 +31,18 @@ export default function Seal({
   text?: string;
   /** What sits in the middle. */
   glyph?: React.ReactNode;
-  size?: "sm" | "md" | "lg";
+  /**
+   * "fit" applies no box of its own, so the caller can size it in `em` and
+   * have it track a font size - which is how it stands in for the O of the
+   * wordmark.
+   */
+  size?: "sm" | "md" | "lg" | "fit";
+  /**
+   * "sage" is the standing mark: sage disc, indigo type.
+   * "ink" reverses it to an indigo disc with sage type, so the seal reads as
+   * part of an indigo wordmark rather than as a badge stuck on top of one.
+   */
+  tone?: "sage" | "ink";
   /** Renders as a link when given; otherwise a plain mark. */
   href?: string;
   label?: string;
@@ -44,13 +56,20 @@ export default function Seal({
     sm: "h-16 w-16",
     md: "h-24 w-24 md:h-28 md:w-28",
     lg: "h-28 w-28 md:h-36 md:w-36",
+    fit: "",
   }[size];
 
   const glyphSize = {
     sm: "text-sm",
     md: "text-lg md:text-xl",
     lg: "text-xl md:text-2xl",
+    // Scales with the inherited font size rather than a breakpoint step.
+    fit: "text-[0.18em]",
   }[size];
+
+  const disc = tone === "ink" ? "bg-ink" : "bg-sage";
+  const ring = tone === "ink" ? "fill-sage" : "fill-ink";
+  const glyphTone = tone === "ink" ? "text-sage" : "text-ink";
 
   const body = (
     <>
@@ -67,7 +86,7 @@ export default function Seal({
             />
           </defs>
           <text
-            className="fill-ink font-sans font-bold uppercase"
+            className={clsx(ring, "font-sans font-bold uppercase")}
             style={{ fontSize: "8.5px", letterSpacing: "0.1em" }}
           >
             <textPath href={`#${pathId}`} startOffset="0">
@@ -76,13 +95,16 @@ export default function Seal({
           </text>
         </svg>
       </span>
-      <span aria-hidden className={clsx("relative leading-none", glyphSize)}>
+      <span
+        aria-hidden
+        className={clsx("relative leading-none", glyphSize, glyphTone)}
+      >
         {glyph}
       </span>
     </>
   );
 
-  const classes = clsx("seal shrink-0", box, className);
+  const classes = clsx("seal shrink-0", disc, box, className);
 
   if (href) {
     return (

@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { CartProvider } from "@/components/cart/cart-context";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
+import MotionProvider from "@/components/motion/motion-provider";
 import { cookies } from "next/headers";
 import { getCart } from "@/lib/shopify";
 import { site } from "@/lib/site";
@@ -96,6 +97,16 @@ export default async function RootLayout({
             __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
           }}
         />
+        {/* The failure catch for the motion layer. Reveal targets are hidden
+            by CSS; if the layer has not reported in within two seconds, this
+            forces them all visible again. It touches no attribute on <html>,
+            because React reconciles those and a script-added class there is a
+            hydration mismatch. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -113,6 +124,7 @@ export default async function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col bg-paper text-ink antialiased">
         <SmoothScrollProvider>
+          <MotionProvider />
           <CartProvider cartPromise={cart}>
             <Navbar />
             <main className="flex-1">{children}</main>

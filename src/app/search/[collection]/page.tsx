@@ -5,6 +5,7 @@ import { getCollections, getCollectionProducts } from "@/lib/shopify";
 import { site } from "@/lib/site";
 import { Metadata } from "next";
 import Link from "next/link";
+import ActionButton from "@/components/ui/action-button";
 
 export async function generateMetadata({
   params,

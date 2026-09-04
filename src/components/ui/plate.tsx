@@ -25,6 +25,8 @@ export default function Plate({
   placeholderText,
   tone = 0,
   objectFit = "cover",
+  parallax,
+  reveal = true,
   className,
   children,
 }: {
@@ -52,6 +54,10 @@ export default function Plate({
   /** 0-3. Varies the placeholder wash so a cluster of plates is not flat. */
   tone?: 0 | 1 | 2 | 3;
   objectFit?: "cover" | "contain";
+  /** Drifts the photograph against the scroll. For large frames only. */
+  parallax?: number;
+  /** Opt out where the plate is inside an already-staggered group. */
+  reveal?: boolean;
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -70,12 +76,21 @@ export default function Plate({
 
   return (
     <div
+      {...(reveal ? { "data-reveal": "" } : {})}
       className={clsx("plate @container", className)}
       style={aspect ? { aspectRatio: aspect } : undefined}
     >
       {/* The notch and the media share a wrapper so the cut-out only ever
           removes photograph, never the caption layer above it. */}
-      <div className={clsx("absolute inset-0", arrow && "notch-tr")}>
+      <div
+        {...(parallax ? { "data-parallax": String(parallax) } : {})}
+        className={clsx(
+          "absolute inset-0",
+          arrow && "notch-tr",
+          // Parallax moves the layer, so it needs room to move into.
+          parallax && "-inset-y-[8%] h-[116%]"
+        )}
+      >
         {src ? (
           <Image
             src={src}

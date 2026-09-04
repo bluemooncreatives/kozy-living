@@ -3,6 +3,7 @@ import ProductGridItems from "@/components/layout/product-grid-items";
 import { defaultSort, sorting } from "@/lib/constants";
 import { getProducts } from "@/lib/shopify";
 import Link from "next/link";
+import ActionButton from "@/components/ui/action-button";
 
 export const metadata = {
   title: "Shop Collection",

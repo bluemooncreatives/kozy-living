@@ -308,6 +308,68 @@
     @apply btn bg-sage text-ink hover:bg-ink hover:text-oat;
   }
 
+  /* ------------------------------------------------------ the action button
+
+     THE site button: a pill carrying a label, with a circular icon node
+     socketed into its right end. Every call to action on the site uses it, so
+     one hover behaviour and one shape read across the whole product.
+
+     Structure is fixed - label then icon - and the icon well is padded to the
+     same value as the pill's own radius so the circle sits flush in the end
+     rather than floating inside it. */
+  .action-btn {
+    @apply inline-flex shrink-0 items-center gap-3 rounded-chip border border-ink/15 bg-card py-1.5 pl-6 pr-1.5 font-sans text-ui font-semibold text-ink;
+    /* The icon node is transformed on hover; without this the circle's own
+       paint can bleed a hairline past the pill's rounded end mid-animation. */
+    overflow: hidden;
+  }
+
+  .action-btn-label {
+    @apply whitespace-nowrap;
+  }
+
+  .action-btn-icon {
+    @apply relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper;
+  }
+
+  /* Solid: indigo pill, ivory label, sage icon well. The strongest CTA. */
+  .action-btn-solid {
+    @apply action-btn border-transparent bg-ink text-paper;
+  }
+
+  .action-btn-solid .action-btn-icon {
+    @apply bg-sage text-ink;
+  }
+
+  /* On photography. Translucent ivory over the image, indigo icon. */
+  .action-btn-glass {
+    @apply action-btn border-ivory/30 bg-ivory/85 text-ink backdrop-blur-md;
+  }
+
+  /* ------------------------------------------------------ the circle button
+
+     The mark that sits directly on a photograph, as in the reference. A ring
+     of hairline over a blurred disc, label centred and set small. */
+  .circle-btn {
+    /* An indigo scrim, not a light one. The disc has to carry ivory type over
+       whatever photograph it lands on, and light textile photography is
+       exactly the case where a translucent white disc disappears. */
+    @apply relative inline-flex items-center justify-center rounded-full border border-ivory/45 bg-indigo/60 text-center font-sans text-micro uppercase tracking-micro text-paper backdrop-blur-md transition-colors duration-300;
+    height: 6.5rem;
+    width: 6.5rem;
+  }
+
+  .circle-btn:hover {
+    @apply bg-indigo/85;
+  }
+
+  @media (min-width: 768px) {
+    .circle-btn {
+      height: 7.5rem;
+      width: 7.5rem;
+    }
+  }
+
   /* Text link with a trailing arrow. Underline only on hover - the reference
      keeps its links quiet and lets the circular buttons do the pointing. */
   .link-arrow {
@@ -371,9 +433,52 @@
      `svh` over `vh` because on mobile `100vh` is the height with the browser
      chrome hidden: a `vh` hero overflows the screen and pushes the wordmark
      below the fold until you scroll. */
+  /* The hero bento.
+
+     Three columns so the two small plates can sit side by side inside the
+     right-hand column while the feature plate spans both rows. Fractional
+     rows rather than fixed heights: the grid is handed an exact height by
+     `.hero-frame`, so the rows divide whatever the viewport gives them and
+     the composition holds at every screen without a single media-query
+     height. */
+  .hero-bento {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1.55fr auto 0.9fr;
+    grid-template-areas:
+      "feature feature"
+      "say say"
+      "one two";
+  }
+
+  @media (min-width: 1024px) {
+    .hero-bento {
+      gap: 0.75rem;
+      grid-template-columns: 1.25fr 0.55fr 0.55fr;
+      grid-template-rows: 1.5fr 1fr;
+      grid-template-areas:
+        "feature say say"
+        "feature one two";
+    }
+  }
+
+  .hero-bento > .bento-feature {
+    grid-area: feature;
+  }
+  .hero-bento > .bento-say {
+    grid-area: say;
+  }
+  .hero-bento > .bento-one {
+    grid-area: one;
+  }
+  .hero-bento > .bento-two {
+    grid-area: two;
+  }
+
   .hero-frame {
-    height: calc(100vh - var(--header-h) - var(--hero-gap));
-    height: calc(100svh - var(--header-h) - var(--hero-gap));
+    height: calc(100vh - var(--header-h) - (var(--hero-gap) * 2));
+    height: calc(100svh - var(--header-h) - (var(--hero-gap) * 2));
   }
 
   /* ----------------------------------------------------------------- media */
@@ -436,8 +541,10 @@
 
   /* Rotating seal. The wrapper spins; the glyph in the middle stays put by
      counter-rotating in its own element. */
+  /* Fill comes from the `tone` prop, not from here - the seal reverses to
+     an indigo disc when it stands in for a letter of the wordmark. */
   .seal {
-    @apply relative inline-flex items-center justify-center rounded-full bg-sage text-ink;
+    @apply relative inline-flex items-center justify-center rounded-full text-ink;
   }
 
   .seal-ring {
@@ -460,6 +567,32 @@
   .rail::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+
+   Reveal targets start hidden in CSS, under a `no-preference` media query, so
+   the hidden state is correct before first paint with no class on <html>.
+   Adding one there is what caused a hydration mismatch: React renders and then
+   reconciles that element's attributes, so a script-added class is a diff.
+
+   The failure catch lives in the head script instead: if the motion layer has
+   not reported in, it injects a stylesheet that forces everything visible. A
+   JavaScript failure degrades to an unanimated page, never a blank one.
+--------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+}
+
+/* Once a reveal has played, drop the compositing hint - hundreds of promoted
+   layers is worse than none. The motion layer adds this on completion. */
+[data-reveal-done] {
+  will-change: auto;
 }
 
 @layer utilities {

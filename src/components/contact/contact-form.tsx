@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useActionState, useId } from "react";
+import ActionButton from "@/components/ui/action-button";
 import {
   submitContactMessage,
   type ContactFieldName,
@@ -122,9 +123,14 @@ export default function ContactForm({ className }: { className?: string }) {
         </p>
       ) : null}
 
-      <button type="submit" className="btn-solid w-full" disabled={isPending}>
-        {isPending ? "Sending…" : "Send"}
-      </button>
+      <ActionButton
+        label={isPending ? "Sending…" : "Send message"}
+        type="submit"
+        variant="solid"
+        icon="mail"
+        disabled={isPending}
+        className="w-full justify-between"
+      />
     </form>
   );
 }

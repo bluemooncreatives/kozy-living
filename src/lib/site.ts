@@ -62,9 +62,23 @@ export const hero = {
   flag: "Made in India",
   blurb:
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
-  cta: "Shop Kompanions",
-  ctaHref: "/search",
-  /** Set in the giant lowercase display face over the frame's bottom edge. */
+  /** The statement panel in the top-right of the bento. */
+  statement: {
+    lines: ["Krafted textiles", "by real hands", "for real rest"],
+    /** Ringed by the hand-drawn ellipse. Must appear in `lines` verbatim. */
+    circled: "real rest",
+    body: "Designed in-house and made with craft clusters across India, from cotton waffle weave, slub cotton, linen blends and wool.",
+  },
+  /** The two small plates that close the bento. */
+  tiles: [
+    { tag: "#kraftedbyhand", handle: "kessentials" },
+    { tag: "#momentsofrest", handle: "kozy-lounge" },
+  ],
+  primary: { label: "Shop Kompanions", href: "/search" },
+  secondary: { label: "Our story", href: "/about-us" },
+  /** The circular button that sits on the feature photograph. */
+  circle: { label: "Shop now", href: "/search" },
+  /** Set in the display face in the band below the frame. */
   wordmark: "kozy living",
   seal: "krafted for moments of rest · ",
   metaLeft: "Rooted in Indian Kraft",
