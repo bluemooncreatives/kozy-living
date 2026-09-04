@@ -155,7 +155,7 @@ function Hero() {
           sizes="(min-width: 1024px) 55vw, 100vw"
           alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
         >
-          <div className="glass absolute left-3 top-3 z-20 max-w-[16rem] md:left-5 md:top-5">
+          <div className="glass absolute left-3 top-3 z-20 max-w-[16rem] py-2.5 md:left-5 md:top-5">
             <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
               <span aria-hidden className="text-sage">
                 ✳
