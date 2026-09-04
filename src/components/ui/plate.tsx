@@ -80,7 +80,12 @@ export default function Plate({
   return (
     <div
       {...(reveal ? { "data-reveal": "" } : {})}
-      className={clsx("relative @container", className)}
+      /* w-full/min-w-0: a box with an aspect ratio takes `justify-self: normal`
+         as `start`, not `stretch`, so a plate given a definite height (h-full,
+         or min-h against a shorter ratio) sized its WIDTH from that height and
+         pushed whole sections past the page edge. Pinning the width to the
+         track makes the ratio drive the height, which is the intent. */
+      className={clsx("relative @container w-full min-w-0", className)}
       style={aspect ? { aspectRatio: aspect } : undefined}
     >
       {/* The notch is masked onto THIS element, the one carrying the plate's

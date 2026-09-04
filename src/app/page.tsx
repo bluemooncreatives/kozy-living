@@ -401,7 +401,9 @@ function ExperienceBand() {
         />
       </Link>
 
-      <div className="grid gap-3">
+      {/* grid-cols-1, not a bare grid: an implicit column is auto-sized, so the
+          plate's ratio-derived width sized the track instead of the reverse. */}
+      <div className="grid grid-cols-1 gap-3">
         <Link
           href={experienceBand.accent.href}
           className="panel-sage group relative flex flex-col justify-between overflow-hidden p-6 md:p-8"

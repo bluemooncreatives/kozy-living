@@ -592,6 +592,13 @@
      an indigo disc when it stands in for a letter of the wordmark. */
   .seal {
     @apply relative inline-flex items-center justify-center rounded-full text-ink;
+    /* The ring spins, and a rotating square's bounding box grows by up to
+       root-2 - which the browser counts as scrollable overflow and turns into a
+       few pixels of page-wide sideways scroll. The type sits at radius 37 of
+       100, so clipping to the disc costs nothing. `clip`, not `hidden`: it must
+       not become a scroll container, or the seal stops sitting on the baseline
+       the wordmark aligns it to. */
+    overflow: clip;
   }
 
   .seal-ring {
@@ -609,6 +616,10 @@
   .rail {
     @apply flex snap-x snap-mandatory overflow-x-auto;
     scrollbar-width: none;
+    /* The snapport is the padding box, so `snap-start` parks the first cell
+       against the page edge and scrolls the rail's own gutter away. Inset it
+       and the rail opens flush with every other section instead. */
+    scroll-padding-inline: var(--gutter);
   }
 
   .rail::-webkit-scrollbar {
