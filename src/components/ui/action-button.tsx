@@ -79,10 +79,20 @@ export default function ActionButton({
       const text = el.querySelector<HTMLElement>(".action-btn-label");
       if (!well || !text) return;
 
-      const scale = gsap.quickTo(well, "scale", {
+      // scaleX/scaleY rather than the `scale` shorthand: GSAP cannot revert
+      // the shorthand on cleanup and warns "not eligible for reset".
+      const scaleX = gsap.quickTo(well, "scaleX", {
         duration: 0.4,
         ease: "power3.out",
       });
+      const scaleY = gsap.quickTo(well, "scaleY", {
+        duration: 0.4,
+        ease: "power3.out",
+      });
+      const scale = (v: number) => {
+        scaleX(v);
+        scaleY(v);
+      };
       const spin = gsap.quickTo(well, "rotation", {
         duration: 0.5,
         ease: "power3.out",
