@@ -209,9 +209,45 @@ export default function MotionProvider() {
 
       // Two frames past mount puts this after React's hydration commit, so
       // nothing here mutates a node the reconciler has not reached yet.
-      outer = requestAnimationFrame(() => {
-        inner = requestAnimationFrame(scan);
-      });
+      const start = () => {
+        outer = requestAnimationFrame(() => {
+          inner = requestAnimationFrame(scan);
+        });
+      };
+
+      /* The loading curtain, when one is up.
+       *
+       * `ScrollTrigger.batch` reveals everything already in the viewport the
+       * moment it refreshes. Scanning while the curtain is still covering the
+       * page would spend the entire first fold's reveal behind it, and the
+       * page would then be uncovered already settled - the one animation the
+       * visitor was actually waiting to see, played to nobody. So the first
+       * scan waits for the curtain to report itself gone.
+       *
+       * Only the FIRST scan: on a route change the curtain no longer exists,
+       * the query below misses, and this starts immediately as before.
+       */
+      const curtain = document.querySelector("[data-loader]");
+      let onCurtain: (() => void) | null = null;
+      let bail = 0;
+
+      if (curtain) {
+        const go = () => {
+          if (!onCurtain) return;
+          window.removeEventListener("kozy:loader-done", onCurtain);
+          onCurtain = null;
+          clearTimeout(bail);
+          start();
+        };
+        onCurtain = go;
+        window.addEventListener("kozy:loader-done", go, { once: true });
+        // The curtain has its own watchdog, but this layer does not get to
+        // depend on another component being correct: if that event never
+        // arrives, the page must still animate rather than stay blank.
+        bail = window.setTimeout(go, 5000);
+      } else {
+        start();
+      }
 
       // Suspense boundaries resolve after that first pass. Re-scan when the
       // tree changes, coalesced to one pass per frame so a streaming page does
@@ -230,6 +266,8 @@ export default function MotionProvider() {
       return () => {
         cancelAnimationFrame(outer);
         cancelAnimationFrame(inner);
+        clearTimeout(bail);
+        if (onCurtain) window.removeEventListener("kozy:loader-done", onCurtain);
         observer.disconnect();
         cleanups.forEach((off) => off());
       };

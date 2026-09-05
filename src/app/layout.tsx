@@ -7,6 +7,7 @@ import Footer from "@/components/layout/footer";
 import { CartProvider } from "@/components/cart/cart-context";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
 import MotionProvider from "@/components/motion/motion-provider";
+import LoadingScreen from "@/components/motion/loading-screen";
 import { cookies } from "next/headers";
 import { getCart } from "@/lib/shopify";
 import { site } from "@/lib/site";
@@ -123,6 +124,10 @@ export default async function RootLayout({
         />
       </head>
       <body className="flex min-h-screen flex-col bg-paper text-ink antialiased">
+        {/* First child of <body> and outside every provider: the curtain has
+            no dependencies, so nothing about it waits on cart data, on the
+            scroll layer, or on a Suspense boundary resolving. */}
+        <LoadingScreen />
         <SmoothScrollProvider>
           <MotionProvider />
           <CartProvider cartPromise={cart}>

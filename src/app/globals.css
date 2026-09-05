@@ -663,6 +663,131 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   The loading curtain
+
+   Everything the curtain needs at first paint lives here rather than in the
+   component, for one reason: the curtain has to be correct BEFORE hydration.
+   It ships in the streamed HTML, this stylesheet covers the viewport and puts
+   every animated part in its start position, and only then does GSAP take
+   over. Nothing about the first frame depends on JavaScript having run.
+
+   The scroll lock is part of that. `html:has([data-loader])` pins the document
+   for exactly as long as the curtain carries the attribute - the component
+   removes it synchronously as the panels leave - so there is no lock to leak,
+   no saved scroll offset to restore, and no window in which a wheel gesture
+   scrolls a page the visitor cannot see.
+--------------------------------------------------------------------------- */
+
+/* Registered so the bulge interpolates as a real percentage. An unregistered
+   custom property animates as a discrete string and the curve would snap. */
+@property --loader-bulge {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+html:has([data-loader]),
+html:has([data-loader]) body {
+  overflow: hidden;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  /* Above everything, with room to spare. The bar to clear is not the page
+     content but the chrome: the sticky navbar is z-[999] and the search and
+     mobile-menu dialogs are z-[1000], so anything lower leaves the header
+     painting straight over the curtain. Nothing outranks a loading screen. */
+  z-index: 1100;
+}
+
+.loader-panel {
+  position: absolute;
+  inset: 0;
+  /* The panels are the only things here that move a full viewport, so they are
+     the only things that get a compositing hint. */
+  will-change: transform;
+  /* Horizontal radius is animated, vertical is fixed: the trailing edge bows
+     into a shallow arc as it sweeps up rather than inflating into a circle. */
+  border-radius: 0 0 var(--loader-bulge) var(--loader-bulge) / 0 0 12vh 12vh;
+}
+
+.loader-panel-sage {
+  background: var(--sage-wash, #dbe1d9);
+}
+
+.loader-panel-cream {
+  background: var(--cream, #fff6eb);
+}
+
+/* The `wordmark` class is applied in the markup rather than pulled in with
+   `@apply` here, so this block only ever owns layout and start state and the
+   type stays defined in exactly one place.
+
+   Absolutely centred inside the panel rather than laid out in a flex column:
+   the curtain has exactly one element on it, so there is no column to be part
+   of, and taking it out of flow means the panel has no content box to size and
+   nothing to reflow when the display face resolves. */
+.loader-wordmark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  text-align: center;
+  color: var(--indigo, #23324b);
+  /* `wordmark` is sized at 16.5vw because on the page it is MEANT to bleed
+     past the frame. Here it has to fit inside one, so the size is restated -
+     eleven glyphs at that scale would run well past the viewport and the
+     wordmark would be clipped at both ends. Held on one line: it reads as a
+     mark, and a two-line break would land mid-word. */
+  font-size: clamp(2.25rem, 10.5vw, 10rem);
+  white-space: nowrap;
+  /* Scaled as one block during the settle, so it is promoted once rather than
+     compositing eleven glyph layers. */
+  will-change: transform, opacity;
+  /* Start state - GSAP fades and settles it in. */
+  opacity: 0;
+}
+
+/* One mask per glyph. `overflow: hidden` on an inline box clips descenders, so
+   the box is grown by the descender depth and pulled back by the same amount -
+   the mask edge then sits on the baseline where it belongs. */
+.loader-clip {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+  vertical-align: bottom;
+}
+
+.loader-char {
+  display: inline-block;
+  /* Below its own mask until the entrance runs. Matches the `fromTo` in the
+     component: if the two disagree the glyphs jump on the first frame. */
+  transform: translateY(115%);
+  will-change: transform;
+}
+
+.loader-space {
+  display: inline-block;
+  width: 0.26em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No entrance to wait for - the curtain is composed on arrival and is faded
+     straight out, so nothing may start hidden or displaced. */
+  .loader-char {
+    transform: none;
+  }
+
+  .loader-wordmark {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
