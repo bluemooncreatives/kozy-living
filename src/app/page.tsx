@@ -242,50 +242,74 @@ function Hero() {
 
 /**
  * The oversized statement, then the staggered lookbook cluster beneath it.
- * Each plate carries its own vertical lift so the row zigzags; the connecting
- * paragraph sits in the gap the tallest plates leave open at the top.
+ *
+ * The head is inset from the left edge rather than flush to it, with the ↘
+ * answering it from three-quarters across - the two together leave an open
+ * band that the connecting paragraph then sits inside.
+ *
+ * Below that, four plates of ONE height at four different depths: highest,
+ * then a drop, then the deepest, then back up halfway. Because only the first
+ * plate rides at the top, the paragraph can occupy the gap the other three
+ * leave - which is why the copy is absolutely placed at `lg` and simply
+ * stacked below that.
  */
 function BoldStatement() {
-  const lift = ["lg:mt-0", "lg:mt-24", "lg:mt-14", "lg:mt-32", "lg:mt-6"];
-  const span = { tall: "5/7", mid: "4/5", short: "3/4" } as const;
+  /** Indexed by each plate's `lift` step. 0 is the top of the row. */
+  const drop = [
+    "lg:mt-0",
+    "lg:mt-10",
+    "lg:mt-[4.5rem]",
+    "lg:mt-[8.5rem]",
+    "lg:mt-[13rem]",
+  ];
 
   return (
     <section aria-labelledby="statement" className="shell pb-10 md:pb-16">
-      <div className="flex items-end justify-between gap-8">
-        <h2 id="statement" className={clsx(displayFace, "text-display-xl")}>
+      <div className="lg:grid lg:grid-cols-12 lg:items-end lg:gap-x-4">
+        <h2
+          id="statement"
+          className={clsx(
+            displayFace,
+            "text-display-xl lg:col-span-7 lg:col-start-3"
+          )}
+        >
           {boldStatement.title.map((line) => (
             <span key={line} className="block">
               {line}
             </span>
           ))}
         </h2>
-        <ArrowDownRight className="mb-2 hidden h-10 w-10 shrink-0 md:block md:h-16 md:w-16" />
+        {/* Sits below the baseline of the head, not level with it - the ↘ in
+            the reference hangs into the band the paragraph occupies. */}
+        <ArrowDownRight className="mb-2 hidden h-10 w-10 shrink-0 md:block md:h-16 md:w-16 lg:col-span-2 lg:col-start-10 lg:mb-0 lg:h-20 lg:w-20 lg:translate-y-6" />
       </div>
 
-      <div className="relative mt-8 md:mt-10">
+      <div className="relative mt-8 md:mt-10 lg:mt-16">
         {/* On wide screens this drops into the notch the staggered plates
             leave open; below that it is simply the paragraph after the head. */}
-        <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[22%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[22rem]">
+        <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[38%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[28rem]">
           {boldStatement.body}
         </p>
 
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:items-start">
+        {/* Four equal tracks. The plates keep one aspect so the zigzag comes
+            purely from the drop, exactly as in the reference. */}
+        <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 lg:items-start">
           {lookbook.map((item, index) => (
-            <li key={item.title} className={clsx(lift[index])}>
+            <li key={item.title} className={clsx(drop[item.lift])}>
               <Link
                 href={`/search/${item.handle}`}
                 className="group block"
                 prefetch={false}
               >
                 <Plate
-                  aspect={span[item.span]}
+                  aspect="5/7"
                   arrow
                   arrowTone={index === 1 ? "sage" : "card"}
                   tag={item.tag}
                   title={item.title}
                   tone={(index % 4) as 0 | 1 | 2 | 3}
                   placeholderText={item.tag}
-                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                  sizes="(min-width: 1024px) 25vw, 50vw"
                 />
               </Link>
             </li>

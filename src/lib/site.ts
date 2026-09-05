@@ -92,9 +92,12 @@ export const boldStatement = {
 } as const;
 
 /**
- * The staggered lookbook cluster. Five plates at alternating vertical offsets;
- * `lift` is the offset step and `span` the relative height, so the row reads
- * as a zigzag rather than a grid. Tags name the fibre, titles the Kompanion.
+ * The staggered lookbook cluster. Four plates of one height, dropped to four
+ * different depths so the row reads as a zigzag rather than a grid: the first
+ * sits highest, the second drops, the third drops furthest, the fourth comes
+ * back up halfway. `lift` is that depth as a step (0 highest, 4 lowest) and
+ * the paragraph above sits in the notch the shallow plates leave open.
+ * Tags name the fibre, titles the Kompanion.
  */
 export const lookbook = [
   {
@@ -102,35 +105,24 @@ export const lookbook = [
     title: "Kessentials",
     handle: "kessentials",
     lift: 0,
-    span: "tall",
   },
   {
     tag: "slub cotton",
     title: "Kloud Series",
     handle: "kloud",
-    lift: 2,
-    span: "short",
+    lift: 3,
   },
   {
     tag: "dabu",
     title: "Pet & Parent",
     handle: "pet-parent",
-    lift: 1,
-    span: "mid",
+    lift: 4,
   },
   {
     tag: "linen blend",
     title: "Floor Lounge",
     handle: "kozy-lounge",
-    lift: 3,
-    span: "short",
-  },
-  {
-    tag: "wool",
-    title: "Throw Pillows",
-    handle: "throw-pillows",
-    lift: 0,
-    span: "mid",
+    lift: 2,
   },
 ] as const;
 
