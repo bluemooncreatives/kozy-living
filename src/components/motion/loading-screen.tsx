@@ -11,14 +11,14 @@ gsap.registerPlugin(useGSAP);
  * never resolves must never hold the page hostage - past this the curtain
  * lifts regardless of what has actually loaded.
  */
-const MAX_MS = 5200;
+const MAX_MS = 7000;
 
 /**
  * Long enough for the wordmark to finish arriving. Below this the glyphs would
  * still be rising as the panels started to leave, which reads as a glitch
  * rather than as a sequence.
  */
-const MIN_MS = 2900;
+const MIN_MS = 4200;
 
 /**
  * The same floor on a repeat load in the session. Shorter than `MIN_MS` - the
@@ -27,23 +27,36 @@ const MIN_MS = 2900;
  * during development every reload is a repeat load, so a near-invisible short
  * cut means the sequence is effectively never seen.
  */
-const REPEAT_MIN_MS = 1500;
+const REPEAT_MIN_MS = 2600;
 
 /** Hard ceiling for that repeat load, matching `MAX_MS`'s role on a cold one. */
-const REPEAT_MAX_MS = 2600;
+const REPEAT_MAX_MS = 3600;
 
 /**
- * How much faster the repeat load plays. A tempo change, not a different
- * animation: the same entrance, settle and exit, brisk enough to feel like a
- * reload rather than an introduction, slow enough to still be legible.
+ * How much faster the repeat load's exit plays. The entrance is a stylesheet
+ * animation with no knowledge of the session, so it runs at one speed either
+ * way; what shortens a repeat load is the floor above, not the arrival.
  */
-const REPEAT_RATE = 1.45;
+const REPEAT_RATE = 1.3;
 
 /** Set once the curtain has lifted, so a reload in-session plays the short cut. */
 const SEEN_KEY = "kozy:loaded";
 
 /** The lowercase display statement, pre-split so nothing splits it at runtime. */
 const WORDMARK = "kozy living";
+
+/**
+ * The wordmark as glyphs, each carrying its position in the *visible*
+ * sequence. The space is skipped when numbering, so the gap between the two
+ * words does not buy itself a beat of delay and stall the entrance mid-phrase.
+ */
+const glyphs = (() => {
+  let order = 0;
+  return Array.from(WORDMARK).map((char) => ({
+    char,
+    order: char === " " ? -1 : order++,
+  }));
+})();
 
 /**
  * The first-paint curtain.
@@ -140,42 +153,35 @@ export default function LoadingScreen() {
 
       /* ------------------------------------------------------ the sequence */
 
-      // The entrance only. It carries no completion callback and no knowledge
-      // of the exit: on a slow load the entrance finishes long before the page
-      // is ready, and a timeline that ended by releasing the curtain would
-      // tear it away with the page still loading behind it.
-      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+      // There is deliberately no entrance timeline here. The wordmark's
+      // arrival is a CSS animation (`.loader-char` / `.loader-wordmark` in
+      // globals.css) so that it plays from the first painted frame rather than
+      // waiting for this file to be fetched, parsed, hydrated and run - which
+      // is longest on exactly the slow connection the curtain exists to cover.
+      // Driving it from GSAP meant an empty cream panel for a second or more
+      // and then the type popping in, which is worse than no curtain at all.
+      // GSAP owns the exit, and nothing else.
 
-      // `fromTo`, not `to`: the start state is authored in CSS, and stating
-      // it again here means GSAP never has to infer it from a computed style
-      // that a fallback font may still be influencing on the first frame.
-      //
-      // The repeat load runs this same entrance rather than being set to its
-      // end state - it is only played faster, below. Skipping it outright made
-      // the curtain appear already-finished, which is what a lift then reads
-      // against: nothing arrived, so nothing appears to leave.
-      tl.fromTo(
-        chars,
-        { yPercent: 115 },
-        {
-          yPercent: 0,
-          duration: 1.3,
-          stagger: { each: 0.052, from: "start" },
-        }
-      )
-        // One slow settle underneath the glyphs, running most of the wait. It
-        // is barely perceptible frame to frame, which is the point: the screen
-        // is never quite frozen, but nothing on it is asking to be watched
-        // either. It outlasts the glyph entrance on purpose, so the moment the
-        // last letter lands is not also the moment all motion stops.
-        .fromTo(
-          mark,
-          { scale: 1.06, autoAlpha: 0 },
-          { scale: 1, autoAlpha: 1, duration: 3.2, ease: "power2.out" },
-          0
-        );
-
-      if (repeat) tl.timeScale(REPEAT_RATE);
+      /**
+       * Freezes the CSS entrance where it currently stands and hands the
+       * elements to GSAP.
+       *
+       * Both would otherwise write `transform` on the same nodes, and a
+       * running stylesheet animation outranks an inline style - the exit tween
+       * would compute correctly and appear to do nothing. Reading the computed
+       * matrix before clearing the animation is what makes a mid-entrance
+       * handoff continue from the live position instead of snapping: on a warm
+       * cache the page can be ready before the last glyph has landed.
+       */
+      const handoff = (nodes: Element[]) =>
+        nodes.forEach((node) => {
+          const el = node as HTMLElement;
+          const held = getComputedStyle(el).transform;
+          const alpha = getComputedStyle(el).opacity;
+          el.style.animation = "none";
+          if (held && held !== "none") el.style.transform = held;
+          el.style.opacity = alpha;
+        });
 
       /* ------------------------------------------------------------ release */
 
@@ -185,28 +191,33 @@ export default function LoadingScreen() {
         if (settled) return;
         settled = true;
 
+        // GSAP cannot tween what CSS is still animating.
+        handoff([...chars, ...mark]);
+
         const exit = gsap.timeline({
           defaults: { ease: "power3.inOut" },
           onComplete: release,
         });
 
         exit
-          // A held beat before anything moves. The entrance can land a long
-          // way ahead of the page being ready, and going straight from "last
-          // glyph settles" into "curtain leaves" gives the wordmark no moment
-          // of rest - the whole sequence then reads as one continuous slide
-          // rather than as arrive, hold, depart.
           // The glyphs leave from the far end, so the wordmark unwrites itself
-          // rather than simply vanishing. Started at an absolute 0.32 rather
-          // than at zero: that offset IS the held beat.
+          // rather than simply vanishing. Started at an absolute 0.55 rather
+          // than at zero: that offset is a held beat, so the sequence reads as
+          // arrive, rest, depart rather than as one continuous slide.
           .to(
             chars,
             {
               yPercent: -115,
-              duration: 0.78,
-              stagger: { each: 0.032, from: "end" },
+              // The idle loop leaves a few pixels of lift pinned as a `y` by
+              // the handoff. Tweening it back to 0 alongside the percentage
+              // absorbs that offset over the exit instead of carrying it as a
+              // constant, so glyphs caught at different points in the ripple
+              // all clear the mask edge together.
+              y: 0,
+              duration: 0.86,
+              stagger: { each: 0.036, from: "end" },
             },
-            0.32
+            0.55
           )
           // Two panels leaving in stacking order - cream is on top, so cream
           // goes first and uncovers the sage beneath it, which then goes and
@@ -215,13 +226,13 @@ export default function LoadingScreen() {
           // flat slab a single panel produces.
           .to(
             q("[data-loader-panel=cream]"),
-            { yPercent: -100, duration: 1.15, ease: "expo.inOut" },
-            "-=0.34"
+            { yPercent: -100, duration: 1.3, ease: "expo.inOut" },
+            "-=0.38"
           )
           .to(
             q("[data-loader-panel=sage]"),
-            { yPercent: -100, duration: 1.2, ease: "expo.inOut" },
-            "<0.16"
+            { yPercent: -100, duration: 1.35, ease: "expo.inOut" },
+            "<0.18"
           )
           // The morph. Each trailing edge bows into the plate radius the whole
           // site is built on as it sweeps up, and flattens again as it clears.
@@ -229,24 +240,16 @@ export default function LoadingScreen() {
             panels,
             {
               "--loader-bulge": "50%",
-              duration: 0.58,
+              duration: 0.64,
               ease: "sine.inOut",
-              stagger: 0.16,
+              stagger: 0.18,
               yoyo: true,
               repeat: 1,
             },
-            "<-0.16"
+            "<-0.18"
           );
 
         if (repeat) exit.timeScale(REPEAT_RATE);
-
-        // Queue behind the entrance if it is still running, otherwise go now.
-        // Appending to an already-finished timeline would extend its duration
-        // past a playhead that has stopped, and the exit would never render.
-        if (tl.isActive()) {
-          tl.eventCallback("onComplete", () => exit.play(0));
-          exit.pause();
-        }
       };
 
       // The real signals. `document.fonts.ready` matters here specifically
@@ -261,18 +264,25 @@ export default function LoadingScreen() {
             }),
       ]);
 
+      // Measured from navigation start, NOT from when this effect ran. The
+      // entrance begins at first paint, so a baseline taken here would start
+      // the clock somewhere in the middle of it, and the curtain's total
+      // on-screen time would grow with however long the bundle took - the
+      // opposite of what these floors are for. `performance.now()` is already
+      // relative to the navigation, so it needs no baseline of its own.
       const floor = repeat ? REPEAT_MIN_MS : MIN_MS;
-      const started = performance.now();
       let hold = 0;
 
       ready.then(() => {
-        const left = Math.max(0, floor - (performance.now() - started));
-        hold = window.setTimeout(finish, left);
+        hold = window.setTimeout(
+          finish,
+          Math.max(0, floor - performance.now())
+        );
       });
 
       const guard = window.setTimeout(
         finish,
-        repeat ? REPEAT_MAX_MS : MAX_MS
+        Math.max(0, (repeat ? REPEAT_MAX_MS : MAX_MS) - performance.now())
       );
 
       return () => {
@@ -313,12 +323,19 @@ export default function LoadingScreen() {
           className="wordmark loader-wordmark"
           aria-label={WORDMARK}
         >
-          {Array.from(WORDMARK).map((char, index) =>
+          {glyphs.map(({ char, order }, index) =>
             char === " " ? (
               <span key={index} className="loader-space" aria-hidden />
             ) : (
               <span key={index} className="loader-clip" aria-hidden>
-                <span data-loader-char className="loader-char">
+                <span
+                  data-loader-char
+                  className="loader-char"
+                  // The stagger, shipped in the HTML. CSS multiplies this by
+                  // the per-glyph delay, so the wordmark writes itself in
+                  // sequence with no JavaScript and no runtime measuring pass.
+                  style={{ "--i": order } as React.CSSProperties}
+                >
                   {char}
                 </span>
               </span>

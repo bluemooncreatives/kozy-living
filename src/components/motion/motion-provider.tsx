@@ -244,7 +244,7 @@ export default function MotionProvider() {
         // The curtain has its own watchdog, but this layer does not get to
         // depend on another component being correct: if that event never
         // arrives, the page must still animate rather than stay blank.
-        bail = window.setTimeout(go, 9000);
+        bail = window.setTimeout(go, 11000);
       } else {
         start();
       }

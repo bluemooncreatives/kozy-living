@@ -748,8 +748,25 @@ html:has([data-loader]) body {
   /* Scaled as one block during the settle, so it is promoted once rather than
      compositing eleven glyph layers. */
   will-change: transform, opacity;
-  /* Start state - GSAP fades and settles it in. */
-  opacity: 0;
+  /* The entrance is a CSS animation, not a GSAP tween, and this is the whole
+     reason the curtain works. The wordmark IS the loading screen; if its
+     arrival waited on GSAP, it would wait on hydration, and the visitor would
+     watch an empty cream panel for exactly as long as the bundle took to
+     parse - longest on the slow connection the curtain exists to cover. As a
+     stylesheet animation it starts on the first painted frame, with no
+     JavaScript involved. GSAP only ever takes over for the exit. */
+  animation: loader-mark 4.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes loader-mark {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* One mask per glyph. `overflow: hidden` on an inline box clips descenders, so
@@ -765,10 +782,58 @@ html:has([data-loader]) body {
 
 .loader-char {
   display: inline-block;
-  /* Below its own mask until the entrance runs. Matches the `fromTo` in the
-     component: if the two disagree the glyphs jump on the first frame. */
+  /* Below its own mask until the entrance runs. `both` fill keeps it here
+     until this glyph's delay elapses, so the start state and the animation
+     agree by construction rather than by two numbers being kept in sync. */
   transform: translateY(115%);
   will-change: transform;
+  /* `--i` is the glyph's index, written on the span in the markup. The
+     stagger is therefore part of the streamed HTML too - there is no runtime
+     pass to compute it, and the wordmark writes itself identically whether or
+     not the JavaScript has arrived yet. */
+  /* Two animations, in order: the arrival, then an idle the arrival hands
+     straight over to. The second is what fills the wait - once the wordmark
+     has landed it must not simply sit there, because a frozen screen is how a
+     loading state starts reading as a crashed one, and this curtain has no
+     spinner or meter to prove otherwise. A later animation in the list wins
+     the property while it runs, so the idle takes `transform` over cleanly the
+     moment the arrival's `both` fill has parked the glyph at 0.
+
+     Per glyph rather than on the wordmark as a block: one drifting slab is a
+     screensaver, whereas the same motion dealt out letter by letter reads as
+     the type breathing. The idle's stagger is wider than the arrival's, so the
+     ripple travels at a different rate than the entrance did and the two do
+     not look like one animation restarting. */
+  animation:
+    loader-char 1.5s cubic-bezier(0.16, 1, 0.3, 1) both,
+    loader-char-idle 2.9s ease-in-out infinite;
+  animation-delay:
+    calc(var(--i, 0) * 0.06s),
+    calc(1.5s + var(--i, 0) * 0.09s);
+}
+
+@keyframes loader-char {
+  from {
+    transform: translateY(115%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Deliberately small. At display scale a 0.06em lift is a few pixels - enough
+   that the eye registers the line as alive, not enough to invite it to watch,
+   which is the same restraint that keeps a percentage off this screen. The
+   glyph returns to exactly 0 at both ends of the cycle, so whenever the exit
+   takes over mid-loop it is never handed a large offset to unwind. */
+@keyframes loader-char-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.06em);
+  }
 }
 
 .loader-space {
@@ -781,10 +846,12 @@ html:has([data-loader]) body {
      straight out, so nothing may start hidden or displaced. */
   .loader-char {
     transform: none;
+    animation: none;
   }
 
   .loader-wordmark {
     opacity: 1;
+    animation: none;
   }
 }
 
