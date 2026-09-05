@@ -755,7 +755,7 @@ html:has([data-loader]) body {
      parse - longest on the slow connection the curtain exists to cover. As a
      stylesheet animation it starts on the first painted frame, with no
      JavaScript involved. GSAP only ever takes over for the exit. */
-  animation: loader-mark 4.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: loader-mark 3.2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes loader-mark {
@@ -805,11 +805,11 @@ html:has([data-loader]) body {
      ripple travels at a different rate than the entrance did and the two do
      not look like one animation restarting. */
   animation:
-    loader-char 1.5s cubic-bezier(0.16, 1, 0.3, 1) both,
-    loader-char-idle 2.9s ease-in-out infinite;
+    loader-char 1.25s cubic-bezier(0.16, 1, 0.3, 1) both,
+    loader-char-idle 2.4s ease-in-out infinite;
   animation-delay:
-    calc(var(--i, 0) * 0.06s),
-    calc(1.5s + var(--i, 0) * 0.09s);
+    calc(var(--i, 0) * 0.05s),
+    calc(1.25s + var(--i, 0) * 0.075s);
 }
 
 @keyframes loader-char {

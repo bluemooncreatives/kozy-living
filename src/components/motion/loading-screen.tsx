@@ -11,14 +11,14 @@ gsap.registerPlugin(useGSAP);
  * never resolves must never hold the page hostage - past this the curtain
  * lifts regardless of what has actually loaded.
  */
-const MAX_MS = 7000;
+const MAX_MS = 5600;
 
 /**
  * Long enough for the wordmark to finish arriving. Below this the glyphs would
  * still be rising as the panels started to leave, which reads as a glitch
  * rather than as a sequence.
  */
-const MIN_MS = 4200;
+const MIN_MS = 3200;
 
 /**
  * The same floor on a repeat load in the session. Shorter than `MIN_MS` - the
@@ -27,10 +27,10 @@ const MIN_MS = 4200;
  * during development every reload is a repeat load, so a near-invisible short
  * cut means the sequence is effectively never seen.
  */
-const REPEAT_MIN_MS = 2600;
+const REPEAT_MIN_MS = 1900;
 
 /** Hard ceiling for that repeat load, matching `MAX_MS`'s role on a cold one. */
-const REPEAT_MAX_MS = 3600;
+const REPEAT_MAX_MS = 2800;
 
 /**
  * How much faster the repeat load's exit plays. The entrance is a stylesheet
@@ -201,7 +201,7 @@ export default function LoadingScreen() {
 
         exit
           // The glyphs leave from the far end, so the wordmark unwrites itself
-          // rather than simply vanishing. Started at an absolute 0.55 rather
+          // rather than simply vanishing. Started at an absolute 0.4 rather
           // than at zero: that offset is a held beat, so the sequence reads as
           // arrive, rest, depart rather than as one continuous slide.
           .to(
@@ -214,10 +214,10 @@ export default function LoadingScreen() {
               // constant, so glyphs caught at different points in the ripple
               // all clear the mask edge together.
               y: 0,
-              duration: 0.86,
-              stagger: { each: 0.036, from: "end" },
+              duration: 0.75,
+              stagger: { each: 0.03, from: "end" },
             },
-            0.55
+            0.4
           )
           // Two panels leaving in stacking order - cream is on top, so cream
           // goes first and uncovers the sage beneath it, which then goes and
@@ -226,13 +226,13 @@ export default function LoadingScreen() {
           // flat slab a single panel produces.
           .to(
             q("[data-loader-panel=cream]"),
-            { yPercent: -100, duration: 1.3, ease: "expo.inOut" },
-            "-=0.38"
+            { yPercent: -100, duration: 1.1, ease: "expo.inOut" },
+            "-=0.34"
           )
           .to(
             q("[data-loader-panel=sage]"),
-            { yPercent: -100, duration: 1.35, ease: "expo.inOut" },
-            "<0.18"
+            { yPercent: -100, duration: 1.15, ease: "expo.inOut" },
+            "<0.16"
           )
           // The morph. Each trailing edge bows into the plate radius the whole
           // site is built on as it sweeps up, and flattens again as it clears.
@@ -240,13 +240,13 @@ export default function LoadingScreen() {
             panels,
             {
               "--loader-bulge": "50%",
-              duration: 0.64,
+              duration: 0.56,
               ease: "sine.inOut",
-              stagger: 0.18,
+              stagger: 0.16,
               yoyo: true,
               repeat: 1,
             },
-            "<-0.18"
+            "<-0.16"
           );
 
         if (repeat) exit.timeScale(REPEAT_RATE);
