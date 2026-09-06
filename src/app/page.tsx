@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import {
   getArticles,
   getCollectionProducts,
+  getCollections,
   getPrimaryMenu,
   getProducts,
 } from "@/lib/shopify";
@@ -253,7 +254,16 @@ function Hero() {
  * leave - which is why the copy is absolutely placed at `lg` and simply
  * stacked below that.
  */
-function BoldStatement() {
+async function BoldStatement() {
+  /* The lookbook is editorial copy carrying a collection handle, and two of
+     those handles have never existed on this store. An unknown collection is a
+     404 now that the shop page tells a typo apart from an empty shelf, so the
+     handle is resolved against Shopify before it becomes a link and a plate
+     whose collection is not there opens the full catalogue instead. */
+  const live = new Set(
+    (await getCollections().catch(() => [])).map((collection) => collection.handle)
+  );
+
   /** Indexed by each plate's `lift` step. 0 is the top of the row. */
   const drop = [
     "lg:mt-0",
@@ -297,7 +307,7 @@ function BoldStatement() {
           {lookbook.map((item, index) => (
             <li key={item.title} className={clsx(drop[item.lift])}>
               <Link
-                href={`/search/${item.handle}`}
+                href={live.has(item.handle) ? `/search/${item.handle}` : "/search"}
                 className="group block"
                 prefetch={false}
               >

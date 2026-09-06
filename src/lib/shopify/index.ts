@@ -17,6 +17,11 @@ import {
   getCollectionProductsQuery,
   getCollectionsQuery,
 } from "./queries/collection";
+import {
+  getCatalogQuery,
+  getCollectionOrderQuery,
+  searchCatalogQuery,
+} from "./queries/catalog";
 import { getMenuQuery } from "./queries/menu";
 import {
   getProductQuery,
@@ -30,6 +35,7 @@ import {
   Cart,
   CartUserError,
   CartWarning,
+  CatalogProduct,
   Collection,
   Connection,
   Image,
@@ -45,7 +51,10 @@ import {
   ShopifyBlogsOperation,
   ShopifyCart,
   ShopifyCartOperation,
+  ShopifyCatalogOperation,
+  ShopifyCatalogProduct,
   ShopifyCollection,
+  ShopifyCollectionOrderOperation,
   ShopifyCollectionProductsOperation,
   ShopifyCollectionsOperation,
   ShopifyCreateCartOperation,
@@ -56,6 +65,7 @@ import {
   ShopifyProductOperation,
   ShopifyProductRecommendationsOperation,
   ShopifyProductsOperation,
+  ShopifySearchCatalogOperation,
   ShopifySearchProductsOperation,
   ShopifyRemoveFromCartOperation,
   ShopifyUpdateCartOperation,
@@ -490,6 +500,145 @@ export async function getCollectionProducts({
   return reshapeProducts(
     removeEdgesAndNodes(res.body.data.collection.products)
   );
+}
+
+/* ------------------------------------------------------------------ catalog
+
+   The shop page reads the catalogue once and does the rest - facets, filtering,
+   sorting, paging - over that one array. Shopify's own storefront filters were
+   the obvious alternative and were rejected after checking what this store
+   actually returns: `filters` on a collection comes back with Availability and
+   Price only (the merchant has not configured Search & Discovery), there is no
+   `collection(handle: "all")` to hang them off for the unfiltered shop page,
+   and facet counts across a set the API will not describe cannot be made exact.
+
+   Reading the whole catalogue is only affordable because `productCardFragment`
+   is small; see the note there. */
+
+/** Shopify caps a connection at 250 nodes per page. */
+const CATALOG_PAGE_SIZE = 250;
+
+/**
+ * Hard ceiling on the catalogue walk. A store past this size wants Shopify's
+ * own filtered pagination rather than an in-memory pass, and stopping is far
+ * better than a request that walks forever: the shop page degrades to the first
+ * `CATALOG_LIMIT` products with a warning in the log, rather than timing out.
+ */
+export const CATALOG_LIMIT = 2000;
+
+function reshapeCatalogProduct(
+  product: ShopifyCatalogProduct
+): CatalogProduct | undefined {
+  if (!product || product.tags?.includes(HIDDEN_PRODUCT_TAG)) return undefined;
+
+  const { collections, ...rest } = product;
+
+  return {
+    ...rest,
+    tags: product.tags ?? [],
+    options: product.options ?? [],
+    collections: collections ? removeEdgesAndNodes(collections) : [],
+  };
+}
+
+/**
+ * Every published product, in Shopify's best-selling order.
+ *
+ * That order is the catalogue's canonical one: it is what an unsorted shop page
+ * shows, and it is the ranking "Trending" sorts by from any starting point.
+ */
+export async function getCatalog(): Promise<CatalogProduct[]> {
+  const products: CatalogProduct[] = [];
+  let after: string | null = null;
+
+  while (products.length < CATALOG_LIMIT) {
+    const res: { body: ShopifyCatalogOperation } = await shopifyFetch<ShopifyCatalogOperation>({
+      query: getCatalogQuery,
+      tags: [TAGS.products, TAGS.collections],
+      variables: { first: CATALOG_PAGE_SIZE, after },
+    });
+
+    const connection = res.body?.data?.products;
+    if (!connection) break;
+
+    for (const edge of connection.edges ?? []) {
+      const product = reshapeCatalogProduct(edge?.node);
+      if (product) products.push(product);
+    }
+
+    if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) {
+      return products;
+    }
+
+    after = connection.pageInfo.endCursor;
+  }
+
+  console.warn(
+    `Catalogue walk stopped at ${CATALOG_LIMIT} products; the shop page is showing a truncated catalogue.`
+  );
+
+  return products;
+}
+
+/**
+ * The product ids of one collection in the merchant's own order, or `null` when
+ * Shopify has no such collection.
+ *
+ * Used only as an ordering index over `getCatalog()`, so a collection page's
+ * default sort matches what the merchant arranged in Admin.
+ */
+export async function getCollectionProductOrder(
+  handle: string
+): Promise<string[] | null> {
+  const ids: string[] = [];
+  let after: string | null = null;
+
+  while (ids.length < CATALOG_LIMIT) {
+    const res: { body: ShopifyCollectionOrderOperation } =
+      await shopifyFetch<ShopifyCollectionOrderOperation>({
+        query: getCollectionOrderQuery,
+        tags: [TAGS.collections, TAGS.products],
+        variables: { handle, first: CATALOG_PAGE_SIZE, after },
+      });
+
+    const collection = res.body?.data?.collection;
+    if (!collection) return null;
+
+    for (const edge of collection.products?.edges ?? []) {
+      if (edge?.node?.id) ids.push(edge.node.id);
+    }
+
+    const pageInfo = collection.products?.pageInfo;
+    if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
+
+    after = pageInfo.endCursor;
+  }
+
+  return ids;
+}
+
+/**
+ * Product ids matching a search term, in Shopify's relevance order.
+ *
+ * The shop page intersects these with the catalogue, so search keeps Shopify's
+ * matching and ranking while the facets, counts and paging stay one code path.
+ */
+export async function searchCatalogIds(query: string): Promise<string[]> {
+  const normalized = query.trim().replace(/\s+/g, " ");
+  if (!normalized) return [];
+
+  const res = await shopifyFetch<ShopifySearchCatalogOperation>({
+    query: searchCatalogQuery,
+    tags: [TAGS.products],
+    variables: { query: normalized, first: CATALOG_PAGE_SIZE },
+  });
+
+  const ids: string[] = [];
+  for (const edge of res.body?.data?.search?.edges ?? []) {
+    if (edge?.node?.id) ids.push(edge.node.id);
+  }
+
+  return ids;
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {

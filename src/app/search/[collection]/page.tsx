@@ -1,11 +1,21 @@
-import Grid from "@/components/grid";
-import ProductGridItems from "@/components/layout/product-grid-items";
-import { defaultSort, sorting } from "@/lib/constants";
-import { getCollections, getCollectionProducts } from "@/lib/shopify";
-import { site } from "@/lib/site";
 import { Metadata } from "next";
-import Link from "next/link";
-import ActionButton from "@/components/ui/action-button";
+import { notFound } from "next/navigation";
+import ShopView from "@/components/shop/shop-view";
+import { getCollections } from "@/lib/shopify";
+import type { Collection } from "@/lib/shopify/types";
+import { site } from "@/lib/site";
+
+/**
+ * `getCollections` is cached and is read by the view as well, so looking the
+ * collection up here costs nothing beyond the first call in a request.
+ */
+async function findCollection(handle: string): Promise<Collection | undefined> {
+  const collections = await getCollections();
+
+  return collections.find(
+    (collection) => collection.handle && collection.handle === handle
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -13,8 +23,7 @@ export async function generateMetadata({
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const { collection: handle } = await params;
-  const collections = await getCollections();
-  const collection = collections.find((item) => item.path === `/search/${handle}`);
+  const collection = await findCollection(handle);
 
   if (!collection) return { title: "Collection" };
 
@@ -36,33 +45,22 @@ export default async function CategoryPage({
     [key: string]: string | string[] | undefined;
   }>;
 }) {
-  const { collection } = await params;
-  const { sort } = (await searchParams) || {};
-  const { sortKey, reverse } =
-    sorting.find((item) => item.slug === sort) || defaultSort;
-  const products = await getCollectionProducts({
-    collection,
-    sortKey,
-    reverse,
-  });
+  const { collection: handle } = await params;
+  const collection = await findCollection(handle);
+
+  // A handle Shopify does not publish is a 404, not an empty grid. Rendering
+  // "this collection is empty" for a typo tells a shopper the store is bare
+  // when the address is simply wrong, and tells search engines the same.
+  if (!collection) notFound();
 
   return (
-    <section>
-      {products.length === 0 ? (
-        <div className="panel px-8 py-20 text-center">
-          <p className="serif text-display-md">This collection is empty</p>
-          <p className="body-mono mx-auto mt-4 max-w-measure">
-            Kompanions in this collection are on their way. Explore the rest of the catalogue.
-          </p>
-          <Link href="/search" className="btn-solid mt-8">
-            View all Kompanions
-          </Link>
-        </div>
-      ) : (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <ProductGridItems products={products} />
-        </Grid>
-      )}
-    </section>
+    <ShopView
+      basePath={collection.path}
+      collectionHandle={collection.handle}
+      eyebrow="Collection"
+      title={collection.title}
+      description={collection.description || undefined}
+      searchParams={(await searchParams) ?? {}}
+    />
   );
 }

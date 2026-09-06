@@ -3,7 +3,7 @@ import clsx from "clsx";
 import Price from "./price";
 import { Badge } from "./ui/section";
 import Plate from "./ui/plate";
-import { Product } from "@/lib/shopify/types";
+import type { Image, Money } from "@/lib/shopify/types";
 
 /**
  * Product cell. A packshot on a rounded plate with a corner ↗ and a status
@@ -12,6 +12,25 @@ import { Product } from "@/lib/shopify/types";
  * Cards carry no border - they are separated by the grid's gap, and the plate's
  * own radius is what reads as the card edge.
  */
+
+/**
+ * What a card needs, and no more.
+ *
+ * Structural rather than `Product` so the same card renders both the full
+ * product from a detail page and the light `CatalogProduct` the shop grid
+ * fetches - see `lib/shopify/fragments/product-card.ts`.
+ */
+export type ProductCardProduct = {
+  handle: string;
+  title: string;
+  availableForSale: boolean;
+  tags: string[];
+  featuredImage?: Image | null;
+  priceRange: {
+    minVariantPrice: Money;
+    maxVariantPrice: Money;
+  };
+};
 
 /** Shopify tags drive the flag; the first match wins. */
 const BADGE_TAGS: Record<string, string> = {
@@ -22,7 +41,7 @@ const BADGE_TAGS: Record<string, string> = {
   bestseller: "Bestseller",
 };
 
-function badgeFor(product: Product): string | null {
+function badgeFor(product: ProductCardProduct): string | null {
   for (const tag of product.tags ?? []) {
     const label = BADGE_TAGS[tag.toLowerCase()];
     if (label) return label;
@@ -34,11 +53,21 @@ export default function ProductCard({
   product,
   priority = false,
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+  reveal = true,
   className,
 }: {
-  product: Product;
+  product: ProductCardProduct;
   priority?: boolean;
   sizes?: string;
+  /**
+   * Scroll-reveal on entry. Turn it off wherever the grid is rebuilt in place
+   * - the shop's filters do that on every tick, and a card that re-plays an
+   * 800ms entrance each time makes filtering feel like a page reload. Those
+   * grids fade in through the CSS `animate-fadeIn` on the cell instead, which
+   * costs no JavaScript and cannot leave a card stranded at zero opacity if a
+   * scroll trigger never fires for it.
+   */
+  reveal?: boolean;
   className?: string;
 }) {
   const price = product.priceRange.minVariantPrice;
@@ -49,7 +78,7 @@ export default function ProductCard({
     <Link
       href={`/product/${product.handle}`}
       prefetch
-      data-reveal=""
+      {...(reveal ? { "data-reveal": "" } : {})}
       className={clsx("group flex h-full flex-col", className)}
     >
       <Plate
@@ -59,6 +88,7 @@ export default function ProductCard({
         placeholderText={product.title.split(" ")[0] ?? "kozy"}
         sizes={sizes}
         priority={priority}
+        reveal={reveal}
         arrow
         tone={1}
       >

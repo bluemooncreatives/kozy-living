@@ -1,13 +1,10 @@
-import Grid from "@/components/grid";
-import ProductGridItems from "@/components/layout/product-grid-items";
-import { defaultSort, sorting } from "@/lib/constants";
-import { getProducts } from "@/lib/shopify";
-import Link from "next/link";
-import ActionButton from "@/components/ui/action-button";
+import ShopView from "@/components/shop/shop-view";
+import { site } from "@/lib/site";
 
 export const metadata = {
   title: "Shop Collection",
-  description: "Search craft-led, conscious textiles from Kozy Living - waffle weave, slub cotton, linen blends and Dabu hand-block prints.",
+  description:
+    "Search craft-led, conscious textiles from Kozy Living - waffle weave, slub cotton, linen blends and Dabu hand-block prints.",
 };
 
 export default async function SearchPage({
@@ -17,46 +14,13 @@ export default async function SearchPage({
     [key: string]: string | string[] | undefined;
   }>;
 }) {
-  const resolvedSearchParams = (await searchParams) || {};
-  const sort = Array.isArray(resolvedSearchParams.sort)
-    ? resolvedSearchParams.sort[0]
-    : resolvedSearchParams.sort;
-  const searchValue = Array.isArray(resolvedSearchParams.q)
-    ? resolvedSearchParams.q[0]
-    : resolvedSearchParams.q;
-  const { sortKey, reverse } =
-    sorting.find((item) => item.slug === sort) || defaultSort;
-  const products = await getProducts({ sortKey, reverse, query: searchValue });
-  const resultsText = products.length === 1 ? "result" : "results";
-
   return (
-    <section>
-      {searchValue ? (
-        <p className="eyebrow mb-8 text-muted">
-          {products.length === 0
-            ? "No Kompanions match"
-            : `${products.length} ${resultsText} for`}{" "}
-          <span className="text-ink">&ldquo;{searchValue}&rdquo;</span>
-        </p>
-      ) : null}
-
-      {products.length > 0 ? (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <ProductGridItems products={products} />
-        </Grid>
-      ) : (
-        <div className="panel px-8 py-20 text-center">
-          <p className="serif text-display-md">Nothing on this shelf yet</p>
-          <p className="body-mono mx-auto mt-4 max-w-measure">
-            {searchValue
-              ? "Try a broader term - a fibre or a collection, like 'waffle', 'linen' or 'Dabu'."
-              : "The collection is being updated. Explore all Kompanions."}
-          </p>
-          <Link href="/search" className="btn-solid mt-8">
-            View all Kompanions
-          </Link>
-        </div>
-      )}
-    </section>
+    <ShopView
+      basePath="/search"
+      eyebrow="All Kompanions"
+      title="Your in-between Kompanions"
+      description={site.description}
+      searchParams={(await searchParams) ?? {}}
+    />
   );
 }

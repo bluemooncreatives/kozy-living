@@ -1,4 +1,10 @@
-import { getMenu, isFrameworkControlFlowError } from "@/lib/shopify";
+import {
+  getCollections,
+  getMenu,
+  getPrimaryMenu,
+  isFrameworkControlFlowError,
+} from "@/lib/shopify";
+import { shopCategories } from "@/lib/menu";
 import { Menu } from "@/lib/shopify/types";
 import Link from "next/link";
 import LogoSquare from "@/components/logo-square";
@@ -17,15 +23,43 @@ import { footerColumns, legalLinks, site } from "@/lib/site";
  * that card immediately above, and repeating it would blunt both.
  */
 export default async function Footer() {
+  const degrade = <T,>(fallback: T) => (error: unknown) => {
+    if (isFrameworkControlFlowError(error)) throw error;
+    return fallback;
+  };
+
   // Shopify owns the legal/policy links; the rest of the footer is editorial.
-  const legalMenu: Menu[] = await getMenu("next-js-footer-menu").catch(
-    (error) => {
-      if (isFrameworkControlFlowError(error)) throw error;
-      return [];
-    }
-  );
+  const [legalMenu, menu, collections] = await Promise.all([
+    getMenu("next-js-footer-menu").catch(degrade<Menu[]>([])),
+    getPrimaryMenu().catch(degrade<Menu[]>([])),
+    getCollections().catch(degrade<Awaited<ReturnType<typeof getCollections>>>([])),
+  ]);
+
   const links = legalMenu.length ? legalMenu : legalLinks;
   const year = new Date().getFullYear();
+
+  /* The Shop column comes from Shopify, resolved against the collections that
+     actually exist.
+     
+     It used to be four hand-written paths, two of which named collections this
+     store has never had - and an unknown collection is a 404 now that the shop
+     page tells a typo apart from an empty shelf. Anything the merchant adds
+     shows up here on its own, and nothing that is not really there can. */
+  const live = new Set(collections.map((collection) => collection.path));
+  const fromMenu = shopCategories(menu).filter((item) => live.has(item.path));
+  const shopLinks = (
+    fromMenu.length
+      ? fromMenu
+      : collections.filter((collection) => collection.handle)
+  )
+    .slice(0, 4)
+    .map((item) => ({ title: item.title, path: item.path }));
+
+  const columns = footerColumns.map((column) =>
+    column.title === "Shop" && shopLinks.length
+      ? { ...column, links: shopLinks }
+      : column
+  );
 
   return (
     <footer className="rule-t mt-6">
@@ -44,7 +78,7 @@ export default async function Footer() {
 
       {/* Link columns + the seal */}
       <div className="shell relative grid grid-cols-2 gap-x-8 gap-y-10 py-10 md:grid-cols-4 md:py-14 lg:pr-40">
-        {footerColumns.map((column) => (
+        {columns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
             <p className="eyebrow text-muted">{column.title}</p>
             <ul className="mt-5 space-y-2.5">
