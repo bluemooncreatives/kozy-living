@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Grid from "@/components/grid";
 import ProductGridItems from "@/components/layout/product-grid-items";
@@ -25,6 +26,8 @@ import {
   sortProducts,
   toParamMap,
   toggleFacetUrl,
+  PRODUCTS_PER_PAGE,
+  PRODUCTS_PER_PAGE_MOBILE,
   type ShopSearchParams,
 } from "@/lib/shop/filters";
 import ActiveFilters, { type ActiveFilter } from "./active-filters";
@@ -140,9 +143,32 @@ export default async function ShopView({
       ? orderBy(scope, (await getCollectionProductOrder(collectionHandle)) ?? [])
       : scope;
 
+  const [headerList, cookieStore] = await Promise.all([
+    headers(),
+    cookies(),
+  ]);
+
+  const chMobile = headerList.get("sec-ch-ua-mobile");
+  const ua = headerList.get("user-agent") || "";
+  const isMobileUA =
+    chMobile === "?1" ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+
+  const cookieVal = cookieStore.get("kozy_is_mobile")?.value;
+  const isMobile =
+    params.get("mobile") === "1"
+      ? true
+      : params.get("mobile") === "0"
+      ? false
+      : cookieVal !== undefined
+      ? cookieVal === "1"
+      : isMobileUA;
+
+  const perPage = isMobile ? PRODUCTS_PER_PAGE_MOBILE : PRODUCTS_PER_PAGE;
+
   const filtered = applyFilters(ordered, index, state);
   const sorted = sortProducts(filtered, state.sort, rank);
-  const results = paginate(sorted, state.page);
+  const results = paginate(sorted, state.page, perPage);
 
   // One result page, one address. Anything else - `page=1`, `page=0`,
   // `page=nonsense`, a page past the end after a filter narrowed the set -
@@ -288,34 +314,44 @@ export default async function ShopView({
 
       {/* Sticky under the header stack - `--header-h` is the single source. */}
       <div className="rule-y sticky top-[var(--header-h)] z-40 bg-paper/95 backdrop-blur-md">
-        <div className="shell flex items-center justify-between gap-3 md:gap-5 py-2.5">
-          <div className="flex shrink-0 items-center gap-3">
-            <FilterDrawer
-              activeCount={activeFilters.length}
-              resultLabel={resultLabel}
-            >
-              {panel}
-            </FilterDrawer>
-            {/* The range needs room the filter button and the sort control
-                have already taken on a phone, so the narrow screen gets the
-                total on its own and the range appears once there is width. */}
-            <p className="spec-mono truncate tabular-nums">
-              {results.total === 0 ? (
-                "No results"
-              ) : (
-                <>
-                  <span className="hidden sm:inline">
-                    {`${results.from}-${results.to} of `}
-                  </span>
-                  {results.total}
-                </>
-              )}
-            </p>
+        <div className="shell flex flex-col gap-2 py-2 md:flex-row md:items-center md:justify-between md:gap-5 md:py-2.5">
+          {/* Row 1 on mobile: 2-column layout (Left: Filters + Count, Right: Sort) */}
+          <div className="flex w-full items-center justify-between gap-3 md:w-auto">
+            <div className="flex shrink-0 items-center gap-3">
+              <FilterDrawer
+                activeCount={activeFilters.length}
+                resultLabel={resultLabel}
+              >
+                {panel}
+              </FilterDrawer>
+              {/* The range needs room the filter button and the sort control
+                  have already taken on a phone, so the narrow screen gets the
+                  total on its own and the range appears once there is width. */}
+              <p className="spec-mono truncate tabular-nums">
+                {results.total === 0 ? (
+                  "No results"
+                ) : (
+                  <>
+                    <span className="hidden min-[380px]:inline">
+                      {`${results.from}-${results.to} of `}
+                    </span>
+                    {results.total}
+                  </>
+                )}
+              </p>
+            </div>
+
+            {/* Mobile-only Sort menu (Right column of Row 1) */}
+            <div className="shrink-0 md:hidden">
+              <SortMenu options={sortOptions} />
+            </div>
           </div>
 
+          {/* Category browse rail: Row 2 on mobile, centered flex-1 on desktop */}
           <BrowseRail items={browse} />
 
-          <div className="shrink-0">
+          {/* Desktop-only Sort menu */}
+          <div className="hidden shrink-0 md:block">
             <SortMenu options={sortOptions} />
           </div>
         </div>

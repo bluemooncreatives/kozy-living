@@ -43,7 +43,7 @@ export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
   return (
     <nav
       aria-label="Browse categories"
-      className="relative min-w-0 flex-1 overflow-hidden"
+      className="relative min-w-0 flex-1 overflow-hidden w-full"
     >
       <ul
         ref={railRef}

@@ -26,6 +26,7 @@ import type { FacetGroup, FacetIndex, Facets, PriceBounds } from "./facets";
 --------------------------------------------------------------------------- */
 
 export const PRODUCTS_PER_PAGE = 24;
+export const PRODUCTS_PER_PAGE_MOBILE = 10;
 
 export type ShopSearchParams = Record<string, string | string[] | undefined>;
 

@@ -108,6 +108,13 @@ export default async function RootLayout({
             __html: `(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`,
           }}
         />
+        {/* Sync mobile viewport state into a cookie so server components can
+            strictly paginate 10 items for mobile views and 24 items for desktop views. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{function check(){var m=window.innerWidth<768?'1':'0';var match=document.cookie.match(/(?:^|; )kozy_is_mobile=([^;]*)/);var current=match?match[1]:null;if(current!==m){document.cookie='kozy_is_mobile='+m+'; path=/; max-age=31536000; SameSite=Lax';var isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);if(current!==null||(m==='1'&&!isMobileUA)){window.location.reload();}}}check();window.addEventListener('resize',function(){clearTimeout(window.__kzResize);window.__kzResize=setTimeout(check,250);});}catch(e){}})()`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
