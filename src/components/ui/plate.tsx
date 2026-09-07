@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import CornerArrow from "./arrow-badge";
+import ClipRotator from "./clip-rotator";
 
 /**
  * The photographic card. Every image on the site goes through this so the
@@ -14,6 +15,10 @@ import CornerArrow from "./arrow-badge";
 export default function Plate({
   src,
   video,
+  videos,
+  videoStart = 0,
+  videoDelay,
+  videoControls,
   alt = "",
   aspect = "4/5",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
@@ -34,6 +39,19 @@ export default function Plate({
   src?: string | null;
   /** Silent looping clip. Takes priority over `src` when both are given. */
   video?: string | null;
+  /**
+   * A shared film list to rotate through instead of a single `video`. The
+   * plate opens on `videoStart` and then takes the next free film from the
+   * queue the other plates are drawing on, blending between them rather than
+   * cutting, and never landing on a film another plate is showing.
+   */
+  videos?: readonly string[];
+  /** Which film in `videos` this plate opens on. */
+  videoStart?: number;
+  /** Offsets this plate's rotation so a cluster of them never moves as one. */
+  videoDelay?: number;
+  /** Draws prev/next buttons over a rotating plate. For large frames only. */
+  videoControls?: boolean;
   alt?: string;
   /**
    * Any CSS aspect-ratio value, e.g. "4/5", "16/9", "1/1". Pass `null` when
@@ -65,6 +83,13 @@ export default function Plate({
   children?: React.ReactNode;
 }) {
   const ghost = placeholderText ?? title ?? tag ?? "kozy";
+
+  // Shared by the still, the single clip and every layer of a rotating one, so
+  // the hover push and the fit stay identical whichever media the plate holds.
+  const mediaClass = clsx(
+    "absolute inset-0 h-full w-full transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
+    objectFit === "contain" ? "object-contain p-8" : "object-cover"
+  );
 
   // Four gradients built off oat milk, deliberately close together - the
   // placeholders should read as one material, not four different boxes. Every
@@ -105,7 +130,15 @@ export default function Plate({
             parallax && "-inset-y-[8%] h-[116%]"
           )}
         >
-          {video ? (
+          {videos?.length ? (
+            <ClipRotator
+              films={videos}
+              start={videoStart}
+              delay={videoDelay}
+              controls={videoControls}
+              className={mediaClass}
+            />
+          ) : video ? (
             <video
               src={video}
               aria-hidden
@@ -114,10 +147,7 @@ export default function Plate({
               loop
               playsInline
               preload="auto"
-              className={clsx(
-                "absolute inset-0 h-full w-full transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
-                objectFit === "contain" ? "object-contain p-8" : "object-cover"
-              )}
+              className={mediaClass}
             />
           ) : src ? (
             <Image
@@ -146,7 +176,7 @@ export default function Plate({
         </div>
 
         {/* Scrim, only where there is copy to protect. */}
-        {(tag || title || caption) && (src || video) ? (
+        {(tag || title || caption) && (src || video || videos?.length) ? (
           <div
             aria-hidden
             className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-indigo/60 to-transparent"
@@ -160,7 +190,7 @@ export default function Plate({
               <h3
                 className={clsx(
                   "serif text-display-sm",
-                  src || video ? "text-paper" : "text-ink"
+                  src || video || videos?.length ? "text-paper" : "text-ink"
                 )}
               >
                 {title}
@@ -173,7 +203,7 @@ export default function Plate({
           <p
             className={clsx(
               "absolute bottom-4 right-4 z-10 max-w-[16rem] text-right text-spec",
-              src || video ? "text-paper/85" : "text-ink/60"
+              src || video || videos?.length ? "text-paper/85" : "text-ink/60"
             )}
           >
             {caption}

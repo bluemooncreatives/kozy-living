@@ -85,6 +85,33 @@ export const hero = {
   metaRight: "100% Natural Fibres",
 } as const;
 
+/**
+ * Every film the hero bento plays, in one list.
+ *
+ * All three plates draw from THIS list and nothing else - there are no
+ * per-plate clips. Each starts on its own entry (the first three, in order)
+ * and then takes the next free film from the shared queue, so the reel runs
+ * end to end across the bento rather than each box looping a playlist of its
+ * own. Two plates can never land on the same film: a film is checked out
+ * while it is on screen and checked back in when it leaves, in
+ * `@/lib/hero-clips`.
+ *
+ * Ordering matters twice over. The first three are what the page paints
+ * before any JavaScript runs, so they are the ones worth leading with; and
+ * because the queue is walked in order, the list is also the running order.
+ * Keep at least one more film here than there are plates, or the queue has
+ * nothing free to hand out.
+ */
+export const heroFilms = [
+  "https://cdn.shopify.com/videos/c/o/v/e551ca2e50364d1cbf8f66838604dc10.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/3329bb6694284f05be3d3ff8a0bb6f22.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/65fa358ea2ec488f9c62e7f86d758f3c.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/e78b76a026054863975d667b63071a21.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/d761713a789d44c3bb7f5b6686912560.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/754450888c474683bb51918287cdcdca.mp4",
+  "https://cdn.shopify.com/videos/c/o/v/4c106e1353e5404dbc1622f13a2de9d2.mp4",
+] as const;
+
 /** The oversized statement that opens the editorial half of the page. */
 export const boldStatement = {
   title: ["Do Less,", "With Intention"],
