@@ -111,7 +111,7 @@ export default function ProductCard({
     variants.find((v) => v.availableForSale) ?? variants[0];
   const isAvailable = Boolean(
     product.availableForSale &&
-      (selectedVariant ? selectedVariant.availableForSale : true)
+    (selectedVariant ? selectedVariant.availableForSale : true)
   );
 
   const step = (by: number) => {
@@ -164,7 +164,7 @@ export default function ProductCard({
     <article
       {...(reveal ? { "data-reveal": "" } : {})}
       className={clsx(
-        "group flex h-full flex-col rounded-plate bg-card p-3 border border-ink/10 transition-all duration-300 hover:border-ink/20 hover:shadow-sm",
+        "group flex h-full flex-col rounded-plate transition-all duration-300 hover:border-ink/20 hover:shadow-sm",
         className
       )}
     >
