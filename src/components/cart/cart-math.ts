@@ -2,6 +2,7 @@ import { MAX_LINE_QUANTITY } from "@/lib/constants";
 import type {
   Cart,
   CartItem,
+  Image,
   Money,
   Product,
   ProductVariant,
@@ -21,10 +22,12 @@ export type UpdateType = "plus" | "minus" | "delete";
  * reads - and it lets a listing card, which never loads the full product,
  * raise an optimistic line of its own.
  */
-export type CartLineProduct = Pick<
-  Product,
-  "id" | "handle" | "title" | "featuredImage"
->;
+export type CartLineProduct = {
+  id: string;
+  handle: string;
+  title: string;
+  featuredImage?: Image | null;
+};
 
 export type CartAction =
   | {
@@ -209,7 +212,12 @@ export function createOrUpdateCartItem(
         id: product.id,
         handle: product.handle,
         title: product.title,
-        featuredImage: product.featuredImage,
+        featuredImage: product.featuredImage ?? {
+          url: "",
+          altText: product.title,
+          width: 0,
+          height: 0,
+        },
       },
     },
   };
