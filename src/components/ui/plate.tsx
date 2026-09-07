@@ -14,6 +14,8 @@ import ClipRotator from "./clip-rotator";
  */
 export default function Plate({
   src,
+  gallery,
+  galleryIndex = 0,
   video,
   videos,
   videoStart = 0,
@@ -37,6 +39,14 @@ export default function Plate({
   children,
 }: {
   src?: string | null;
+  /**
+   * Several stills for one plate, stacked and cross-faded. The plate does not
+   * own which one shows - `galleryIndex` does - so the card above it can put
+   * that on whatever control it likes without this file knowing about paging.
+   */
+  gallery?: readonly { url: string; altText?: string }[] | null;
+  /** Which of `gallery` is on top. Anything out of range shows the first. */
+  galleryIndex?: number;
   /** Silent looping clip. Takes priority over `src` when both are given. */
   video?: string | null;
   /**
@@ -130,7 +140,32 @@ export default function Plate({
             parallax && "-inset-y-[8%] h-[116%]"
           )}
         >
-          {videos?.length ? (
+          {gallery?.length ? (
+            gallery.map((image, index) => (
+              <Image
+                key={image.url}
+                src={image.url}
+                alt={image.altText || alt}
+                fill
+                sizes={sizes}
+                // Only the shot on screen is worth the priority hint; the
+                // rest are a browse the visitor may never open.
+                priority={priority && index === 0}
+                loading={priority && index === 0 ? undefined : "lazy"}
+                className={clsx(
+                  mediaClass,
+                  "transition-opacity duration-500 ease-editorial",
+                  // Modulo rather than a clamp: paging past either end wraps,
+                  // so the caller can just keep counting in one direction.
+                  index ===
+                    ((galleryIndex % gallery.length) + gallery.length) %
+                      gallery.length
+                    ? "opacity-100"
+                    : "opacity-0"
+                )}
+              />
+            ))
+          ) : videos?.length ? (
             <ClipRotator
               films={videos}
               start={videoStart}
@@ -157,10 +192,7 @@ export default function Plate({
               sizes={sizes}
               priority={priority}
               loading={priority ? undefined : "lazy"}
-              className={clsx(
-                "transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
-                objectFit === "contain" ? "object-contain p-8" : "object-cover"
-              )}
+              className={mediaClass}
             />
           ) : (
             <div
@@ -176,7 +208,8 @@ export default function Plate({
         </div>
 
         {/* Scrim, only where there is copy to protect. */}
-        {(tag || title || caption) && (src || video || videos?.length) ? (
+        {(tag || title || caption) &&
+        (src || video || videos?.length || gallery?.length) ? (
           <div
             aria-hidden
             className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-indigo/60 to-transparent"
@@ -190,7 +223,9 @@ export default function Plate({
               <h3
                 className={clsx(
                   "serif text-display-sm",
-                  src || video || videos?.length ? "text-paper" : "text-ink"
+                  src || video || videos?.length || gallery?.length
+                    ? "text-paper"
+                    : "text-ink"
                 )}
               >
                 {title}
@@ -203,7 +238,9 @@ export default function Plate({
           <p
             className={clsx(
               "absolute bottom-4 right-4 z-10 max-w-[16rem] text-right text-spec",
-              src || video || videos?.length ? "text-paper/85" : "text-ink/60"
+              src || video || videos?.length || gallery?.length
+                ? "text-paper/85"
+                : "text-ink/60"
             )}
           >
             {caption}

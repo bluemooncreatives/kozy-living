@@ -1,6 +1,6 @@
 "use client";
 
-import { Cart, Product, ProductVariant } from "@/lib/shopify/types";
+import { Cart, ProductVariant } from "@/lib/shopify/types";
 import {
   createContext,
   use,
@@ -12,14 +12,23 @@ import {
   useState,
 } from "react";
 import type { CartActionState } from "./actions";
-import { cartReducer, clampQuantity, type UpdateType } from "./cart-math";
+import {
+  cartReducer,
+  clampQuantity,
+  type CartLineProduct,
+  type UpdateType,
+} from "./cart-math";
 
 type CartContextType = {
   cart: Cart | undefined;
   /** Applies an optimistic line change. Does not talk to the server. */
   updateCartItem: (merchandiseId: string, updateType: UpdateType) => void;
-  /** Applies an optimistic add. Does not talk to the server. */
-  addCartItem: (variant: ProductVariant, product: Product) => void;
+  /** Applies an optimistic add of `quantity` units. Does not talk to the server. */
+  addCartItem: (
+    variant: ProductVariant,
+    product: CartLineProduct,
+    quantity?: number
+  ) => void;
   /**
    * Serialises a cart mutation behind every mutation already in flight, so
    * overlapping requests can never be applied out of order.
@@ -138,8 +147,11 @@ export function CartProvider({
   );
 
   const addCartItem = useCallback(
-    (variant: ProductVariant, product: Product) => {
-      updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
+    (variant: ProductVariant, product: CartLineProduct, quantity = 1) => {
+      updateOptimisticCart({
+        type: "ADD_ITEM",
+        payload: { variant, product, quantity },
+      });
     },
     [updateOptimisticCart]
   );

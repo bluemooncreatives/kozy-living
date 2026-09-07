@@ -531,13 +531,17 @@ function reshapeCatalogProduct(
 ): CatalogProduct | undefined {
   if (!product || product.tags?.includes(HIDDEN_PRODUCT_TAG)) return undefined;
 
-  const { collections, ...rest } = product;
+  const { collections, images, variants, ...rest } = product;
 
   return {
     ...rest,
     tags: product.tags ?? [],
     options: product.options ?? [],
     collections: collections ? removeEdgesAndNodes(collections) : [],
+    // Both connections are optional in practice: a cached catalogue entry
+    // written before the fragment carried them deserialises without either.
+    images: images ? reshapeImages(images, product.title) : [],
+    variants: variants ? removeEdgesAndNodes(variants) : [],
   };
 }
 

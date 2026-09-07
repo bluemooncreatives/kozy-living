@@ -136,13 +136,22 @@ export type ShopifyCatalogProduct = {
     maxVariantPrice: Money;
   };
   featuredImage: Image | null;
+  /** Capped at 5 by the fragment - the card's gallery, not the full set. */
+  images: Connection<Image>;
+  /** Capped at 2: enough to tell "sellable here" from "has choices to make". */
+  variants: Connection<ProductVariant>;
   collections: Connection<{ handle: string; title: string }>;
   createdAt: string;
   updatedAt: string;
 };
 
-export type CatalogProduct = Omit<ShopifyCatalogProduct, "collections"> & {
+export type CatalogProduct = Omit<
+  ShopifyCatalogProduct,
+  "collections" | "images" | "variants"
+> & {
   collections: { handle: string; title: string }[];
+  images: Image[];
+  variants: ProductVariant[];
 };
 
 export type ShopifyCatalogOperation = {
