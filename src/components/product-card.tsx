@@ -23,7 +23,8 @@ import type { Image, Money, ProductVariant } from "@/lib/shopify/types";
  * A self-contained card box with:
  * - Elongated photographic plate (4/5 aspect ratio)
  * - Top-right notched corner curve with the iconic ↗ arrow button
- * - In-plate left and right navigation buttons for product gallery browsing
+ * - In-plate vertically centered left and right navigation buttons for gallery browsing
+ * - In-plate dotted carousel indicator at the bottom of the card plate
  * - Status badge (Sold out / New / Bestseller)
  * - Product title and formatted price row
  * - Integrated Order Add Counter [- 1 +] and dynamic Add to Cart button [ADD]
@@ -123,8 +124,22 @@ export default function ProductCard({
   const page = (e: React.MouseEvent, by: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setShot((current) => current + by);
+    setShot((current) => {
+      const len = gallery.length || 1;
+      return (((current + by) % len) + len) % len;
+    });
   };
+
+  const goToShot = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShot(index);
+  };
+
+  const activeIndex =
+    gallery.length > 0
+      ? ((shot % gallery.length) + gallery.length) % gallery.length
+      : 0;
 
   async function add(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -198,25 +213,55 @@ export default function ProductCard({
             </span>
           ) : null}
 
-          {/* In-plate Gallery Navigation Buttons (Left & Right) */}
+          {/* In-plate Gallery Navigation Buttons (Left & Right) - Vertically Centered & Smaller */}
           {gallery.length > 1 ? (
-            <div className="pointer-events-none absolute inset-x-2.5 bottom-2.5 z-20 flex items-center justify-between">
+            <div className="pointer-events-none absolute inset-x-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-between">
               <button
                 type="button"
                 onClick={(e) => page(e, -1)}
                 aria-label={`Previous image of ${product.title}`}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 bg-card/90 text-ink shadow-chip backdrop-blur-sm transition-all duration-200 hover:bg-ink hover:text-paper active:scale-95"
+                className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-white/50 bg-white/85 text-ink backdrop-blur-sm transition-all duration-200 hover:bg-white active:scale-95"
               >
-                <ChevronLeftIcon aria-hidden className="h-4 w-4 stroke-[2.5]" />
+                <ChevronLeftIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
               </button>
               <button
                 type="button"
                 onClick={(e) => page(e, 1)}
                 aria-label={`Next image of ${product.title}`}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 bg-card/90 text-ink shadow-chip backdrop-blur-sm transition-all duration-200 hover:bg-ink hover:text-paper active:scale-95"
+                className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-white/50 bg-white/85 text-ink backdrop-blur-sm transition-all duration-200 hover:bg-white active:scale-95"
               >
-                <ChevronRightIcon aria-hidden className="h-4 w-4 stroke-[2.5]" />
+                <ChevronRightIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
               </button>
+            </div>
+          ) : null}
+
+          {/* In-plate Transparent Dotted / Dashed Carousel Indicator at the Bottom */}
+          {gallery.length > 1 ? (
+            <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex items-center justify-center">
+              <div className="flex items-center gap-1.5 py-1">
+                {gallery.map((_, index) => {
+                  const isActive = index === activeIndex;
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={(e) => goToShot(e, index)}
+                      aria-label={`Go to slide ${index + 1} of ${gallery.length} for ${product.title}`}
+                      aria-current={isActive}
+                      className="pointer-events-auto group/dot flex h-5 items-center justify-center px-0.5 transition-transform active:scale-90"
+                    >
+                      <span
+                        className={clsx(
+                          "block shrink-0 rounded-full transition-all duration-300 ease-out",
+                          isActive
+                            ? "h-1.5 w-5 bg-white"
+                            : "h-1.5 w-1.5 bg-white/50 group-hover/dot:bg-white/80"
+                        )}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ) : null}
         </Plate>
