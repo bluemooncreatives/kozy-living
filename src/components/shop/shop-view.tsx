@@ -28,6 +28,7 @@ import {
   type ShopSearchParams,
 } from "@/lib/shop/filters";
 import ActiveFilters, { type ActiveFilter } from "./active-filters";
+import BrowseRail from "./browse-rail";
 import FilterDrawer from "./filter-drawer";
 import FilterPanel, {
   type BrowseItem,
@@ -241,7 +242,6 @@ export default async function ShopView({
 
   const panel = (
     <FilterPanel
-      browse={browse}
       groups={groups}
       price={facets.price}
       priceSelection={state.price}
@@ -257,8 +257,8 @@ export default async function ShopView({
     active: (state.sort ?? null) === (item.slug ?? null),
   }));
 
-  const noun = results.total === 1 ? "Kompanion" : "Kompanions";
-  const resultLabel = `${results.total} ${noun}`;
+  const resultLabel =
+    results.total === 1 ? "1 result" : `${results.total} results`;
 
   return (
     <>
@@ -288,8 +288,8 @@ export default async function ShopView({
 
       {/* Sticky under the header stack - `--header-h` is the single source. */}
       <div className="rule-y sticky top-[var(--header-h)] z-40 bg-paper/95 backdrop-blur-md">
-        <div className="shell flex items-center justify-between gap-4 py-3">
-          <div className="flex min-w-0 items-center gap-3">
+        <div className="shell flex items-center justify-between gap-3 md:gap-5 py-2.5">
+          <div className="flex shrink-0 items-center gap-3">
             <FilterDrawer
               activeCount={activeFilters.length}
               resultLabel={resultLabel}
@@ -307,12 +307,17 @@ export default async function ShopView({
                   <span className="hidden sm:inline">
                     {`${results.from}-${results.to} of `}
                   </span>
-                  {resultLabel}
+                  {results.total}
                 </>
               )}
             </p>
           </div>
-          <SortMenu options={sortOptions} />
+
+          <BrowseRail items={browse} />
+
+          <div className="shrink-0">
+            <SortMenu options={sortOptions} />
+          </div>
         </div>
       </div>
 

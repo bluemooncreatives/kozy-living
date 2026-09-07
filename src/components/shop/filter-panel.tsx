@@ -174,7 +174,6 @@ function ValueList({ values }: { values: PanelValue[] }) {
 }
 
 export default function FilterPanel({
-  browse,
   groups,
   price,
   priceSelection,
@@ -182,7 +181,7 @@ export default function FilterPanel({
   clearHref,
   hasFilters,
 }: {
-  browse: BrowseItem[];
+  browse?: BrowseItem[];
   groups: PanelGroup[];
   price: PriceBounds | null;
   priceSelection: PriceSelection | null;
@@ -193,32 +192,6 @@ export default function FilterPanel({
 }) {
   return (
     <div className="rule-t">
-      {browse.length ? (
-        <Section label="Browse">
-          <ul>
-            {browse.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  prefetch={false}
-                  aria-current={item.active ? "page" : undefined}
-                  className={clsx(
-                    "ui-mono flex items-start justify-between gap-3 py-1.5 transition-colors",
-                    item.active
-                      ? "font-semibold text-ink"
-                      : "text-muted hover:text-ink"
-                  )}
-                >
-                  <span className="min-w-0 flex-1 break-words">
-                    {item.title}
-                  </span>
-                  <Count>{item.count}</Count>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      ) : null}
 
       {price ? (
         <Section label="Price">

@@ -226,7 +226,7 @@ export default function ProductCard({
       <div className="mt-3 flex flex-1 flex-col justify-between px-0.5">
         {/* Title and Price Row */}
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="ui-mono font-semibold line-clamp-1 text-ink text-sm sm:text-base">
+          <h3 className="ui-mono font-semibold text-ink text-sm sm:text-base leading-snug">
             <Link href={href} prefetch className="hover:underline">
               {product.title}
             </Link>
