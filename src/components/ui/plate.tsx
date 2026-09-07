@@ -217,8 +217,12 @@ export default function Plate({
         ) : null}
 
         {tag || title ? (
-          <div className="absolute inset-x-4 bottom-4 z-10 flex flex-col items-start gap-2">
-            {tag ? <span className="chip">{tag}</span> : null}
+          <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-4 sm:bottom-4 z-10 flex flex-col items-start gap-1.5 sm:gap-2">
+            {tag ? (
+              <span className="chip text-[0.625rem] sm:text-spec py-0.5 sm:py-1.5 px-2 sm:px-3">
+                {tag}
+              </span>
+            ) : null}
             {title ? (
               <h3
                 className={clsx(

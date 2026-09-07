@@ -446,8 +446,22 @@
      to sit on the oat plate, where its fill was contrast enough. */
   .arrow-btn {
     @apply inline-flex items-center justify-center rounded-full border border-ink/10 bg-card text-ink shadow-chip transition-colors duration-200;
-    height: 2.75rem;
-    width: 2.75rem;
+    height: clamp(2.125rem, 8.5vw, 2.375rem);
+    width: clamp(2.125rem, 8.5vw, 2.375rem);
+  }
+
+  @media (min-width: 640px) {
+    .arrow-btn {
+      height: 2.5rem;
+      width: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .arrow-btn {
+      height: 2.75rem;
+      width: 2.75rem;
+    }
   }
 
   .arrow-btn:hover {
@@ -539,7 +553,14 @@
   .hero-bento > .bento-one,
   .hero-bento > .bento-two {
     aspect-ratio: 4 / 3;
-    min-height: 11rem;
+    min-height: clamp(9rem, 30vw, 10.5rem);
+  }
+
+  @media (min-width: 640px) {
+    .hero-bento > .bento-one,
+    .hero-bento > .bento-two {
+      min-height: 11rem;
+    }
   }
 
   .hero-bento > .bento-one {
@@ -641,7 +662,7 @@
      `mask-composite`, whose keywords still differ between WebKit and everyone
      else. Layers simply add, which every engine agrees on. */
   .notch-tr {
-    --notch: 96px;
+    --notch: clamp(74px, 18vw, 82px);
     -webkit-mask-image: var(--notch-corner), linear-gradient(#000, #000),
       linear-gradient(#000, #000);
     mask-image: var(--notch-corner), linear-gradient(#000, #000),
@@ -654,6 +675,18 @@
     mask-position: right top, left top, right bottom;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+  }
+
+  @media (min-width: 640px) {
+    .notch-tr {
+      --notch: 88px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .notch-tr {
+      --notch: 96px;
+    }
   }
 
   /* ---------------------------------------------------------------- motion */

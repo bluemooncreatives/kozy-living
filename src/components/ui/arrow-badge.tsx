@@ -39,12 +39,11 @@ export default function CornerArrow({
       aria-hidden
       className={clsx(
         tone === "sage" ? "arrow-btn-sage" : "arrow-btn",
-        // 2px inset -> centre 24px in, concentric with the r36 cut.
         "absolute right-0.5 top-0.5 z-10",
         className
       )}
     >
-      <ArrowUpRight className="h-4 w-4" />
+      <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
     </span>
   );
 }
