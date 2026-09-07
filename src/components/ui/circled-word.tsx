@@ -21,9 +21,11 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 export default function CircledWord({
   children,
   className,
+  tone = "deep",
 }: {
   children: React.ReactNode;
   className?: string;
+  tone?: "deep" | "sage" | "white";
 }) {
   const scope = useRef<HTMLSpanElement>(null);
 
@@ -50,6 +52,13 @@ export default function CircledWord({
     { scope }
   );
 
+  const strokeColor =
+    tone === "white"
+      ? "#ffffff"
+      : tone === "sage"
+      ? "var(--sage)"
+      : "var(--sage-deep)";
+
   return (
     <span
       ref={scope}
@@ -67,7 +76,7 @@ export default function CircledWord({
         <path
           d="M104 6C64 3 18 12 8 30c-9 17 30 26 82 27 47 1 100-7 105-25C199 16 168 7 128 5"
           fill="none"
-          stroke="var(--sage-deep)"
+          stroke={strokeColor}
           strokeWidth="2.5"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"

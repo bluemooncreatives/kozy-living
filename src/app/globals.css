@@ -379,7 +379,7 @@
      same value as the pill's own radius so the circle sits flush in the end
      rather than floating inside it. */
   .action-btn {
-    @apply inline-flex shrink-0 items-center gap-3 rounded-chip border border-ink/15 bg-card py-1.5 pl-6 pr-1.5 font-sans text-ui font-semibold text-ink;
+    @apply inline-flex shrink-0 items-center gap-2 sm:gap-3 rounded-chip border border-ink/15 bg-card py-1 sm:py-1.5 pl-3.5 sm:pl-6 pr-1 sm:pr-1.5 font-sans text-xs sm:text-ui font-semibold text-ink;
     /* The icon node is transformed on hover; without this the circle's own
        paint can bleed a hairline past the pill's rounded end mid-animation. */
     overflow: hidden;
@@ -390,7 +390,7 @@
   }
 
   .action-btn-icon {
-    @apply relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper;
+    @apply relative flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper;
   }
 
   /* Solid: indigo pill, cream label, sage icon well. The strongest CTA. */
@@ -509,22 +509,44 @@
      chrome hidden: a `vh` hero overflows the screen and pushes the wordmark
      below the fold until you scroll. */
   /* The hero bento.
-
-     Three columns so the two small plates can sit side by side inside the
-     right-hand column while the feature plate spans both rows. Fractional
-     rows rather than fixed heights: the grid is handed an exact height by
-     `.hero-frame`, so the rows divide whatever the viewport gives them and
-     the composition holds at every screen without a single media-query
-     height. */
+     On mobile, the feature plate takes full viewport height for a dramatic,
+     unobstructed hero experience with side-by-side action buttons.
+     The statement panel and secondary tiles follow below in natural flow.
+     On desktop (lg), the composition locks to a 3-column bento fitting exactly
+     the viewport minus header and margins. */
   .hero-bento {
     display: grid;
     gap: 0.5rem;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1.55fr auto 0.9fr;
+    grid-template-rows: auto auto;
     grid-template-areas:
       "feature feature"
-      "say say"
       "one two";
+  }
+
+  .hero-bento > .bento-feature {
+    grid-area: feature;
+    height: calc(100vh - var(--header-h) - (var(--hero-gap) * 2));
+    height: calc(100dvh - var(--header-h) - (var(--hero-gap) * 2));
+    height: calc(100svh - var(--header-h) - (var(--hero-gap) * 2));
+    min-height: 540px;
+  }
+
+  .hero-bento > .bento-say {
+    grid-area: say;
+  }
+
+  .hero-bento > .bento-one,
+  .hero-bento > .bento-two {
+    aspect-ratio: 4 / 3;
+    min-height: 11rem;
+  }
+
+  .hero-bento > .bento-one {
+    grid-area: one;
+  }
+  .hero-bento > .bento-two {
+    grid-area: two;
   }
 
   @media (min-width: 1024px) {
@@ -536,24 +558,23 @@
         "feature say say"
         "feature one two";
     }
-  }
 
-  .hero-bento > .bento-feature {
-    grid-area: feature;
-  }
-  .hero-bento > .bento-say {
-    grid-area: say;
-  }
-  .hero-bento > .bento-one {
-    grid-area: one;
-  }
-  .hero-bento > .bento-two {
-    grid-area: two;
-  }
+    .hero-bento > .bento-feature {
+      height: 100%;
+      min-height: 0;
+    }
 
-  .hero-frame {
-    height: calc(100vh - var(--header-h) - (var(--hero-gap) * 2));
-    height: calc(100svh - var(--header-h) - (var(--hero-gap) * 2));
+    .hero-bento > .bento-one,
+    .hero-bento > .bento-two {
+      aspect-ratio: auto;
+      min-height: 0;
+    }
+
+    .hero-frame {
+      height: calc(100vh - var(--header-h) - (var(--hero-gap) * 2));
+      height: calc(100dvh - var(--header-h) - (var(--hero-gap) * 2));
+      height: calc(100svh - var(--header-h) - (var(--hero-gap) * 2));
+    }
   }
 
   /* ----------------------------------------------------------------- media */

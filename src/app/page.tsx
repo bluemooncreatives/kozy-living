@@ -127,14 +127,18 @@ async function productsFrom(
  * Wraps the ringed phrase where it appears inside a line, so the ellipse can
  * loop a few words mid-sentence rather than a whole line.
  */
-function ringWord(line: string, phrase: string) {
+function ringWord(
+  line: string,
+  phrase: string,
+  tone?: "deep" | "sage" | "white"
+) {
   const at = line.indexOf(phrase);
   if (at === -1) return line;
 
   return (
     <>
       {line.slice(0, at)}
-      <CircledWord>{phrase}</CircledWord>
+      <CircledWord tone={tone}>{phrase}</CircledWord>
       {line.slice(at + phrase.length)}
     </>
   );
@@ -168,24 +172,46 @@ function Hero() {
             </p>
           </div>
 
-          <div className="absolute inset-x-3 bottom-3 z-20 flex flex-wrap items-center gap-2 md:inset-x-5 md:bottom-5 md:gap-3">
-            <ActionButton
-              label={hero.primary.label}
-              href={hero.primary.href}
-              icon="arrow"
-              variant="glass"
-            />
-            <ActionButton
-              label={hero.secondary.label}
-              href={hero.secondary.href}
-              icon="down"
-              variant="glass"
-            />
+          {/* Dark indigo scrim on mobile for crisp white text legibility over video */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-4/5 rounded-b-plate bg-gradient-to-t from-indigo/90 via-indigo/50 via-50% to-transparent lg:hidden"
+          />
+
+          <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-3.5 md:inset-x-5 md:bottom-5 md:gap-4">
+            {/* Mobile-only textual context in crisp white */}
+            <div className="flex flex-col gap-2 lg:hidden max-w-lg">
+              <h2 className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white">
+                {statement.lines.map((line) => (
+                  <span key={line} className="block">
+                    {ringWord(line, statement.circled, "white")}
+                  </span>
+                ))}
+              </h2>
+              <p className="body-mono text-white/90 text-xs sm:text-sm max-w-measure">
+                {statement.body}
+              </p>
+            </div>
+
+            <div className="flex flex-nowrap items-center gap-2 md:gap-3">
+              <ActionButton
+                label={hero.primary.label}
+                href={hero.primary.href}
+                icon="arrow"
+                variant="glass"
+              />
+              <ActionButton
+                label={hero.secondary.label}
+                href={hero.secondary.href}
+                icon="down"
+                variant="glass"
+              />
+            </div>
           </div>
         </Plate>
 
         {/* --------------------------------------------------------- saying */}
-        <div className="bento-say panel flex flex-col justify-between gap-6 p-6 md:p-8 lg:p-9">
+        <div className="bento-say panel hidden lg:flex flex-col justify-between gap-6 p-6 md:p-8 lg:p-9">
           <h2 className={clsx(displayFace, "text-display-lg")}>
             {statement.lines.map((line) => (
               <span key={line} className="block">
@@ -193,7 +219,7 @@ function Hero() {
               </span>
             ))}
           </h2>
-          <p className="body-mono max-w]">{statement.body}</p>
+          <p className="body-mono max-w-measure">{statement.body}</p>
         </div>
 
         {/* ---------------------------------------------------- two closers */}
