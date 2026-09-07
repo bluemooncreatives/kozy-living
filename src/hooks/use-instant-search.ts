@@ -20,6 +20,7 @@ export type InstantSearchState = {
  * Starts fetching from the very first character.
  */
 export function useInstantSearch(query: string, debounceMs = 180): InstantSearchState {
+  const trimmed = query.trim();
   const [results, setResults] = useState<SearchResult>(EMPTY);
   const [isLoading, setIsLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -48,14 +49,10 @@ export function useInstantSearch(query: string, debounceMs = 180): InstantSearch
   }, []);
 
   useEffect(() => {
-    const trimmed = query.trim();
-
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (!trimmed) {
       abortRef.current?.abort();
-      setResults(EMPTY);
-      setIsLoading(false);
       return;
     }
 
@@ -64,7 +61,7 @@ export function useInstantSearch(query: string, debounceMs = 180): InstantSearch
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [query, debounceMs, fetch_]);
+  }, [trimmed, debounceMs, fetch_]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -74,5 +71,12 @@ export function useInstantSearch(query: string, debounceMs = 180): InstantSearch
     };
   }, []);
 
-  return { results, hasResults: hasResults(results), isLoading };
+  const currentResults = trimmed ? results : EMPTY;
+  const currentLoading = trimmed ? isLoading : false;
+
+  return {
+    results: currentResults,
+    hasResults: hasResults(currentResults),
+    isLoading: currentLoading,
+  };
 }

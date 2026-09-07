@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import clsx from "clsx";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import Price from "./price";
 import { Badge } from "./ui/section";
 import Plate from "./ui/plate";
@@ -141,36 +141,38 @@ export default function ProductCard({
       ? ((shot % gallery.length) + gallery.length) % gallery.length
       : 0;
 
-  async function add(e?: React.FormEvent) {
-    if (e) e.preventDefault();
+  function add() {
     if (!selectedVariant || !isAvailable || pending) return;
 
     setResult(null);
     setPending(true);
-    addCartItem(selectedVariant, product, quantity);
 
-    try {
-      const outcome = await runCartMutation(() =>
-        addItem(null, { merchandiseId: selectedVariant.id, quantity })
-      );
-      setResult(outcome);
-      reportStatus(outcome);
-      if (outcome?.ok !== false) {
-        setAdded(true);
-        setQuantity(1);
-        window.setTimeout(() => setAdded(false), 2000);
+    startTransition(async () => {
+      addCartItem(selectedVariant, product, quantity);
+
+      try {
+        const outcome = await runCartMutation(() =>
+          addItem(null, { merchandiseId: selectedVariant.id, quantity })
+        );
+        setResult(outcome);
+        reportStatus(outcome);
+        if (outcome?.ok !== false) {
+          setAdded(true);
+          setQuantity(1);
+          window.setTimeout(() => setAdded(false), 2000);
+        }
+      } catch (error) {
+        console.error(error);
+        const failure = {
+          ok: false,
+          message: "We couldn't add that to your cart.",
+        };
+        setResult(failure);
+        reportStatus(failure);
+      } finally {
+        setPending(false);
       }
-    } catch (error) {
-      console.error(error);
-      const failure = {
-        ok: false,
-        message: "We couldn't add that to your cart.",
-      };
-      setResult(failure);
-      reportStatus(failure);
-    } finally {
-      setPending(false);
-    }
+    });
   }
 
   const errorMessage = result && !result.ok ? result.message : "";
@@ -291,7 +293,7 @@ export default function ProductCard({
         {/* 3. In-Box Order Counter & Dynamic Add Button */}
         <div className="mt-3 pt-1">
           <form
-            onSubmit={add}
+            action={add}
             className="flex items-center gap-2"
           >
             {/* Pill Order Add Counter: [- 1 +] */}

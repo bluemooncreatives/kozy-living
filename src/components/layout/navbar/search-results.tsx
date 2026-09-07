@@ -66,7 +66,6 @@ export default function SearchResults({
       : "w-full"; // inline: no box, flows naturally
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div className={wrapperClass} onKeyDown={handleKeyDown}>
       {/* Loading state */}
       {isLoading && isEmpty && (
