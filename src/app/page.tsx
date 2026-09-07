@@ -172,23 +172,23 @@ function Hero() {
             </p>
           </div>
 
-          {/* Dark indigo scrim on mobile for crisp white text legibility over video */}
+          {/* Black gradient to transparent layer for mobile view only */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-4/5 rounded-b-plate bg-gradient-to-t from-indigo/90 via-indigo/50 via-50% to-transparent lg:hidden"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-4/5 rounded-b-plate bg-gradient-to-t from-black/85 via-black/50 via-50% to-transparent lg:hidden"
           />
 
           <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-3.5 md:inset-x-5 md:bottom-5 md:gap-4">
             {/* Mobile-only textual context in crisp white */}
             <div className="flex flex-col gap-2 lg:hidden max-w-lg">
-              <h2 className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white">
+              <h2 className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white drop-shadow-sm">
                 {statement.lines.map((line) => (
                   <span key={line} className="block">
                     {ringWord(line, statement.circled, "white")}
                   </span>
                 ))}
               </h2>
-              <p className="body-mono text-white/90 text-xs sm:text-sm max-w-measure">
+              <p className="body-mono text-white/90 text-xs sm:text-sm max-w-measure drop-shadow-sm">
                 {statement.body}
               </p>
             </div>
