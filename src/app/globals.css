@@ -103,10 +103,14 @@
      the frame height that subtracts it. */
   --hero-gap: 0.5rem;
 
-  /* The notch corner, as a mask image. Kept here rather than inline in the
-     rule so the one place the arc numbers appear is beside the token that
-     names them. See `.notch-tr` for the construction. */
+  /* Notch corner mask */
   --notch-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cpath d='M0 0L23.010 0A14 14 0 0 1 36.727 16.800A36 36 0 0 0 79.200 59.273A14 14 0 0 1 96 72.990L96 96L0 96Z' fill='%23000'/%3E%3C/svg%3E");
+
+  /* Scrollbar tokens */
+  --scrollbar-thumb: rgba(35, 50, 75, 0.22);
+  --scrollbar-thumb-hover: rgba(35, 50, 75, 0.45);
+  --scrollbar-thumb-active: rgba(35, 50, 75, 0.75);
+  --scrollbar-track: transparent;
 }
 
 @media (min-width: 640px) {
@@ -131,6 +135,49 @@
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-ui);
+  }
+
+  /* -------------------------------------------------------- custom scrollbar
+     Custom minimalist pill scrollbar replacing default OS bars with a sleek,
+     floating capsule that harmonizes with the warm palette. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   /* Headings default to the UI face at bold. The display face is opt-in, via
@@ -162,6 +209,9 @@
   /* Dark panels: cream body copy, oat milk headings, sage focus rings. */
   .on-dark {
     color: var(--paper);
+    --scrollbar-thumb: rgba(255, 246, 235, 0.28);
+    --scrollbar-thumb-hover: rgba(255, 246, 235, 0.5);
+    --scrollbar-thumb-active: rgba(255, 246, 235, 0.8);
   }
 
   .on-dark a,
