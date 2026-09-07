@@ -42,8 +42,7 @@ export const site = {
  */
 
 /** The quiet line above the header. */
-export const announcement =
-  "Krafted to give you moments of rest - your in-between Kompanions";
+export const announcement = "Krafted to give you moments of rest";
 
 /* ------------------------------------------------------------------ homepage
    The sections below map one-to-one onto the homepage layout, in page order.
