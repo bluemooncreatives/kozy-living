@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import type { Swatch } from "@/lib/shop/colours";
 
 export type ActiveFilter = {
   /** The group the value came from, so two "Blue"s read differently. */
@@ -7,6 +8,8 @@ export type ActiveFilter = {
   label: string;
   /** The shop URL with this one filter removed. */
   href: string;
+  /** Colour values only. Paints the chip so the filter is legible at a glance. */
+  swatch?: Swatch;
 };
 
 /**
@@ -38,6 +41,13 @@ export default function ActiveFilters({
           className="ui-mono group inline-flex items-center gap-2 rounded-chip border border-ink/15 bg-card py-1.5 pl-3.5 pr-2.5 transition-colors hover:border-ink hover:bg-ink hover:text-paper"
         >
           <span className="sr-only">Remove filter </span>
+          {filter.swatch ? (
+            <span
+              aria-hidden
+              style={{ backgroundColor: filter.swatch.hex }}
+              className="-ml-1 h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/25"
+            />
+          ) : null}
           <span className="text-muted transition-colors group-hover:text-paper/70">
             {`${filter.group}:`}
           </span>

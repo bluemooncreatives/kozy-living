@@ -118,6 +118,28 @@ export type CatalogProductOption = {
   values: string[];
 };
 
+/**
+ * One metafield as the listing fragment asks for it.
+ *
+ * `references` is populated only for the metaobject-reference types - a colour
+ * recorded as a Shopify swatch metaobject rather than as text. Every field is
+ * optional because Storefront returns `null` for an identifier the store has no
+ * definition for, and because a cached catalogue entry written before this
+ * fragment carried metafields deserialises without them.
+ */
+export type CatalogMetafield = {
+  namespace: string;
+  key: string;
+  type: string;
+  value: string | null;
+  references?: {
+    nodes?: {
+      handle?: string | null;
+      fields?: { key: string; value: string | null }[] | null;
+    }[] | null;
+  } | null;
+};
+
 export type ShopifyCatalogProduct = {
   id: string;
   handle: string;
@@ -140,6 +162,8 @@ export type ShopifyCatalogProduct = {
   images: Connection<Image>;
   /** Capped at 2: enough to tell "sellable here" from "has choices to make". */
   variants: Connection<ProductVariant>;
+  /** Asked for by identifier; a `null` entry is an identifier this store has no definition for. */
+  metafields: (CatalogMetafield | null)[];
   collections: Connection<{ handle: string; title: string }>;
   createdAt: string;
   updatedAt: string;
@@ -147,11 +171,13 @@ export type ShopifyCatalogProduct = {
 
 export type CatalogProduct = Omit<
   ShopifyCatalogProduct,
-  "collections" | "images" | "variants"
+  "collections" | "images" | "variants" | "metafields"
 > & {
   collections: { handle: string; title: string }[];
   images: Image[];
   variants: ProductVariant[];
+  /** Nulls dropped - see `reshapeCatalogProduct`. */
+  metafields: CatalogMetafield[];
 };
 
 export type ShopifyCatalogOperation = {

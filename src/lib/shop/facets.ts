@@ -1,4 +1,18 @@
 import type { CatalogProduct } from "@/lib/shopify/types";
+import { normalizeLabel, toSlug } from "./normalize";
+import {
+  COLOUR_PARAM,
+  colourFromTag,
+  isColourGroupName,
+  orderColours,
+  productColours,
+  type Swatch,
+} from "./colours";
+
+// Re-exported so the facet engine stays the one import for anything that groups
+// on a merchant label; the functions themselves live a level down, out of the
+// cycle this module and `colours.ts` would otherwise form.
+export { normalizeLabel, toSlug };
 
 /* ---------------------------------------------------------------------------
    The facet engine
@@ -54,6 +68,11 @@ export const RESERVED_PARAMS = new Set([
   "availability",
   "offer",
   "collection",
+  COLOUR_PARAM,
+  // The shop-by-colour page's own step marker. Reserved here so a merchant who
+  // one day names a product option "View" cannot claim it and send every
+  // filter click back to the picker.
+  "view",
 ]);
 
 export type FacetValue = {
@@ -63,6 +82,8 @@ export type FacetValue = {
   label: string;
   /** Matches under every OTHER active group. Zero means selecting it is a dead end. */
   count: number;
+  /** Colour values only - the paint chip rendered beside the label. */
+  swatch?: Swatch;
 };
 
 export type FacetGroup = {
@@ -92,24 +113,6 @@ export type FacetIndex = Map<string, Map<string, Set<string>>>;
 /* ------------------------------------------------------------ normalisation */
 
 /**
- * The comparison form of a label.
- *
- * Accents are folded, digits and letters are split apart so "4kg" and "4 kg"
- * meet, and every run of punctuation becomes a single space so "UK 3-4",
- * "uk-3-4" and "Uk 3 4" all collapse to one value.
- */
-export function normalizeLabel(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/([0-9])([a-z])/g, "$1 $2")
-    .replace(/([a-z])([0-9])/g, "$1 $2")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-/**
  * The comparison form of a group name: the normalised label with a plural last
  * word folded to its singular, so "Size"/"Sizes" and "Sleeve Detail"/"Sleeve
  * Details" are one group rather than four.
@@ -123,11 +126,6 @@ function normalizeGroupName(name: string): string {
   }
 
   return words.join(" ");
-}
-
-/** A normalised key as it appears in a URL. */
-export function toSlug(key: string): string {
-  return normalizeLabel(key).replace(/ /g, "-");
 }
 
 /** Title-cases a label the merchant left all-lowercase; leaves theirs alone otherwise. */
@@ -188,6 +186,12 @@ function record(
 ) {
   const groupKey = normalizeGroupName(name);
   if (!groupKey || SKIPPED_GROUPS.has(groupKey)) return;
+
+  // Colour has its own group, assembled in `buildColourGroup` from the
+  // metafield AND from options named like this one. Deriving here as well
+  // would put "Color", "Color Way" and "Belt Colour" in the sidebar beside it,
+  // each holding a slice of the same idea.
+  if (isColourGroupName(groupKey)) return;
 
   const valueKey = normalizeLabel(value);
   if (!valueKey) return;
@@ -303,6 +307,61 @@ function orderValues(values: FacetValue[]): FacetValue[] {
   });
 }
 
+/* ------------------------------------------------------------------ colour */
+
+/**
+ * The Colour group, and its slice of the membership index.
+ *
+ * Built apart from the derived groups because a colour is a name AND a paint
+ * chip, and because the house palette has an order the catalogue must not
+ * reshuffle - see `lib/shop/colours.ts`. What comes back is an ordinary
+ * `FacetGroup` on the `colour` parameter, so matching, counting, the sidebar
+ * and the URL all treat it like any other filter from here on.
+ *
+ * `MIN_FACET_PRODUCTS` deliberately does not apply. Colour is the dimension
+ * this store leads with; two colours across three products is still the way in,
+ * and the picker page exists to be linked to whether or not the catalogue has
+ * reached some threshold.
+ */
+function buildColourGroup(products: CatalogProduct[]): {
+  group: FacetGroup;
+  membership: Map<string, Set<string>>;
+} | null {
+  const membership = new Map<string, Set<string>>();
+  const values = new Map<string, FacetValue>();
+
+  for (const product of products) {
+    for (const colour of productColours(product)) {
+      if (!values.has(colour.key)) {
+        values.set(colour.key, {
+          key: colour.key,
+          label: colour.label,
+          count: 0,
+          swatch: colour.swatch,
+        });
+      }
+
+      let owned = membership.get(product.id);
+      if (!owned) {
+        owned = new Set();
+        membership.set(product.id, owned);
+      }
+      owned.add(colour.key);
+    }
+  }
+
+  if (values.size < MIN_FACET_VALUES) return null;
+
+  return {
+    group: {
+      param: COLOUR_PARAM,
+      label: "Colour",
+      values: orderColours([...values.values()]),
+    },
+    membership,
+  };
+}
+
 /* -------------------------------------------------------------------- build */
 
 /**
@@ -328,6 +387,9 @@ export function buildFacets(products: CatalogProduct[]): {
     }
 
     for (const tag of product.tags ?? []) {
+      // A tag that is purely a colour name has already been folded into the
+      // Colour group; listing it under Tags as well is the same filter twice.
+      if (colourFromTag(tag)) continue;
       record(candidates, "Tags", tag, product.id);
     }
 
@@ -452,8 +514,21 @@ export function buildFacets(products: CatalogProduct[]): {
     });
   }
 
+  // Colour leads the groups. It is the dimension the brand browses by and the
+  // one the shop-by-colour page is built on, so it sits above the flags rather
+  // than being sorted in among the derived groups by reach.
+  const colour = buildColourGroup(products);
+  if (colour) index.set(COLOUR_PARAM, colour.membership);
+
   return {
-    facets: { groups: [...flagGroups, ...groups], price: priceBounds(products) },
+    facets: {
+      groups: [
+        ...(colour ? [colour.group] : []),
+        ...flagGroups,
+        ...groups,
+      ],
+      price: priceBounds(products),
+    },
     index,
   };
 }

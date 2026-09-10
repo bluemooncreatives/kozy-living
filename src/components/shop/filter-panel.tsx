@@ -2,6 +2,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { PriceBounds } from "@/lib/shop/facets";
+import type { Swatch } from "@/lib/shop/colours";
 import type { PriceSelection } from "@/lib/shop/filters";
 import PriceFilter from "./price-filter";
 
@@ -23,6 +24,8 @@ export type PanelValue = {
   count: number;
   href: string;
   active: boolean;
+  /** Colour values only. Rendered as a chip between the box and the label. */
+  swatch?: Swatch;
 };
 
 export type PanelGroup = {
@@ -79,6 +82,23 @@ function Count({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * The paint chip beside a colour's name.
+ *
+ * Always ringed, never bare: Oat Milk and White are within a shade of the
+ * panel's own surface, and without the ring the chip for either is a hole in
+ * the row rather than a colour.
+ */
+function Chip({ swatch }: { swatch: Swatch }) {
+  return (
+    <span
+      aria-hidden
+      style={{ backgroundColor: swatch.hex }}
+      className="mt-[0.1rem] h-4 w-4 shrink-0 rounded-[0.3rem] ring-1 ring-inset ring-ink/20"
+    />
+  );
+}
+
+/**
  * One multi-select row.
  *
  * A value that nothing left would match is rendered as text rather than a
@@ -103,6 +123,7 @@ function ValueRow({ value }: { value: PanelValue }) {
   const body = (
     <>
       {box}
+      {value.swatch ? <Chip swatch={value.swatch} /> : null}
       <span className="min-w-0 flex-1 break-words">{value.label}</span>
       <Count>{value.count}</Count>
     </>

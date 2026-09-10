@@ -19,6 +19,7 @@ import type { FacetGroup, FacetIndex, Facets, PriceBounds } from "./facets";
      ?price_min= &price_max=        inclusive band, either end optional
      ?<group>=<value>,<value>       a derived facet group
      ?page=2                        1 is never written
+     ?view=products                 shop-by-colour only: past the picker
 
    Values are slugs of the merchant's own labels, so the URL stays readable and
    a link keeps working as long as the value still exists in Shopify. A value

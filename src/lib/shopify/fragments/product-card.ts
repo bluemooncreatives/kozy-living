@@ -1,3 +1,4 @@
+import { COLOUR_METAFIELD_IDENTIFIERS } from "@/lib/shop/colours";
 import imageFragment from "./image";
 
 /**
@@ -23,6 +24,13 @@ import imageFragment from "./image";
  *                       paragraph above rules out.
  *
  * `options` carries names and values only - the facet engine groups on those.
+ *
+ * `metafields` is the colour source. Storefront metafields have to be asked for
+ * by identifier - there is no "give me all of them" on this API - so the list
+ * comes from `@/lib/shop/colours`, which is also what reads the answers back.
+ * Identifiers the store has no definition for come back as `null` and are
+ * dropped on reshape, so an unused candidate costs nothing but a null in the
+ * array.
  */
 export const productCardFragment = /* GraphQL */ `
   fragment productCard on Product {
@@ -76,6 +84,23 @@ export const productCardFragment = /* GraphQL */ `
           price {
             amount
             currencyCode
+          }
+        }
+      }
+    }
+    metafields(identifiers: [${COLOUR_METAFIELD_IDENTIFIERS}]) {
+      namespace
+      key
+      type
+      value
+      references(first: 12) {
+        nodes {
+          ... on Metaobject {
+            handle
+            fields {
+              key
+              value
+            }
           }
         }
       }

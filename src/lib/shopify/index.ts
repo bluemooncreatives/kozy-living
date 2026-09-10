@@ -531,7 +531,7 @@ function reshapeCatalogProduct(
 ): CatalogProduct | undefined {
   if (!product || product.tags?.includes(HIDDEN_PRODUCT_TAG)) return undefined;
 
-  const { collections, images, variants, ...rest } = product;
+  const { collections, images, variants, metafields, ...rest } = product;
 
   return {
     ...rest,
@@ -542,6 +542,12 @@ function reshapeCatalogProduct(
     // written before the fragment carried them deserialises without either.
     images: images ? reshapeImages(images, product.title) : [],
     variants: variants ? removeEdgesAndNodes(variants) : [],
+    // Storefront returns one slot per requested identifier and fills the ones
+    // this store has no definition for with `null`. Dropping them here means
+    // every reader downstream sees only metafields that exist.
+    metafields: (metafields ?? []).filter(
+      (field): field is NonNullable<typeof field> => Boolean(field)
+    ),
   };
 }
 
