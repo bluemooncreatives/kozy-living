@@ -46,16 +46,16 @@ export default function ColourPicker({
   selected,
   basePath,
   carry,
-  allHref,
+  resultsAnchor,
 }: {
   colours: PickerColour[];
   /** Colour keys already in the URL - a shared link lands mid-selection. */
   selected: string[];
   basePath: string;
-  /** Everything else in the URL, carried through to step two. */
+  /** Everything else in the URL, carried through when the selection is applied. */
   carry: Record<string, string>;
-  /** The way past this step for a shopper who does not want to pick. */
-  allHref: string;
+  /** Fragment id of the results section further down the page. */
+  resultsAnchor: string;
 }) {
   const [picked, setPicked] = useState<string[]>(selected);
 
@@ -78,15 +78,33 @@ export default function ColourPicker({
     return ids.size;
   }, [chosen]);
 
+  /**
+   * Where the button goes: the same page with this selection applied, anchored
+   * at the grid.
+   *
+   * One href whether or not anything changed. When the selection already
+   * matches the URL this is the current address plus a fragment, so the click
+   * is a scroll rather than a fetch; when it differs it is a soft navigation
+   * that re-renders the grid below. Both read as "take me to my Kompanions",
+   * which is the only promise the button has to keep.
+   */
   const productsHref = useMemo(() => {
     const search = new URLSearchParams(carry);
 
     if (picked.length) search.set("colour", picked.join(","));
     else search.delete("colour");
-    search.set("view", "products");
 
-    return `${basePath}?${search.toString()}`;
-  }, [basePath, carry, picked]);
+    const query = search.toString();
+
+    return `${basePath}${query ? `?${query}` : ""}#${resultsAnchor}`;
+  }, [basePath, carry, picked, resultsAnchor]);
+
+  /** True while the palette holds a selection the grid below has not been told about. */
+  const pending = useMemo(() => {
+    if (picked.length !== selected.length) return true;
+
+    return picked.some((key) => !selected.includes(key));
+  }, [picked, selected]);
 
   const toggle = (key: string) =>
     setPicked((current) =>
@@ -112,6 +130,32 @@ export default function ColourPicker({
       >
         {colours.map((colour) => {
           const active = picked.includes(colour.key);
+
+          // In the palette but not yet in the catalogue. Shown, because the
+          // brand's palette is six colours whether or not all six are in stock;
+          // not a link, because it leads to an empty grid.
+          const empty = colour.count === 0;
+
+          if (empty) {
+            return (
+              <li
+                key={colour.key}
+                className="w-[8.5rem] shrink-0 sm:w-auto sm:flex-1 sm:basis-0"
+              >
+                <div className="block text-center opacity-35">
+                  <span className="relative mx-auto flex aspect-square w-full max-w-[13rem] items-center justify-center rounded-plate p-2.5 sm:p-4">
+                    <ColourSpiral swatch={colour.swatch} />
+                  </span>
+                  <span className="mt-3 block text-[0.625rem] uppercase tracking-micro text-muted sm:mt-4 sm:text-[0.6875rem]">
+                    {colour.label}
+                  </span>
+                  <span className="spec-mono mt-1 block text-muted">
+                    Coming soon
+                  </span>
+                </div>
+              </li>
+            );
+          }
 
           return (
             <li
@@ -182,16 +226,20 @@ export default function ColourPicker({
         })}
       </ul>
 
-      {/* The step's own footer. Sticky rather than parked at the bottom of the
-          page: on a phone the palette is taller than the screen, and a button
-          you have to scroll back down to find is a button nobody presses. */}
-      <div className="sticky bottom-0 z-30 -mx-4 mt-12 border-t border-rule bg-paper/95 px-4 py-4 backdrop-blur-md md:-mx-6 md:px-6 md:py-5">
+      {/* The step's own footer.
+
+          Sticky, but only for as long as the palette is on screen - a sticky
+          box sticks within its own container, and this one ends where step two
+          begins. `mt-16` is not decoration: while the bar is stuck to the
+          bottom of the viewport it paints over whatever is beneath it, and that
+          gap is what keeps it off the colour names. */}
+      <div className="sticky bottom-0 z-30 -mx-4 mt-16 border-t border-rule bg-paper/95 px-4 py-4 backdrop-blur-md md:-mx-6 md:px-6 md:py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             {chosen.length ? (
               <>
                 <span aria-hidden className="flex shrink-0 -space-x-2">
-                  {chosen.slice(0, 6).map((colour) => (
+                  {chosen.slice(0, 8).map((colour) => (
                     <span
                       key={colour.key}
                       style={{ backgroundColor: colour.swatch.hex }}
@@ -219,18 +267,12 @@ export default function ColourPicker({
               >
                 Clear
               </button>
-            ) : (
-              <Link
-                href={allHref}
-                className="ui-mono text-muted underline decoration-1 underline-offset-4 hover:text-ink"
-              >
-                Show everything
-              </Link>
-            )}
+            ) : null}
 
+            {/* Nothing to go to until a colour is chosen - step two is empty
+                by design, so an enabled button would scroll to a prompt. */}
             <Link
               href={productsHref}
-              scroll={false}
               aria-disabled={picked.length === 0}
               tabIndex={picked.length === 0 ? -1 : undefined}
               className={clsx(
@@ -238,11 +280,13 @@ export default function ColourPicker({
                 picked.length === 0 && "pointer-events-none opacity-40"
               )}
             >
-              {total === null
+              {!picked.length || (pending && total === null)
                 ? "Show Kompanions"
-                : total === 1
-                  ? "Show 1 Kompanion"
-                  : `Show ${total} Kompanions`}
+                : !pending
+                  ? "View Kompanions"
+                  : total === 1
+                    ? "Show 1 Kompanion"
+                    : `Show ${total} Kompanions`}
             </Link>
           </div>
         </div>

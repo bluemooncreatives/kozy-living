@@ -86,7 +86,6 @@ export default async function ShopView({
   eyebrow,
   title,
   description,
-  intro,
   searchParams,
 }: {
   /** The route this view lives at - every link is built from it. */
@@ -96,13 +95,6 @@ export default async function ShopView({
   eyebrow: string;
   title: string;
   description?: string;
-  /**
-   * Anything the surface wants under its own heading - the chosen swatches and
-   * the way back on the shop-by-colour page. Rendered in the header block so a
-   * caller does not have to reproduce the page's opening spacing to add a line
-   * to it.
-   */
-  intro?: React.ReactNode;
   searchParams: ShopSearchParams;
 }) {
   const params = toParamMap(searchParams);
@@ -307,7 +299,6 @@ export default async function ShopView({
             {description}
           </p>
         ) : null}
-        {intro ? <div className="mt-6">{intro}</div> : null}
         {query ? (
           <p className="ui-mono mt-5">
             <span className="text-muted">Results for </span>

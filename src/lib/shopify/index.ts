@@ -4,6 +4,7 @@ import {
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
 } from "../constants";
+import { colourFromMetaobject, type ColourValue } from "../shop/colours";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import {
@@ -22,6 +23,7 @@ import {
   getCollectionOrderQuery,
   searchCatalogQuery,
 } from "./queries/catalog";
+import { getColourPaletteQuery } from "./queries/colours";
 import { getMenuQuery } from "./queries/menu";
 import {
   getProductQuery,
@@ -54,6 +56,7 @@ import {
   ShopifyCatalogOperation,
   ShopifyCatalogProduct,
   ShopifyCollection,
+  ShopifyColourPaletteOperation,
   ShopifyCollectionOrderOperation,
   ShopifyCollectionProductsOperation,
   ShopifyCollectionsOperation,
@@ -549,6 +552,41 @@ function reshapeCatalogProduct(
       (field): field is NonNullable<typeof field> => Boolean(field)
     ),
   };
+}
+
+/**
+ * The brand's colour palette, in the merchant's own order.
+ *
+ * Read straight from the `shop_color` metaobjects rather than gathered from
+ * products, so the shop-by-colour picker can show a colour the catalogue has
+ * not been tagged with yet - a palette missing a shade because nothing is in
+ * stock in it reads as a broken page, not as an empty shelf.
+ *
+ * Degrades to `[]` rather than throwing: a store with no such definition simply
+ * gets the colours its products carry, which is what every other surface uses.
+ *
+ * Tagged with `products` so the existing Shopify webhook refreshes it - colours
+ * and the products carrying them change in the same editing session.
+ */
+export async function getColourPalette(): Promise<ColourValue[]> {
+  try {
+    const res = await shopifyFetch<ShopifyColourPaletteOperation>({
+      query: getColourPaletteQuery,
+      tags: [TAGS.products],
+      variables: { first: 50 },
+    });
+
+    const nodes = res.body?.data?.metaobjects?.nodes ?? [];
+
+    return nodes
+      .map(colourFromMetaobject)
+      .filter((colour): colour is ColourValue => Boolean(colour));
+  } catch (error) {
+    if (isFrameworkControlFlowError(error)) throw error;
+
+    console.warn("Colour palette metaobjects unavailable:", error);
+    return [];
+  }
 }
 
 /**

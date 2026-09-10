@@ -328,7 +328,9 @@ function buildColourGroup(products: CatalogProduct[]): {
   membership: Map<string, Set<string>>;
 } | null {
   const membership = new Map<string, Set<string>>();
-  const values = new Map<string, FacetValue>();
+  // `order` rides along only as far as the sort - it is the merchant's own
+  // `sort_order` from Shopify, not something a facet value carries afterwards.
+  const values = new Map<string, FacetValue & { order?: number }>();
 
   for (const product of products) {
     for (const colour of productColours(product)) {
@@ -338,6 +340,7 @@ function buildColourGroup(products: CatalogProduct[]): {
           label: colour.label,
           count: 0,
           swatch: colour.swatch,
+          order: colour.order,
         });
       }
 
@@ -356,7 +359,7 @@ function buildColourGroup(products: CatalogProduct[]): {
     group: {
       param: COLOUR_PARAM,
       label: "Colour",
-      values: orderColours([...values.values()]),
+      values: orderColours([...values.values()]).map(({ order, ...value }) => value),
     },
     membership,
   };

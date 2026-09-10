@@ -31,6 +31,18 @@ import { normalizeLabel, toSlug } from "./normalize";
 /** The query parameter the colour facet owns, on every shop surface. */
 export const COLOUR_PARAM = "colour";
 
+/**
+ * The metaobject definition holding the brand palette. Each entry carries a
+ * name, a hex and a sort order, and the product metafield below points at them.
+ */
+export const COLOUR_METAOBJECT_TYPE = "shop_color";
+
+/**
+ * Where colours the merchant did not order themselves start. Comfortably past
+ * any hand-set `sort_order`, so Shopify's ordering always leads.
+ */
+const HOUSE_ORDER_OFFSET = 1000;
+
 export type Swatch = {
   hex: string;
   /**
@@ -39,16 +51,26 @@ export type Swatch = {
    * fill wherever a swatch or a spiral is painted.
    */
   outline?: boolean;
+  /**
+   * True when the metafield named a colour this file has no hex for, and the
+   * chip is a placeholder. The fix is to add the name to `HOUSE_PALETTE` - see
+   * `resolveSwatch`.
+   */
+  unresolved?: boolean;
 };
 
 export type ColourValue = {
   /** Slug used in the URL. */
   key: string;
-  /** What the shopper reads. The merchant's own spelling for anything off-palette. */
+  /** What the shopper reads - the merchant's own spelling, whenever there is one. */
   label: string;
   swatch: Swatch;
-  /** True when this is one of the six house colours rather than a derived one. */
+  /** True when the name matches one of the six house colours. */
   house: boolean;
+  /** Where the value came from, so the facet can prefer the metafield. */
+  source: "metafield" | "option" | "tag";
+  /** The merchant's own position for this colour, when their metaobject carries one. */
+  order?: number;
 };
 
 /* ------------------------------------------------------------------ palette */
@@ -56,10 +78,13 @@ export type ColourValue = {
 /**
  * The six house colours, in brand order.
  *
- * These hexes are the brand's, not Shopify's: a merchant recording colour as a
- * text metafield gives us the NAME only, and a name has to resolve to a paint
- * chip somewhere. This is that somewhere - the one place to correct a colour
- * if the brand revises it.
+ * COPIED FROM SHOPIFY, not invented here: these are the `color` fields of the
+ * six `shop_color` metaobjects, as of 2026-09-11. A product that references one
+ * of those entries does not use this table at all - it carries its own name and
+ * hex from Shopify. This is the fallback for everything else: a colour that
+ * arrives as a bare option value or a tag, which is a name with no hex attached.
+ *
+ * Keep it in step with the metaobjects if the brand revises a shade.
  *
  * `aliases` are the other spellings seen in the catalogue that mean this
  * colour. They are matched on the normalised form, so casing, hyphens and
@@ -75,25 +100,25 @@ export const HOUSE_PALETTE: {
   {
     key: "rose-pink",
     label: "Rose Pink",
-    hex: "#DDA0A6",
+    hex: "#D98F97",
     aliases: ["rose", "pink", "rose dust", "blush", "dusty rose"],
   },
   {
     key: "indigo-blue",
     label: "Indigo Blue",
-    hex: "#1E3D70",
+    hex: "#183F73",
     aliases: ["indigo", "blue", "navy", "midnight blue"],
   },
   {
     key: "tulsi-green",
     label: "Tulsi Green",
-    hex: "#3A5233",
+    hex: "#315D3D",
     aliases: ["tulsi", "forest green", "deep green", "bottle green"],
   },
   {
     key: "oat-milk",
     label: "Oat Milk",
-    hex: "#E3D5C2",
+    hex: "#E1CDA8",
     aliases: ["oat", "oatmeal", "beige", "sand", "ecru", "natural"],
   },
   {
@@ -106,7 +131,7 @@ export const HOUSE_PALETTE: {
   {
     key: "sage-green",
     label: "Sage Green",
-    hex: "#92A583",
+    hex: "#9DB08E",
     aliases: ["sage", "green", "olive", "moss"],
   },
 ];
@@ -158,6 +183,10 @@ const EXTRA_COLOURS: { key: string; label: string; hex: string; aliases: string[
  * builds the GraphQL from this list, so there is no second place to edit.
  */
 export const COLOUR_METAFIELDS: { namespace: string; key: string }[] = [
+  // What this store actually uses: a list of references to `shop_color`
+  // metaobjects, each carrying a name, a hex and a sort order.
+  { namespace: "custom", key: "shop_colors" },
+  { namespace: "custom", key: "shop_colours" },
   { namespace: "custom", key: "colour" },
   { namespace: "custom", key: "color" },
   { namespace: "custom", key: "colours" },
@@ -271,6 +300,11 @@ function isHex(value: string): boolean {
   return /^#?[0-9a-f]{6}$/i.test(value.trim());
 }
 
+/** Shopify writes its `color` fields lowercase and unprefixed in places. */
+function normalizeHex(value: string): string {
+  return `#${value.trim().replace(/^#/, "").toUpperCase()}`;
+}
+
 function channels(value: string): [number, number, number] {
   const raw = value.trim().replace(/^#/, "");
 
@@ -313,8 +347,98 @@ function nearestColour(hex: string): PaletteEntry | null {
   return bestDistance <= 24 * 24 * 3 ? best : null;
 }
 
-/** Turns one merchant string into a colour, or null when it names none. */
-export function toColourValue(raw: string): ColourValue | null {
+/**
+ * The neutral chip for a colour the merchant named but this file has no hex
+ * for. Visible, obviously not a real colour, and never silently dropped - a
+ * colour missing from the picker is far harder to notice than a grey one.
+ */
+const UNRESOLVED_HEX = "#B9B3AA";
+
+/**
+ * The paint chip for a name.
+ *
+ * Names come from Shopify; hexes do not - a text metafield carries "Tulsi
+ * Green" and nothing else - so every name has to be looked up here. Exact
+ * palette match first, then the colour word inside a longer name, then a
+ * neutral placeholder flagged `unresolved`.
+ *
+ * ADDING A COLOUR: put its name and hex in `HOUSE_PALETTE` above. That is the
+ * whole fix for a colour showing up grey.
+ */
+export function resolveSwatch(name: string): Swatch {
+  const match = isHex(name) ? nearestColour(name) : matchColour(name);
+
+  if (match) return { hex: match.hex, outline: match.outline };
+
+  return { hex: UNRESOLVED_HEX, unresolved: true };
+}
+
+/** Title-cases a name the merchant left all-lowercase; leaves their casing alone otherwise. */
+function presentLabel(value: string): string {
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  if (trimmed !== trimmed.toLowerCase()) return trimmed;
+
+  return trimmed.replace(/[a-z]/g, (character) => character.toUpperCase());
+}
+
+/**
+ * A colour recorded in the metafield.
+ *
+ * The merchant's string IS the colour: the label is what they typed and the key
+ * is its slug, so "Tulsi Green" reads and links as Tulsi Green whether or not
+ * this file happens to know the name. Only the hex is looked up.
+ *
+ * This is the difference between the metafield and the fallback sources below.
+ * A metafield is the merchant deliberately answering "what colour is this",
+ * so the answer is taken at face value. An option value or a tag is a string
+ * that happens to contain a colour, so it has to be matched against a known
+ * one before it can be trusted - which is also what stops "Open Wide Sleeve"
+ * from becoming a colour.
+ */
+function fromMetafieldValue(raw: string): ColourValue | null {
+  const value = raw.trim();
+  if (!value) return null;
+
+  // A bare hex is not a name. It is the one case where the palette has to
+  // supply the label as well, and an unrecognisable one is dropped - "#3A5233"
+  // in a filter list tells a shopper nothing.
+  if (isHex(value)) {
+    const match = nearestColour(value);
+    if (!match) return null;
+
+    return {
+      key: match.key,
+      label: match.label,
+      swatch: { hex: match.hex, outline: match.outline },
+      house: match.house,
+      source: "metafield",
+    };
+  }
+
+  const label = presentLabel(value);
+  const match = matchColour(value);
+
+  return {
+    key: toSlug(label),
+    label,
+    swatch: resolveSwatch(value),
+    house: Boolean(match?.house),
+    source: "metafield",
+  };
+}
+
+/**
+ * A colour inferred from a product option value or a tag.
+ *
+ * Must resolve to a colour this file knows, and takes that colour's canonical
+ * name rather than the merchant's string: the string is "Indigo Sunshine" or
+ * "Green Belt" - a print name and a part name - and filing those under their
+ * own labels would put three spellings of one colour in the sidebar.
+ */
+function fromDerivedValue(
+  raw: string,
+  source: "option" | "tag"
+): ColourValue | null {
   const value = raw.trim();
   if (!value) return null;
 
@@ -326,6 +450,7 @@ export function toColourValue(raw: string): ColourValue | null {
     label: match.label,
     swatch: { hex: match.hex, outline: match.outline },
     house: match.house,
+    source,
   };
 }
 
@@ -346,112 +471,168 @@ export function isColourGroupName(groupKey: string): boolean {
   );
 }
 
+export type MetaobjectNode = {
+  handle?: string | null;
+  fields?: { key: string; value: string | null }[] | null;
+};
+
 type MetafieldNode = {
   namespace?: string | null;
   key?: string | null;
   type?: string | null;
   value?: string | null;
-  references?: {
-    nodes?: {
-      handle?: string | null;
-      fields?: { key: string; value: string | null }[] | null;
-    }[] | null;
-  } | null;
+  references?: { nodes?: MetaobjectNode[] | null } | null;
 };
 
-/** Metaobject field keys that hold the human name and the paint chip. */
-const METAOBJECT_LABEL_KEYS = ["label", "name", "title", "display_name"];
-const METAOBJECT_COLOUR_KEYS = ["color", "colour", "hex", "swatch"];
+/**
+ * Field keys on a colour metaobject.
+ *
+ * This store's `shop_color` definition uses `name`, `color` and `sort_order`;
+ * the alternatives are the other names Shopify's own swatch definitions and the
+ * theme editor generate, so a store that built its palette a different way still
+ * resolves without a code change.
+ */
+const METAOBJECT_NAME_KEYS = ["name", "label", "title", "display_name"];
+const METAOBJECT_HEX_KEYS = ["color", "colour", "hex", "swatch"];
+const METAOBJECT_ORDER_KEYS = ["sort_order", "order", "position"];
 
-function fromMetaobject(node: NonNullable<
-  NonNullable<MetafieldNode["references"]>["nodes"]
->[number]): string | null {
+function field(node: MetaobjectNode, keys: string[]): string | null {
   const fields = new Map(
-    (node?.fields ?? []).map((field) => [field.key, field.value ?? ""])
+    (node?.fields ?? []).map((entry) => [entry.key, (entry.value ?? "").trim()])
   );
 
-  for (const key of METAOBJECT_LABEL_KEYS) {
-    const label = fields.get(key)?.trim();
-    if (label) return label;
+  for (const key of keys) {
+    const value = fields.get(key);
+    if (value) return value;
   }
 
-  // A swatch metaobject with no name field still carries its colour, and the
-  // handle is the merchant's own slug for it - "tulsi-green" reads fine.
-  for (const key of METAOBJECT_COLOUR_KEYS) {
-    const hex = fields.get(key)?.trim();
-    if (hex && isHex(hex)) return hex;
-  }
-
-  return node?.handle?.replace(/-/g, " ") ?? null;
+  return null;
 }
 
-/** Every raw string one metafield carries, whatever shape the merchant chose. */
-function metafieldValues(field: MetafieldNode): string[] {
-  const type = field.type ?? "";
+/**
+ * One colour, as the merchant defined it in a metaobject.
+ *
+ * Everything visible comes from Shopify: the NAME is their `name` field, the
+ * chip is their `color` field, and the position on the picker is their
+ * `sort_order`. Nothing here consults the palette above - that is the whole
+ * point of a metaobject palette, and it means the brand can add a seventh
+ * colour, rename one or restyle a shade without this file changing.
+ *
+ * The handle is the key rather than the name, so renaming "Tulsi Green" in
+ * Shopify does not break links that were already shared.
+ */
+export function colourFromMetaobject(node: MetaobjectNode): ColourValue | null {
+  const name = field(node, METAOBJECT_NAME_KEYS);
+  const hex = field(node, METAOBJECT_HEX_KEYS);
+  const handle = node?.handle?.trim() || null;
+
+  // A swatch entry with neither a name nor a handle has nothing to label a
+  // filter with, whatever colour it carries.
+  const label = name ?? (handle ? presentLabel(handle.replace(/-/g, " ")) : null);
+  if (!label) return null;
+
+  const order = Number(field(node, METAOBJECT_ORDER_KEYS));
+
+  return {
+    key: handle ?? toSlug(label),
+    label,
+    swatch: hex && isHex(hex) ? { hex: normalizeHex(hex) } : resolveSwatch(label),
+    house: Boolean(matchColour(label)?.house),
+    source: "metafield",
+    order: Number.isFinite(order) ? order : undefined,
+  };
+}
+
+/**
+ * The colours one metafield carries, whatever shape the merchant chose:
+ * metaobject references, a list of names, a single name, or a hex.
+ */
+function metafieldColours(entry: MetafieldNode): ColourValue[] {
+  const type = entry.type ?? "";
 
   if (type.includes("metaobject_reference")) {
-    const nodes = field.references?.nodes ?? [];
-    return nodes.map(fromMetaobject).filter((value): value is string => !!value);
+    return (entry.references?.nodes ?? [])
+      .map(colourFromMetaobject)
+      .filter((colour): colour is ColourValue => Boolean(colour));
   }
 
-  const raw = field.value ?? "";
+  const raw = entry.value ?? "";
   if (!raw) return [];
 
-  if (type.startsWith("list.")) {
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      // A merchant-typed list field is sometimes just a comma-separated line.
-      return raw.split(",");
-    }
-  }
+  const values = type.startsWith("list.")
+    ? parseList(raw)
+    : [raw];
 
-  return [raw];
+  return values
+    .map(fromMetafieldValue)
+    .filter((colour): colour is ColourValue => Boolean(colour));
 }
+
+function parseList(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    // A merchant-typed list field is sometimes just a comma-separated line.
+    return raw.split(",");
+  }
+}
+
+/**
+ * Whether a product with no colour metafield may fall back to its options and
+ * tags.
+ *
+ * OFF. `custom.shop_colors` is the answer to "what colour is this", and the
+ * fallback's guesses contradict it: the same catalogue that says "Oat Milk" in
+ * the metafield says "Taupe Flora" in a variant option and "Yellow" in a tag,
+ * and mixing the three put colours in the picker that the brand does not sell.
+ *
+ * Turn it back on only to cover a catalogue mid-migration, and expect the
+ * inferred names to sit alongside the real ones rather than merge with them.
+ * The switch is per product either way - a product WITH the metafield never
+ * reads its options or tags.
+ */
+const FALL_BACK_TO_OPTIONS_AND_TAGS = false;
 
 /**
  * Every colour one product is browsable by.
  *
- * Sources, in the order they are read: the colour metafield, then colour-named
- * product options, then tags. The metafield is the intended home and comes
- * first; the others are there because this catalogue predates it, and a colour
- * filter that only sees a field nobody filled in is a filter that shows
- * nothing.
+ * The metafield is the source. When a product has one, its values are the
+ * answer and nothing else is read: the names are the merchant's own, verbatim,
+ * and options and tags cannot contradict them. Only a product with an empty
+ * metafield falls back, and only while the constant above says it may.
  *
- * Deduplicated by key, so a product recording "Indigo Blue" as both a metafield
- * and an option counts once.
+ * Deduplicated by key, so a colour named twice counts once.
  */
 export function productColours(product: CatalogProduct): ColourValue[] {
   const found = new Map<string, ColourValue>();
 
-  const add = (raw: string) => {
-    const colour = toColourValue(raw);
+  const add = (colour: ColourValue | null) => {
     if (colour && !found.has(colour.key)) found.set(colour.key, colour);
   };
 
   const fields = (product.metafields ?? []).filter(
-    (field): field is NonNullable<typeof field> => Boolean(field?.value || field?.references)
+    (field): field is NonNullable<typeof field> =>
+      Boolean(field?.value || field?.references)
   );
 
-  // First identifier with anything in it wins - see COLOUR_METAFIELDS.
-  for (const field of fields) {
-    const values = metafieldValues(field);
-    if (!values.length) continue;
+  // First identifier carrying anything wins - see COLOUR_METAFIELDS.
+  for (const entry of fields) {
+    const colours = metafieldColours(entry);
+    if (!colours.length) continue;
 
-    for (const value of values) add(value);
+    for (const colour of colours) add(colour);
     break;
   }
 
+  if (found.size || !FALL_BACK_TO_OPTIONS_AND_TAGS) return [...found.values()];
+
   for (const option of product.options ?? []) {
     if (!isColourGroupName(normalizeLabel(option.name))) continue;
-    for (const value of option.values ?? []) add(value);
+    for (const value of option.values ?? []) add(fromDerivedValue(value, "option"));
   }
 
-  for (const tag of product.tags ?? []) {
-    const colour = colourFromTag(tag);
-    if (colour && !found.has(colour.key)) found.set(colour.key, colour);
-  }
+  for (const tag of product.tags ?? []) add(colourFromTag(tag));
 
   return [...found.values()];
 }
@@ -467,26 +648,46 @@ export function productColours(product: CatalogProduct): ColourValue[] {
  */
 export function colourFromTag(tag: string): ColourValue | null {
   const stripped = tag.replace(/^\s*colou?r\s*[:_-]\s*/i, "");
-  const normalised = normalizeLabel(stripped);
 
-  if (!BY_NORMALISED.has(normalised)) return null;
+  if (!BY_NORMALISED.has(normalizeLabel(stripped))) return null;
 
-  return toColourValue(stripped);
+  return fromDerivedValue(stripped, "tag");
 }
 
 /**
- * Orders a set of colour keys the way the brand presents itself: the six house
- * colours in palette order, then anything derived from the catalogue,
- * alphabetically so the tail is at least stable between builds.
+ * Orders colours.
+ *
+ * The merchant's own `sort_order` wins wherever their metaobject carries one -
+ * that field exists precisely so the brand can decide the running order without
+ * a deploy, and this page is what it was made for. Colours with no order of
+ * their own fall in behind, ranked against the house palette, then
+ * alphabetically so the tail stays stable between builds.
  */
-export function orderColours<T extends { key: string; label: string }>(
-  values: T[]
-): T[] {
+export function orderColours<
+  T extends { key: string; label: string; order?: number },
+>(values: T[]): T[] {
   const rank = new Map(HOUSE_PALETTE.map((colour, index) => [colour.key, index]));
 
+  const positionOf = (value: T) => {
+    if (typeof value.order === "number") return value.order;
+
+    // Behind everything Shopify ordered, in palette order among themselves.
+    // The offset is what keeps a house colour with no `sort_order` from
+    // outranking one the merchant deliberately placed second.
+    const direct = rank.get(value.key);
+    if (direct !== undefined) return HOUSE_ORDER_OFFSET + direct;
+
+    const match = matchColour(value.label);
+    if (match?.house) {
+      return HOUSE_ORDER_OFFSET + (rank.get(match.key) ?? HOUSE_PALETTE.length);
+    }
+
+    return Number.MAX_SAFE_INTEGER;
+  };
+
   return [...values].sort((a, b) => {
-    const rankA = rank.get(a.key) ?? Number.MAX_SAFE_INTEGER;
-    const rankB = rank.get(b.key) ?? Number.MAX_SAFE_INTEGER;
+    const rankA = positionOf(a);
+    const rankB = positionOf(b);
 
     return rankA !== rankB ? rankA - rankB : a.label.localeCompare(b.label);
   });

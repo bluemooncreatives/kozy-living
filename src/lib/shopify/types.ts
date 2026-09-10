@@ -220,6 +220,17 @@ export type ShopifySearchCatalogOperation = {
   };
 };
 
+/** One entry of the brand's colour palette metaobject. */
+export type ShopifyColourMetaobject = {
+  handle: string;
+  fields: { key: string; value: string | null }[];
+};
+
+export type ShopifyColourPaletteOperation = {
+  data: { metaobjects: { nodes: ShopifyColourMetaobject[] } | null };
+  variables: { first: number };
+};
+
 export type ShopifyCollection = {
   handle: string;
   title: string;
