@@ -11,10 +11,18 @@ type Combination = {
 };
 
 /**
- * Variant picker (DESIGN.md §5). No chips, no boxes - a plain vertical list of
- * radio glyphs and mono labels under a mono group heading. Unavailable
- * combinations are struck through as well as dimmed, so the state never relies
- * on colour alone.
+ * Variant picker.
+ *
+ * One pill per value, in the same shape as the shop's browse rail and filter
+ * chips - selected is a solid indigo pill, the rest are outlined on the card
+ * tint. Making a choice look like a control is the point: as a bare list of
+ * radio glyphs these read as specification copy, and shoppers scrolled past
+ * them without registering that there was anything to press.
+ *
+ * A combination the merchant does not stock stays visible and is struck
+ * through as well as dimmed, so the state never rests on colour alone and a
+ * shopper can see WHICH pairing is unavailable rather than watching options
+ * silently disappear.
  */
 export default function VariantSelector({
   options,
@@ -50,8 +58,8 @@ export default function VariantSelector({
       {options.map((option) => (
         <form key={option.id} className="mb-6">
           <fieldset>
-            <legend className="ui-mono normal-case">{option.name}:</legend>
-            <div className="mt-2 flex flex-col items-start gap-1">
+            <legend className="eyebrow text-muted">{option.name}</legend>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               {option.values.map((value) => {
                 const optionNameLowerCase = option.name.toLowerCase();
 
@@ -89,19 +97,16 @@ export default function VariantSelector({
                     title={`${option.name} ${value}${
                       !isAvailableForSale ? " (out of stock)" : ""
                     }`}
+                    aria-pressed={isActive}
                     className={clsx(
-                      "flex items-center gap-2 py-0.5 text-left font-sans text-ui tracking-ui transition-opacity",
-                      {
-                        "cursor-default": isActive,
-                        "hover:opacity-60": !isActive && isAvailableForSale,
-                        "cursor-not-allowed line-through opacity-45":
-                          !isAvailableForSale,
-                      }
+                      "ui-mono inline-flex items-center rounded-chip border px-3.5 py-2 text-center transition-colors duration-150",
+                      isActive
+                        ? "border-ink bg-ink font-semibold text-paper"
+                        : isAvailableForSale
+                          ? "border-ink/15 bg-card text-ink hover:border-ink"
+                          : "cursor-not-allowed border-ink/10 text-muted line-through opacity-50"
                     )}
                   >
-                    <span aria-hidden className="text-[0.7em] leading-none">
-                      {isActive ? "●" : "○"}
-                    </span>
                     {value}
                   </button>
                 );
