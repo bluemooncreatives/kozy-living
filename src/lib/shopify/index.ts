@@ -113,17 +113,54 @@ export function isFrameworkControlFlowError(error: unknown): boolean {
   );
 }
 
+/* ---------------------------------------------------------------------------
+   How long Shopify data may go stale
+
+   Every cached call carries a TAG and a TTL, and it needs both.
+
+   The tag is the fast path: Shopify POSTs a webhook to `/api/revalidate` when a
+   product, collection, blog or metaobject changes, and that clears the tag
+   immediately. When it is wired up, the site is seconds behind the Admin.
+
+   The TTL is the floor, and it is the part that was missing. `cache:
+   "force-cache"` with tags alone means Next holds a response FOREVER until a
+   webhook says otherwise - so on any store where the webhooks are not
+   registered, or that is running on localhost where Shopify cannot reach it,
+   the catalogue freezes at whatever it was the first time it was fetched and
+   never moves again. That is exactly what happened here: colour metafields
+   added in Admin did not appear on the site at all, because the site was still
+   serving a day-old copy of the catalogue.
+
+   A webhook is an optimisation. The TTL is the guarantee.
+
+   Development defaults to no caching at all, so editing Shopify and refreshing
+   the browser shows the change. Production defaults to a minute, which is short
+   enough to feel live and long enough that a burst of traffic does not walk the
+   whole catalogue once per visitor. `SHOPIFY_CACHE_SECONDS` overrides both.
+--------------------------------------------------------------------------- */
+
+export const SHOPIFY_CACHE_SECONDS = (() => {
+  const configured = Number(process.env.SHOPIFY_CACHE_SECONDS);
+  if (Number.isFinite(configured) && configured >= 0) return configured;
+
+  return process.env.NODE_ENV === "production" ? 60 : 0;
+})();
+
 type ExtractVariables<T> = T extends { variables: object }
   ? T["variables"]
   : never;
 export async function shopifyFetch<T>({
-  cache = "force-cache",
+  cache,
+  revalidate = SHOPIFY_CACHE_SECONDS,
   headers,
   query,
   tags,
   variables,
 }: {
+  /** Only `"no-store"` is honoured - a caller saying "never cache this" means it. */
   cache?: RequestCache;
+  /** Seconds this response may be reused. `0` disables caching for the call. */
+  revalidate?: number;
   headers?: HeadersInit;
   query: string;
   tags?: string[];
@@ -137,6 +174,8 @@ export async function shopifyFetch<T>({
     );
   }
 
+  const uncached = cache === "no-store" || revalidate <= 0;
+
   try {
     const result = await fetch(endpoint, {
       method: "POST",
@@ -149,8 +188,13 @@ export async function shopifyFetch<T>({
         ...(query && { query }),
         ...(variables && { variables }),
       }),
-      cache,
-      ...(tags && { next: { tags } }),
+      // `cache` and `next.revalidate` are mutually exclusive in Next - setting
+      // both is a conflict it resolves in ways that are hard to predict - so
+      // exactly one of them is sent. A TTL of 0 means the same thing as
+      // "no-store" and is expressed that way rather than as `revalidate: 0`.
+      ...(uncached
+        ? { cache: "no-store" as RequestCache }
+        : { next: { ...(tags ? { tags } : {}), revalidate } }),
     });
 
     const body = await result.json();
@@ -914,6 +958,13 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     "products/create",
     "products/delete",
     "products/update",
+    // The colour palette lives in `shop_color` metaobjects, and editing one -
+    // renaming a shade, restyling it, adding a seventh - changes what the shop
+    // renders without touching a single product. Without these, a palette edit
+    // would sit behind the TTL with no way to publish it sooner.
+    "metaobjects/create",
+    "metaobjects/delete",
+    "metaobjects/update",
   ];
   const blogWebhooks = [
     "articles/create",
