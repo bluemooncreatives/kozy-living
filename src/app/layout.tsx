@@ -8,6 +8,7 @@ import { CartProvider } from "@/components/cart/cart-context";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
 import MotionProvider from "@/components/motion/motion-provider";
 import LoadingScreen from "@/components/motion/loading-screen";
+import NewsletterPopup from "@/components/newsletter/newsletter-popup";
 import { cookies } from "next/headers";
 import { getCart } from "@/lib/shopify";
 import { site } from "@/lib/site";
@@ -141,6 +142,9 @@ export default async function RootLayout({
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
+            {/* Outside <main> and last in the tree: it is an overlay, not
+                content, and nothing in the page should reflow around it. */}
+            <NewsletterPopup />
           </CartProvider>
         </SmoothScrollProvider>
       </body>

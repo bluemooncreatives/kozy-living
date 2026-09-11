@@ -977,3 +977,125 @@ html:has([data-loader]) body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   The newsletter postcard.
+
+   One drawing made of four pieces: a striped airmail border, a cream card sat
+   slightly askew inside it, a perforated stamp, and the ruled address block
+   the email address is written on.
+
+   These live here rather than as Tailwind utilities because each one needs a
+   gradient or a mask that arbitrary-value classes would stringify badly, and
+   because the two rotations have to be readable together to be tuned at all.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  /* The envelope. Padding is the border band; the stripes show through it
+     around the card that sits on top. 45deg, sage on cream, at the weight a
+     real airmail edge is printed. */
+  .postcard-frame {
+    padding: clamp(0.5rem, 2.2vw, 0.875rem);
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--sage) 0 0.5rem,
+      var(--cream) 0.5rem 1rem
+    );
+    box-shadow: 0 24px 60px -28px rgba(35, 50, 75, 0.45);
+    transform: rotate(-1.1deg);
+  }
+
+  /* The card, counter-rotated a touch so the border band is visibly uneven -
+     a card slipped into an envelope, not a card centred in a frame. The
+     inset outline is the printed hairline on a real postcard. */
+  .postcard-card {
+    background: var(--cream);
+    outline: 1px solid rgba(35, 50, 75, 0.55);
+    outline-offset: -0.4375rem;
+    transform: rotate(0.55deg);
+  }
+
+  /* The stamp. Perforations are punched by tiling half-circles of the card's
+     own cream around the edge - a mask would be cleaner in theory, but the
+     backdrop here is always known, and this renders identically everywhere. */
+  .postcard-stamp {
+    --perf: 4px;
+    position: relative;
+    background: var(--sage-wash);
+  }
+
+  .postcard-stamp::before {
+    content: "";
+    position: absolute;
+    /* The punch sits centred ON the edge, not outside it: half of every circle
+       lands on the stamp and cuts the notch, the other half lands on the card
+       and is invisible cream on cream. */
+    inset: calc(var(--perf) * -1);
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
+      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
+      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
+      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%);
+    background-size:
+      calc(var(--perf) * 2.4) calc(var(--perf) * 2),
+      calc(var(--perf) * 2.4) calc(var(--perf) * 2),
+      calc(var(--perf) * 2) calc(var(--perf) * 2.4),
+      calc(var(--perf) * 2) calc(var(--perf) * 2.4);
+    background-position: 50% 0, 50% 100%, 0 50%, 100% 50%;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  }
+
+  /* The address line itself. Bare, sat on its rule, and the rule darkens as it
+     takes focus - the only state change on the card. */
+  .postcard-field {
+    @apply w-full border-0 border-b bg-transparent px-0 pb-2 font-sans text-ui italic text-ink;
+    border-color: rgba(35, 50, 75, 0.55);
+    border-bottom-width: 1px;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .postcard-field::placeholder {
+    color: rgba(94, 104, 121, 0.75);
+    font-style: italic;
+  }
+
+  .postcard-field:focus,
+  .postcard-field:focus-visible {
+    border-color: var(--ink);
+    border-bottom-width: 2px;
+    /* The extra pixel is taken off the padding so the baseline does not jump. */
+    padding-bottom: calc(0.5rem - 1px);
+    box-shadow: none;
+  }
+
+  /* The postmark: a hard rectangle, deliberately not the site's pill. It is
+     the one control on the page that is stamped rather than clicked. */
+  .postcard-submit {
+    @apply inline-flex items-center justify-center bg-ink px-6 py-3 font-normal lowercase text-cream;
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .postcard-submit:hover:not(:disabled) {
+    background: #1a2739;
+    transform: translateY(-1px);
+  }
+
+  .postcard-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .postcard-frame,
+    .postcard-card {
+      transform: none;
+    }
+  }
+}

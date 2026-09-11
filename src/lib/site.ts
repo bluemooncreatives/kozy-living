@@ -378,6 +378,31 @@ export const contact = {
   ],
 } as const;
 
+/* ------------------------------------------------------------- newsletter */
+
+/**
+ * The postcard. Every line is lowercase and set short on purpose - the card is
+ * a note left on a doormat, not a marketing unit, and the voice is what keeps
+ * an interruption from reading as an ad.
+ *
+ * `note` is the promise about frequency. Keep it honest: it is the one line
+ * that decides whether the address typed above it is a real one.
+ */
+export const newsletter = {
+  /** Sits in the stamp, top right. The house wordmark, lowercase. */
+  stamp: "kozy.",
+  title: "leave word.",
+  /** Two lines, broken by hand - the rag is part of the drawing. */
+  body: ["we'll write when there's", "something worth saying."],
+  placeholder: "your email",
+  note: "two, maybe three notes a season.",
+  cta: "post it.",
+  sending: "posting…",
+  /** The card after Shopify has the address. */
+  thanks: "posted.",
+  thanksBody: "we'll write when there's something worth saying.",
+} as const;
+
 /* ---------------------------------------------------------------- about page */
 
 /**

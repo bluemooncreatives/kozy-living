@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { z } from "zod";
 import {
   ShopifyAdminNotConfiguredError,
@@ -9,6 +8,7 @@ import {
 } from "@/lib/shopify/admin";
 import { createContactMessageMutation } from "@/lib/shopify/mutations/contact";
 import { contact } from "@/lib/site";
+import { clientKey, rateLimited } from "@/lib/rate-limit";
 
 /**
  * Contact form submission.
@@ -55,49 +55,6 @@ const ContactSchema = z.object({
     .max(4000, "Please keep it under 4000 characters."),
 });
 
-/**
- * Naive per-instance throttle: five submissions per address per ten minutes.
- *
- * On serverless this is per-container, so it is a speed bump rather than a
- * guarantee - it stops a single browser hammering submit, not a distributed
- * flood. Shopify's own rate limits and the honeypot below cover the rest; move
- * this to a shared store (KV/Redis) if enquiry spam ever becomes real.
- */
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-const attempts = new Map<string, number[]>();
-
-function rateLimited(key: string): boolean {
-  const now = Date.now();
-  const recent = (attempts.get(key) ?? []).filter((at) => now - at < WINDOW_MS);
-
-  if (recent.length >= MAX_PER_WINDOW) {
-    attempts.set(key, recent);
-    return true;
-  }
-
-  recent.push(now);
-  attempts.set(key, recent);
-
-  // The map would otherwise grow for the life of the process.
-  if (attempts.size > 5000) {
-    for (const [ip, times] of attempts) {
-      if (times.every((at) => now - at >= WINDOW_MS)) attempts.delete(ip);
-    }
-  }
-
-  return false;
-}
-
-async function clientKey(): Promise<string> {
-  const store = await headers();
-  return (
-    store.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    store.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
 const GENERIC_FAILURE = `Something went wrong on our end. Please email us at ${contact.email} and we'll pick it up from there.`;
 
 export async function submitContactMessage(
@@ -111,7 +68,7 @@ export async function submitContactMessage(
     return { ok: true, message: "Thank you - we'll be in touch shortly." };
   }
 
-  if (rateLimited(await clientKey())) {
+  if (rateLimited("contact", await clientKey())) {
     return {
       ok: false,
       message: `That's a few messages in a row - give it a few minutes, or email us at ${contact.email}.`,

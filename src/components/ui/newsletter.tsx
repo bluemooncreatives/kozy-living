@@ -1,59 +1,86 @@
 "use client";
 
 import clsx from "clsx";
-import { useState } from "react";
+import { useActionState, useId } from "react";
 import ActionButton from "@/components/ui/action-button";
+import {
+  subscribeToNewsletter,
+  type NewsletterState,
+} from "@/components/newsletter/actions";
 
 /**
- * Newsletter capture: a bare underlined field and an arrow link, no box and no
- * fill (DESIGN.md §5).
+ * Newsletter capture for the footer: a bare underlined field and one pill, no
+ * box and no fill (DESIGN.md §5). The postcard popup is the same signup wearing
+ * the full drawing; this is the quiet version that sits in a rule of links.
  *
- * Deliberately client-side and self-contained - there is no subscriber backend
- * wired up yet, so this validates and acknowledges without claiming to have
- * stored anything. Point the submit handler at a route handler or Shopify
- * customer-marketing mutation when that endpoint exists.
+ * Both post to `subscribeToNewsletter`, so an address given here lands in
+ * Shopify as a subscribed customer exactly as one given to the card does -
+ * this form used to acknowledge without storing anything, and two signup
+ * surfaces with different meanings is the kind of thing nobody finds until a
+ * campaign goes out to half a list.
  */
 export default function Newsletter({ className }: { className?: string }) {
-  const [email, setEmail] = useState("");
-  const [done, setDone] = useState(false);
+  const [state, formAction, isPending] = useActionState<
+    NewsletterState,
+    FormData
+  >(subscribeToNewsletter, null);
+  const id = useId();
 
-  if (done) {
+  if (state?.ok) {
     return (
       <p className={clsx("ui-mono", className)} role="status">
-        Thank you - we&apos;ll write when the next collection lands.
+        {state.already
+          ? state.message
+          : "Thank you - we'll write when the next collection lands."}
       </p>
     );
   }
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (email.trim()) setDone(true);
-      }}
-      className={clsx("flex w-full items-center gap-2", className)}
-    >
-      <div className="flex-1">
-        <label htmlFor="newsletter-email" className="sr-only">
-          Email address
-        </label>
+    <form action={formAction} className={clsx("w-full", className)}>
+      {/* Honeypot - see the note in the postcard card. */}
+      <div aria-hidden className="hidden">
+        <label htmlFor={`${id}-company`}>Company</label>
         <input
-          id="newsletter-email"
-          type="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email address"
-          autoComplete="email"
-          className="field-bare"
+          id={`${id}-company`}
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
         />
       </div>
-      <ActionButton
-        label="Subscribe"
-        type="submit"
-        variant="solid"
-        icon="arrow"
-      />
+
+      <div className="flex w-full items-center gap-2">
+        <div className="flex-1">
+          <label htmlFor={`${id}-email`} className="sr-only">
+            Email address
+          </label>
+          <input
+            id={`${id}-email`}
+            name="email"
+            type="email"
+            required
+            placeholder="Email address"
+            autoComplete="email"
+            aria-invalid={state && !state.ok ? true : undefined}
+            aria-describedby={state && !state.ok ? `${id}-error` : undefined}
+            className="field-bare"
+          />
+        </div>
+        <ActionButton
+          label={isPending ? "Sending…" : "Subscribe"}
+          type="submit"
+          variant="solid"
+          icon="arrow"
+          disabled={isPending}
+        />
+      </div>
+
+      {state && !state.ok ? (
+        <p id={`${id}-error`} role="alert" className="spec-mono mt-2">
+          {state.message}
+        </p>
+      ) : null}
     </form>
   );
 }
