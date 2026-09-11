@@ -2,20 +2,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Grid from "@/components/grid";
 import ProductGridItems from "@/components/layout/product-grid-items";
-import ColourPicker, {
-  type PickerColour,
-} from "@/components/shop/colour-picker";
+import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import ColourSpiral from "@/components/shop/colour-spiral";
 import { Eyebrow, Headline } from "@/components/ui/section";
-import { buildFacets } from "@/lib/shop/facets";
 import { COLOUR_PARAM } from "@/lib/shop/colours";
 import {
-  countFacets,
-  parseFilterState,
-  toParamMap,
-  toggleFacetUrl,
-  type ShopSearchParams,
-} from "@/lib/shop/filters";
+  COLOUR_RESULTS_ANCHOR,
+  colourEntries,
+  colourHref,
+} from "@/lib/shop/palette";
+import { toParamMap, type ShopSearchParams } from "@/lib/shop/filters";
 import { getCatalog, getColourPalette } from "@/lib/shopify";
 
 /* ---------------------------------------------------------------------------
@@ -24,34 +20,35 @@ import { getCatalog, getColourPalette } from "@/lib/shopify";
    One page, two steps, stacked:
 
      Step 1   the palette - the `shop_color` metaobjects, one coil each
-     Step 2   the Kompanions krafted in whatever is chosen, as cards
+     Step 2   the Kompanions krafted in the chosen colour, as cards
 
-   Step two starts EMPTY and stays empty until a colour is chosen. That is the
-   point of the page: it is a way in through colour, not another shop grid with
-   a colour filter bolted on. A shopper who wants the whole catalogue has
-   /search, which is where the sidebar, the sort, the price band and the
-   pagination all live. None of that is here, deliberately - the only controls
-   on this page are the coils.
+   ONE COLOUR AT A TIME. Not a facet that happens to be rendered as coils - a
+   choice. Picking a second colour replaces the first rather than adding to it,
+   so the heading is always a colour rather than a sum of them, and a shopper
+   is always looking at one shade the way they would look at one paint chip.
+   Multi-select belongs in the shop sidebar at /search, where colour sits beside
+   size and price and the whole point is to combine them.
+
+   That is also why there is no "apply" button. With one colour selected at a
+   time a click IS the choice, so every coil is a plain link and the whole page
+   is server-rendered - no client state, works with JavaScript off, correct
+   under the back button.
+
+   Step two starts EMPTY and stays empty until a colour is chosen. This is a way
+   in through colour, not another shop grid with a colour filter bolted on; the
+   sidebar, sort, price band and pagination all live at /search, deliberately
+   not here.
 
    The address is the state, as everywhere else in this shop:
 
      /shop-by-colour                        the palette, nothing below it
      /shop-by-colour?colour=rose-pink       one colour's Kompanions
-     /shop-by-colour?colour=a,b#kompanions  what the picker's button links to
 
    Colour matching is not reimplemented here. `buildFacets` indexes every
    product by colour - see `lib/shop/colours.ts` for where the colours come
-   from - and this page reads that index directly, so the same product answers
-   to the same colour here as it does in the shop sidebar.
-
-   `?view=products` is no longer written but is harmless on the way in: links
-   shared while the two steps were separate pages still land here.
+   from - and `lib/shop/palette.ts` reads that index, so the same product
+   answers to the same colour here as it does in the shop sidebar.
 --------------------------------------------------------------------------- */
-
-const BASE_PATH = "/shop-by-colour";
-
-/** Fragment the picker's button scrolls to, and the id on the results section. */
-const RESULTS_ANCHOR = "kompanions";
 
 /**
  * Four columns at the widest, so the cards match the shop grid's cell size.
@@ -61,18 +58,10 @@ const RESULTS_ANCHOR = "kompanions";
 const GRID_SIZES =
   "(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw";
 
-/**
- * Above this the per-colour membership lists stop being worth shipping to the
- * browser, and the picker's button drops its live count rather than the page
- * growing without bound. At 2,000 products - the catalogue ceiling - six
- * colours is a few tens of KB; the guard is for the day that ceiling moves.
- */
-const MEMBERS_LIMIT = 2000;
-
 export const metadata: Metadata = {
   title: "Shop by Colour",
   description:
-    "Start with a colour. Rose Pink, Indigo Blue, Tulsi Green, Oat Milk, White and Sage Green - pick the shades your home already lives in, and see the Kompanions that match.",
+    "Start with a colour. Rose Pink, Indigo Blue, Tulsi Green, Oat Milk, White and Sage Green - pick the shade your home already lives in, and see the Kompanions krafted in it.",
 };
 
 export default async function ShopByColourPage({
@@ -88,95 +77,37 @@ export default async function ShopByColourPage({
     getColourPalette(),
   ]);
 
-  const { facets, index } = buildFacets(catalog);
-  const state = parseFilterState(resolved, facets);
-  const selected = state.selections.get(COLOUR_PARAM) ?? [];
+  const { entries, membership } = colourEntries(palette, catalog);
 
-  // `buildFacets` leaves every count at zero - counting is `countFacets`' job,
-  // and it counts each group against the OTHER groups. For colour that means
-  // the number beside a swatch is how many Kompanions that colour reaches
-  // regardless of what else is already ticked, which is exactly what a picker
-  // has to promise.
-  const group = countFacets(catalog, index, state, facets).find(
-    (entry) => entry.param === COLOUR_PARAM
-  );
+  /**
+   * The chosen colour, or none.
+   *
+   * Only ever ONE, even when the URL names several. A link shared from before
+   * this page was single-select - or hand-edited - resolves to its first valid
+   * colour rather than 404ing or quietly reintroducing the "A + B" heading this
+   * page no longer has a layout for.
+   */
+  const requested = (params.get(COLOUR_PARAM) ?? "")
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean);
 
-  const chosen = (group?.values ?? []).filter((value) =>
-    selected.includes(value.key)
-  );
+  const selected =
+    entries.find(
+      (entry) => entry.count > 0 && requested.includes(entry.key)
+    ) ?? null;
 
-  /* ------------------------------------------------- step one: the palette */
-
-  // The picker's button counts a multi-colour selection as a union, which
-  // needs to know WHICH products each colour holds, not just how many. What
-  // travels is each product's position in the catalogue rather than its id: an
-  // index is a small number, and a Shopify product id is a 50-character URI.
-  const membership = index.get(COLOUR_PARAM);
-  const shipMembers = catalog.length <= MEMBERS_LIMIT;
-
-  // The palette leads, the catalogue fills it in.
-  //
-  // Shopify's `shop_color` metaobjects are the brand's complete set and their
-  // order; the facet group is only the part of it the catalogue has been tagged
-  // with. Showing the palette means a colour nothing is in stock in is still on
-  // the page - greyed and unclickable, but present - which is the difference
-  // between a brand with six colours and a page that looks like it has five.
-  // Anything the catalogue carries that the palette does not is appended, so a
-  // colour is never hidden by a metaobject someone deleted.
-  const counted = new Map((group?.values ?? []).map((value) => [value.key, value]));
-  const listed = new Set(palette.map((colour) => colour.key));
-
-  const entries = [
-    ...palette.map((colour) => ({
-      key: colour.key,
-      label: colour.label,
-      swatch: colour.swatch,
-      count: counted.get(colour.key)?.count ?? 0,
-    })),
-    ...(group?.values ?? [])
-      .filter((value) => !listed.has(value.key) && value.swatch)
-      .map((value) => ({
-        key: value.key,
-        label: value.label,
-        swatch: value.swatch!,
-        count: value.count,
-      })),
-  ];
-
-  const colours: PickerColour[] = entries.map((entry) => ({
+  const colours: RailColour[] = entries.map((entry) => ({
     ...entry,
-    toggleHref: toggleFacetUrl(BASE_PATH, params, state, COLOUR_PARAM, entry.key),
-    members: shipMembers
-      ? catalog.flatMap((product, position) =>
-          membership?.get(product.id)?.has(entry.key) ? [position] : []
-        )
-      : undefined,
+    active: entry.key === selected?.key,
+    // Clicking the colour already showing clears it, which is the only way back
+    // to the empty state without the browser's back button.
+    href: colourHref(entry.key === selected?.key ? null : entry.key),
   }));
 
-  // What the picker's button has to carry forward. `view` is dropped rather
-  // than preserved: it is the flag from when these were two pages, and writing
-  // it back would keep it alive in every link the shop builds from here.
-  const carry: Record<string, string> = {};
-  for (const [key, value] of params) {
-    if (key === COLOUR_PARAM || key === "view" || key === "page") continue;
-    carry[key] = value;
-  }
-
-  /* --------------------------------------------------- step two: the cards */
-
-  // Read straight off the facet index rather than re-deriving colour here, so
-  // one product answers to one colour on every surface. OR within the
-  // selection: two colours chosen means "either", which is what picking two
-  // coils looks like it should do.
-  const matched = selected.length
-    ? catalog.filter((product) =>
-        selected.some((key) => membership?.get(product.id)?.has(key))
-      )
+  const matched = selected
+    ? catalog.filter((product) => membership.get(product.id)?.has(selected.key))
     : [];
-
-  const heading = chosen.map((value) => value.label).join(" + ");
-  const resultLabel =
-    matched.length === 1 ? "1 Kompanion" : `${matched.length} Kompanions`;
 
   return (
     <>
@@ -188,21 +119,14 @@ export default async function ShopByColourPage({
           <Eyebrow align="left">Step 1 of 2</Eyebrow>
           <Headline className="mt-4">Shop by colour</Headline>
           <p className="body-mono mt-5 text-pretty">
-            The house palette, one coil each. Choose the shades your home already
-            lives in - as many as you like - and the Kompanions krafted in them
-            appear below.
+            The house palette, one coil each. Choose the shade your home already
+            lives in, and the Kompanions krafted in it appear below.
           </p>
         </div>
 
         {colours.length ? (
           <div className="mt-10 md:mt-14">
-            <ColourPicker
-              colours={colours}
-              selected={selected}
-              basePath={BASE_PATH}
-              carry={carry}
-              resultsAnchor={RESULTS_ANCHOR}
-            />
+            <ColourRail colours={colours} />
           </div>
         ) : (
           <p className="ui-mono mt-8 text-muted">
@@ -218,29 +142,25 @@ export default async function ShopByColourPage({
         )}
       </section>
 
-      {/* Step two. `scroll-mt` clears the sticky header, so the picker's button
+      {/* Step two. `scroll-mt` clears the sticky header, so a colour's fragment
           lands on the heading rather than under the navigation. */}
       <section
-        id={RESULTS_ANCHOR}
+        id={COLOUR_RESULTS_ANCHOR}
         className="shell scroll-mt-[var(--header-h)] pb-14 pt-10 md:pb-20 md:pt-14"
       >
-        {selected.length ? (
+        {selected ? (
           <>
             <Eyebrow align="left">Step 2 of 2</Eyebrow>
-            <div className="mt-4 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-              <div className="flex items-center gap-4">
-                <span aria-hidden className="flex items-center gap-2">
-                  {chosen.map((value) =>
-                    value.swatch ? (
-                      <span key={value.key} className="h-11 w-11">
-                        <ColourSpiral swatch={value.swatch} size="compact" />
-                      </span>
-                    ) : null
-                  )}
-                </span>
-                <Headline count={matched.length || undefined}>{heading}</Headline>
-              </div>
-              <p className="spec-mono tabular-nums text-muted">{resultLabel}</p>
+            {/* The count rides on the heading as the house superscript rather
+                than as a second line of its own - there is no pagination here
+                for a "13-24 of 90" to belong to. */}
+            <div className="mt-4 flex items-center gap-4">
+              <span aria-hidden className="h-11 w-11 shrink-0">
+                <ColourSpiral swatch={selected.swatch} size="compact" />
+              </span>
+              <Headline count={matched.length || undefined}>
+                {selected.label}
+              </Headline>
             </div>
 
             {matched.length ? (
@@ -252,7 +172,7 @@ export default async function ShopByColourPage({
               // since sold out or been unpublished.
               <div className="panel mt-8 px-8 py-16 text-center">
                 <p className="serif text-display-md">
-                  Nothing in {heading} just now
+                  Nothing in {selected.label} just now
                 </p>
                 <p className="body-mono mx-auto mt-4 max-w-measure">
                   Try another shade above, or see everything we make.
@@ -272,8 +192,8 @@ export default async function ShopByColourPage({
               Pick a colour to see what we make in it
             </p>
             <p className="body-mono mx-auto mt-4 max-w-measure">
-              Choose one coil, or several - the Kompanions krafted in those
-              shades will appear here.
+              Choose a coil above and the Kompanions krafted in that shade will
+              appear here.
             </p>
           </div>
         )}

@@ -22,6 +22,12 @@ import CircledWord from "@/components/ui/circled-word";
 import WordmarkBand from "@/components/ui/wordmark-band";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
+import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
+import {
+  getColourEntries,
+  shopColourHref,
+  SHOP_BY_COLOUR_PATH,
+} from "@/lib/shop/palette";
 import {
   displayFace,
   Eyebrow,
@@ -69,6 +75,10 @@ export default function Home() {
 
       <Suspense fallback={<RailFallback />}>
         <Bestsellers />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ShopByColour />
       </Suspense>
 
       <ExperienceBand />
@@ -422,6 +432,50 @@ async function Bestsellers() {
           />
         ))}
       </Carousel>
+    </section>
+  );
+}
+
+/**
+ * The palette, as a way into the shop.
+ *
+ * Six coils, each a link into the SHOP filtered to that colour - `/search?
+ * colour=...`, the same parameter the shop's own sidebar writes, so a shopper
+ * lands on the grid with the checkbox already ticked and every other filter
+ * still available to them. "All colours" leads to /shop-by-colour instead, for
+ * browsing the palette itself.
+ *
+ * The same rail component as that page, reading the same Shopify metaobjects.
+ * Nothing about this section is written down here: add a seventh colour in
+ * Shopify and it appears, reorder them and this reorders.
+ *
+ * Counts are off. On the shop page the number is how a shopper judges whether a
+ * colour is worth a click; here it is a teaser, and "2 Kompanions" under a coil
+ * undersells a palette.
+ */
+async function ShopByColour() {
+  const entries = await getColourEntries();
+
+  // Nothing to tease if the merchant has not built the palette yet, or if every
+  // colour is still waiting on products.
+  if (!entries.some((entry) => entry.count > 0)) return null;
+
+  const colours: RailColour[] = entries.map((entry) => ({
+    ...entry,
+    href: shopColourHref(entry.key),
+  }));
+
+  return (
+    <section aria-labelledby="shop-by-colour">
+      <SectionHead
+        eyebrow="Shop by colour"
+        title={<span id="shop-by-colour">Start with a shade</span>}
+        action="All colours"
+        actionHref={SHOP_BY_COLOUR_PATH}
+      />
+      <div className="shell pb-10 md:pb-14">
+        <ColourRail colours={colours} showCounts={false} />
+      </div>
     </section>
   );
 }
