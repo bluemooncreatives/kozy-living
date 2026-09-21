@@ -229,6 +229,7 @@ export const ctaBand = {
   wordmark: "shop now",
   href: "/search",
   seal: "krafted for moments of rest · ",
+  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
 } as const;
 
 /** Journal teaser - copy left, image right. */

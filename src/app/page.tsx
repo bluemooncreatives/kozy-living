@@ -881,6 +881,7 @@ function ClosingBand() {
     >
       <div className="relative">
         <Plate
+          src={"image" in ctaBand ? (ctaBand.image as string) : undefined}
           aspect="2/1"
           tone={3}
           placeholderText="home"
@@ -888,13 +889,17 @@ function ClosingBand() {
           sizes="100vw"
           alt="A lived-in floor lounge: biscuit pillows, a waffle throw and an unhurried morning."
         >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-10 rounded-plate bg-gradient-to-b from-black/55 via-black/20 to-transparent"
+          />
           <div className="absolute inset-x-3 top-3 z-20 flex flex-col items-start gap-3 md:inset-x-5 md:top-5 md:flex-row md:items-start md:justify-between md:gap-6">
             <ActionButton
               label={ctaBand.pill}
               href={ctaBand.href}
               variant="glass"
             />
-            <p className="max-w-[22rem] text-spec text-paper/90 md:max-w-[18rem] md:text-right">
+            <p className="max-w-[22rem] text-spec text-paper md:max-w-[18rem] md:text-right drop-shadow-sm">
               {ctaBand.body}
             </p>
           </div>
