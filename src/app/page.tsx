@@ -205,7 +205,7 @@ function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-nowrap items-center gap-2 md:gap-3">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3">
               <ActionButton
                 label={hero.primary.label}
                 href={hero.primary.href}
@@ -478,7 +478,7 @@ async function Bestsellers() {
   if (!products.length) return null;
 
   return (
-    <section aria-labelledby="bestsellers">
+    <section aria-labelledby="bestsellers" className="overflow-x-clip">
       <SectionHead
         eyebrow="Bestsellers"
         title={<span id="bestsellers">Loved in real homes</span>}
@@ -530,7 +530,7 @@ async function ShopByColour() {
   }));
 
   return (
-    <section aria-labelledby="shop-by-colour">
+    <section aria-labelledby="shop-by-colour" className="overflow-x-clip">
       <SectionHead
         eyebrow="Shop by colour"
         title={<span id="shop-by-colour">Start with a shade</span>}
@@ -687,7 +687,7 @@ function Testimonial() {
 /** Full-bleed ticker, each repeat punctuated by the sage asterisk. */
 function RestTicker() {
   return (
-    <section aria-label="Moments of rest" className="rule-y py-5 md:py-7">
+    <section aria-label="Moments of rest" className="rule-y overflow-x-clip py-5 md:py-7">
       <Marquee
         phrases={Array.from(
           { length: restTicker.repeat },

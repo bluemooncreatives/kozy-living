@@ -15,10 +15,10 @@ export default function LogoSquare({
 }) {
   const dimensions =
     size === "sm"
-      ? "h-8 w-auto max-w-[130px]"
+      ? "h-7 sm:h-8 w-auto max-w-[100px] sm:max-w-[130px]"
       : size === "lg"
-        ? "h-14 md:h-16 w-auto max-w-[220px]"
-        : "h-9 md:h-11 w-auto max-w-[180px]";
+        ? "h-12 md:h-16 w-auto max-w-[180px] md:max-w-[220px]"
+        : "h-7.5 sm:h-9 md:h-11 w-auto max-w-[110px] sm:max-w-[140px] md:max-w-[180px]";
 
   return (
     <span className={clsx("inline-flex items-center leading-none", className)}>

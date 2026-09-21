@@ -130,9 +130,9 @@ export default function SearchTrigger({ menu = [] }: { menu?: Menu[] }) {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Search"
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
+        className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
       >
-        <MagnifyingGlassIcon aria-hidden className="h-4 w-4" />
+        <MagnifyingGlassIcon aria-hidden className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </button>
 
       <Transition show={isOpen}>

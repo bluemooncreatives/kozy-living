@@ -15,14 +15,14 @@ export default function OpenCart({
   return (
     <span
       className={clsx(
-        "relative flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper",
+        "relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper",
         className
       )}
     >
       <svg
         viewBox="0 0 24 24"
         aria-hidden
-        className="h-4 w-4"
+        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.75"

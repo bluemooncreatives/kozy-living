@@ -218,7 +218,7 @@ export default function Plate({
               className="absolute inset-0 flex items-center justify-center overflow-hidden"
               style={{ background: washes[tone] }}
             >
-              <span className="wordmark whitespace-nowrap px-4 text-[22cqw] leading-none text-ink/[0.09]">
+              <span className="wordmark truncate whitespace-nowrap px-4 text-[clamp(1rem,18cqw,3rem)] leading-none text-ink/[0.09]">
                 {ghost}
               </span>
             </div>

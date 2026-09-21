@@ -62,7 +62,7 @@ export async function Navbar() {
 
           <DesktopMenu menu={menu} />
 
-          <div className="ml-auto flex items-center gap-3 md:gap-4">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3 md:gap-4">
             <SearchTrigger menu={menu} />
             <CartModal />
             <Link
@@ -74,9 +74,9 @@ export async function Navbar() {
               aria-label={
                 customerSession.isAuthenticated ? "Account" : "Sign in"
               }
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-ink/15 bg-card transition-colors hover:bg-ink hover:text-paper"
             >
-              <UserIcon aria-hidden className="h-4 w-4" />
+              <UserIcon aria-hidden className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Link>
           </div>
         </div>
