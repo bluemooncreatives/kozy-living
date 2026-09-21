@@ -418,6 +418,8 @@ async function BoldStatement() {
                 prefetch={false}
               >
                 <Plate
+                  src={"image" in item ? (item.image as string) : undefined}
+                  alt={`${item.title} - ${item.tag}`}
                   aspect="5/7"
                   arrow
                   arrowTone={index === 1 ? "sage" : "card"}
@@ -574,6 +576,7 @@ function ExperienceBand() {
     >
       <Link href={experienceBand.wide.href} className="group block">
         <Plate
+          src={"image" in experienceBand.wide ? (experienceBand.wide.image as string) : undefined}
           aspect="16/10"
           arrow
           tone={1}
@@ -608,6 +611,7 @@ function ExperienceBand() {
 
         <Link href={experienceBand.small.href} className="group block">
           <Plate
+            src={"image" in experienceBand.small ? (experienceBand.small.image as string) : undefined}
             aspect="16/10"
             arrow
             tone={3}
@@ -653,6 +657,7 @@ function Testimonial() {
       className="shell grid grid-cols-1 gap-3 py-10 md:py-14 lg:grid-cols-2"
     >
       <Plate
+        src={"image" in testimonial ? (testimonial.image as string) : undefined}
         aspect="4/3"
         tone={0}
         placeholderText="kraft"
@@ -809,6 +814,7 @@ function Guides() {
       </div>
       <Link href={guidesFeature.href} className="group block">
         <Plate
+          src={"image" in guidesFeature ? (guidesFeature.image as string) : undefined}
           aspect="4/3"
           arrow
           tone={1}
@@ -846,11 +852,13 @@ async function Journal() {
               <li key={post.slug}>
                 <Link href="/blogs" className="group block">
                   <Plate
+                    src={"image" in post ? (post.image as string) : undefined}
                     aspect="4/3"
                     arrow
                     tone={(index % 4) as 0 | 1 | 2 | 3}
                     placeholderText="journal"
                     sizes="(min-width: 768px) 33vw, 100vw"
+                    alt={post.title}
                   />
                   <h3 className="serif mt-4 text-display-sm">{post.title}</h3>
                   <p className="body-mono mt-2 line-clamp-3">{post.excerpt}</p>

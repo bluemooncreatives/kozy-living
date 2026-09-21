@@ -132,24 +132,28 @@ export const lookbook = [
     tag: "waffle",
     title: "Kessentials",
     handle: "kessentials",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
     lift: 0,
   },
   {
     tag: "slub cotton",
     title: "Kloud Series",
     handle: "kloud",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
     lift: 3,
   },
   {
     tag: "dabu",
     title: "Pet & Parent",
     handle: "pet-parent",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
     lift: 4,
   },
   {
     tag: "linen blend",
     title: "Floor Lounge",
     handle: "kozy-lounge",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
     lift: 2,
   },
 ] as const;
@@ -162,6 +166,7 @@ export const experienceBand = {
   wide: {
     caption:
       "We call them Kompanions, not products - krafted to support the moments of rest you already have.",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Untitled_design_2c1e5ce6-7925-429a-815e-30d532269847.jpg?v=1788636354",
     href: "/search",
   },
   accent: {
@@ -172,6 +177,7 @@ export const experienceBand = {
   small: {
     caption:
       "designed in-house, made in collaboration with craft clusters across India.",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
     href: "/about-us",
   },
 } as const;
@@ -202,6 +208,7 @@ export const testimonial = {
   quote: site.statement,
   name: site.name,
   role: "The studio philosophy",
+  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
 } as const;
 
 /**
@@ -230,6 +237,7 @@ export const guidesFeature = {
   title: "Notes on rest, ritual and kraft",
   body: "How a waffle weave earns its texture, what Dabu hand-block printing actually involves, and how to care for natural fibres so they soften rather than wear out.",
   cta: "Read the journal",
+  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1880.jpg?v=1788636348",
   href: "/blogs",
 } as const;
 
@@ -248,18 +256,21 @@ export const journalPosts = [
   {
     slug: "why-waffle-weave",
     title: "Why Waffle Weave Belongs in Your Slowest Hour",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
     excerpt:
       "The honeycomb structure holds air, which is what makes a waffle robe dry quickly and breathe against skin. A look at how the weave is built and why it suits an unhurried morning...",
   },
   {
     slug: "dabu-hand-block-printing",
     title: "Dabu: The Mud-Resist Print Behind Our Indigo",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1895_c94dd5b4-daca-47b9-94aa-d5aa31527cd5.jpg?v=1788636351",
     excerpt:
       "Before dye touches cloth, a mud-and-gum resist is hand-stamped onto it block by block. Nothing about the process is fast, and every repeat carries the hand that placed it...",
   },
   {
     slug: "in-between-moments",
     title: "The In-Between Moments Are the Ritual",
+    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
     excerpt:
       "Not the grand reset, but the ten minutes on the floor before the day starts. A case for textiles that support the routines already in your day rather than asking for new ones...",
   },
