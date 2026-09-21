@@ -293,7 +293,11 @@ async function HeroProductTiles() {
     const products = collections[index]?.length
       ? collections[index]!
       : fallback;
-    const gallery = collectionGallery(products);
+    const liveGallery = collectionGallery(products);
+    const tileFallback = "images" in tile && Array.isArray(tile.images)
+      ? (tile.images as readonly string[]).map((url) => ({ url, altText: tile.tag }))
+      : [];
+    const gallery = liveGallery.length >= 2 ? liveGallery : tileFallback.length ? tileFallback : liveGallery;
 
     return (
       <Link
@@ -305,8 +309,10 @@ async function HeroProductTiles() {
         <Plate
           aspect={null}
           gallery={gallery}
-          galleryAuto
-          galleryDelay={index * 2100}
+          galleryAuto={Boolean(gallery && gallery.length > 1)}
+          galleryDelay={index * 1600}
+          galleryInterval={4000}
+          showIndicators={true}
           tone={index === 0 ? 0 : 3}
           tag={tile.tag}
           placeholderText={index === 0 ? "kraft" : "rest"}
@@ -408,30 +414,46 @@ async function BoldStatement() {
         {/* Four equal tracks. The plates keep one aspect so the zigzag comes
             purely from the drop, exactly as in the reference. */}
         <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 lg:items-start">
-          {lookbook.map((item, index) => (
-            <li key={item.title} className={clsx(drop[item.lift])}>
-              <Link
-                href={
-                  live.has(item.handle) ? `/search/${item.handle}` : "/search"
-                }
-                className="group block"
-                prefetch={false}
-              >
-                <Plate
-                  src={"image" in item ? (item.image as string) : undefined}
-                  alt={`${item.title} - ${item.tag}`}
-                  aspect="5/7"
-                  arrow
-                  arrowTone={index === 1 ? "sage" : "card"}
-                  tag={item.tag}
-                  title={item.title}
-                  tone={(index % 4) as 0 | 1 | 2 | 3}
-                  placeholderText={item.tag}
-                  sizes="(min-width: 1024px) 25vw, 50vw"
-                />
-              </Link>
-            </li>
-          ))}
+          {lookbook.map((item, index) => {
+            const gallery = "images" in item && Array.isArray(item.images)
+              ? (item.images as readonly string[]).map((url) => ({
+                  url,
+                  altText: `${item.title} - ${item.tag}`,
+                }))
+              : "image" in item && item.image
+                ? [{ url: item.image as string, altText: `${item.title} - ${item.tag}` }]
+                : null;
+
+            return (
+              <li key={item.title} className={clsx(drop[item.lift])}>
+                <Link
+                  href={
+                    live.has(item.handle) ? `/search/${item.handle}` : "/search"
+                  }
+                  className="group block"
+                  prefetch={false}
+                >
+                  <Plate
+                    src={"image" in item ? (item.image as string) : undefined}
+                    gallery={gallery}
+                    galleryAuto={Boolean(gallery && gallery.length > 1)}
+                    galleryDelay={index * 1300}
+                    galleryInterval={3600 + (index % 2) * 600}
+                    showIndicators={true}
+                    alt={`${item.title} - ${item.tag}`}
+                    aspect="5/7"
+                    arrow
+                    arrowTone={index === 1 ? "sage" : "card"}
+                    tag={item.tag}
+                    title={item.title}
+                    tone={(index % 4) as 0 | 1 | 2 | 3}
+                    placeholderText={item.tag}
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                  />
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>
@@ -576,6 +598,18 @@ function ExperienceBand() {
     >
       <Link href={experienceBand.wide.href} className="group block">
         <Plate
+          gallery={
+            "images" in experienceBand.wide && Array.isArray(experienceBand.wide.images)
+              ? (experienceBand.wide.images as readonly string[]).map((url) => ({
+                  url,
+                  altText: "Moments of rest",
+                }))
+              : undefined
+          }
+          galleryAuto
+          galleryDelay={600}
+          galleryInterval={4400}
+          showIndicators={true}
           src={"image" in experienceBand.wide ? (experienceBand.wide.image as string) : undefined}
           aspect="16/10"
           arrow
@@ -611,6 +645,18 @@ function ExperienceBand() {
 
         <Link href={experienceBand.small.href} className="group block">
           <Plate
+            gallery={
+              "images" in experienceBand.small && Array.isArray(experienceBand.small.images)
+                ? (experienceBand.small.images as readonly string[]).map((url) => ({
+                    url,
+                    altText: "Artisan craft detail",
+                  }))
+                : undefined
+            }
+            galleryAuto
+            galleryDelay={2200}
+            galleryInterval={4400}
+            showIndicators={true}
             src={"image" in experienceBand.small ? (experienceBand.small.image as string) : undefined}
             aspect="16/10"
             arrow

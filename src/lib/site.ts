@@ -70,8 +70,24 @@ export const hero = {
   },
   /** The two small plates that close the bento. */
   tiles: [
-    { tag: "#KRAFTEDBYHAND", handle: "kessentials" },
-    { tag: "#MOMENTSOFREST", handle: "kozy-lounge" },
+    {
+      tag: "#KRAFTEDBYHAND",
+      handle: "kessentials",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1677.jpg?v=1788636340",
+      ],
+    },
+    {
+      tag: "#MOMENTSOFREST",
+      handle: "kozy-lounge",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
+      ],
+    },
   ],
   primary: { label: "Shop Kompanions", href: "/search" },
   secondary: { label: "Our story", href: "/about-us" },
@@ -133,6 +149,12 @@ export const lookbook = [
     title: "Kessentials",
     handle: "kessentials",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1677.jpg?v=1788636340",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1694_d0fd0a48-49cb-46ac-a8ec-fbf065b857f6.jpg?v=1788636341",
+    ],
     lift: 0,
   },
   {
@@ -140,6 +162,12 @@ export const lookbook = [
     title: "Kloud Series",
     handle: "kloud",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0049.png?v=1788636351",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1884.jpg?v=1788636350",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
+    ],
     lift: 3,
   },
   {
@@ -147,6 +175,12 @@ export const lookbook = [
     title: "Pet & Parent",
     handle: "pet-parent",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/CEDD7B20-D83F-4050-9CEB-D693C7AE6269.jpg?v=1788636170",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/5A7D8EAA-E90A-4449-B0C0-4C7C5CA38535.jpg?v=1788636170",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/DB2B40CD-1A34-48FC-98D5-63220DD3DD2B.jpg?v=1788636171",
+    ],
     lift: 4,
   },
   {
@@ -154,6 +188,12 @@ export const lookbook = [
     title: "Floor Lounge",
     handle: "kozy-lounge",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1032.jpg?v=1788636331",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1915.jpg?v=1788636331",
+    ],
     lift: 2,
   },
 ] as const;
@@ -167,6 +207,11 @@ export const experienceBand = {
     caption:
       "We call them Kompanions, not products - krafted to support the moments of rest you already have.",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Untitled_design_2c1e5ce6-7925-429a-815e-30d532269847.jpg?v=1788636354",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Untitled_design_2c1e5ce6-7925-429a-815e-30d532269847.jpg?v=1788636354",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0120.jpg?v=1788636349",
+    ],
     href: "/search",
   },
   accent: {
@@ -178,6 +223,11 @@ export const experienceBand = {
     caption:
       "designed in-house, made in collaboration with craft clusters across India.",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
+    images: [
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/5A7D8EAA-E90A-4449-B0C0-4C7C5CA38535.jpg?v=1788636170",
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
+    ],
     href: "/about-us",
   },
 } as const;

@@ -19,6 +19,8 @@ export default function Plate({
   galleryIndex = 0,
   galleryAuto = false,
   galleryDelay,
+  galleryInterval,
+  showIndicators,
   video,
   videos,
   videoStart = 0,
@@ -55,6 +57,10 @@ export default function Plate({
   galleryAuto?: boolean;
   /** Staggers automatic galleries when several plates share a section. */
   galleryDelay?: number;
+  /** Interval between automatic rotations in ms. */
+  galleryInterval?: number;
+  /** Shows subtle glowing progress dots on rotating galleries. */
+  showIndicators?: boolean;
   /** Silent looping clip. Takes priority over `src` when both are given. */
   video?: string | null;
   /**
@@ -155,6 +161,8 @@ export default function Plate({
               images={gallery}
               sizes={sizes}
               delay={galleryDelay}
+              interval={galleryInterval}
+              showIndicators={showIndicators}
               className={mediaClass}
             />
           ) : gallery?.length ? (
