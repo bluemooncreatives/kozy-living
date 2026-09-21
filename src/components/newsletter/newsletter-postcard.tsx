@@ -6,7 +6,10 @@ import { useActionState, useEffect, useId } from "react";
 import { newsletter } from "@/lib/site";
 import { subscribeToNewsletter, type NewsletterState } from "./actions";
 
-/** Slightly uneven rings reproduce the reference's hand-printed ritual seal. */
+/**
+ * Concentric-ring ritual seal.
+ * Text uses Title Case ("Shared Rituals / Mindful Days") as in the reference.
+ */
 function RitualSeal() {
   return (
     <svg viewBox="0 0 240 250" className="ritual-seal" aria-hidden="true">
@@ -23,10 +26,10 @@ function RitualSeal() {
           />
         ))}
       </g>
-      <text x="120" y="119" textAnchor="middle">
-        <tspan x="120">shared Rituals</tspan>
-        <tspan x="120" dy="25">
-          mindful Days
+      <text x="120" y="117" textAnchor="middle">
+        <tspan x="120">Shared Rituals</tspan>
+        <tspan x="120" dy="26">
+          Mindful Days
         </tspan>
       </text>
     </svg>
@@ -54,9 +57,14 @@ export default function NewsletterPostcard({
 
   return (
     <div className={clsx("ritual-card", className)}>
+      {/* Blue K-tile frame — flush to all edges */}
       <div className="ritual-border" aria-hidden="true" />
+
+      {/* Concentric-ring seal — top-right */}
       <RitualSeal />
+
       <div className="ritual-content">
+        {/* Heading */}
         <h2 id={headingId} className="ritual-title">
           {state?.ok ? (
             newsletter.thanks
@@ -68,6 +76,8 @@ export default function NewsletterPostcard({
             </>
           )}
         </h2>
+
+        {/* Body / form */}
         {state?.ok ? (
           <p className="ritual-copy" role="status">
             {state.already ? state.message : newsletter.thanksBody}
@@ -79,11 +89,21 @@ export default function NewsletterPostcard({
                 <span key={line}>{line}</span>
               ))}
             </p>
+
+            {/*
+             * Email form — dynamically rendered from site config.
+             *
+             * The floating "your email" label sits above the wavy underline
+             * and fades when the visitor focuses or fills the field, matching
+             * the reference image where the placeholder appears as visible
+             * text rather than a greyed HTML placeholder.
+             */}
             <form
               action={formAction}
               className="ritual-form"
               aria-busy={isPending}
             >
+              {/* Honeypot — hidden from real users */}
               <div aria-hidden="true" className="hidden">
                 <label htmlFor={`${id}-company`}>Company</label>
                 <input
@@ -94,9 +114,13 @@ export default function NewsletterPostcard({
                   autoComplete="off"
                 />
               </div>
+
+              {/* Accessible label (screen-readers only) */}
               <label htmlFor={`${id}-email`} className="sr-only">
                 Email address
               </label>
+
+              {/* Visible ghost label + wavy-underline wrapper */}
               <div className="ritual-email-line">
                 <input
                   id={`${id}-email`}
@@ -105,19 +129,25 @@ export default function NewsletterPostcard({
                   required
                   autoComplete="email"
                   inputMode="email"
-                  placeholder={newsletter.placeholder}
+                  placeholder=" "
                   aria-invalid={state && !state.ok ? true : undefined}
                   aria-describedby={
                     state && !state.ok ? `${id}-error` : undefined
                   }
                   className="ritual-field"
                 />
+                <span className="ritual-email-label" aria-hidden="true">
+                  {newsletter.placeholder}
+                </span>
               </div>
+
               {state && !state.ok ? (
                 <p id={`${id}-error`} role="alert" className="ritual-error">
                   {state.message}
                 </p>
               ) : null}
+
+              {/* CTA button — label and loading text from site config */}
               <button
                 type="submit"
                 disabled={isPending}
@@ -129,6 +159,8 @@ export default function NewsletterPostcard({
           </>
         )}
       </div>
+
+      {/* Kozy Living logo — bottom-right, inside K-tile frame */}
       <div className="ritual-logo">
         <Image
           src="/logo/kozy-logo.png"

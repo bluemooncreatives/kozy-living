@@ -3,6 +3,7 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
+import { useHorizontalScrollPassthrough } from "@/hooks/use-horizontal-scroll-passthrough";
 
 export type BrowseRailItem = {
   title: string;
@@ -21,6 +22,7 @@ export type BrowseRailItem = {
 export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
   const railRef = useRef<HTMLUListElement>(null);
   const activeItemRef = useRef<HTMLLIElement>(null);
+  useHorizontalScrollPassthrough(railRef);
 
   useEffect(() => {
     if (activeItemRef.current) {
@@ -31,12 +33,6 @@ export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
       });
     }
   }, [items]);
-
-  const handleWheel = (e: React.WheelEvent<HTMLUListElement>) => {
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && railRef.current) {
-      railRef.current.scrollLeft += e.deltaY;
-    }
-  };
 
   if (!items.length) return null;
 
@@ -49,7 +45,6 @@ export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
         ref={railRef}
         data-lenis-prevent
         data-lenis-prevent-horizontal
-        onWheel={handleWheel}
         className="no-scrollbar flex items-center gap-2 overflow-x-auto scroll-smooth py-1 px-0.5"
       >
         {items.map((item) => (

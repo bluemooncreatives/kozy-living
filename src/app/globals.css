@@ -261,12 +261,15 @@
   .rule-t {
     @apply border-t border-rule;
   }
+
   .rule-b {
     @apply border-b border-rule;
   }
+
   .rule-x {
     @apply border-x border-rule;
   }
+
   .rule-y {
     @apply border-y border-rule;
   }
@@ -497,6 +500,7 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -537,11 +541,11 @@
       "one two";
   }
 
-  .hero-bento > * {
+  .hero-bento>* {
     min-width: 0;
   }
 
-  .hero-bento > .bento-feature {
+  .hero-bento>.bento-feature {
     grid-area: feature;
     height: calc(100vh - var(--header-h) - (var(--hero-gap) * 2));
     height: calc(100dvh - var(--header-h) - (var(--hero-gap) * 2));
@@ -549,50 +553,50 @@
     min-height: 540px;
   }
 
-  .hero-bento > .bento-say {
+  .hero-bento>.bento-say {
     grid-area: say;
   }
 
-  .hero-bento > .bento-one,
-  .hero-bento > .bento-two {
+  .hero-bento>.bento-one,
+  .hero-bento>.bento-two {
     aspect-ratio: 4 / 3;
     min-height: clamp(9rem, 30vw, 10.5rem);
   }
 
   @media (min-width: 640px) {
-    .hero-bento > .bento-one,
-    .hero-bento > .bento-two {
+
+    .hero-bento>.bento-one,
+    .hero-bento>.bento-two {
       min-height: 11rem;
     }
   }
 
-  .hero-bento > .bento-one {
+  .hero-bento>.bento-one {
     grid-area: one;
   }
-  .hero-bento > .bento-two {
+
+  .hero-bento>.bento-two {
     grid-area: two;
   }
 
   @media (min-width: 1024px) {
     .hero-bento {
       gap: 0.75rem;
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.55fr) minmax(
-          0,
-          0.55fr
-        );
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.55fr) minmax(0,
+          0.55fr);
       grid-template-rows: 1.5fr 1fr;
       grid-template-areas:
         "feature say say"
         "feature one two";
     }
 
-    .hero-bento > .bento-feature {
+    .hero-bento>.bento-feature {
       height: 100%;
       min-height: 0;
     }
 
-    .hero-bento > .bento-one,
-    .hero-bento > .bento-two {
+    .hero-bento>.bento-one,
+    .hero-bento>.bento-two {
       aspect-ratio: auto;
       min-height: 0;
     }
@@ -735,6 +739,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+
     .marquee-track,
     .marquee-track-reverse,
     .seal-ring {
@@ -770,6 +775,7 @@
 --------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {
+
   [data-reveal],
   [data-reveal-client] {
     opacity: 0;
@@ -893,6 +899,7 @@ html:has([data-loader]) body {
     opacity: 0;
     transform: scale(1.06);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -944,6 +951,7 @@ html:has([data-loader]) body {
   from {
     transform: translateY(115%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -955,10 +963,12 @@ html:has([data-loader]) body {
    glyph returns to exactly 0 at both ends of the cycle, so whenever the exit
    takes over mid-loop it is never handed a large offset to unwind. */
 @keyframes loader-char-idle {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-0.06em);
   }
@@ -970,6 +980,7 @@ html:has([data-loader]) body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   /* No entrance to wait for - the curtain is composed on arrival and is faded
      straight out, so nothing may start hidden or displaced. */
   .loader-char {
@@ -984,6 +995,7 @@ html:has([data-loader]) body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -993,10 +1005,10 @@ html:has([data-loader]) body {
   }
 }
 
-/* Newsletter signup: the cream ritual card and blue block-printed K frame. */
+/* Newsletter signup: white ritual card with blue block-printed K frame. */
 @layer components {
   .newsletter-popup-panel {
-    max-width: 34rem;
+    max-width: 40rem;
   }
 
   .newsletter-popup-content {
@@ -1008,52 +1020,55 @@ html:has([data-loader]) body {
   @media (min-width: 601px) {
     .newsletter-popup-panel {
       /* Keep the landscape card comfortably inside short/zoomed viewports. */
-      max-width: min(34rem, calc(140svh - 7rem));
+      max-width: min(40rem, calc(140svh - 7rem));
     }
   }
 
   .ritual-card {
     --ritual-blue: #163e79;
-    --ritual-paper: #fffaf1;
+    --ritual-white: #ffffff;
     position: relative;
     container-type: inline-size;
     width: 100%;
     aspect-ratio: 13 / 9;
-    background: var(--ritual-paper);
+    background: var(--ritual-white);
     color: var(--ritual-blue);
-    box-shadow: 0 24px 80px -32px rgb(18 39 67 / 35%);
+    box-shadow: 0 24px 80px -32px rgb(18 39 67 / 40%);
   }
 
+  /* K-tile frame — flush to every edge, no inset gap */
   .ritual-border {
     position: absolute;
-    inset: 8px;
-    background: url("/newsletter/ritual-border.svg") center / 100% 100%
-      no-repeat;
+    inset: 0;
+    background: url("/newsletter/ritual-border.svg") center / 100% 100% no-repeat;
     pointer-events: none;
   }
 
+  /* Inner white area: pushed in by ~1 tile width on each side (≈8% of card) */
   .ritual-content {
     position: relative;
-    padding: 14.9% 21.5% 11.7% 13.5%;
+    padding: 13% 23% 10% 13%;
   }
 
+  /* Bold condensed heading — heavy weight, tight leading */
   .ritual-title {
     margin: 0;
     font-family: var(--font-display);
-    font-size: 7.5cqw;
+    font-size: 8cqw;
     font-weight: 400;
-    line-height: 0.95;
-    letter-spacing: 0.025em;
+    line-height: 0.92;
     text-transform: uppercase;
     color: var(--ritual-blue);
   }
 
+  /* Body copy — lighter navy, slightly larger than before */
   .ritual-copy {
-    margin-top: 3.4cqw;
+    margin-top: 3.2cqw;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 3.55cqw;
-    line-height: 1.14;
-    letter-spacing: -0.035em;
+    font-size: 3.4cqw;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    color: #1e3f6d;
   }
 
   .ritual-copy span {
@@ -1061,50 +1076,69 @@ html:has([data-loader]) body {
     white-space: nowrap;
   }
 
+  /* Concentric-ring seal — repositioned for wider card */
   .ritual-seal {
     position: absolute;
-    top: 13%;
-    right: 8.4%;
-    width: 20%;
+    top: 12%;
+    right: 9%;
+    width: 21%;
     height: auto;
-    color: #263245;
+    color: #1a3a6b;
   }
 
+  /* Seal inner text — properly capitalised */
   .ritual-seal text {
     fill: currentColor;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    letter-spacing: -0.8px;
+    letter-spacing: -0.5px;
   }
 
+  /* Email form block */
   .ritual-form {
-    margin-top: 3.25cqw;
+    margin-top: 3cqw;
   }
 
+  /* Placeholder label overlays the input — fades on focus/fill */
+  .ritual-email-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3.4cqw;
+    line-height: 1.15;
+    color: #9a9a96;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+
+  /* Wavy underline container — relative so the label overlays */
   .ritual-email-line {
-    padding-bottom: 0.8cqw;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='14' viewBox='0 0 48 14'%3E%3Cpath d='M-12 7Q0-3 12 7T36 7T60 7' fill='none' stroke='%23234d72' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
-      left bottom / 4cqw 1.15cqw repeat-x;
+    position: relative;
+    padding-bottom: 0.75cqw;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='14' viewBox='0 0 48 14'%3E%3Cpath d='M-12 7Q0-3 12 7T36 7T60 7' fill='none' stroke='%23234d72' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") left bottom / 4cqw 1.1cqw repeat-x;
+    width: 72%;
   }
 
+  /* Actual <input> — invisible placeholder since we show the label above */
   .ritual-field {
     width: 100%;
     min-width: 0;
     border: 0;
     border-radius: 0;
-    padding: 0 0 0.4cqw;
+    padding: 0 0 0.35cqw;
     background: transparent;
     color: var(--ritual-blue);
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 3.55cqw;
+    font-size: 3.4cqw;
     line-height: 1.15;
     letter-spacing: -0.04em;
   }
 
   .ritual-field::placeholder {
-    color: #81817d;
-    opacity: 1;
+    color: transparent;
   }
 
   .ritual-field:focus-visible {
@@ -1113,29 +1147,36 @@ html:has([data-loader]) body {
     box-shadow: none;
   }
 
+  /* When the field has a value, hide the floating label */
+  .ritual-field:not(:placeholder-shown)+.ritual-email-label,
+  .ritual-field:focus+.ritual-email-label {
+    opacity: 0;
+  }
+
+  /* CTA button — solid dark navy, rounded corners matching image */
   .ritual-submit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    margin-top: 2.35cqw;
-    border: 2px solid #5076a0;
-    border-radius: 3px;
-    padding: 1.8cqw 1.15cqw;
-    background: #184b88;
-    box-shadow: inset 0 0 0 1px rgb(255 250 241 / 22%);
-    color: var(--ritual-paper);
+    margin-top: 2cqw;
+    border: none;
+    border-radius: 4px;
+    padding: 1.6cqw 2.4cqw;
+    background: #163e79;
+    color: #ffffff;
     font-family: var(--font-ui);
-    font-size: 2.45cqw;
-    font-weight: 700;
+    font-size: 2.4cqw;
+    font-weight: 600;
     line-height: 1.1;
+    letter-spacing: 0.01em;
     transition:
       background-color 180ms ease,
       transform 180ms ease;
   }
 
   .ritual-submit:hover:not(:disabled) {
-    background: #12396a;
+    background: #0e2d5c;
     transform: translateY(-2px);
   }
 
@@ -1145,16 +1186,17 @@ html:has([data-loader]) body {
   }
 
   .ritual-error {
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: clamp(12px, 1.4cqw, 16px);
     line-height: 1.4;
   }
 
+  /* Kozy logo — bottom-right, inside the K-tile frame */
   .ritual-logo {
     position: absolute;
-    right: 11.5%;
-    bottom: 15.5%;
-    width: 16%;
+    right: 10%;
+    bottom: 14%;
+    width: 17%;
     text-align: center;
   }
 
@@ -1166,14 +1208,15 @@ html:has([data-loader]) body {
 
   .ritual-logo span {
     display: block;
-    margin-top: -0.5cqw;
+    margin-top: -0.3cqw;
     font-family: Arial, sans-serif;
-    font-size: 0.68cqw;
+    font-size: 0.72cqw;
     font-style: italic;
     font-weight: 600;
     color: #497751;
   }
 
+  /* ── Mobile ─────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
     .ritual-border {
       background-image: url("/newsletter/ritual-border-mobile.svg");
@@ -1185,59 +1228,64 @@ html:has([data-loader]) body {
     }
 
     .ritual-content {
-      padding: 35% 16% 38%;
+      padding: 33% 16% 36%;
     }
 
     .ritual-title {
-      font-size: 8.1cqw;
-      line-height: 1.13;
-      letter-spacing: 0;
+      font-size: 8.5cqw;
+      line-height: 1.0;
     }
 
     .ritual-copy {
-      margin-top: 6cqw;
-      font-size: 5.6cqw;
-      line-height: 1.2;
+      margin-top: 5.5cqw;
+      font-size: 5.4cqw;
+      line-height: 1.25;
     }
 
     .ritual-copy span {
       white-space: normal;
     }
 
+    .ritual-email-label {
+      font-size: 5.4cqw;
+      margin-bottom: 1cqw;
+    }
+
     .ritual-seal {
-      top: 10%;
-      right: 12%;
-      width: 25%;
+      top: 9%;
+      right: 11%;
+      width: 26%;
     }
 
     .ritual-form {
-      margin-top: 7cqw;
+      margin-top: 6cqw;
     }
 
     .ritual-field {
-      font-size: max(16px, 6cqw);
+      font-size: max(16px, 5.4cqw);
       padding-bottom: 5px;
     }
 
     .ritual-email-line {
       padding-bottom: 7px;
       background-size: 26px 9px;
+      width: 90%;
     }
 
     .ritual-submit {
-      margin-top: 6cqw;
-      padding: 12px 10px;
-      font-size: 5.4cqw;
+      margin-top: 5cqw;
+      padding: 12px 14px;
+      font-size: 5.2cqw;
     }
 
     .ritual-logo {
-      right: 12%;
-      bottom: 11%;
-      width: 27%;
+      right: 10%;
+      bottom: 10%;
+      width: 28%;
     }
 
     .ritual-logo span {
-      font-size: 1.5cqw;
+      font-size: 1.6cqw;
     }
   }
 }

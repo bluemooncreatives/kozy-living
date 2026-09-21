@@ -1,8 +1,12 @@
+"use client";
+
 import clsx from "clsx";
 import Link from "next/link";
+import { useRef } from "react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import type { Swatch } from "@/lib/shop/colours";
 import ColourSpiral from "./colour-spiral";
+import { useHorizontalScrollPassthrough } from "@/hooks/use-horizontal-scroll-passthrough";
 
 /**
  * The palette, as a single line of coils.
@@ -45,6 +49,9 @@ export default function ColourRail({
   /** Off on the homepage, where a count is detail the teaser does not need. */
   showCounts?: boolean;
 }) {
+  const railRef = useRef<HTMLUListElement>(null);
+  useHorizontalScrollPassthrough(railRef);
+
   if (!colours.length) return null;
 
   return (
@@ -60,6 +67,7 @@ export default function ColourRail({
     // `data-lenis-prevent` hands the gesture back to the browser - without it
     // the page's smooth scroll swallows the horizontal swipe.
     <ul
+      ref={railRef}
       data-lenis-prevent
       data-lenis-prevent-horizontal
       className="no-scrollbar -mx-[var(--gutter)] flex items-start gap-5 overflow-x-auto px-[var(--gutter)] pb-1 sm:mx-0 sm:gap-6 sm:px-0 lg:gap-8"
@@ -154,3 +162,4 @@ export default function ColourRail({
     </ul>
   );
 }
+
