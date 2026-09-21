@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import clsx from "clsx";
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import Price from "./price";
 import { Badge } from "./ui/section";
 import Plate from "./ui/plate";
@@ -100,6 +100,15 @@ export default function ProductCard({
   const [pending, setPending] = useState(false);
   const [added, setAdded] = useState(false);
   const [result, setResult] = useState<CartActionState>(null);
+  const [motionReady, setMotionReady] = useState(false);
+
+  // Product rails can arrive through a streamed Suspense boundary. Opting in
+  // to the global motion layer from an effect guarantees GSAP never writes an
+  // inline transform before React has hydrated this client component.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMotionReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   const price = product.priceRange.minVariantPrice;
   const isRange = price.amount !== product.priceRange.maxVariantPrice.amount;
@@ -112,12 +121,12 @@ export default function ProductCard({
     variants.find((v) => v.availableForSale) ?? variants[0];
   const isAvailable = Boolean(
     product.availableForSale &&
-    (selectedVariant ? selectedVariant.availableForSale : true)
+      (selectedVariant ? selectedVariant.availableForSale : true),
   );
 
   const step = (by: number) => {
     setQuantity((current) =>
-      Math.min(MAX_LINE_QUANTITY, Math.max(1, current + by))
+      Math.min(MAX_LINE_QUANTITY, Math.max(1, current + by)),
     );
   };
 
@@ -152,7 +161,7 @@ export default function ProductCard({
 
       try {
         const outcome = await runCartMutation(() =>
-          addItem(null, { merchandiseId: selectedVariant.id, quantity })
+          addItem(null, { merchandiseId: selectedVariant.id, quantity }),
         );
         setResult(outcome);
         reportStatus(outcome);
@@ -179,10 +188,14 @@ export default function ProductCard({
 
   return (
     <article
-      {...(reveal ? { "data-reveal": "" } : {})}
+      {...(reveal
+        ? motionReady
+          ? { "data-reveal": "" }
+          : { "data-reveal-client": "" }
+        : {})}
       className={clsx(
         "group flex h-full flex-col rounded-plate transition-all duration-300 hover:border-ink/20 hover:shadow-sm",
-        className
+        className,
       )}
     >
       {/* 1. Photography Plate with Top-Right Curve Notch & Gallery Arrows */}
@@ -196,7 +209,7 @@ export default function ProductCard({
           placeholderText={product.title.split(" ")[0] ?? "kozy"}
           sizes={sizes}
           priority={priority}
-          reveal={reveal}
+          reveal={false}
           arrow
           tone={1}
         >
@@ -224,7 +237,10 @@ export default function ProductCard({
                 aria-label={`Previous image of ${product.title}`}
                 className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-white/50 bg-white/85 text-ink backdrop-blur-sm transition-all duration-200 hover:bg-white active:scale-95"
               >
-                <ChevronLeftIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
+                <ChevronLeftIcon
+                  aria-hidden
+                  className="h-3.5 w-3.5 stroke-[2.5]"
+                />
               </button>
               <button
                 type="button"
@@ -232,7 +248,10 @@ export default function ProductCard({
                 aria-label={`Next image of ${product.title}`}
                 className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-white/50 bg-white/85 text-ink backdrop-blur-sm transition-all duration-200 hover:bg-white active:scale-95"
               >
-                <ChevronRightIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
+                <ChevronRightIcon
+                  aria-hidden
+                  className="h-3.5 w-3.5 stroke-[2.5]"
+                />
               </button>
             </div>
           ) : null}
@@ -257,7 +276,7 @@ export default function ProductCard({
                           "block shrink-0 rounded-full transition-all duration-300 ease-out",
                           isActive
                             ? "h-1.5 w-5 bg-white"
-                            : "h-1.5 w-1.5 bg-white/50 group-hover/dot:bg-white/80"
+                            : "h-1.5 w-1.5 bg-white/50 group-hover/dot:bg-white/80",
                         )}
                       />
                     </button>
@@ -292,15 +311,12 @@ export default function ProductCard({
 
         {/* 3. In-Box Order Counter & Dynamic Add Button */}
         <div className="mt-3 pt-1">
-          <form
-            action={add}
-            className="flex items-center gap-2"
-          >
+          <form action={add} className="flex items-center gap-2">
             {/* Pill Order Add Counter: [- 1 +] */}
             <div
               className={clsx(
                 "flex h-10 shrink-0 items-center justify-between rounded-full border border-ink/20 px-1 bg-card transition-opacity",
-                !isAvailable && "opacity-40 pointer-events-none"
+                !isAvailable && "opacity-40 pointer-events-none",
               )}
             >
               <button
@@ -345,7 +361,7 @@ export default function ProductCard({
                     : pending
                       ? "border-ink/20 bg-ink/5 text-ink/70 cursor-wait"
                       : "border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98]"
-                  : "border-ink/10 bg-transparent text-muted/60 cursor-not-allowed"
+                  : "border-ink/10 bg-transparent text-muted/60 cursor-not-allowed",
               )}
             >
               {pending ? (
@@ -364,7 +380,10 @@ export default function ProductCard({
           </form>
 
           {errorMessage ? (
-            <p role="alert" className="spec-mono mt-2 text-center text-xs text-red-600">
+            <p
+              role="alert"
+              className="spec-mono mt-2 text-center text-xs text-red-600"
+            >
               {errorMessage}
             </p>
           ) : null}

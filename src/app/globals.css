@@ -57,7 +57,8 @@
      A display face at 14px stops being a voice and starts being noise. */
   --font-display: var(--font-franxurter), "Plus Jakarta Sans", "Inter",
     system-ui, sans-serif;
-  --font-ui: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-ui: var(--font-jakarta), "Plus Jakarta Sans", "Inter", system-ui,
+    sans-serif;
   /* Legacy alias - a few files still reference --font-mono. */
   --font-mono: var(--font-ui);
 
@@ -89,9 +90,6 @@
   --wash: rgba(35, 50, 75, 0.05);
 
   --gutter: 0.75rem;
-  --scroll-progress: 0;
-  --scroll-velocity: 0;
-
   /* Announcement strip + nav. A first-paint estimate only: the announcement
      wraps to two lines on a narrow screen, so the value differs by breakpoint.
      `HeaderHeight` replaces it with the measured pixel after hydration, and
@@ -135,6 +133,7 @@
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-ui);
+    overflow-x: clip;
   }
 
   /* -------------------------------------------------------- custom scrollbar
@@ -531,11 +530,15 @@
   .hero-bento {
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: auto auto;
     grid-template-areas:
       "feature feature"
       "one two";
+  }
+
+  .hero-bento > * {
+    min-width: 0;
   }
 
   .hero-bento > .bento-feature {
@@ -573,7 +576,10 @@
   @media (min-width: 1024px) {
     .hero-bento {
       gap: 0.75rem;
-      grid-template-columns: 1.25fr 0.55fr 0.55fr;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.55fr) minmax(
+          0,
+          0.55fr
+        );
       grid-template-rows: 1.5fr 1fr;
       grid-template-areas:
         "feature say say"
@@ -667,12 +673,22 @@
       linear-gradient(#000, #000);
     mask-image: var(--notch-corner), linear-gradient(#000, #000),
       linear-gradient(#000, #000);
-    -webkit-mask-size: var(--notch) var(--notch),
-      calc(100% - var(--notch)) 100%, var(--notch) calc(100% - var(--notch));
-    mask-size: var(--notch) var(--notch), calc(100% - var(--notch)) 100%,
+    -webkit-mask-size:
+      var(--notch) var(--notch),
+      calc(100% - var(--notch)) 100%,
       var(--notch) calc(100% - var(--notch));
-    -webkit-mask-position: right top, left top, right bottom;
-    mask-position: right top, left top, right bottom;
+    mask-size:
+      var(--notch) var(--notch),
+      calc(100% - var(--notch)) 100%,
+      var(--notch) calc(100% - var(--notch));
+    -webkit-mask-position:
+      right top,
+      left top,
+      right bottom;
+    mask-position:
+      right top,
+      left top,
+      right bottom;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
   }
@@ -754,7 +770,8 @@
 --------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  [data-reveal] {
+  [data-reveal],
+  [data-reveal-client] {
     opacity: 0;
     will-change: opacity, transform;
   }
@@ -920,9 +937,7 @@ html:has([data-loader]) body {
   animation:
     loader-char 1.25s cubic-bezier(0.16, 1, 0.3, 1) both,
     loader-char-idle 2.4s ease-in-out infinite;
-  animation-delay:
-    calc(var(--i, 0) * 0.05s),
-    calc(1.25s + var(--i, 0) * 0.075s);
+  animation-delay: calc(var(--i, 0) * 0.05s), calc(1.25s + var(--i, 0) * 0.075s);
 }
 
 @keyframes loader-char {
@@ -1032,17 +1047,36 @@ html:has([data-loader]) body {
        and is invisible cream on cream. */
     inset: calc(var(--perf) * -1);
     pointer-events: none;
-    background-image:
-      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
-      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
-      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%),
-      radial-gradient(circle var(--perf) at 50% 50%, var(--cream) 96%, #0000 100%);
+    background-image: radial-gradient(
+        circle var(--perf) at 50% 50%,
+        var(--cream) 96%,
+        #0000 100%
+      ),
+      radial-gradient(
+        circle var(--perf) at 50% 50%,
+        var(--cream) 96%,
+        #0000 100%
+      ),
+      radial-gradient(
+        circle var(--perf) at 50% 50%,
+        var(--cream) 96%,
+        #0000 100%
+      ),
+      radial-gradient(
+        circle var(--perf) at 50% 50%,
+        var(--cream) 96%,
+        #0000 100%
+      );
     background-size:
       calc(var(--perf) * 2.4) calc(var(--perf) * 2),
       calc(var(--perf) * 2.4) calc(var(--perf) * 2),
       calc(var(--perf) * 2) calc(var(--perf) * 2.4),
       calc(var(--perf) * 2) calc(var(--perf) * 2.4);
-    background-position: 50% 0, 50% 100%, 0 50%, 100% 50%;
+    background-position:
+      50% 0,
+      50% 100%,
+      0 50%,
+      100% 50%;
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   }
 

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import CornerArrow from "./arrow-badge";
 import ClipRotator from "./clip-rotator";
+import ProductImageRotator from "./product-image-rotator";
 
 /**
  * The photographic card. Every image on the site goes through this so the
@@ -16,11 +17,14 @@ export default function Plate({
   src,
   gallery,
   galleryIndex = 0,
+  galleryAuto = false,
+  galleryDelay,
   video,
   videos,
   videoStart = 0,
   videoDelay,
   videoControls,
+  videoPoster,
   alt = "",
   aspect = "4/5",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
@@ -47,6 +51,10 @@ export default function Plate({
   gallery?: readonly { url: string; altText?: string }[] | null;
   /** Which of `gallery` is on top. Anything out of range shows the first. */
   galleryIndex?: number;
+  /** Automatically cross-fade through a product gallery while visible. */
+  galleryAuto?: boolean;
+  /** Staggers automatic galleries when several plates share a section. */
+  galleryDelay?: number;
   /** Silent looping clip. Takes priority over `src` when both are given. */
   video?: string | null;
   /**
@@ -62,6 +70,8 @@ export default function Plate({
   videoDelay?: number;
   /** Draws prev/next buttons over a rotating plate. For large frames only. */
   videoControls?: boolean;
+  /** First-frame fallback while the opening rotating clip is decoding. */
+  videoPoster?: string;
   alt?: string;
   /**
    * Any CSS aspect-ratio value, e.g. "4/5", "16/9", "1/1". Pass `null` when
@@ -98,7 +108,7 @@ export default function Plate({
   // the hover push and the fit stay identical whichever media the plate holds.
   const mediaClass = clsx(
     "absolute inset-0 h-full w-full transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
-    objectFit === "contain" ? "object-contain p-8" : "object-cover"
+    objectFit === "contain" ? "object-contain p-8" : "object-cover",
   );
 
   // Four gradients built off oat milk, deliberately close together - the
@@ -137,10 +147,17 @@ export default function Plate({
           className={clsx(
             "absolute inset-0",
             // Parallax moves the layer, so it needs room to move into.
-            parallax && "-inset-y-[8%] h-[116%]"
+            parallax && "-inset-y-[8%] h-[116%]",
           )}
         >
-          {gallery?.length ? (
+          {gallery?.length && galleryAuto ? (
+            <ProductImageRotator
+              images={gallery}
+              sizes={sizes}
+              delay={galleryDelay}
+              className={mediaClass}
+            />
+          ) : gallery?.length ? (
             gallery.map((image, index) => (
               <Image
                 key={image.url}
@@ -161,7 +178,7 @@ export default function Plate({
                     ((galleryIndex % gallery.length) + gallery.length) %
                       gallery.length
                     ? "opacity-100"
-                    : "opacity-0"
+                    : "opacity-0",
                 )}
               />
             ))
@@ -171,6 +188,7 @@ export default function Plate({
               start={videoStart}
               delay={videoDelay}
               controls={videoControls}
+              poster={videoPoster}
               className={mediaClass}
             />
           ) : video ? (
@@ -229,7 +247,7 @@ export default function Plate({
                   "serif text-display-sm",
                   src || video || videos?.length || gallery?.length
                     ? "text-paper"
-                    : "text-ink"
+                    : "text-ink",
                 )}
               >
                 {title}
@@ -244,7 +262,7 @@ export default function Plate({
               "absolute bottom-4 right-4 z-10 max-w-[16rem] text-right text-spec",
               src || video || videos?.length || gallery?.length
                 ? "text-paper/85"
-                : "text-ink/60"
+                : "text-ink/60",
             )}
           >
             {caption}

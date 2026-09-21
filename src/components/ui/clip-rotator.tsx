@@ -14,16 +14,13 @@ const HOLD = 11;
 const BLEND = 1.6;
 /** Give up waiting for a clip to buffer after this and cut to it anyway. */
 const BUFFER_LIMIT = 2500;
-
-
+/** Begin fetching the next clip this long before its transition. */
+const WARM_AHEAD = 4;
 
 /**
- * A plate's film loop. There is no per-plate playlist: the plate paints the
+ * The feature plate's film loop. The plate paints the
  * film at `start` in the shared `films` list, then takes whatever the shared
- * queue in `@/lib/hero-clips` hands it next. With all three plates drawing
- * from the one list, and the queue carrying on from wherever the last plate
- * stopped, the reel runs end to end across the bento instead of each box
- * looping its own set.
+ * queue in `@/lib/hero-clips` hands it next, so the reel runs end to end.
  *
  * ONE INVARIANT MAKES A BLANK EDGE IMPOSSIBLE, and every decision below
  * follows from it: at every frame of the transition, every pixel of the plate
@@ -52,14 +49,8 @@ const BUFFER_LIMIT = 2500;
  * is instant - the previous clip is still loaded in the other layer, so the
  * source is left alone when it already holds what was asked for.
  *
- * Collisions are handled at the desk in `@/lib/hero-clips`: a film is checked
- * out before it is loaded and only checked back in once it has left the
- * screen, so the three plates can never land on the same film - not even
- * mid-blend, when both clips are on screen.
- *
- * `delay` staggers the plates against each other. All three share one hold
- * duration, so offsetting the start is enough to keep their transitions from
- * ever firing on the same frame.
+ * The next file is warmed before the hold ends, and all playback/timers stop
+ * when the feature is outside the viewport or the tab is hidden.
  *
  * `prefers-reduced-motion: reduce` opts out entirely and simply holds the
  * starting film - no rotation, no blend, and no controls to start one. Every
@@ -71,6 +62,7 @@ export default function ClipRotator({
   start,
   delay = 0,
   controls,
+  poster,
   className,
 }: {
   /** The shared list every plate draws from. */
@@ -80,6 +72,7 @@ export default function ClipRotator({
   delay?: number;
   /** Draws the prev/next buttons. For the large frames only. */
   controls?: boolean;
+  poster?: string;
   className?: string;
 }) {
   // Server and client both render this one, before any queue exists.
@@ -95,11 +88,13 @@ export default function ClipRotator({
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
       const layers = layerRefs.current;
       const videos = videoRefs.current;
       if (!layers[0] || !layers[1]) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        videos.forEach((video) => video?.pause());
+        return;
+      }
 
       // The film already painted is claimed here rather than at the queue,
       // so the other plates route around it from their very first turn.
@@ -116,41 +111,66 @@ export default function ClipRotator({
       const history: string[] = [first];
 
       let timer: ReturnType<typeof setTimeout> | undefined;
+      let warmTimer: ReturnType<typeof setTimeout> | undefined;
       let timeline: gsap.core.Timeline | undefined;
       let detach: (() => void) | undefined;
       let busy = false;
       let stopped = false;
+      let inView = true;
+      let pageVisible = !document.hidden;
+      let staged: string | null = null;
+      let claimed: string | null = null;
 
       const current = () => history[history.length - 1]!;
 
+      const warmNext = () => {
+        if (stopped || busy || staged || !inView || !pageVisible) return;
+        const incomingVideo = videos[active === 0 ? 1 : 0];
+        if (!incomingVideo) return;
+
+        staged = nextFilm(films, current());
+        if (incomingVideo.src !== staged) {
+          incomingVideo.preload = "auto";
+          incomingVideo.src = staged;
+          incomingVideo.load();
+        }
+      };
+
       const schedule = (seconds: number) => {
         clearTimeout(timer);
+        clearTimeout(warmTimer);
+        if (stopped || busy || !inView || !pageVisible) return;
+        warmTimer = setTimeout(
+          warmNext,
+          Math.max(0, seconds - WARM_AHEAD) * 1000,
+        );
         timer = setTimeout(() => step(false), seconds * 1000);
       };
 
       /** Resolves once the layer has a frame to show, or once we give up. */
       const buffer = (video: HTMLVideoElement) =>
-        new Promise<void>((resolve) => {
+        new Promise<boolean>((resolve) => {
           let settled = false;
-          const done = () => {
+          const done = (ready: boolean) => {
             if (settled) return;
             settled = true;
             clearTimeout(guard);
-            video.removeEventListener("canplay", done);
+            video.removeEventListener("canplay", onReady);
             detach = undefined;
-            resolve();
+            resolve(ready);
           };
 
-          const guard = setTimeout(done, BUFFER_LIMIT);
-          video.addEventListener("canplay", done);
+          const onReady = () => done(true);
+          const guard = setTimeout(() => done(false), BUFFER_LIMIT);
+          video.addEventListener("canplay", onReady);
           // Unmounting mid-buffer must not leave the listener or the guard
           // behind - the promise is simply abandoned along with them.
           detach = () => {
             clearTimeout(guard);
-            video.removeEventListener("canplay", done);
+            video.removeEventListener("canplay", onReady);
           };
 
-          if (video.readyState >= 3) done();
+          if (video.readyState >= 3) done(true);
         });
 
       /**
@@ -176,12 +196,22 @@ export default function ClipRotator({
         const outgoingLayer = layers[active];
         if (!incomingLayer || !incomingVideo || !outgoingLayer) return;
 
+        clearTimeout(timer);
+        clearTimeout(warmTimer);
+
+        // A manual previous action invalidates the forward clip we warmed.
+        if (back && staged) {
+          releaseFilm(staged);
+          staged = null;
+        }
+
         const stepping = back ? backPick() : null;
-        const incoming = stepping ?? nextFilm(films, current());
+        const incoming = stepping ?? staged ?? nextFilm(films, current());
         const wentBack = back && stepping !== null;
+        staged = null;
+        claimed = incoming;
 
         busy = true;
-        clearTimeout(timer);
 
         // Re-assigning the same source would tear down a clip that is already
         // buffered and playing - which is precisely the case when stepping
@@ -190,15 +220,25 @@ export default function ClipRotator({
           incomingVideo.src = incoming;
           incomingVideo.load();
         }
-        await buffer(incomingVideo);
+        const ready = await buffer(incomingVideo);
         if (stopped) {
           releaseFilm(incoming);
+          claimed = null;
+          return;
+        }
+        if (!ready) {
+          // Keep the fully painted outgoing clip. A slow or malformed remote
+          // file is skipped instead of being allowed to create a blank frame.
+          releaseFilm(incoming);
+          claimed = null;
+          busy = false;
+          schedule(1.5);
           return;
         }
 
-        // A refused autoplay (low power mode, data saver) is not worth
-        // surfacing: the clip holds its first frame and the blend still runs.
-        void incomingVideo.play().catch(() => {});
+        // The play promise resolves only once playback has actually started.
+        // Waiting for it prevents the dissolve from outrunning the decoder.
+        await incomingVideo.play().catch(() => {});
 
         const outgoing = current();
 
@@ -217,6 +257,7 @@ export default function ClipRotator({
                 history.pop();
               }
               history.push(incoming);
+              claimed = null;
               // Deep history is never replayed - two entries back is as far
               // as two layers can go - so it is trimmed rather than grown.
               if (history.length > 4) history.shift();
@@ -241,7 +282,7 @@ export default function ClipRotator({
           .to(
             incomingLayer,
             { opacity: 1, duration: BLEND, ease: "power2.inOut" },
-            0
+            0,
           )
           // The only movement in the frame. It runs on the scaler, not on the
           // <video>: the clip carries the plate's `transition-transform`
@@ -251,9 +292,9 @@ export default function ClipRotator({
           // still settling as it lands.
           .fromTo(
             scalerRefs.current[nextIndex],
-            { scale: 1.05 },
+            { scale: 1.025 },
             { scale: 1, duration: BLEND * 1.3, ease: "power2.inOut" },
-            0
+            0,
           )
           // Safe now, and only now: the incoming clip is fully opaque over
           // it, so dropping the outgoing one in a single step is invisible.
@@ -261,18 +302,54 @@ export default function ClipRotator({
       };
 
       stepRef.current = (back: boolean) => step(back);
-      schedule(HOLD + delay);
+
+      const syncPlayback = () => {
+        pageVisible = !document.hidden;
+        const shouldRun = inView && pageVisible;
+
+        if (!shouldRun) {
+          clearTimeout(timer);
+          clearTimeout(warmTimer);
+          timeline?.pause();
+          videos.forEach((video) => video?.pause());
+          return;
+        }
+
+        timeline?.resume();
+        if (busy) {
+          videos.forEach((video) => void video?.play().catch(() => {}));
+        } else {
+          void videos[active]?.play().catch(() => {});
+          schedule(HOLD + delay);
+        }
+      };
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          inView = Boolean(entry?.isIntersecting);
+          syncPlayback();
+        },
+        { rootMargin: "160px" },
+      );
+      if (rootRef.current) observer.observe(rootRef.current);
+      document.addEventListener("visibilitychange", syncPlayback);
+      syncPlayback();
 
       return () => {
         stopped = true;
         stepRef.current = null;
         clearTimeout(timer);
+        clearTimeout(warmTimer);
         detach?.();
         timeline?.kill();
+        observer.disconnect();
+        document.removeEventListener("visibilitychange", syncPlayback);
         releaseFilm(current());
+        releaseFilm(staged);
+        releaseFilm(claimed);
       };
     },
-    { scope: rootRef, dependencies: [first, films, delay] }
+    { scope: rootRef, dependencies: [first, films, delay] },
   );
 
   return (
@@ -300,12 +377,13 @@ export default function ClipRotator({
                 videoRefs.current[index] = el;
               }}
               src={index === 0 ? first : undefined}
+              poster={index === 0 ? poster : undefined}
               aria-hidden
               autoPlay={index === 0}
               muted
               loop
               playsInline
-              preload={index === 0 ? "auto" : "none"}
+              preload={index === 0 ? "auto" : "metadata"}
               className={className}
             />
           </div>
@@ -313,7 +391,7 @@ export default function ClipRotator({
       ))}
 
       {controls ? (
-        <div className="absolute right-3 top-3 z-30 flex items-center gap-2 md:right-5 md:top-5">
+        <div className="absolute right-3 top-3 z-30 flex items-center gap-2 motion-reduce:hidden md:right-5 md:top-5">
           {[
             { back: true, label: "Previous clip", Icon: ChevronLeftIcon },
             { back: false, label: "Next clip", Icon: ChevronRightIcon },

@@ -30,6 +30,24 @@ const franxurter = localFont({
   fallback: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
 });
 
+const jakarta = localFont({
+  src: [
+    {
+      path: "../../public/font/PlusJakartaSans-Variable.ttf",
+      weight: "200 800",
+      style: "normal",
+    },
+    {
+      path: "../../public/font/PlusJakartaSans-Italic-Variable.ttf",
+      weight: "200 800",
+      style: "italic",
+    },
+  ],
+  variable: "--font-jakarta",
+  display: "swap",
+  fallback: ["Inter", "system-ui", "sans-serif"],
+});
+
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -91,7 +109,7 @@ export default async function RootLayout({
     return undefined;
   });
   return (
-    <html lang="en" className={franxurter.variable}>
+    <html lang="en" className={`${franxurter.variable} ${jakarta.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -106,7 +124,7 @@ export default async function RootLayout({
             hydration mismatch. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`,
+            __html: `(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal],[data-reveal-client]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`,
           }}
         />
         {/* Sync mobile viewport state into a cookie so server components can
@@ -115,20 +133,6 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `(function(){try{function check(){var m=window.innerWidth<768?'1':'0';var match=document.cookie.match(/(?:^|; )kozy_is_mobile=([^;]*)/);var current=match?match[1]:null;if(current!==m){document.cookie='kozy_is_mobile='+m+'; path=/; max-age=31536000; SameSite=Lax';var isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);if(current!==null||(m==='1'&&!isMobileUA)){window.location.reload();}}}check();window.addEventListener('resize',function(){clearTimeout(window.__kzResize);window.__kzResize=setTimeout(check,250);});}catch(e){}})()`,
           }}
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        {/* Plus Jakarta Sans is the UI face: navigation, labels, body copy and
-            every heading below display-lg. The display face is Franxurter,
-            self-hosted via next/font in this file. 800 is no longer requested -
-            nothing uses it since the wordmark moved to the display face. */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
-          rel="stylesheet"
         />
       </head>
       <body className="flex min-h-screen flex-col bg-paper text-ink antialiased">

@@ -102,7 +102,9 @@ export const hero = {
  * nothing free to hand out.
  */
 export const heroFilms = [
-  "https://cdn.shopify.com/videos/c/o/v/e551ca2e50364d1cbf8f66838604dc10.mp4",
+  // Local H.264/fast-start rendition of the 46.3 MB HEVC Shopify original.
+  // At 6.3 MB it starts reliably across browsers and costs far less to decode.
+  "/media/hero-main.mp4",
   "https://cdn.shopify.com/videos/c/o/v/3329bb6694284f05be3d3ff8a0bb6f22.mp4",
   "https://cdn.shopify.com/videos/c/o/v/65fa358ea2ec488f9c62e7f86d758f3c.mp4",
   "https://cdn.shopify.com/videos/c/o/v/e78b76a026054863975d667b63071a21.mp4",
@@ -578,7 +580,8 @@ export const sustainability = {
 export const collective = {
   eyebrow: "The collective",
   title: "Designed in-house. Made by hand.",
-  strapline: "Rooted in Indian kraft, expressed through a modern design language",
+  strapline:
+    "Rooted in Indian kraft, expressed through a modern design language",
   members: [
     {
       name: site.founder,

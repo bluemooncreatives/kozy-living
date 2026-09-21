@@ -2,7 +2,6 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import type Lenis from "lenis";
 import type { LenisOptions } from "lenis";
 import { ReactLenis, useLenis, type LenisRef } from "lenis/react";
 import { usePathname } from "next/navigation";
@@ -39,17 +38,10 @@ const options: LenisOptions = {
 function ScrollSynchronizer() {
   const pathname = usePathname();
 
-  const onScroll = useCallback((lenis: Lenis) => {
-    ScrollTrigger.update();
-
-    const root = document.documentElement;
-    root.style.setProperty("--scroll-progress", lenis.progress.toFixed(4));
-    root.style.setProperty("--scroll-velocity", lenis.velocity.toFixed(3));
-
-    if (lenis.direction) {
-      root.dataset.scrollDirection = lenis.direction > 0 ? "down" : "up";
-    }
-  }, []);
+  // ScrollTrigger is the only consumer of the scroll signal. Writing unused
+  // CSS variables and data attributes here forced a style invalidation on
+  // every wheel frame, including while the hero video was decoding.
+  const onScroll = useCallback(() => ScrollTrigger.update(), []);
 
   const lenis = useLenis(onScroll, [onScroll], -100);
 

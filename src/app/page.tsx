@@ -110,7 +110,7 @@ export default function Home() {
 /** Collection first, all products as the fallback for an unconfigured store. */
 async function productsFrom(
   collection: string,
-  fallbackSort?: { sortKey: string; reverse?: boolean }
+  fallbackSort?: { sortKey: string; reverse?: boolean },
 ): Promise<Product[]> {
   try {
     const fromCollection = await getCollectionProducts({ collection });
@@ -140,7 +140,7 @@ async function productsFrom(
 function ringWord(
   line: string,
   phrase: string,
-  tone?: "deep" | "sage" | "white"
+  tone?: "deep" | "sage" | "white",
 ) {
   const at = line.indexOf(phrase);
   if (at === -1) return line;
@@ -167,11 +167,13 @@ function Hero() {
           videos={heroFilms}
           videoStart={0}
           videoControls
+          videoPoster="/media/hero-main-poster.jpg"
           tone={2}
           placeholderText="kozy"
           className="bento-feature group h-full w-full"
           sizes="(min-width: 1024px) 55vw, 100vw"
           alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
+          reveal={false}
         >
           <div className="glass absolute left-3 top-3 z-20 max-w-[16rem] py-2.5 md:left-5 md:top-5">
             <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
@@ -233,31 +235,9 @@ function Hero() {
         </div>
 
         {/* ---------------------------------------------------- two closers */}
-        {hero.tiles.map((tile, index) => (
-          <Plate
-            key={tile.tag}
-            aspect={null}
-            videos={heroFilms}
-            /* The two tiles open on the films after the feature plate's, so
-               the bento starts on three different clips before the shared
-               queue takes over. */
-            videoStart={index + 1}
-            /* One hold length, three start offsets: the plates then take
-               turns instead of all blending on the same frame. */
-            videoDelay={index === 0 ? 3.6 : 7.2}
-            tone={index === 0 ? 0 : 3}
-            tag={tile.tag}
-            placeholderText={index === 0 ? "kraft" : "rest"}
-            arrow
-            arrowTone={index === 0 ? "card" : "sage"}
-            className={clsx(
-              "group h-full w-full",
-              index === 0 ? "bento-one" : "bento-two"
-            )}
-            sizes="(min-width: 1024px) 22vw, 50vw"
-            alt=""
-          />
-        ))}
+        <Suspense fallback={<HeroTileFallbacks />}>
+          <HeroProductTiles />
+        </Suspense>
       </div>
 
       {/* The wordmark band. It used to live inside the frame; the bento has no
@@ -279,6 +259,86 @@ function Hero() {
       </h1>
     </section>
   );
+}
+
+/** One lead image per product first, then alternate shots, with no duplicates. */
+function collectionGallery(products: Product[], limit = 8) {
+  const ordered = [
+    ...products.map((product) => product.featuredImage),
+    ...products.flatMap((product) => product.images),
+  ];
+  const seen = new Set<string>();
+
+  return ordered
+    .filter((image) => {
+      if (!image?.url || seen.has(image.url)) return false;
+      seen.add(image.url);
+      return true;
+    })
+    .slice(0, limit);
+}
+
+async function HeroProductTiles() {
+  const collections = await Promise.all(
+    hero.tiles.map((tile) =>
+      getCollectionProducts({ collection: tile.handle }).catch(() => []),
+    ),
+  );
+  const needsFallback = collections.some((products) => !products.length);
+  const fallback = needsFallback
+    ? await getProducts({ sortKey: "BEST_SELLING" }).catch(() => [])
+    : [];
+
+  return hero.tiles.map((tile, index) => {
+    const products = collections[index]?.length
+      ? collections[index]!
+      : fallback;
+    const gallery = collectionGallery(products);
+
+    return (
+      <Link
+        key={tile.tag}
+        href={collections[index]?.length ? `/search/${tile.handle}` : "/search"}
+        className={clsx(index === 0 ? "bento-one" : "bento-two")}
+        prefetch={false}
+      >
+        <Plate
+          aspect={null}
+          gallery={gallery}
+          galleryAuto
+          galleryDelay={index * 2100}
+          tone={index === 0 ? 0 : 3}
+          tag={tile.tag}
+          placeholderText={index === 0 ? "kraft" : "rest"}
+          arrow
+          arrowTone={index === 0 ? "card" : "sage"}
+          className="group h-full w-full"
+          sizes="(min-width: 1024px) 22vw, 50vw"
+          alt=""
+          reveal={false}
+        />
+      </Link>
+    );
+  });
+}
+
+function HeroTileFallbacks() {
+  return hero.tiles.map((tile, index) => (
+    <Plate
+      key={tile.tag}
+      aspect={null}
+      tone={index === 0 ? 0 : 3}
+      tag={tile.tag}
+      placeholderText={index === 0 ? "kraft" : "rest"}
+      arrow
+      arrowTone={index === 0 ? "card" : "sage"}
+      className={clsx(
+        "group h-full w-full",
+        index === 0 ? "bento-one" : "bento-two",
+      )}
+      reveal={false}
+    />
+  ));
 }
 
 /* ------------------------------------------------- statement + lookbook */
@@ -303,7 +363,9 @@ async function BoldStatement() {
      handle is resolved against Shopify before it becomes a link and a plate
      whose collection is not there opens the full catalogue instead. */
   const live = new Set(
-    (await getCollections().catch(() => [])).map((collection) => collection.handle)
+    (await getCollections().catch(() => [])).map(
+      (collection) => collection.handle,
+    ),
   );
 
   /** Indexed by each plate's `lift` step. 0 is the top of the row. */
@@ -322,7 +384,7 @@ async function BoldStatement() {
           id="statement"
           className={clsx(
             displayFace,
-            "text-display-xl lg:col-span-7 lg:col-start-3"
+            "text-display-xl lg:col-span-7 lg:col-start-3",
           )}
         >
           {boldStatement.title.map((line) => (
@@ -349,7 +411,9 @@ async function BoldStatement() {
           {lookbook.map((item, index) => (
             <li key={item.title} className={clsx(drop[item.lift])}>
               <Link
-                href={live.has(item.handle) ? `/search/${item.handle}` : "/search"}
+                href={
+                  live.has(item.handle) ? `/search/${item.handle}` : "/search"
+                }
                 className="group block"
                 prefetch={false}
               >
@@ -625,8 +689,9 @@ function RestTicker() {
   return (
     <section aria-label="Moments of rest" className="rule-y py-5 md:py-7">
       <Marquee
-        phrases={Array.from({ length: restTicker.repeat }, () =>
-          restTicker.label
+        phrases={Array.from(
+          { length: restTicker.repeat },
+          () => restTicker.label,
         )}
         size="display"
         separator="✳"

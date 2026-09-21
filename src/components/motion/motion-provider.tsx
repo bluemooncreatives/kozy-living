@@ -44,7 +44,7 @@ export default function MotionProvider() {
   useGSAP(
     () => {
       const reduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
+        "(prefers-reduced-motion: reduce)",
       ).matches;
 
       // Tell the head script's watchdog that motion is alive, whether or not
@@ -77,9 +77,9 @@ export default function MotionProvider() {
 
       const registerReveals = () => {
         const solo = claim(
-          gsap.utils.toArray<HTMLElement>(
-            "[data-reveal]:not([data-reveal-group])"
-          )
+          gsap.utils
+            .toArray<HTMLElement>("[data-reveal]:not([data-reveal-group])")
+            .filter((node) => !node.closest("[data-reveal-group]")),
         );
 
         // Order matters: ScrollTrigger.batch fires onEnter for anything
@@ -106,106 +106,116 @@ export default function MotionProvider() {
 
         // Grouped reveals stagger their children, which is what a grid or a
         // rail wants - a container fading as one block reads as a slab.
-        claim(gsap.utils.toArray<HTMLElement>("[data-reveal-group]")).forEach(
-          (group) => {
-            const children = Array.from(group.children);
-            if (!children.length) return;
-
-            gsap.set(group, { opacity: 1 });
-            gsap.set(children, { opacity: 0, y: 26 });
-
-            ScrollTrigger.create({
-              trigger: group,
-              start: "top 88%",
-              once: true,
-              onEnter: () =>
-                gsap.to(children, {
-                  opacity: 1,
-                  y: 0,
-                  duration: 0.8,
-                  ease,
-                  stagger: 0.09,
-                  onComplete: () => settle([group, ...children]),
-                }),
-            });
-          }
+        const groups = claim(
+          gsap.utils.toArray<HTMLElement>("[data-reveal-group]"),
         );
+        groups.forEach((group) => {
+          const children = Array.from(group.children);
+          if (!children.length) return;
+
+          gsap.set(group, { opacity: 1 });
+          gsap.set(children, { opacity: 0, y: 26 });
+
+          ScrollTrigger.create({
+            trigger: group,
+            start: "top 88%",
+            once: true,
+            onEnter: () =>
+              gsap.to(children, {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease,
+                stagger: 0.09,
+                onComplete: () => settle([group, ...children]),
+              }),
+          });
+        });
+
+        return solo.length + groups.length;
       };
 
       /* ---------------------------------------------------------- parallax */
 
-      const registerParallax = () =>
-        claim(gsap.utils.toArray<HTMLElement>("[data-parallax]")).forEach(
-          (el) => {
-            const distance = Number(el.dataset.parallax) || 12;
-
-            gsap.fromTo(
-              el,
-              { yPercent: -distance / 2 },
-              {
-                yPercent: distance / 2,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: el,
-                  start: "top bottom",
-                  end: "bottom top",
-                  scrub: true,
-                },
-              }
-            );
-          }
+      const registerParallax = () => {
+        const targets = claim(
+          gsap.utils.toArray<HTMLElement>("[data-parallax]"),
         );
+        targets.forEach((el) => {
+          const distance = Number(el.dataset.parallax) || 12;
+
+          gsap.fromTo(
+            el,
+            { yPercent: -distance / 2 },
+            {
+              yPercent: distance / 2,
+              ease: "none",
+              scrollTrigger: {
+                trigger: el,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
+            },
+          );
+        });
+        return targets.length;
+      };
 
       /* ---------------------------------------------------------- magnetic */
 
       const registerMagnetic = () => {
-        if (!fine.matches) return;
+        if (!fine.matches) return 0;
 
-        claim(gsap.utils.toArray<HTMLElement>("[data-magnetic]")).forEach(
-          (el) => {
-            const pull = Number(el.dataset.magnetic) || 0.25;
-            const moveX = gsap.quickTo(el, "x", {
-              duration: 0.5,
-              ease: "power3.out",
-            });
-            const moveY = gsap.quickTo(el, "y", {
-              duration: 0.5,
-              ease: "power3.out",
-            });
-
-            const onMove = (event: PointerEvent) => {
-              const box = el.getBoundingClientRect();
-              moveX((event.clientX - (box.left + box.width / 2)) * pull);
-              moveY((event.clientY - (box.top + box.height / 2)) * pull);
-            };
-
-            const onLeave = () => {
-              moveX(0);
-              moveY(0);
-            };
-
-            el.addEventListener("pointermove", onMove);
-            el.addEventListener("pointerleave", onLeave);
-            cleanups.push(() => {
-              el.removeEventListener("pointermove", onMove);
-              el.removeEventListener("pointerleave", onLeave);
-            });
-          }
+        const targets = claim(
+          gsap.utils.toArray<HTMLElement>("[data-magnetic]"),
         );
+        targets.forEach((el) => {
+          const pull = Number(el.dataset.magnetic) || 0.25;
+          const moveX = gsap.quickTo(el, "x", {
+            duration: 0.5,
+            ease: "power3.out",
+          });
+          const moveY = gsap.quickTo(el, "y", {
+            duration: 0.5,
+            ease: "power3.out",
+          });
+
+          const onMove = (event: PointerEvent) => {
+            const box = el.getBoundingClientRect();
+            moveX((event.clientX - (box.left + box.width / 2)) * pull);
+            moveY((event.clientY - (box.top + box.height / 2)) * pull);
+          };
+
+          const onLeave = () => {
+            moveX(0);
+            moveY(0);
+          };
+
+          el.addEventListener("pointermove", onMove);
+          el.addEventListener("pointerleave", onLeave);
+          cleanups.push(() => {
+            el.removeEventListener("pointermove", onMove);
+            el.removeEventListener("pointerleave", onLeave);
+          });
+        });
+        return targets.length;
       };
 
       /* ------------------------------------------------------------ timing */
 
       const scan = () => {
-        registerReveals();
-        registerParallax();
-        registerMagnetic();
-        ScrollTrigger.refresh();
+        const added =
+          registerReveals() + registerParallax() + registerMagnetic();
+        // A Suspense commit can cause several mutations. Only rebuild trigger
+        // measurements when that commit actually introduced motion targets.
+        if (added) ScrollTrigger.refresh(true);
       };
 
       let pending = false;
       let outer = 0;
       let inner = 0;
+      let mutationFrame = 0;
 
       // Two frames past mount puts this after React's hydration commit, so
       // nothing here mutates a node the reconciler has not reached yet.
@@ -255,24 +265,31 @@ export default function MotionProvider() {
       const observer = new MutationObserver(() => {
         if (pending) return;
         pending = true;
-        requestAnimationFrame(() => {
+        mutationFrame = requestAnimationFrame(() => {
           pending = false;
           scan();
         });
       });
 
-      observer.observe(document.body, { childList: true, subtree: true });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["data-reveal"],
+      });
 
       return () => {
         cancelAnimationFrame(outer);
         cancelAnimationFrame(inner);
+        cancelAnimationFrame(mutationFrame);
         clearTimeout(bail);
-        if (onCurtain) window.removeEventListener("kozy:loader-done", onCurtain);
+        if (onCurtain)
+          window.removeEventListener("kozy:loader-done", onCurtain);
         observer.disconnect();
         cleanups.forEach((off) => off());
       };
     },
-    { dependencies: [pathname], revertOnUpdate: true }
+    { dependencies: [pathname], revertOnUpdate: true },
   );
 
   return null;
