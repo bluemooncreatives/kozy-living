@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useState } from "react";
 import NewsletterPostcard from "./newsletter-postcard";
 
 /**
@@ -65,7 +65,7 @@ function writeRecord(state: Record_["state"]) {
   try {
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ state, at: Date.now() } satisfies Record_)
+      JSON.stringify({ state, at: Date.now() } satisfies Record_),
     );
   } catch {
     // Nothing to do. The visitor sees the card again next session, which is a
@@ -82,10 +82,11 @@ function suppressed(): boolean {
 
 export default function NewsletterPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const headingId = useId();
   const pathname = usePathname();
 
   const quiet = QUIET_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
   useEffect(() => {
@@ -140,7 +141,11 @@ export default function NewsletterPopup() {
 
   return (
     <Transition show={isOpen}>
-      <Dialog onClose={dismiss} className="relative z-[1100]">
+      <Dialog
+        onClose={dismiss}
+        aria-labelledby={headingId}
+        className="relative z-[1100]"
+      >
         <TransitionChild
           as={Fragment}
           enter="transition-opacity ease-editorial duration-500"
@@ -150,10 +155,13 @@ export default function NewsletterPopup() {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm" aria-hidden />
+          <div
+            className="fixed inset-0 bg-ink/40 backdrop-blur-sm"
+            aria-hidden
+          />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto p-4">
+        <div className="fixed inset-0 overflow-y-auto p-6">
           <div className="flex min-h-full items-center justify-center">
             <TransitionChild
               as={Fragment}
@@ -164,8 +172,16 @@ export default function NewsletterPopup() {
               leaveFrom="opacity-100 translate-y-0 scale-100"
               leaveTo="opacity-0 translate-y-4 scale-[0.98]"
             >
-              <DialogPanel className="relative w-full max-w-[34rem]">
-                <NewsletterPostcard onSubscribed={subscribed} />
+              <DialogPanel
+                className="newsletter-popup-panel relative w-full"
+                data-lenis-prevent
+              >
+                <div className="newsletter-popup-content">
+                  <NewsletterPostcard
+                    onSubscribed={subscribed}
+                    headingId={headingId}
+                  />
+                </div>
 
                 {/* Parked on the envelope's corner rather than inside the card:
                     the card is the note, and a close control printed on a note
@@ -174,7 +190,7 @@ export default function NewsletterPopup() {
                   type="button"
                   onClick={dismiss}
                   aria-label="Close"
-                  className="absolute -right-2 -top-2 grid h-9 w-9 place-items-center rounded-chip bg-cream text-ink shadow-chip transition-transform hover:scale-105"
+                  className="absolute -right-2 -top-2 grid h-11 w-11 place-items-center rounded-full bg-[#fffaf1] text-[#163e79] shadow-chip transition-transform hover:scale-105 motion-reduce:transition-none"
                 >
                   <XMarkIcon className="h-4 w-4" />
                 </button>

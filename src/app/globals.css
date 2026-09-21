@@ -993,143 +993,251 @@ html:has([data-loader]) body {
   }
 }
 
-/* ---------------------------------------------------------------------------
-   The newsletter postcard.
-
-   One drawing made of four pieces: a striped airmail border, a cream card sat
-   slightly askew inside it, a perforated stamp, and the ruled address block
-   the email address is written on.
-
-   These live here rather than as Tailwind utilities because each one needs a
-   gradient or a mask that arbitrary-value classes would stringify badly, and
-   because the two rotations have to be readable together to be tuned at all.
---------------------------------------------------------------------------- */
-
+/* Newsletter signup: the cream ritual card and blue block-printed K frame. */
 @layer components {
-  /* The envelope. Padding is the border band; the stripes show through it
-     around the card that sits on top. 45deg, sage on cream, at the weight a
-     real airmail edge is printed. */
-  .postcard-frame {
-    padding: clamp(0.5rem, 2.2vw, 0.875rem);
-    background-image: repeating-linear-gradient(
-      45deg,
-      var(--sage) 0 0.5rem,
-      var(--cream) 0.5rem 1rem
-    );
-    box-shadow: 0 24px 60px -28px rgba(35, 50, 75, 0.45);
-    transform: rotate(-1.1deg);
+  .newsletter-popup-panel {
+    max-width: 34rem;
   }
 
-  /* The card, counter-rotated a touch so the border band is visibly uneven -
-     a card slipped into an envelope, not a card centred in a frame. The
-     inset outline is the printed hairline on a real postcard. */
-  .postcard-card {
-    background: var(--cream);
-    outline: 1px solid rgba(35, 50, 75, 0.55);
-    outline-offset: -0.4375rem;
-    transform: rotate(0.55deg);
+  .newsletter-popup-content {
+    max-height: calc(100dvh - 3rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
-  /* The stamp. Perforations are punched by tiling half-circles of the card's
-     own cream around the edge - a mask would be cleaner in theory, but the
-     backdrop here is always known, and this renders identically everywhere. */
-  .postcard-stamp {
-    --perf: 4px;
+  @media (min-width: 601px) {
+    .newsletter-popup-panel {
+      /* Keep the landscape card comfortably inside short/zoomed viewports. */
+      max-width: min(34rem, calc(140svh - 7rem));
+    }
+  }
+
+  .ritual-card {
+    --ritual-blue: #163e79;
+    --ritual-paper: #fffaf1;
     position: relative;
-    background: var(--sage-wash);
+    container-type: inline-size;
+    width: 100%;
+    aspect-ratio: 13 / 9;
+    background: var(--ritual-paper);
+    color: var(--ritual-blue);
+    box-shadow: 0 24px 80px -32px rgb(18 39 67 / 35%);
   }
 
-  .postcard-stamp::before {
-    content: "";
+  .ritual-border {
     position: absolute;
-    /* The punch sits centred ON the edge, not outside it: half of every circle
-       lands on the stamp and cuts the notch, the other half lands on the card
-       and is invisible cream on cream. */
-    inset: calc(var(--perf) * -1);
+    inset: 8px;
+    background: url("/newsletter/ritual-border.svg") center / 100% 100%
+      no-repeat;
     pointer-events: none;
-    background-image: radial-gradient(
-        circle var(--perf) at 50% 50%,
-        var(--cream) 96%,
-        #0000 100%
-      ),
-      radial-gradient(
-        circle var(--perf) at 50% 50%,
-        var(--cream) 96%,
-        #0000 100%
-      ),
-      radial-gradient(
-        circle var(--perf) at 50% 50%,
-        var(--cream) 96%,
-        #0000 100%
-      ),
-      radial-gradient(
-        circle var(--perf) at 50% 50%,
-        var(--cream) 96%,
-        #0000 100%
-      );
-    background-size:
-      calc(var(--perf) * 2.4) calc(var(--perf) * 2),
-      calc(var(--perf) * 2.4) calc(var(--perf) * 2),
-      calc(var(--perf) * 2) calc(var(--perf) * 2.4),
-      calc(var(--perf) * 2) calc(var(--perf) * 2.4);
-    background-position:
-      50% 0,
-      50% 100%,
-      0 50%,
-      100% 50%;
-    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   }
 
-  /* The address line itself. Bare, sat on its rule, and the rule darkens as it
-     takes focus - the only state change on the card. */
-  .postcard-field {
-    @apply w-full border-0 border-b bg-transparent px-0 pb-2 font-sans text-ui italic text-ink;
-    border-color: rgba(35, 50, 75, 0.55);
-    border-bottom-width: 1px;
+  .ritual-content {
+    position: relative;
+    padding: 14.9% 21.5% 11.7% 13.5%;
+  }
+
+  .ritual-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 7.5cqw;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    color: var(--ritual-blue);
+  }
+
+  .ritual-copy {
+    margin-top: 3.4cqw;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3.55cqw;
+    line-height: 1.14;
+    letter-spacing: -0.035em;
+  }
+
+  .ritual-copy span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .ritual-seal {
+    position: absolute;
+    top: 13%;
+    right: 8.4%;
+    width: 20%;
+    height: auto;
+    color: #263245;
+  }
+
+  .ritual-seal text {
+    fill: currentColor;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+  }
+
+  .ritual-form {
+    margin-top: 3.25cqw;
+  }
+
+  .ritual-email-line {
+    padding-bottom: 0.8cqw;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='14' viewBox='0 0 48 14'%3E%3Cpath d='M-12 7Q0-3 12 7T36 7T60 7' fill='none' stroke='%23234d72' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+      left bottom / 4cqw 1.15cqw repeat-x;
+  }
+
+  .ritual-field {
+    width: 100%;
+    min-width: 0;
+    border: 0;
     border-radius: 0;
-    outline: none;
-    transition: border-color 0.2s ease;
+    padding: 0 0 0.4cqw;
+    background: transparent;
+    color: var(--ritual-blue);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3.55cqw;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
   }
 
-  .postcard-field::placeholder {
-    color: rgba(94, 104, 121, 0.75);
-    font-style: italic;
+  .ritual-field::placeholder {
+    color: #81817d;
+    opacity: 1;
   }
 
-  .postcard-field:focus,
-  .postcard-field:focus-visible {
-    border-color: var(--ink);
-    border-bottom-width: 2px;
-    /* The extra pixel is taken off the padding so the baseline does not jump. */
-    padding-bottom: calc(0.5rem - 1px);
+  .ritual-field:focus-visible {
+    outline: 2px solid var(--ritual-blue);
+    outline-offset: 5px;
     box-shadow: none;
   }
 
-  /* The postmark: a hard rectangle, deliberately not the site's pill. It is
-     the one control on the page that is stamped rather than clicked. */
-  .postcard-submit {
-    @apply inline-flex items-center justify-center bg-ink px-6 py-3 font-normal lowercase text-cream;
-    font-family: var(--font-display);
-    letter-spacing: -0.015em;
+  .ritual-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 2.35cqw;
+    border: 2px solid #5076a0;
+    border-radius: 3px;
+    padding: 1.8cqw 1.15cqw;
+    background: #184b88;
+    box-shadow: inset 0 0 0 1px rgb(255 250 241 / 22%);
+    color: var(--ritual-paper);
+    font-family: var(--font-ui);
+    font-size: 2.45cqw;
+    font-weight: 700;
+    line-height: 1.1;
     transition:
-      background-color 0.2s ease,
-      transform 0.2s ease;
+      background-color 180ms ease,
+      transform 180ms ease;
   }
 
-  .postcard-submit:hover:not(:disabled) {
-    background: #1a2739;
-    transform: translateY(-1px);
+  .ritual-submit:hover:not(:disabled) {
+    background: #12396a;
+    transform: translateY(-2px);
   }
 
-  .postcard-submit:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+  .ritual-submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .postcard-frame,
-    .postcard-card {
-      transform: none;
+  .ritual-error {
+    margin-top: 12px;
+    font-size: clamp(12px, 1.4cqw, 16px);
+    line-height: 1.4;
+  }
+
+  .ritual-logo {
+    position: absolute;
+    right: 11.5%;
+    bottom: 15.5%;
+    width: 16%;
+    text-align: center;
+  }
+
+  .ritual-logo img {
+    width: 100%;
+    height: auto;
+    mix-blend-mode: multiply;
+  }
+
+  .ritual-logo span {
+    display: block;
+    margin-top: -0.5cqw;
+    font-family: Arial, sans-serif;
+    font-size: 0.68cqw;
+    font-style: italic;
+    font-weight: 600;
+    color: #497751;
+  }
+
+  @media (max-width: 600px) {
+    .ritual-border {
+      background-image: url("/newsletter/ritual-border-mobile.svg");
+    }
+
+    .ritual-card {
+      aspect-ratio: auto;
+      min-height: 490px;
+    }
+
+    .ritual-content {
+      padding: 35% 16% 38%;
+    }
+
+    .ritual-title {
+      font-size: 8.1cqw;
+      line-height: 1.13;
+      letter-spacing: 0;
+    }
+
+    .ritual-copy {
+      margin-top: 6cqw;
+      font-size: 5.6cqw;
+      line-height: 1.2;
+    }
+
+    .ritual-copy span {
+      white-space: normal;
+    }
+
+    .ritual-seal {
+      top: 10%;
+      right: 12%;
+      width: 25%;
+    }
+
+    .ritual-form {
+      margin-top: 7cqw;
+    }
+
+    .ritual-field {
+      font-size: max(16px, 6cqw);
+      padding-bottom: 5px;
+    }
+
+    .ritual-email-line {
+      padding-bottom: 7px;
+      background-size: 26px 9px;
+    }
+
+    .ritual-submit {
+      margin-top: 6cqw;
+      padding: 12px 10px;
+      font-size: 5.4cqw;
+    }
+
+    .ritual-logo {
+      right: 12%;
+      bottom: 11%;
+      width: 27%;
+    }
+
+    .ritual-logo span {
+      font-size: 1.5cqw;
     }
   }
 }

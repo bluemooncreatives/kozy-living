@@ -382,27 +382,21 @@ export const contact = {
 
 /* ------------------------------------------------------------- newsletter */
 
-/**
- * The postcard. Every line is lowercase and set short on purpose - the card is
- * a note left on a doormat, not a marketing unit, and the voice is what keeps
- * an interruption from reading as an ad.
- *
- * `note` is the promise about frequency. Keep it honest: it is the one line
- * that decides whether the address typed above it is a real one.
- */
+/** Copy for the ritual signup card. The two body lines follow the artwork. */
 export const newsletter = {
-  /** Sits in the stamp, top right. The house wordmark, lowercase. */
-  stamp: "kozy.",
-  title: "leave word.",
+  title: "Shall we share a ritual",
   /** Two lines, broken by hand - the rag is part of the drawing. */
-  body: ["we'll write when there's", "something worth saying."],
+  body: [
+    "Sign up and we shall send you",
+    "a little Kozy ritual, every now & then.",
+  ],
   placeholder: "your email",
-  note: "two, maybe three notes a season.",
-  cta: "post it.",
-  sending: "posting…",
+  cta: "Begin your ritual",
+  sending: "Joining…",
   /** The card after Shopify has the address. */
-  thanks: "posted.",
-  thanksBody: "we'll write when there's something worth saying.",
+  thanks: "Welcome to the ritual.",
+  thanksBody:
+    "A little Kozy ritual will find its way to your inbox, every now & then.",
 } as const;
 
 /* ---------------------------------------------------------------- about page */
