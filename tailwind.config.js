@@ -78,7 +78,7 @@ module.exports = {
         // The full-bleed wordmark ("kozy living", "shop now"). Sized in vw so
         // it always spans the frame edge to edge.
         "display-hero": [
-          "clamp(3.25rem, 16.5vw, 16rem)",
+          "clamp(3.5rem, 18vw, 16rem)",
           { lineHeight: "0.82", letterSpacing: "-0.045em" },
         ],
         "display-xl": [
