@@ -21,14 +21,16 @@ export type CategoryNavSub = {
 };
 
 /**
- * One size for both rows, between the two they used to be.
+ * The one pill size the phone's shop bar runs on, shared with the Filters and
+ * Sort controls above it - see `filter-drawer.tsx` and `sort-menu.tsx`, which
+ * step down to this below `md` and keep their wider size above it.
  *
- * Sizing the rows apart was a second way of saying what the active treatment
- * already says. Two pill sizes that are close but not equal read as an
- * oversight rather than as a hierarchy, so the rows now match and the filled
- * chip alone marks which row is the parent.
+ * Sizing the two rows apart was a second way of saying what the active
+ * treatment already says. Two pill sizes that are close but not equal read as
+ * an oversight rather than as a hierarchy, so every pill in the bar now
+ * matches and the filled chip alone marks which row is the parent.
  */
-const CHIP_SIZE = "px-[0.7rem] py-[0.3rem] text-[0.72rem]";
+const CHIP_SIZE = "px-3.5 py-1.5 text-xs";
 
 /**
  * The phone's category browser.

@@ -34,7 +34,10 @@ function Drawer({ activeCount, resultLabel, children }: DrawerProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="ui-mono flex items-center gap-2 rounded-chip border border-ink/15 bg-card px-4 py-2 transition-colors hover:border-ink lg:hidden"
+        // Below md this matches the category pills beneath it exactly; from md
+        // the category rows give way to the full rail and it returns to the
+        // wider size the rest of the shop chrome uses.
+        className="ui-mono flex items-center gap-2 rounded-chip border border-ink/15 bg-card px-3.5 py-1.5 text-xs transition-colors hover:border-ink md:px-4 md:py-2 md:text-ui lg:hidden"
       >
         <AdjustmentsHorizontalIcon aria-hidden className="h-4 w-4" />
         <span className="font-semibold">Filters</span>

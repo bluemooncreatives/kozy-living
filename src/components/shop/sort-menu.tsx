@@ -26,7 +26,9 @@ export default function SortMenu({ options }: { options: SortOption[] }) {
 
   return (
     <Menu as="div" className="relative">
-      <MenuButton className="ui-mono flex max-w-[13rem] items-center gap-2 rounded-chip border border-ink/15 bg-card px-4 py-2 transition-colors hover:border-ink sm:max-w-none">
+      {/* Below md this matches the category pills under it; from md it returns
+          to the wider size shared with the rest of the shop chrome. */}
+      <MenuButton className="ui-mono flex max-w-[13rem] items-center gap-2 rounded-chip border border-ink/15 bg-card px-3.5 py-1.5 text-xs transition-colors hover:border-ink sm:max-w-none md:px-4 md:py-2 md:text-ui">
         <span className="eyebrow shrink-0 text-muted">Sort</span>
         <span className="truncate font-semibold">{current?.title}</span>
         <ChevronDownIcon aria-hidden className="h-4 w-4 shrink-0" />
