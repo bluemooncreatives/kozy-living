@@ -636,7 +636,7 @@
      cream measures 1.027, so with nothing else it is simply not there. It used
      to sit on the oat plate, where its fill was contrast enough. */
   .arrow-btn {
-    @apply inline-flex items-center justify-center rounded-full border border-ink/10 bg-card text-ink shadow-chip transition-colors duration-200;
+    @apply inline-flex items-center justify-center rounded-full border border-ink bg-ink text-paper shadow-chip transition-colors duration-200;
     height: clamp(2.125rem, 8.5vw, 2.375rem);
     width: clamp(2.125rem, 8.5vw, 2.375rem);
   }
@@ -656,15 +656,11 @@
   }
 
   .arrow-btn:hover {
-    @apply border-ink bg-ink text-paper;
+    @apply border-ink/10 bg-card text-ink;
   }
 
   .arrow-btn-sage {
-    @apply arrow-btn bg-sage;
-  }
-
-  .arrow-btn-sage:hover {
-    @apply bg-ink text-oat;
+    @apply arrow-btn;
   }
 
   /* Small pill tag on the card surface, sitting over photography. */

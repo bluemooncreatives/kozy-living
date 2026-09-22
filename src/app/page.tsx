@@ -451,7 +451,7 @@ async function BoldStatement() {
                     aspect="5/7"
                     arrow
                     arrowTone={index === 1 ? "sage" : "card"}
-                    tag={item.tag}
+                    description={item.description}
                     title={item.title}
                     tone={(index % 4) as 0 | 1 | 2 | 3}
                     placeholderText={item.tag}

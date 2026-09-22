@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import Link from "next/link";
-import { ArrowUpRight } from "./arrow-badge";
+import ActionButton from "./action-button";
 
 /**
  * Section scaffolding.
@@ -136,12 +135,13 @@ export function SectionHead({
         </Headline>
       </div>
       {action && actionHref ? (
-        <Link href={actionHref} className="link-arrow shrink-0">
-          {action}
-          <span className="arrow-btn h-8 w-8 border border-ink/15">
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
+        <ActionButton
+          label={action}
+          href={actionHref}
+          icon="arrow"
+          variant="solid"
+          className="shrink-0"
+        />
       ) : null}
     </div>
   );

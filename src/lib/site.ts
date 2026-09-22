@@ -146,6 +146,7 @@ export const boldStatement = {
 export const lookbook = [
   {
     tag: "waffle",
+    description: "Everyday waffle-weave staples in easy, honest cotton.",
     title: "Kessentials",
     handle: "kessentials",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
@@ -159,6 +160,7 @@ export const lookbook = [
   },
   {
     tag: "slub cotton",
+    description: "Slub-cotton seating built soft, slouchy and low to the ground.",
     title: "Kloud Series",
     handle: "kloud",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
@@ -172,6 +174,7 @@ export const lookbook = [
   },
   {
     tag: "dabu",
+    description: "Dabu-printed carriers and matching pieces for both ends of the leash.",
     title: "Pet & Parent",
     handle: "pet-parent",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
@@ -185,6 +188,7 @@ export const lookbook = [
   },
   {
     tag: "linen blend",
+    description: "Low floor seating in linen blend, made for gathering on the ground.",
     title: "Floor Lounge",
     handle: "kozy-lounge",
     image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",

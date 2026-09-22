@@ -77,7 +77,7 @@ export default function Carousel({
   const cellWidth =
     perView === 2
       ? "w-[82%] sm:w-[48%] lg:w-[49%]"
-      : "w-[78%] sm:w-[46%] lg:w-[31.5%]";
+      : "w-[78%] sm:w-[46%] lg:w-[26%]";
 
   return (
     <div className={className}>

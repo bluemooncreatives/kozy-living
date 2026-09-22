@@ -35,6 +35,7 @@ export default function Plate({
   arrowTone = "card",
   tag,
   title,
+  description,
   caption,
   placeholderText,
   tone = 0,
@@ -90,10 +91,12 @@ export default function Plate({
   /** Draws the corner ↗ button and the notch that receives it. */
   arrow?: boolean;
   arrowTone?: "card" | "sage";
-  /** Small white pill sitting low-left on the photograph. */
+  /** Small white pill sitting low-left on the photograph. Ignored when `description` is set. */
   tag?: string;
   /** Heavy display title under the tag, inside the frame. */
   title?: string;
+  /** One-line copy under the title, in place of the tag pill. */
+  description?: string;
   /** Muted line pinned to the bottom-right of the frame. */
   caption?: string;
   /** Ghost type for the placeholder. Falls back to `title` then `tag`. */
@@ -234,7 +237,7 @@ export default function Plate({
         </div>
 
         {/* Scrim, only where there is copy to protect. */}
-        {(tag || title || caption) &&
+        {(tag || title || description || caption) &&
         (src || video || videos?.length || gallery?.length) ? (
           <div
             aria-hidden
@@ -242,9 +245,9 @@ export default function Plate({
           />
         ) : null}
 
-        {tag || title ? (
+        {tag || title || description ? (
           <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-4 sm:bottom-4 z-10 flex flex-col items-start gap-1.5 sm:gap-2">
-            {tag ? (
+            {!description && tag ? (
               <span className="chip text-[0.625rem] sm:text-spec py-0.5 sm:py-1.5 px-2 sm:px-3">
                 {tag}
               </span>
@@ -260,6 +263,18 @@ export default function Plate({
               >
                 {title}
               </h3>
+            ) : null}
+            {description ? (
+              <p
+                className={clsx(
+                  "body-mono line-clamp-1 text-xs sm:text-sm",
+                  src || video || videos?.length || gallery?.length
+                    ? "text-paper/85"
+                    : "text-ink/60",
+                )}
+              >
+                {description}
+              </p>
             ) : null}
           </div>
         ) : null}
