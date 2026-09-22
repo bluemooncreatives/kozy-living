@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Grid from "@/components/grid";
@@ -403,10 +404,35 @@ export default async function ShopView({
   const resultLabel =
     results.total === 1 ? "1 result" : `${results.total} results`;
 
+  // Anything standing between the shopper and the whole catalogue: a
+  // collection, a search, or a facet. On the unfiltered shop page there is
+  // nothing to widen out of.
+  const isNarrowed = Boolean(
+    collectionHandle || query || hasActiveFilters(state)
+  );
+
   return (
     <>
       <div className="shell pb-6 pt-8 md:pt-12">
-        <Eyebrow align="left">{eyebrow}</Eyebrow>
+        <div className="flex items-center justify-between gap-3">
+          <Eyebrow align="left">{eyebrow}</Eyebrow>
+          {/* The way back out of a narrowed view. The phone's category rows
+              carry only the merchandised groups, so without this a collection
+              is a corner of the shop with no door back to the whole of it. It
+              is absent when the whole catalogue is already what is on screen,
+              where it would lead nowhere. */}
+          {isNarrowed ? (
+            <Link
+              href="/search"
+              scroll={false}
+              prefetch={false}
+              className="ui-mono inline-flex shrink-0 items-center gap-1.5 rounded-chip border border-ink/15 bg-card px-3 py-1.5 text-xs text-muted transition-colors hover:border-ink hover:text-ink md:hidden"
+            >
+              View all
+              <ArrowUpRightIcon aria-hidden className="h-3 w-3 shrink-0" />
+            </Link>
+          ) : null}
+        </div>
         <Headline className="mt-4" count={results.total}>
           {title}
         </Headline>

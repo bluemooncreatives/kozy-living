@@ -6,7 +6,7 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useCart } from "./cart-context";
 import { createUrl } from "@/lib/utils";
 import Image from "next/image";
@@ -42,11 +42,16 @@ function compareLines(a: CartItem, b: CartItem): number {
 }
 
 export default function CartModal() {
-  const { cart, isMutating, status, clearStatus } = useCart();
-  const [isOpen, setIsOpen] = useState(false);
+  const {
+    cart,
+    isMutating,
+    status,
+    clearStatus,
+    isCartOpen: isOpen,
+    openCart,
+    closeCart,
+  } = useCart();
   const quantityRef = useRef(cart?.totalQuantity ?? 0);
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
 
   const totalQuantity = cart?.totalQuantity ?? 0;
 
@@ -59,10 +64,10 @@ export default function CartModal() {
     // Only a genuine *increase* pops the drawer. The old condition fired on
     // decrements too, so removing an item could yank the drawer back open.
     if (totalQuantity > quantityRef.current && !isOpen) {
-      setIsOpen(true);
+      openCart();
     }
     quantityRef.current = totalQuantity;
-  }, [totalQuantity, isOpen]);
+  }, [totalQuantity, isOpen, openCart]);
 
   // Stale banner from a previous interaction shouldn't greet the next open.
   useEffect(() => {

@@ -5,6 +5,7 @@ import "lenis/dist/lenis.css";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { CartProvider } from "@/components/cart/cart-context";
+import CartBar from "@/components/cart/cart-bar";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
 import MotionProvider from "@/components/motion/motion-provider";
 import LoadingScreen from "@/components/motion/loading-screen";
@@ -146,6 +147,9 @@ export default async function RootLayout({
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
+            {/* After the footer so its spacer extends the end of the page,
+                which is what lets the last of the content clear the bar. */}
+            <CartBar />
             {/* Outside <main> and last in the tree: it is an overlay, not
                 content, and nothing in the page should reflow around it. */}
             <NewsletterPopup />

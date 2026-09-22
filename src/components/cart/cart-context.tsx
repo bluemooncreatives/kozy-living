@@ -51,6 +51,14 @@ type CartContextType = {
   status: CartActionState;
   reportStatus: (status: CartActionState) => void;
   clearStatus: () => void;
+  /**
+   * The drawer's open state lives here rather than inside the drawer so that
+   * anything else holding cart state - the summary bar above the fold of the
+   * thumb, for one - can raise it without a second copy of the cart.
+   */
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -71,6 +79,7 @@ export function CartProvider({
   );
   const [pendingCount, setPendingCount] = useState(0);
   const [status, setStatus] = useState<CartActionState>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Serial chain. Cart mutations send an *absolute* quantity, so two in-flight
   // requests that resolve out of order leave the cart at the wrong number.
@@ -136,6 +145,9 @@ export function CartProvider({
 
   const clearStatus = useCallback(() => setStatus(null), []);
 
+  const openCart = useCallback(() => setIsCartOpen(true), []);
+  const closeCart = useCallback(() => setIsCartOpen(false), []);
+
   const updateCartItem = useCallback(
     (merchandiseId: string, updateType: UpdateType) => {
       updateOptimisticCart({
@@ -169,6 +181,9 @@ export function CartProvider({
       status,
       reportStatus,
       clearStatus,
+      isCartOpen,
+      openCart,
+      closeCart,
     }),
     [
       optimisticCart,
@@ -182,6 +197,9 @@ export function CartProvider({
       status,
       reportStatus,
       clearStatus,
+      isCartOpen,
+      openCart,
+      closeCart,
     ]
   );
 
