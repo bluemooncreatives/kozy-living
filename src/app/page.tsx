@@ -23,6 +23,9 @@ import WordmarkBand from "@/components/ui/wordmark-band";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
+import CollectionShowcase, {
+  CollectionShowcaseFallback,
+} from "@/components/home/collection-showcase";
 import {
   getColourEntries,
   shopColourHref,
@@ -59,15 +62,19 @@ export const metadata = {
 /**
  * Homepage. Section order follows the reference layout top to bottom:
  * hero frame + wordmark → meta rule → bold statement + staggered lookbook →
- * category pills → bestsellers → experience band → material strip →
- * testimonial → rest ticker → new arrivals → spotlight → journal →
- * closing "shop now" band.
+ * collection showcase → category pills → bestsellers → shop by colour →
+ * experience band → material strip → testimonial → rest ticker → new
+ * arrivals → spotlight → guides → journal → closing "shop now" band.
  */
 export default function Home() {
   return (
     <>
       <Hero />
       <BoldStatement />
+
+      <Suspense fallback={<CollectionShowcaseFallback />}>
+        <CollectionShowcase />
+      </Suspense>
 
       <Suspense fallback={null}>
         <CollectionFilters />
