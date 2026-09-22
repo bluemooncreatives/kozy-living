@@ -384,16 +384,21 @@ export default async function ShopView({
     });
   }
 
-  const panel = (
-    <FilterPanel
-      groups={groups}
-      price={facets.price}
-      priceSelection={state.price}
-      priceAction={{ path: basePath, carry: priceCarry }}
-      clearHref={clearHref}
-      hasFilters={hasActiveFilters(state)}
-    />
-  );
+  const panelProps = {
+    groups,
+    price: facets.price,
+    priceSelection: state.price,
+    priceAction: { path: basePath, carry: priceCarry },
+    clearHref,
+    hasFilters: hasActiveFilters(state),
+  };
+
+  const panel = <FilterPanel {...panelProps} />;
+
+  // The drawer's copy carries the collection list as well. At lg the sidebar
+  // appears and the rail above it already lists every collection, so repeating
+  // them down the side would be the same control twice on one screen.
+  const drawerPanel = <FilterPanel {...panelProps} browse={browse} />;
 
   const sortOptions = sorting.map((item) => ({
     title: item.title,
@@ -465,7 +470,7 @@ export default async function ShopView({
                 activeCount={activeFilters.length}
                 resultLabel={resultLabel}
               >
-                {panel}
+                {drawerPanel}
               </FilterDrawer>
               {/* The range needs room the filter button and the sort control
                   have already taken on a phone, so the narrow screen gets the

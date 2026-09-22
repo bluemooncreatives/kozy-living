@@ -99,6 +99,80 @@ function Chip({ swatch }: { swatch: Swatch }) {
 }
 
 /**
+ * One collection row.
+ *
+ * A ring rather than a box, because picking a collection is not another facet
+ * to stack: it replaces the scope the facets are then counted against. The
+ * shape is the whole signal that this list behaves differently to the ones
+ * under it, so it is worth the few lines not to reuse the checkbox row.
+ */
+function BrowseRow({ item }: { item: BrowseItem }) {
+  return (
+    <li>
+      <Link
+        href={item.href}
+        scroll={false}
+        prefetch={false}
+        aria-current={item.active ? "page" : undefined}
+        className={clsx(
+          "ui-mono group/row flex items-start gap-2.5 py-1.5 transition-colors",
+          item.active ? "text-ink" : "text-muted hover:text-ink"
+        )}
+      >
+        <span
+          aria-hidden
+          className={clsx(
+            "mt-[0.1rem] flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+            item.active
+              ? "border-ink bg-card"
+              : "border-ink/25 bg-card group-hover/row:border-ink"
+          )}
+        >
+          {item.active ? (
+            <span className="h-[0.45rem] w-[0.45rem] rounded-full bg-ink" />
+          ) : null}
+        </span>
+        <span className="min-w-0 flex-1 break-words">{item.title}</span>
+        <Count>{item.count}</Count>
+      </Link>
+    </li>
+  );
+}
+
+function BrowseList({ items }: { items: BrowseItem[] }) {
+  const visible = items.slice(0, VISIBLE_VALUES);
+  const hidden = items.slice(VISIBLE_VALUES);
+
+  return (
+    <>
+      <ul>
+        {visible.map((item) => (
+          <BrowseRow key={item.href} item={item} />
+        ))}
+      </ul>
+
+      {hidden.length ? (
+        // Opens itself when the collection being viewed is one of the folded
+        // ones, so the list never hides where the shopper actually is.
+        <details open={hidden.some((item) => item.active)} className="group/more">
+          <summary className="ui-mono mt-1.5 inline-flex cursor-pointer list-none items-center gap-1.5 text-muted underline decoration-1 underline-offset-4 hover:text-ink [&::-webkit-details-marker]:hidden">
+            <span className="group-open/more:hidden">
+              Show {hidden.length} more
+            </span>
+            <span className="hidden group-open/more:inline">Show less</span>
+          </summary>
+          <ul className="pt-1">
+            {hidden.map((item) => (
+              <BrowseRow key={item.href} item={item} />
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </>
+  );
+}
+
+/**
  * One multi-select row.
  *
  * A value that nothing left would match is rendered as text rather than a
@@ -195,6 +269,7 @@ function ValueList({ values }: { values: PanelValue[] }) {
 }
 
 export default function FilterPanel({
+  browse,
   groups,
   price,
   priceSelection,
@@ -202,6 +277,12 @@ export default function FilterPanel({
   clearHref,
   hasFilters,
 }: {
+  /**
+   * Every collection, with its live count. Passed to the drawer only: below
+   * `lg` there is no room for the rail that carries this on a wide screen, and
+   * the phone's category rows deliberately show the merchandised groups rather
+   * than all of it.
+   */
   browse?: BrowseItem[];
   groups: PanelGroup[];
   price: PriceBounds | null;
@@ -213,6 +294,11 @@ export default function FilterPanel({
 }) {
   return (
     <div className="rule-t">
+      {browse?.length ? (
+        <Section label="Collection">
+          <BrowseList items={browse} />
+        </Section>
+      ) : null}
 
       {price ? (
         <Section label="Price">
