@@ -64,11 +64,11 @@ export default function ColourRail({
     // on a phone, so a 1rem bleed put the rail 8px wider than the viewport and
     // the whole page scrolled sideways by those 8px.
     //
-    // `data-lenis-prevent` hands the gesture back to the browser - without it
-    // the page's smooth scroll swallows the horizontal swipe.
+    // Only horizontal gestures are handed back to the browser. Vertical
+    // gestures must continue to Lenis/the page so a swipe that starts on a
+    // coil still scrolls the document on touch screens.
     <ul
       ref={railRef}
-      data-lenis-prevent
       data-lenis-prevent-horizontal
       className="no-scrollbar -mx-[var(--gutter)] flex items-start gap-5 overflow-x-auto px-[var(--gutter)] pb-1 sm:mx-0 sm:gap-6 sm:px-0 lg:gap-8"
     >

@@ -139,6 +139,19 @@
     max-width: 100%;
   }
 
+  /* Lenis applies `overscroll-behavior: contain` on both axes to every
+     `data-lenis-prevent-horizontal` element. These elements are horizontal
+     rails, so containing the y axis traps a vertical swipe that begins over a
+     product/colour tile on mobile. Keep horizontal gestures in the rail while
+     allowing vertical gestures to bubble to the document. `!important` is
+     intentional: lenis.css is imported after this file in the root layout. */
+  [data-lenis-prevent-horizontal] {
+    overscroll-behavior-x: contain !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* -------------------------------------------------------- custom scrollbar
      Custom minimalist pill scrollbar replacing default OS bars with a sleek,
      floating capsule that harmonizes with the warm palette. */

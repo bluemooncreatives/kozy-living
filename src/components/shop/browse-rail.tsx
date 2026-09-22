@@ -43,7 +43,6 @@ export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
     >
       <ul
         ref={railRef}
-        data-lenis-prevent
         data-lenis-prevent-horizontal
         className="no-scrollbar flex items-center gap-2 overflow-x-auto scroll-smooth py-1 px-0.5"
       >
