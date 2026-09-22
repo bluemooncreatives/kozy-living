@@ -1270,16 +1270,6 @@ html:has([data-loader]) body {
     right: 9%;
     width: 21%;
     height: auto;
-    color: #1a3a6b;
-  }
-
-  /* Seal inner text — properly capitalised */
-  .ritual-seal text {
-    fill: currentColor;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
   }
 
   /* Email form block */

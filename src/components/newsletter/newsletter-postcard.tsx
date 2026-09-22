@@ -6,33 +6,17 @@ import { useActionState, useEffect, useId } from "react";
 import { newsletter } from "@/lib/site";
 import { subscribeToNewsletter, type NewsletterState } from "./actions";
 
-/**
- * Concentric-ring ritual seal.
- * Text uses Title Case ("Shared Rituals / Mindful Days") as in the reference.
- */
+/** Concentric-ring ritual seal. */
 function RitualSeal() {
   return (
-    <svg viewBox="0 0 240 250" className="ritual-seal" aria-hidden="true">
-      <g fill="none" stroke="currentColor">
-        {Array.from({ length: 15 }, (_, index) => (
-          <ellipse
-            key={index}
-            cx={120 + Math.sin(index * 2) * 1.8}
-            cy={125 + Math.cos(index) * 1.4}
-            rx={113 - index * 7.1}
-            ry={121 - index * 7.55}
-            strokeWidth={index % 3 === 0 ? 1.3 : 0.8}
-            transform={`rotate(${index % 2 ? -4 : 3} 120 125)`}
-          />
-        ))}
-      </g>
-      <text x="120" y="117" textAnchor="middle">
-        <tspan x="120">Shared Rituals</tspan>
-        <tspan x="120" dy="26">
-          Mindful Days
-        </tspan>
-      </text>
-    </svg>
+    <Image
+      src="/newsletter/shared-ritual.png"
+      alt=""
+      width={1261}
+      height={1247}
+      className="ritual-seal"
+      aria-hidden="true"
+    />
   );
 }
 
