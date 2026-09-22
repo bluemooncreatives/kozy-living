@@ -44,10 +44,13 @@ const LABEL =
 export default function ColourRail({
   colours,
   showCounts = true,
+  mobileGrid = false,
 }: {
   colours: RailColour[];
   /** Off on the homepage, where a count is detail the teaser does not need. */
   showCounts?: boolean;
+  /** Show the homepage palette in three columns on phones. */
+  mobileGrid?: boolean;
 }) {
   const railRef = useRef<HTMLUListElement>(null);
   useHorizontalScrollPassthrough(railRef);
@@ -70,7 +73,7 @@ export default function ColourRail({
     <ul
       ref={railRef}
       data-lenis-prevent-horizontal
-      className="no-scrollbar -mx-[var(--gutter)] flex items-start gap-5 overflow-x-auto px-[var(--gutter)] pb-1 sm:mx-0 sm:gap-6 sm:px-0 lg:gap-8"
+      className={clsx("no-scrollbar -mx-[var(--gutter)] flex items-start gap-5 overflow-x-auto px-[var(--gutter)] pb-1 sm:mx-0 sm:gap-6 sm:px-0 lg:gap-8", mobileGrid && "colour-palette-mobile-grid")}
     >
       {colours.map((colour) => {
         // In the palette but not yet in the catalogue. Shown, because the

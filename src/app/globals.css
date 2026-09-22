@@ -144,6 +144,36 @@
 }
 
 .ritual-caption-mobile { display: none; }
+.colour-palette-mobile-grid { min-width: 0; }
+
+@media (max-width: 639px) {
+  .colour-palette-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 8px;
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+  }
+
+  .colour-palette-mobile-grid > li {
+    width: auto;
+    min-width: 0;
+  }
+
+  .colour-palette-mobile-grid .aspect-square {
+    max-width: 100px;
+    padding: 8px;
+  }
+
+  .colour-palette-mobile-grid .uppercase {
+    margin-top: 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    overflow-wrap: break-word;
+  }
+}
+
 .collection-mosaic-copy p, .collection-mosaic-copy p span { font-family: var(--font-ui); }
 
 /* Mobile ritual mosaic. Pixel-sized SVG cutouts keep the same curvature on

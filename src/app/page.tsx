@@ -569,7 +569,7 @@ async function ShopByColour() {
         actionHref={SHOP_BY_COLOUR_PATH}
       />
       <div className="shell pb-10 md:pb-14">
-        <ColourRail colours={colours} showCounts={false} />
+        <ColourRail colours={colours} showCounts={false} mobileGrid />
       </div>
     </section>
   );
