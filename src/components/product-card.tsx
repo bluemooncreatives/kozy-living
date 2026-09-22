@@ -223,7 +223,7 @@ export default function ProductCard({
           />
 
           {/* GI tag + Availability / Status Flag */}
-          <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-start gap-1.5">
+          <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5">
             <NextImage
               src="/icons/gi-tag.png"
               alt="GI registered craft"
