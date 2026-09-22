@@ -21,6 +21,16 @@ export type CategoryNavSub = {
 };
 
 /**
+ * One size for both rows, between the two they used to be.
+ *
+ * Sizing the rows apart was a second way of saying what the active treatment
+ * already says. Two pill sizes that are close but not equal read as an
+ * oversight rather than as a hierarchy, so the rows now match and the filled
+ * chip alone marks which row is the parent.
+ */
+const CHIP_SIZE = "px-[0.7rem] py-[0.3rem] text-[0.72rem]";
+
+/**
  * The phone's category browser.
  *
  * A flat rail of every collection is the wrong shape on a phone - twenty pills
@@ -83,7 +93,7 @@ function Rail({
             aria-current={item.active ? "page" : undefined}
             className={clsx(
               "ui-mono inline-flex items-center gap-1.5 rounded-chip border transition-colors duration-150",
-              primary ? "px-3 py-1.5 text-xs" : "px-2.5 py-1 text-[0.7rem]",
+              CHIP_SIZE,
               item.active
                 ? primary
                   ? "border-ink bg-ink font-semibold text-paper"
