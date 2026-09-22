@@ -13,24 +13,28 @@ import ProductImageRotator from "@/components/ui/product-image-rotator";
 const STORIES = [
   {
     title: "Bathrobes",
+    mobileCopy: "Soft layers. Slow mornings.",
     handle: "bathrobes",
     href: "/search/bathrobes",
     copy: "Soft layers for slow mornings, long evenings and everything in between.",
   },
   {
     title: "Dabu Printed Pillows",
+    mobileCopy: "Handcrafted comfort.",
     handle: "dabu-printed-pillows",
     href: "/search/dabu-printed-pillows",
     copy: "Handcrafted patterns that bring a quiet, artful mood to your corners.",
   },
   {
     title: "Pet & Parent",
+    mobileCopy: "Better together.",
     handle: "pet-parent",
     href: "/search/pet-parent",
     copy: "Matching comfort made for shared rituals with your little companion.",
   },
   {
     title: "Pet Collection",
+    mobileCopy: "For your favourite companion.",
     handle: "pet-collection",
     href: "/search/pet-collection",
     copy: "Everyday Kozy pieces for the pets who make a house feel more like home.",
@@ -38,7 +42,7 @@ const STORIES = [
 ] as const;
 
 const GRID =
-  "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[20rem_20rem] xl:grid-rows-[23rem_23rem]";
+  "ritual-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[20rem_20rem] xl:grid-rows-[23rem_23rem]";
 const CELL = [
   "sm:col-span-2 lg:col-span-1 lg:row-span-2",
   "",
@@ -111,7 +115,7 @@ export default async function CollectionShowcase() {
             >
               <div
                 className={clsx(
-                  "relative z-10 p-6 pb-24 md:p-7",
+                  "collection-mosaic-copy relative z-10 p-6 pb-24 md:p-7",
                   index === 3 && "sm:max-w-[60%]",
                 )}
               >
@@ -124,11 +128,12 @@ export default async function CollectionShowcase() {
                     "text-paper/90",
                   )}
                 >
-                  {story.copy}
+                  <span className="ritual-caption-mobile">{story.mobileCopy}</span>
+                  <span className="ritual-caption-desktop">{story.copy}</span>
                 </p>
               </div>
 
-              <div className="absolute inset-0 -z-10 overflow-hidden">
+              <div className="ritual-media absolute inset-0 -z-10 overflow-hidden">
                 {images.length ? (
                   <ProductImageRotator
                     images={images}
@@ -137,7 +142,7 @@ export default async function CollectionShowcase() {
                         ? "(min-width: 1024px) 66vw, 100vw"
                         : index === 0
                           ? "(min-width: 1024px) 33vw, 100vw"
-                          : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          : "(min-width: 1024px) 33vw, 50vw"
                     }
                     className="collection-story-image object-cover"
                     delay={index * 550}
