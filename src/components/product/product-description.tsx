@@ -104,12 +104,23 @@ export function ProductDescription({ product }: { product: Product }) {
         </Headline>
         <div className="flex shrink-0 items-start gap-1">
           {badges.map((badge) => (
-            <Image
+            <span
               key={badge.alt}
-              src={badge.src}
-              alt={badge.alt}
-              className={`${BADGE_ICON_CLASS} ${badge.scale}`}
-            />
+              tabIndex={0}
+              className="group/badge relative inline-flex focus:outline-none"
+            >
+              <Image
+                src={badge.src}
+                alt={badge.alt}
+                className={`${BADGE_ICON_CLASS} ${badge.scale}`}
+              />
+              <span
+                role="tooltip"
+                className="chip pointer-events-none absolute left-1/2 top-full z-30 mt-2 -translate-x-1/2 whitespace-nowrap opacity-0 shadow-chip transition-opacity duration-150 group-hover/badge:opacity-100 group-focus/badge:opacity-100"
+              >
+                {badge.alt}
+              </span>
+            </span>
           ))}
         </div>
       </div>

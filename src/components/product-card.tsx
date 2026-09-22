@@ -7,6 +7,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import NextImage from "next/image";
 import clsx from "clsx";
 import { startTransition, useEffect, useState } from "react";
 import Price from "./price";
@@ -221,12 +222,19 @@ export default function ProductCard({
             className="absolute inset-0 z-10"
           />
 
-          {/* Availability / Status Flag */}
-          {!product.availableForSale || badge ? (
-            <span className="pointer-events-none absolute left-3 top-3 z-20">
+          {/* GI tag + Availability / Status Flag */}
+          <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-start gap-1.5">
+            <NextImage
+              src="/icons/gi-tag.png"
+              alt="GI registered craft"
+              width={2528}
+              height={4288}
+              className="h-10 w-auto sm:h-11"
+            />
+            {!product.availableForSale || badge ? (
               <Badge>{product.availableForSale ? badge : "Sold out"}</Badge>
-            </span>
-          ) : null}
+            ) : null}
+          </div>
 
           {/* In-plate Gallery Navigation Buttons (Left & Right) - Vertically Centered & Smaller */}
           {gallery.length > 1 ? (

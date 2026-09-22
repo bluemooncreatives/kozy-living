@@ -44,6 +44,14 @@ export default function Gallery({
           </div>
         )}
 
+        <Image
+          src="/icons/gi-tag.png"
+          alt="GI registered craft"
+          width={2528}
+          height={4288}
+          className="pointer-events-none absolute left-4 top-4 h-16 w-auto sm:h-20 lg:h-28"
+        />
+
         {images.length > 1 ? (
           <>
             <button
