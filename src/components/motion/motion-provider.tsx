@@ -62,6 +62,14 @@ export default function MotionProvider() {
       const cleanups: Array<() => void> = [];
       const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
 
+      // A translated reveal feels like a bounce when a touch gesture is what
+      // brings a product rail into view: the document moves with the finger
+      // while every card simultaneously travels the last 26px of its tween.
+      // Touch screens keep the fade, but only fine-pointer devices get the
+      // decorative rise. This also leaves the rail stationary beneath the
+      // finger on its first interaction after a reload.
+      const revealY = fine.matches ? 26 : 0;
+
       /** Returns only the nodes not already wired up by an earlier pass. */
       const claim = <T extends Element>(nodes: T[]) =>
         nodes.filter((node) => {
@@ -87,7 +95,7 @@ export default function MotionProvider() {
         // afterwards would push those elements down *after* their reveal had
         // played and strand them there.
         if (solo.length) {
-          gsap.set(solo, { y: 26 });
+          gsap.set(solo, { y: revealY });
 
           ScrollTrigger.batch(solo, {
             start: "top 88%",
@@ -114,7 +122,7 @@ export default function MotionProvider() {
           if (!children.length) return;
 
           gsap.set(group, { opacity: 1 });
-          gsap.set(children, { opacity: 0, y: 26 });
+          gsap.set(children, { opacity: 0, y: revealY });
 
           ScrollTrigger.create({
             trigger: group,
