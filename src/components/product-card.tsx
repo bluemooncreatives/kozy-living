@@ -354,7 +354,7 @@ export default function ProductCard({
               aria-label={`Add ${product.title} to cart`}
               aria-busy={pending}
               className={clsx(
-                "flex h-10 flex-1 items-center justify-center rounded-full border border-ink/25 px-4 font-sans text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all duration-200 select-none",
+                "flex h-10 flex-1 items-center justify-center rounded-full border border-ink/25 px-4 font-sans text-xs sm:text-sm font-semibold uppercase tracking-normal transition-all duration-200 select-none",
                 isAvailable
                   ? added
                     ? "border-sage-deep bg-sage text-ink font-bold"

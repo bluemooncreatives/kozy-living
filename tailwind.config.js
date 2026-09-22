@@ -99,7 +99,7 @@ module.exports = {
         ],
         eyebrow: [
           "0.6875rem",
-          { lineHeight: "1.2", fontWeight: "600", letterSpacing: "0.16em" },
+          { lineHeight: "1.2", fontWeight: "600", letterSpacing: "0" },
         ],
         ui: [
           "clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem)",
@@ -111,17 +111,17 @@ module.exports = {
         ],
         spec: [
           "0.75rem",
-          { lineHeight: "1.5", letterSpacing: "0.01em", fontWeight: "400" },
+          { lineHeight: "1.5", letterSpacing: "0", fontWeight: "400" },
         ],
         micro: [
           "0.625rem",
-          { lineHeight: "1.2", letterSpacing: "0.18em", fontWeight: "600" },
+          { lineHeight: "1.2", letterSpacing: "0", fontWeight: "600" },
         ],
       },
       letterSpacing: {
         ui: "-0.005em",
-        eyebrow: "0.16em",
-        micro: "0.18em",
+        eyebrow: "0",
+        micro: "0",
         tightest: "-0.045em",
       },
       borderRadius: {

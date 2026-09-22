@@ -690,7 +690,7 @@ function MaterialStrip() {
         {brandPartners.map((partner) => (
           <li
             key={partner}
-            className="serif text-display-sm uppercase tracking-[0.08em] text-ink/70"
+            className="serif text-display-sm uppercase tracking-normal text-ink/70"
           >
             {partner}
           </li>

@@ -169,7 +169,7 @@
   .colour-palette-mobile-grid .uppercase {
     margin-top: 8px;
     font-size: 9px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0;
     overflow-wrap: break-word;
   }
 }
@@ -1360,7 +1360,7 @@ html:has([data-loader]) body {
     font-size: 2.4cqw;
     font-weight: 600;
     line-height: 1.1;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
     transition:
       background-color 180ms ease,
       transform 180ms ease;
