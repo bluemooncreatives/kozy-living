@@ -24,11 +24,11 @@ export default function Gallery({
     imageIndex === 0 ? images.length - 1 : imageIndex - 1;
 
   const arrowClass =
-    "arrow-btn h-11 w-11 border border-ink/10 text-lg leading-none shadow-chip";
+    "arrow-btn h-8 w-8 border border-ink/10 text-base leading-none shadow-chip";
 
   return (
     <form>
-      <div className="plate aspect-square w-full">
+      <div className="plate aspect-[6/7] w-full">
         {images[imageIndex] ? (
           <Image
             className="object-cover"
@@ -46,28 +46,32 @@ export default function Gallery({
 
         {images.length > 1 ? (
           <>
-            <div className="absolute bottom-4 right-4 flex gap-2">
-              <button
-                formAction={() => {
-                  const newState = updateImage(previousImageIndex.toString());
-                  updateURL(newState);
-                }}
-                aria-label="Previous product image"
-                className={arrowClass}
-              >
-                <span aria-hidden>&larr;</span>
-              </button>
-              <button
-                formAction={() => {
-                  const newState = updateImage(nextImageIndex.toString());
-                  updateURL(newState);
-                }}
-                aria-label="Next product image"
-                className={arrowClass}
-              >
-                <span aria-hidden>&rarr;</span>
-              </button>
-            </div>
+            <button
+              formAction={() => {
+                const newState = updateImage(previousImageIndex.toString());
+                updateURL(newState);
+              }}
+              aria-label="Previous product image"
+              className={clsx(
+                arrowClass,
+                "absolute left-4 top-1/2 -translate-y-1/2",
+              )}
+            >
+              <span aria-hidden>&lsaquo;</span>
+            </button>
+            <button
+              formAction={() => {
+                const newState = updateImage(nextImageIndex.toString());
+                updateURL(newState);
+              }}
+              aria-label="Next product image"
+              className={clsx(
+                arrowClass,
+                "absolute right-4 top-1/2 -translate-y-1/2",
+              )}
+            >
+              <span aria-hidden>&rsaquo;</span>
+            </button>
 
             <p className="spec-mono absolute bottom-6 left-6">
               {String(imageIndex + 1).padStart(2, "0")} /{" "}
