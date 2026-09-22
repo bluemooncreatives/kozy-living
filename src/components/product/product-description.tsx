@@ -1,6 +1,8 @@
 import Image from "next/image";
 import pawIcon from "../../../public/icons/paw.png";
 import petParentIcon from "../../../public/icons/pet-parent.png";
+import kraftedByKozyIcon from "../../../public/icons/kozy.png";
+import ecoConsciousIcon from "../../../public/icons/eco-concious.png";
 import { Product } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
@@ -12,15 +14,28 @@ import { Headline } from "../ui/section";
 const PET_PARENT_COLLECTION_HANDLE = "pet-parent";
 /** Collection handle marking pet-only products (no matching parent piece). */
 const PET_COLLECTION_HANDLE = "pet-collection";
+/** Collection handle for the in-house craft line. */
+const KRAFTED_BY_KOZY_COLLECTION_HANDLE = "crafted-by-kozy";
 
 /**
- * One box for every collection icon. The artwork files are all squared to the
- * same canvas with the glyph at a fixed fill, so a tall figure and a wide paw
- * land at the same visual size in this box rather than each icon's own padding
- * deciding how big it looks.
+ * One box for every badge. The artwork is squared to a common canvas but
+ * normalised on its longest side, so a tall glyph lands far narrower in that
+ * box than a wide one - the figure at 53px against the paw's 85px. Each badge
+ * carries a scale that evens them out by area instead.
+ *
+ * The box is sized so a two-badge cluster still leaves the headline room: the
+ * buy panel is only ~509px wide at the breakpoint where the grid splits, and
+ * the title already wraps to four lines there.
  */
-const COLLECTION_ICON_CLASS =
-  "h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20 md:h-24 md:w-24";
+const BADGE_ICON_CLASS =
+  "h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 md:h-16 md:w-16";
+
+/** Carried by every product, so it sits alongside any collection mark. */
+const ECO_BADGE = {
+  src: ecoConsciousIcon,
+  alt: "Eco conscious",
+  scale: "scale-[0.91]",
+};
 
 /**
  * Buy panel: Object title, pricing, variant selections (sizing/finishes),
@@ -84,10 +99,12 @@ export function ProductDescription({ product }: { product: Product }) {
     product.collections.map((collection) => collection.handle)
   );
   const collectionIcon = handles.has(PET_PARENT_COLLECTION_HANDLE)
-    ? { src: petParentIcon, alt: "Pet & Parent" }
+    ? { src: petParentIcon, alt: "Pet & Parent", scale: "scale-[1.12]" }
     : handles.has(PET_COLLECTION_HANDLE)
-      ? { src: pawIcon, alt: "Pet Collection" }
-      : null;
+      ? { src: pawIcon, alt: "Pet Collection", scale: "scale-[0.96]" }
+      : handles.has(KRAFTED_BY_KOZY_COLLECTION_HANDLE)
+        ? { src: kraftedByKozyIcon, alt: "Krafted by Kozy", scale: "scale-[0.94]" }
+        : null;
 
   return (
     <div>
@@ -99,7 +116,7 @@ export function ProductDescription({ product }: { product: Product }) {
           <Image
             src={collectionIcon.src}
             alt={collectionIcon.alt}
-            className={COLLECTION_ICON_CLASS}
+            className={`${COLLECTION_ICON_CLASS} ${collectionIcon.scale}`}
           />
         ) : null}
       </div>
