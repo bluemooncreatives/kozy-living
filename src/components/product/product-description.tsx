@@ -1,9 +1,13 @@
+import Image from "next/image";
 import { Product } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
 import Prose from "../prose";
 import { AddToCart } from "../cart/add-to-cart";
 import { Headline } from "../ui/section";
+
+/** Collection handle marking products carried in both pet and matching-parent versions. */
+const PET_PARENT_COLLECTION_HANDLE = "pet-parent";
 
 /**
  * Buy panel: Object title, pricing, variant selections (sizing/finishes),
@@ -63,10 +67,26 @@ export function ProductDescription({ product }: { product: Product }) {
   const { minVariantPrice, maxVariantPrice } = product.priceRange;
   const isRange = minVariantPrice.amount !== maxVariantPrice.amount;
   const specs = specsFor(product);
+  const isPetParent = product.collections.some(
+    (collection) => collection.handle === PET_PARENT_COLLECTION_HANDLE
+  );
 
   return (
     <div>
-      <Headline as="h1">{product.title}</Headline>
+      <div className="flex items-start justify-between gap-3">
+        <Headline as="h1" className="flex-1">
+          {product.title}
+        </Headline>
+        {isPetParent ? (
+          <Image
+            src="/icons/pet-parent.png"
+            alt="Pet & Parent"
+            width={64}
+            height={64}
+            className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20 md:h-24 md:w-24"
+          />
+        ) : null}
+      </div>
 
       <p className="ui-mono mt-4 flex items-baseline gap-2">
         {isRange ? <span>from</span> : null}

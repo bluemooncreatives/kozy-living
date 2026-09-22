@@ -56,6 +56,14 @@ export const productFragment = /* GraphQl */ `
     }
     tags
     updatedAt
+    collections(first: 10) {
+      edges {
+        node {
+          handle
+          title
+        }
+      }
+    }
     }
     ${imageFragment}
     ${seoFragment}
