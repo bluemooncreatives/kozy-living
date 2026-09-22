@@ -1,4 +1,6 @@
 import Image from "next/image";
+import pawIcon from "../../../public/icons/paw.png";
+import petParentIcon from "../../../public/icons/pet-parent.png";
 import { Product } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
@@ -8,6 +10,17 @@ import { Headline } from "../ui/section";
 
 /** Collection handle marking products carried in both pet and matching-parent versions. */
 const PET_PARENT_COLLECTION_HANDLE = "pet-parent";
+/** Collection handle marking pet-only products (no matching parent piece). */
+const PET_COLLECTION_HANDLE = "pet-collection";
+
+/**
+ * One box for every collection icon. The artwork files are all squared to the
+ * same canvas with the glyph at a fixed fill, so a tall figure and a wide paw
+ * land at the same visual size in this box rather than each icon's own padding
+ * deciding how big it looks.
+ */
+const COLLECTION_ICON_CLASS =
+  "h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20 md:h-24 md:w-24";
 
 /**
  * Buy panel: Object title, pricing, variant selections (sizing/finishes),
@@ -67,9 +80,14 @@ export function ProductDescription({ product }: { product: Product }) {
   const { minVariantPrice, maxVariantPrice } = product.priceRange;
   const isRange = minVariantPrice.amount !== maxVariantPrice.amount;
   const specs = specsFor(product);
-  const isPetParent = product.collections.some(
-    (collection) => collection.handle === PET_PARENT_COLLECTION_HANDLE
+  const handles = new Set(
+    product.collections.map((collection) => collection.handle)
   );
+  const collectionIcon = handles.has(PET_PARENT_COLLECTION_HANDLE)
+    ? { src: petParentIcon, alt: "Pet & Parent" }
+    : handles.has(PET_COLLECTION_HANDLE)
+      ? { src: pawIcon, alt: "Pet Collection" }
+      : null;
 
   return (
     <div>
@@ -77,13 +95,11 @@ export function ProductDescription({ product }: { product: Product }) {
         <Headline as="h1" className="flex-1">
           {product.title}
         </Headline>
-        {isPetParent ? (
+        {collectionIcon ? (
           <Image
-            src="/icons/pet-parent.png"
-            alt="Pet & Parent"
-            width={64}
-            height={64}
-            className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20 md:h-24 md:w-24"
+            src={collectionIcon.src}
+            alt={collectionIcon.alt}
+            className={COLLECTION_ICON_CLASS}
           />
         ) : null}
       </div>
