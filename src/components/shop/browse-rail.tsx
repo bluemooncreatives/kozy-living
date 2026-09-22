@@ -19,7 +19,13 @@ export type BrowseRailItem = {
  * Displays all active catalogue categories as compact pills with their item
  * counts, automatically centering the selected category on navigation.
  */
-export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
+export default function BrowseRail({
+  items,
+  className,
+}: {
+  items: BrowseRailItem[];
+  className?: string;
+}) {
   const railRef = useRef<HTMLUListElement>(null);
   const activeItemRef = useRef<HTMLLIElement>(null);
   useHorizontalScrollPassthrough(railRef);
@@ -39,7 +45,10 @@ export default function BrowseRail({ items }: { items: BrowseRailItem[] }) {
   return (
     <nav
       aria-label="Browse categories"
-      className="relative min-w-0 flex-1 overflow-hidden w-full"
+      className={clsx(
+        "relative min-w-0 flex-1 overflow-hidden w-full",
+        className
+      )}
     >
       <ul
         ref={railRef}

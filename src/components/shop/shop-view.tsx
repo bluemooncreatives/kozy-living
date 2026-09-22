@@ -9,6 +9,7 @@ import {
   getCatalog,
   getCollectionProductOrder,
   getCollections,
+  getPrimaryMenu,
   searchCatalogIds,
 } from "@/lib/shopify";
 import type { CatalogProduct, Collection } from "@/lib/shopify/types";
@@ -32,6 +33,10 @@ import {
 } from "@/lib/shop/filters";
 import ActiveFilters, { type ActiveFilter } from "./active-filters";
 import BrowseRail from "./browse-rail";
+import CategoryNav, {
+  type CategoryNavItem,
+  type CategoryNavSub,
+} from "./category-nav";
 import FilterDrawer from "./filter-drawer";
 import FilterPanel, {
   type BrowseItem,
@@ -71,6 +76,21 @@ function orderBy<T extends { id: string }>(items: T[], ids: string[]): T[] {
   );
 }
 
+/**
+ * The collection a menu entry points at, or null for anything else.
+ *
+ * `/search/<handle>` is a collection; `/search` is the whole catalogue and
+ * `/product/...`, `/blogs/...` and the rest are not collections at all. The
+ * phone's category rows scope the grid, so only the first shape belongs in them
+ * - see `normalizeMenuPath` in `lib/shopify` for where these paths come from.
+ */
+function menuCollectionHandle(path: string): string | null {
+  const prefix = "/search/";
+  if (!path.startsWith(prefix)) return null;
+
+  return path.slice(prefix.length).split(/[/?#]/)[0] || null;
+}
+
 function formatMoney(amount: number, currencyCode: string): string {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -100,9 +120,10 @@ export default async function ShopView({
   const params = toParamMap(searchParams);
   const query = (params.get("q") ?? "").trim();
 
-  const [catalog, collections] = await Promise.all([
+  const [catalog, collections, menu] = await Promise.all([
     getCatalog(),
     getCollections(),
+    getPrimaryMenu(),
   ]);
 
   // Catalogue-wide best-selling position, so "Trending" ranks the same way
@@ -214,6 +235,101 @@ export default async function ShopView({
         active: collection.handle === collectionHandle,
       })),
   ];
+
+  /* ------------------------------------------- phone category rows */
+
+  // The merchandised groups, read off the Shopify menu rather than named here:
+  // a top-level entry that points at a collection and has collection children
+  // is a category. Admin adding a fourth group puts it on the phone with no
+  // code change, which is the same contract the header nav works to.
+  const categories = menu.flatMap((entry) => {
+    const handle = menuCollectionHandle(entry.path);
+    if (!handle) return [];
+
+    // The group's own collection already leads its sub-row, and the live menu
+    // does point one child at its parent - without this that destination would
+    // occupy two chips on the same row and light up as active in both.
+    const seen = new Set([handle]);
+
+    const children: CategoryNavItem[] = (entry.items ?? []).flatMap((child) => {
+      const childHandle = menuCollectionHandle(child.path);
+      if (!childHandle || seen.has(childHandle)) return [];
+      seen.add(childHandle);
+
+      const active = childHandle === collectionHandle;
+      // Nothing in it under the current search is a dead chip, unless it is the
+      // one being viewed - that has to stay visible to be left.
+      if (!collectionCounts.get(childHandle) && !active) return [];
+
+      return [
+        {
+          title: child.title,
+          href: collectionUrl(child.path, params),
+          active,
+        },
+      ];
+    });
+
+    if (!children.length) return [];
+
+    const atRoot = handle === collectionHandle;
+    const active = atRoot || children.some((child) => child.active);
+    if (!collectionCounts.get(handle) && !active) return [];
+
+    return [
+      {
+        title: entry.title,
+        href: collectionUrl(entry.path, params),
+        active,
+        atRoot,
+        children,
+      },
+    ];
+  });
+
+  const activeCategory = categories.find((category) => category.active) ?? null;
+
+  const categoryItems: CategoryNavItem[] = categories.map(
+    ({ title, href, active }) => ({
+      title,
+      href,
+      active,
+      group: true,
+    })
+  );
+
+  // Collections reachable from the footer and the home page sit outside every
+  // group. Without this the rows would show nothing active while the grid is
+  // plainly filtered, which reads as a broken control rather than as a corner
+  // of the shop the groups do not cover.
+  const stray =
+    collectionHandle && !activeCategory
+      ? collections.find(
+          (collection: Collection) => collection.handle === collectionHandle
+        )
+      : undefined;
+
+  if (stray) {
+    categoryItems.push({
+      title: stray.title,
+      href: collectionUrl(stray.path, params),
+      active: true,
+    });
+  }
+
+  const categorySub: CategoryNavSub | null = activeCategory
+    ? {
+        label: activeCategory.title,
+        items: [
+          {
+            title: `All ${activeCategory.title}`,
+            href: activeCategory.href,
+            active: activeCategory.atRoot,
+          },
+          ...activeCategory.children,
+        ],
+      }
+    : null;
 
   const counted = countFacets(scope, index, state, facets);
 
@@ -348,8 +464,11 @@ export default async function ShopView({
             </div>
           </div>
 
-          {/* Category browse rail: Row 2 on mobile, centered flex-1 on desktop */}
-          <BrowseRail items={browse} />
+          {/* Row 2 on a phone: the merchandised groups, and the open group's
+              own collections under them. The flat rail takes over at md, where
+              there is width for every collection at once. */}
+          <CategoryNav items={categoryItems} sub={categorySub} />
+          <BrowseRail items={browse} className="hidden md:block" />
 
           {/* Desktop-only Sort menu */}
           <div className="hidden shrink-0 md:block">
