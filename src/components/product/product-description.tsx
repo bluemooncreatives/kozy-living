@@ -105,6 +105,7 @@ export function ProductDescription({ product }: { product: Product }) {
       : handles.has(KRAFTED_BY_KOZY_COLLECTION_HANDLE)
         ? { src: kraftedByKozyIcon, alt: "Krafted by Kozy", scale: "scale-[0.94]" }
         : null;
+  const badges = collectionIcon ? [collectionIcon, ECO_BADGE] : [ECO_BADGE];
 
   return (
     <div>
@@ -112,13 +113,16 @@ export function ProductDescription({ product }: { product: Product }) {
         <Headline as="h1" className="flex-1">
           {product.title}
         </Headline>
-        {collectionIcon ? (
-          <Image
-            src={collectionIcon.src}
-            alt={collectionIcon.alt}
-            className={`${COLLECTION_ICON_CLASS} ${collectionIcon.scale}`}
-          />
-        ) : null}
+        <div className="flex shrink-0 items-start gap-1">
+          {badges.map((badge) => (
+            <Image
+              key={badge.alt}
+              src={badge.src}
+              alt={badge.alt}
+              className={`${BADGE_ICON_CLASS} ${badge.scale}`}
+            />
+          ))}
+        </div>
       </div>
 
       <p className="ui-mono mt-4 flex items-baseline gap-2">
