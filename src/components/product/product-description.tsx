@@ -1,8 +1,5 @@
 import Image from "next/image";
-import pawIcon from "../../../public/icons/paw.png";
-import petParentIcon from "../../../public/icons/pet-parent.png";
-import kraftedByKozyIcon from "../../../public/icons/kozy.png";
-import ecoConsciousIcon from "../../../public/icons/eco-concious.png";
+import { brandIcons } from "@/components/ui/brand-icons";
 import { Product } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
@@ -18,24 +15,13 @@ const PET_COLLECTION_HANDLE = "pet-collection";
 const KRAFTED_BY_KOZY_COLLECTION_HANDLE = "crafted-by-kozy";
 
 /**
- * One box for every badge. The artwork is squared to a common canvas but
- * normalised on its longest side, so a tall glyph lands far narrower in that
- * box than a wide one - the figure at 53px against the paw's 85px. Each badge
- * carries a scale that evens them out by area instead.
- *
- * The box is sized so a two-badge cluster still leaves the headline room: the
- * buy panel is only ~509px wide at the breakpoint where the grid splits, and
- * the title already wraps to four lines there.
+ * One box for every badge, sized so a two-badge cluster still leaves the
+ * headline room: the buy panel is only ~509px wide at the breakpoint where the
+ * grid splits, and the title already wraps to four lines there. The per-glyph
+ * scale that keeps the badges level comes from `brandIcons`.
  */
 const BADGE_ICON_CLASS =
   "h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 md:h-16 md:w-16";
-
-/** Carried by every product, so it sits alongside any collection mark. */
-const ECO_BADGE = {
-  src: ecoConsciousIcon,
-  alt: "Eco conscious",
-  scale: "scale-[0.91]",
-};
 
 /**
  * Buy panel: Object title, pricing, variant selections (sizing/finishes),
@@ -99,13 +85,16 @@ export function ProductDescription({ product }: { product: Product }) {
     product.collections.map((collection) => collection.handle)
   );
   const collectionIcon = handles.has(PET_PARENT_COLLECTION_HANDLE)
-    ? { src: petParentIcon, alt: "Pet & Parent", scale: "scale-[1.12]" }
+    ? brandIcons.petParent
     : handles.has(PET_COLLECTION_HANDLE)
-      ? { src: pawIcon, alt: "Pet Collection", scale: "scale-[0.96]" }
+      ? brandIcons.pet
       : handles.has(KRAFTED_BY_KOZY_COLLECTION_HANDLE)
-        ? { src: kraftedByKozyIcon, alt: "Krafted by Kozy", scale: "scale-[0.94]" }
+        ? brandIcons.krafted
         : null;
-  const badges = collectionIcon ? [collectionIcon, ECO_BADGE] : [ECO_BADGE];
+  // the eco mark rides on every product, so it joins any collection mark
+  const badges = collectionIcon
+    ? [collectionIcon, brandIcons.eco]
+    : [brandIcons.eco];
 
   return (
     <div>

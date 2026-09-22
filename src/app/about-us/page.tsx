@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
+import IconMarquee from "@/components/ui/icon-marquee";
 import clsx from "clsx";
 import { displayFace, Eyebrow, Headline } from "@/components/ui/section";
 import {
@@ -39,6 +40,13 @@ export default function AboutPage() {
       <WhyKraft />
       <StudioToEveryday />
       <Sustainability />
+      {/* The pillars above, restated as the glyphs that mark the products. */}
+      <section
+        aria-label="What every Kompanion carries"
+        className="rule-y overflow-x-clip bg-paper py-6 md:py-8"
+      >
+        <IconMarquee />
+      </section>
       <Collective />
       <StudioNote />
       <ShopCta />

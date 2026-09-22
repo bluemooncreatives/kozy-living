@@ -14,6 +14,7 @@ import ProductCard from "@/components/product-card";
 import ArticleCard from "@/components/blog/article-card";
 import Price from "@/components/price";
 import Marquee from "@/components/ui/marquee";
+import IconMarquee from "@/components/ui/icon-marquee";
 import Carousel from "@/components/ui/carousel";
 import Plate from "@/components/ui/plate";
 import Seal from "@/components/ui/seal";
@@ -71,6 +72,7 @@ export default function Home() {
     <>
       <Hero />
       <BoldStatement />
+      <StandardsTicker />
 
       <Suspense fallback={<CollectionShowcaseFallback />}>
         <CollectionShowcase />
@@ -107,6 +109,7 @@ export default function Home() {
         <Journal />
       </Suspense>
 
+      <StandardsTicker reverse />
       <ClosingBand />
     </>
   );
@@ -683,6 +686,22 @@ function ExperienceBand() {
 /* -------------------------------------------------------- material strip */
 
 /** Hairline band of material and ethics credentials, set as wordmarks. */
+/**
+ * The house glyphs on a quiet band. It runs twice on this page - once under
+ * the opening statement and once before the closing band - so the second pass
+ * drifts the other way rather than reading as the same strip repeated.
+ */
+function StandardsTicker({ reverse = false }: { reverse?: boolean }) {
+  return (
+    <section
+      aria-label="What every Kompanion carries"
+      className="rule-y overflow-x-clip bg-paper py-6 md:py-8"
+    >
+      <IconMarquee reverse={reverse} />
+    </section>
+  );
+}
+
 function MaterialStrip() {
   return (
     <section aria-label="Our standards" className="rule-y bg-card">
