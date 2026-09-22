@@ -180,11 +180,11 @@ export default function CartModal() {
                           <Link
                             href={merchandiseUrl}
                             onClick={closeCart}
-                            className="plate h-24 w-20 shrink-0"
+                            className="plate h-24 w-20 shrink-0 rounded-lg"
                           >
                             {item.merchandise.product.featuredImage?.url ? (
                               <Image
-                                className="h-full w-full object-contain p-2"
+                                className="h-full w-full object-cover"
                                 fill
                                 sizes="80px"
                                 alt={
@@ -219,7 +219,7 @@ export default function CartModal() {
                             </div>
 
                             <div className="mt-auto flex items-end justify-between pt-4">
-                              <div className="flex items-center rounded-full border border-ink/20">
+                              <div className="flex items-center overflow-hidden rounded-full border border-ink/20">
                                 <EditItemQuantityButton
                                   item={item}
                                   type="minus"
