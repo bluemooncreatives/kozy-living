@@ -6,8 +6,9 @@ import { useProduct, useUpdateURL } from "./product-context";
 
 /**
  * Product gallery: one rounded plate on the mist ground with pill arrow
- * controls, and a thumbnail rail beneath. Product images are contained rather than
- * cropped to preserve full handcrafted silhouettes.
+ * controls, and a thumbnail rail beneath. Images fill their frame edge to edge
+ * - the photography is already shot square, so covering crops far less than the
+ * letterboxing it replaces cost in presence.
  */
 export default function Gallery({
   images,
@@ -30,7 +31,7 @@ export default function Gallery({
       <div className="plate aspect-square w-full">
         {images[imageIndex] ? (
           <Image
-            className="h-full w-full object-contain p-10"
+            className="object-cover"
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             src={images[imageIndex]?.src as string}
@@ -101,7 +102,7 @@ export default function Gallery({
                     alt={image.altText}
                     fill
                     sizes="12vw"
-                    className="object-contain p-2"
+                    className="object-cover"
                   />
                 </button>
               </li>
