@@ -122,6 +122,13 @@ export default function Gallery({
           })}
         </ul>
       ) : null}
+
+      {/* The GI tag's own text, set out in full below the thumbnails. */}
+      <div className="rule-t mt-4 pt-4 text-center">
+        <p className="eyebrow">Jodhpur Block Print</p>
+        <p className="spec-mono mt-1">A GI Registered Kraft</p>
+        <p className="spec-mono mt-2">Rooted in Ritual &middot; Handcrafted in India</p>
+      </div>
     </form>
   );
 }
