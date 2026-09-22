@@ -124,7 +124,7 @@ export function SectionHead({
   return (
     <div
       className={clsx(
-        "shell flex flex-col gap-5 py-10 md:flex-row md:items-end md:justify-between md:py-14",
+        "shell flex flex-col items-start gap-5 py-10 md:flex-row md:items-end md:justify-between md:py-14",
         className
       )}
     >
