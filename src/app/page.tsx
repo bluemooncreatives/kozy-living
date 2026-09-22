@@ -806,6 +806,12 @@ async function Spotlight() {
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
             aspect="1/1"
+            // This section is streamed through Suspense. Opting it into the
+            // global DOM-scanned reveal lets GSAP write inline styles in the
+            // short window after the HTML arrives but before React hydrates
+            // the boundary, producing a real hydration mismatch. The panel is
+            // already below the fold and does not need a second entrance.
+            reveal={false}
             placeholderText="spotlight"
             tone={2}
             sizes="(min-width: 1024px) 50vw, 100vw"
