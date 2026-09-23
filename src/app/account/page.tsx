@@ -41,6 +41,9 @@ export default async function AccountPage({
           ) : null}
           <Link
             href="/api/auth/login?returnTo=/account"
+            // A route handler: a prefetch would run the login flow. See the
+            // same note on the header's account link.
+            prefetch={false}
             className="btn-solid mt-8"
           >
             Sign in

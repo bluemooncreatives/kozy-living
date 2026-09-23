@@ -147,10 +147,10 @@ export default function NewsletterPostcard({
       {/* Kozy Living logo — bottom-right, inside K-tile frame */}
       <div className="ritual-logo">
         <Image
-          src="/logo/kozy-logo.png"
+          src="/logo/kozy-logo-web.png"
           alt="Kozy Living"
-          width={3836}
-          height={2160}
+          width={720}
+          height={405}
           sizes="(max-width: 600px) 100px, 180px"
         />
         <span>Rooted in Rituals</span>

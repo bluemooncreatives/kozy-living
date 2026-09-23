@@ -23,10 +23,10 @@ export default function LogoSquare({
   return (
     <span className={clsx("inline-flex items-center leading-none", className)}>
       <Image
-        src="/logo/Kozy Logo.png"
+        src="/logo/kozy-logo-web.png"
         alt={site.name}
-        width={3836}
-        height={2160}
+        width={720}
+        height={405}
         priority={size !== "sm"}
         className={clsx("object-contain", dimensions)}
       />

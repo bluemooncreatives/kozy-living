@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";

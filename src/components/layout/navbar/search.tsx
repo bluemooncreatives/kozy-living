@@ -81,7 +81,7 @@ export function SearchBar({
   return (
     <div className={clsx("w-full", className)}>
       {/* Input */}
-      <form onSubmit={onSubmit} className="relative w-full">
+      <form onSubmit={onSubmit} data-route-progress className="relative w-full">
         <label htmlFor="site-search" className="sr-only">
           Search
         </label>
@@ -237,7 +237,7 @@ function SearchOverlayForm({
   return (
     <>
       {/* Input row */}
-      <form onSubmit={onSubmit} className="relative w-full">
+      <form onSubmit={onSubmit} data-route-progress className="relative w-full">
         <label htmlFor="overlay-search" className="sr-only">
           Search
         </label>

@@ -4,7 +4,7 @@ import type { SearchResult } from "@/app/api/search/route";
 import Price from "@/components/price";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { createUrl } from "@/lib/utils";
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import { useEffect, useRef, KeyboardEvent } from "react";
 
 type Props = {

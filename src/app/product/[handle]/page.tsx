@@ -75,7 +75,11 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
 
-      <div className="shell grid grid-cols-1 gap-3 pb-10 pt-4 lg:grid-cols-[1.1fr_1fr]">
+      {/* The gallery and the buy panel arrive as a pair, a beat apart. */}
+      <div
+        data-reveal-group
+        className="shell grid grid-cols-1 gap-3 pb-10 pt-4 lg:grid-cols-[1.1fr_1fr]"
+      >
         <Suspense
           fallback={<div className="plate aspect-square w-full animate-pulse" />}
         >

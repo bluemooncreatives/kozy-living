@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 
@@ -24,6 +24,7 @@ export default function ProductImageRotator({
   delay = 0,
   interval = 3600,
   showIndicators = true,
+  priority = false,
   className,
 }: {
   images: readonly RotatorImage[];
@@ -31,24 +32,40 @@ export default function ProductImageRotator({
   delay?: number;
   interval?: number;
   showIndicators?: boolean;
+  /** Only for a reel in the first viewport. See the note on the <Image>. */
+  priority?: boolean;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const imagesRef = useRef(images);
-  imagesRef.current = images;
+  // The timer only ever needs the COUNT, so it depends on that directly. It
+  // used to mirror the whole array into a ref during render - which React
+  // forbids (`react-hooks/refs`, the one error `npm run lint` reported).
+  const total = images.length;
 
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Preload all rotator images into browser cache so transitions are instantaneous and glitch-free
-  useEffect(() => {
-    if (typeof window === "undefined" || !images?.length) return;
-    images.forEach((img) => {
-      const preload = new window.Image();
-      preload.src = img.url;
-    });
-  }, [images]);
+  // How many shots are mounted - the one on screen and the one after it.
+  // Every layer sits in the same box, so every mounted <img> is "in view" and
+  // lazy loading fetches it at once: a reel of eight fetched all eight on
+  // arrival, and the homepage's reels pulled ~100 photographs before the
+  // curtain had even lifted. A shot is now mounted one full interval before
+  // its turn, which is ample for a sized WebP, and never unmounted after, so
+  // a second lap costs nothing. The same count on the server and the first
+  // client render, so hydration agrees.
+  const [mounted, setMounted] = useState(Math.min(2, images.length));
+  const nextUp = Math.min(images.length, active + 2);
+  if (nextUp > mounted) setMounted(nextUp);
+
+  // NOTE: there used to be an effect here that "preloaded" every shot with
+  // `new Image().src = image.url`. That is the ORIGINAL file, outside the
+  // srcset - so each of the ~15 reels on the homepage downloaded every one of
+  // its photographs at full size (several are multi-megabyte PNGs) on top of
+  // the sized variant it actually displays, and competed with the first
+  // viewport for bandwidth to do it. The layers below are all in the DOM and
+  // all in the same box, so lazy loading already fetches each one, at the
+  // right width, well before its turn comes round.
 
   // Observer pauses cycling when tile is out of view (saves CPU & battery)
   useEffect(() => {
@@ -69,7 +86,6 @@ export default function ProductImageRotator({
 
   // Timer loop for automatic advancing
   useEffect(() => {
-    const total = imagesRef.current?.length ?? 0;
     if (total < 2 || !visible || isHovered) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -82,7 +98,7 @@ export default function ProductImageRotator({
         return;
       }
 
-      setActive((current) => (current + 1) % (imagesRef.current?.length || 1));
+      setActive((current) => (current + 1) % total);
       timer = setTimeout(advance, interval);
     };
 
@@ -94,7 +110,7 @@ export default function ProductImageRotator({
       stopped = true;
       clearTimeout(timer);
     };
-  }, [delay, interval, visible, isHovered]);
+  }, [delay, interval, visible, isHovered, total]);
 
   if (!images?.length) return null;
 
@@ -107,6 +123,7 @@ export default function ProductImageRotator({
     >
       {images.map((image, index) => {
         const isActive = index === active;
+        if (index >= mounted) return null;
         return (
           <div
             key={image.url}
@@ -123,8 +140,12 @@ export default function ProductImageRotator({
               alt={image.altText || ""}
               fill
               sizes={sizes}
-              priority={index === 0}
-              loading={index <= 1 ? "eager" : "lazy"}
+              // Priority only where the caller says the reel is in the first
+              // viewport. Hard-coding it on the first shot put a high-priority
+              // preload on EVERY reel on the page - most of them far below the
+              // fold - and the loading curtain waits on priority images.
+              priority={priority && index === 0}
+              loading={priority && index === 0 ? undefined : "lazy"}
               className={clsx(
                 className ?? "object-cover",
                 "h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover:scale-[1.03]",

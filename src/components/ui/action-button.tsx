@@ -39,10 +39,13 @@ function Icon({ name }: { name: ActionIcon }) {
  * its end. Used for every CTA on every page so one shape and one hover
  * behaviour carry the whole product.
  *
- * The hover is two tweens rather than a CSS transition because they have to
- * disagree: the icon well grows and rotates while the label slides the other
- * way, and `quickTo` lets a fast pointer reverse either of them mid-flight
- * without the queueing that makes CSS transitions feel sticky.
+ * The hover has two halves. The icon well grows and turns through GSAP
+ * `quickTo`, which lets a fast pointer reverse it mid-flight without the
+ * queueing that makes CSS transitions feel sticky. The label ROLLS: it slides
+ * up out of its slot and an identical copy rolls in beneath it (see
+ * `.action-btn-roll` in globals.css). That half is pure CSS because it has no
+ * mid-flight reversal problem - it is one transform on one element - and CSS
+ * keeps it working before hydration.
  *
  * Renders an `<a>`, a `<Link>` or a `<button>` depending on what it is given,
  * so a form submit and a navigation share the same component.
@@ -76,8 +79,7 @@ export default function ActionButton({
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       const well = el.querySelector<HTMLElement>(".action-btn-icon");
-      const text = el.querySelector<HTMLElement>(".action-btn-label");
-      if (!well || !text) return;
+      if (!well) return;
 
       // scaleX/scaleY rather than the `scale` shorthand: GSAP cannot revert
       // the shorthand on cleanup and warns "not eligible for reset".
@@ -97,20 +99,13 @@ export default function ActionButton({
         duration: 0.5,
         ease: "power3.out",
       });
-      const slide = gsap.quickTo(text, "x", {
-        duration: 0.4,
-        ease: "power3.out",
-      });
-
       const enter = () => {
         scale(1.12);
         spin(45);
-        slide(-3);
       };
       const leave = () => {
         scale(1);
         spin(0);
-        slide(0);
       };
 
       el.addEventListener("pointerenter", enter);
@@ -140,7 +135,13 @@ export default function ActionButton({
 
   const body = (
     <>
-      <span className="action-btn-label">{label}</span>
+      <span className="action-btn-label">
+        {/* The copy that rolls in is drawn from `data-text` by CSS, with an
+            empty alternative text - so it is not in the DOM, and not read. */}
+        <span className="action-btn-roll" data-text={label}>
+          {label}
+        </span>
+      </span>
       <span className="action-btn-icon">
         <Icon name={icon} />
       </span>
@@ -148,7 +149,13 @@ export default function ActionButton({
   );
 
   if (href && !disabled) {
-    const external = /^(https?:|mailto:|tel:)/.test(href);
+    // Route handlers get a plain <a> too, never a <Link>: <Link> PREFETCHES,
+    // and a prefetch is a real GET. `/api/auth/logout` deletes every customer
+    // cookie on GET, so the "Sign out" button on /account signed the customer
+    // out the moment it scrolled into view in production; `/api/auth/login`
+    // minted a new PKCE verifier each time. These leave the app anyway, so a
+    // client transition has nothing to offer them.
+    const external = /^(https?:|mailto:|tel:|\/api\/)/.test(href);
 
     if (external) {
       return (

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { splitText } from "@/components/motion/split-text";
 import Seal from "./seal";
 
 /**
@@ -22,6 +23,13 @@ import Seal from "./seal";
  * no measurement at runtime.
  *
  * If the word has no "o" the seal is simply omitted rather than guessed at.
+ *
+ * ENTRANCE. The pieces rise out of their own slots (`data-split`), which is the
+ * loading curtain's gesture played in reverse: the curtain's wordmark leaves
+ * upward, and this one arrives from below as the panels clear it. Split by
+ * WORD, never by glyph - Franxurter carries 2,104 kerning pairs, and a glyph
+ * in its own box is a glyph the font can no longer kern, which at 18vw is
+ * plainly visible. The seal box travels as one unit with the rest.
  */
 export default function WordmarkBand({
   text,
@@ -38,12 +46,13 @@ export default function WordmarkBand({
 
   return (
     <div
+      data-split=""
       className={clsx(
         "wordmark flex select-none items-baseline justify-center leading-[0.9] text-ink",
         className
       )}
     >
-      <span aria-hidden>{before}</span>
+      <span aria-hidden>{splitText(before)}</span>
 
       {at === -1 ? null : (
         /* The seal is taken out of flow inside a box sized to the glyph, so
@@ -52,7 +61,7 @@ export default function WordmarkBand({
            glyph at its centre - which is what dropped the disc half a letter
            low. With no in-flow content the baseline is synthesised from the
            bottom border edge, which is the alignment the O actually needs. */
-        <span className="relative mx-[0.0195em] mb-[-0.005em] inline-block h-[0.586em] w-[0.586em]">
+        <span className="split-unit relative mx-[0.0195em] mb-[-0.005em] inline-block h-[0.586em] w-[0.586em]">
           <Seal
             text={seal}
             tone="ink"
@@ -62,7 +71,7 @@ export default function WordmarkBand({
         </span>
       )}
 
-      <span aria-hidden>{after}</span>
+      <span aria-hidden>{splitText(after)}</span>
 
       {/* The wordmark is decorative; the page's real heading is elsewhere. */}
       <span className="sr-only">{text}</span>

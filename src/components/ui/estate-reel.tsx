@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 

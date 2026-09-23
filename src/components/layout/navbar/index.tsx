@@ -71,6 +71,13 @@ export async function Navbar() {
                   ? "/account"
                   : "/api/auth/login?returnTo=/account"
               }
+              // Never prefetched. Signed out, this is a route handler that
+              // mints a fresh PKCE verifier + state cookie and redirects to
+              // Shopify - so a prefetch on every page view ran the login flow
+              // for every visitor, failed CORS on the cross-origin redirect,
+              // and could overwrite the verifier of a sign-in already in
+              // progress in another tab, breaking its callback.
+              prefetch={false}
               aria-label={
                 customerSession.isAuthenticated ? "Account" : "Sign in"
               }

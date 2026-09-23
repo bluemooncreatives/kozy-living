@@ -76,6 +76,12 @@ import {
 } from "./types";
 import { headers } from "next/headers";
 import { revalidateTag } from "next/cache";
+// Per-request memo. The header, the mobile drawer, the search overlay and the
+// homepage's category rail all ask for the menu in one render; the fetch
+// cache would dedupe them in production, but a POST is never deduped by
+// `fetch` itself and development caches nothing, so without this each one
+// was its own round trip.
+import { cache as reactCache } from "react";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import {
   getArticleQuery,
@@ -358,10 +364,16 @@ function reshapeMenuItem(item: ShopifyMenuItemShape): Menu {
 export async function getMenu(handle: string): Promise<Menu[]> {
   const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,
-    // Menus are edited independently of collections in Shopify Admin. Read
-    // them fresh so header changes do not wait for a collection webhook or a
-    // new deployment to appear.
-    cache: "no-store",
+    // On the default TTL like everything else (see SHOPIFY_CACHE_SECONDS):
+    // uncached in development, so an Admin edit shows on refresh, and at most
+    // a minute behind in production. No tag - Shopify sends no webhook for
+    // menus - so the TTL alone is what brings an edit through.
+    //
+    // It was `no-store`, so header edits would appear instantly. The cost was
+    // that the header awaits this outside any Suspense boundary: EVERY page,
+    // on every request, sat on a live Shopify round trip before it could send
+    // its first byte - ~0.5-0.7s of TTFB on a warm cache, on /about-us as
+    // much as on the homepage.
     variables: {
       handle,
     },
@@ -380,7 +392,7 @@ export async function getMenu(handle: string): Promise<Menu[]> {
  * `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` takes priority when set, so a store that
  * uses a third handle needs an env var rather than a code change.
  */
-export async function getPrimaryMenu(): Promise<Menu[]> {
+export const getPrimaryMenu = reactCache(async (): Promise<Menu[]> => {
   const handles = [
     process.env.NEXT_PUBLIC_SHOPIFY_MENU_HANDLE,
     "main-menu",
@@ -398,7 +410,7 @@ export async function getPrimaryMenu(): Promise<Menu[]> {
   }
 
   return [];
-}
+});
 
 export async function getProducts({
   query,

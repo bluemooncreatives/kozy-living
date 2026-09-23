@@ -9,7 +9,7 @@ import {
 import { Fragment, useEffect, useRef } from "react";
 import { useCart } from "./cart-context";
 import { createUrl } from "@/lib/utils";
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import Link from "next/link";
 import Price from "../price";
 import OpenCart from "./open-cart";

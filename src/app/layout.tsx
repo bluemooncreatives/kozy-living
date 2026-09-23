@@ -10,8 +10,10 @@ import CartBar from "@/components/cart/cart-bar";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
 import MotionProvider from "@/components/motion/motion-provider";
 import LoadingScreen from "@/components/motion/loading-screen";
+import RouteProgress from "@/components/motion/route-progress";
 import NewsletterPopup from "@/components/newsletter/newsletter-popup";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { getCart } from "@/lib/shopify";
 import { site } from "@/lib/site";
 
@@ -63,7 +65,7 @@ const baseUrl =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000");
 
-const logoUrl = new URL("/logo/Kozy Logo.png", baseUrl).toString();
+const logoUrl = new URL("/logo/kozy-logo-web.png", baseUrl).toString();
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -73,8 +75,8 @@ const organizationJsonLd = {
   logo: {
     "@type": "ImageObject",
     url: logoUrl,
-    width: 3836,
-    height: 2160,
+    width: 720,
+    height: 405,
   },
 };
 
@@ -86,9 +88,9 @@ export const metadata: Metadata = {
   },
   description: site.description,
   icons: {
-    icon: [{ url: "/logo/Kozy Logo.png", type: "image/png" }],
-    shortcut: ["/logo/Kozy Logo.png"],
-    apple: [{ url: "/logo/Kozy Logo.png", type: "image/png" }],
+    icon: [{ url: "/logo/kozy-logo-web.png", type: "image/png" }],
+    shortcut: ["/logo/kozy-logo-web.png"],
+    apple: [{ url: "/logo/kozy-logo-web.png", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
   openGraph: {
@@ -147,13 +149,14 @@ export default async function RootLayout({
             This applies to the two EXECUTABLE scripts only. The JSON-LD
             above stays a raw tag - see the note on it. */}
 
-        {/* The failure catch for the motion layer. Reveal targets are hidden
-            by CSS; if the layer has not reported in within two seconds, this
-            forces them all visible again. It touches no attribute on <html>,
+        {/* The failure catch for the motion layer. Reveal targets - and the
+            words of every split headline - are hidden by CSS; if the layer
+            has not reported in within two seconds, this forces them all
+            visible again. It touches no attribute on <html>,
             because React reconciles those and a script-added class there is a
             hydration mismatch. */}
         <Script id="kozy-motion-watchdog" strategy="beforeInteractive">
-          {`(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal],[data-reveal-client]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`}
+          {`(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal],[data-reveal-client],[data-split] .split-word,[data-split] .split-unit{opacity:1!important;transform:none!important}[data-split] .split-mask{clip-path:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`}
         </Script>
 
         {/* Sync mobile viewport state into a cookie so server components can
@@ -167,6 +170,11 @@ export default async function RootLayout({
             no dependencies, so nothing about it waits on cart data, on the
             scroll layer, or on a Suspense boundary resolving. */}
         <LoadingScreen />
+        {/* Suspense because it reads the query string, which would otherwise
+            opt every statically rendered route into client rendering. */}
+        <Suspense fallback={null}>
+          <RouteProgress />
+        </Suspense>
         <SmoothScrollProvider>
           <MotionProvider />
           <CartProvider cartPromise={cart}>

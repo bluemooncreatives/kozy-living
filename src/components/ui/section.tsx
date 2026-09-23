@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { splitText } from "@/components/motion/split-text";
 import ActionButton from "./action-button";
 
 /**
@@ -57,6 +58,12 @@ export const displayFace =
  * The size decides the face: xl and lg are major section headings and get
  * Franxurter; md and sm are subheads and cards, and stay on the UI grotesk,
  * where a poster face would only cost legibility.
+ *
+ * The display sizes also enter word by word, each word rising out of its own
+ * mask (`data-split`, run by the motion layer). Subheads do not: at card scale
+ * the effect is noise, and a grid of product cards each writing itself in
+ * would be a lot of motion for no meaning. `split={false}` opts a display
+ * heading out - for one that sits in something already animating as a block.
  */
 export function Headline({
   children,
@@ -64,6 +71,7 @@ export function Headline({
   as: Tag = "h2",
   size = "xl",
   id,
+  split = true,
   className,
 }: {
   children: React.ReactNode;
@@ -71,13 +79,16 @@ export function Headline({
   as?: "h1" | "h2" | "h3" | "p";
   size?: "xl" | "lg" | "md" | "sm";
   id?: string;
+  split?: boolean;
   className?: string;
 }) {
   const isDisplay = size === "xl" || size === "lg";
+  const splitting = isDisplay && split;
 
   return (
     <Tag
       id={id}
+      {...(splitting ? { "data-split": "" } : {})}
       className={clsx(
         "text-balance",
         isDisplay ? displayFace : "serif",
@@ -90,7 +101,7 @@ export function Headline({
         className
       )}
     >
-      {children}
+      {splitting ? splitText(children) : children}
       {count ? (
         <sup className="count-sup" aria-hidden>
           {count}

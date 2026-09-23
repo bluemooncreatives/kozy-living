@@ -182,6 +182,14 @@ drawer, search overlay and homepage category rail all read the Shopify menu via
 hard-coded fallback list silently replaced the real menu for months and shipped
 links to collection handles the store never had — do not reintroduce one.
 
+The menu is on the **same cache TTL as every other Shopify call** (none in dev,
+60s in production) and memoised per request with React `cache()`. It used to
+be `no-store`, and because the header awaits it outside any Suspense boundary,
+every page on every request waited on a live Shopify round trip before sending
+its first byte — warm TTFB measured 0.5–0.7s, now 0.01–0.05s. A menu edit in
+Admin now takes up to a minute to reach production. Do not put it back on
+`no-store`; if instant menu edits ever matter, revalidate a tag instead.
+
 ### Handles vs titles
 
 A **handle** is an identifier that appears in URLs and in Shopify lookups. A
@@ -335,6 +343,48 @@ line.
 URL. Nothing reads them today — every surface renders through `next/image`
 with `fill` — but do not assume they match the bytes you fetched.
 
+### Shopify images skip Next's optimiser entirely — `ShopImage`
+
+`src/components/ui/shop-image.tsx` wraps `next/image` with a loader that asks
+**Shopify's CDN** for each srcset width directly: it resizes at the edge,
+negotiates WebP from the browser's `Accept` header and caches for a year. A
+384px card variant is ~42 KB, fetched straight from the CDN, where the
+optimiser used to pull a multi-MB original through this server to make it.
+**Every component that renders a remote image imports it as `Image` from
+there** (Plate, the rotator, gallery, cart, tiles, search results…).
+
+- Transformed URLs carry their size in the **filename**
+  (`IMG_4114_2048x.png.webp`) and Shopify **ignores** `?width=` on those. The
+  loader rewrites the `_2048x` suffix; `?width=` is only for raw file URLs
+  (the stills hard-coded in `site.ts`). Capped at 2048.
+- It is a wrapper, not `images.loaderFile`: a global custom loader makes
+  next-server 404 `/_next/image`, which every *local* asset still needs.
+- Next 16's `priority` only preloads; it no longer sets `fetchpriority`. The
+  wrapper adds `fetchPriority="high"` for priority images.
+
+### Image reels — `ProductImageRotator`
+
+Every layer of a reel sits in the same box, so every mounted `<img>` is "in
+view" and lazy loading fetches it at once. The reel now **mounts a shot one
+interval before its turn** (on screen + next); it used to mount all of them,
+and also "preloaded" every ORIGINAL with `new Image().src` outside the srcset.
+Together those pulled ~100 photographs before the loading curtain lifted.
+`priority` is passed down from the plate — only the hero tiles are in the
+first viewport — never hard-coded on every reel's first shot.
+
+### Local assets are sized for their largest use
+
+`next/image` without `sizes` builds its srcset from the file's **intrinsic
+width**, so a 1303px icon painted at 80px requested 1920/3840px variants. The
+icons are now ≤256px, `gi-tag.png` is 189x320 (was 2528x4288, 7.8 MB), and the
+header/favicon/JSON-LD use `public/logo/kozy-logo-web.png` (720x405, 56 KB).
+The 3.2 MB masters in `public/logo/` are untouched; do not point anything that
+renders on every page at them.
+
+Fonts ship as subset **WOFF2** (402 KB of TTF → 127 KB). The TTFs stay only
+for the social card, because satori cannot parse WOFF2 — see the note on the
+font block in `layout.tsx`.
+
 ### Shop URL state
 
 `src/lib/shop/filters.ts` — **every** piece of shop state (collection, query,
@@ -353,9 +403,38 @@ attributes scanned from the DOM**, not from wrapper components:
 ```text
 data-reveal         fade + rise on enter
 data-reveal-group   stagger this element's children instead
+data-reveal-media   (inside either) photo settles from scale 1.12 — Plate sets it
+data-split          words rise out of masks — markup from motion/split-text.tsx
 data-magnetic       leans toward the cursor (fine pointers only)
 data-parallax       drifts against scroll, for large photography
+(no attribute)      every .marquee-track speeds up with scroll velocity
 ```
+
+**Split headlines.** `Headline` at `xl`/`lg` splits by default (`split={false}`
+opts out); the hero statements, the bold statement, `WordmarkBand`, the closing
+"shop now" and the footer heading are split by hand with `splitText()`. The
+split is emitted **in the render**, never done at runtime — a runtime splitter
+rewrites text nodes React owns. Components inside a split (e.g. `CircledWord`)
+travel whole as a `.split-unit`. Split by **word, never by glyph**: Franxurter
+has 2,104 kerning pairs and a glyph in its own box cannot be kerned. The mask is
+a `clip-path` in `em` (see the comment in `globals.css`) — not
+`overflow: hidden`, which moves the baseline, and not percentages, which broke
+on `leading-[0.8]`.
+
+**The curtain hands over early.** `LoadingScreen` fires `kozy:loader-exit` and
+drops `data-loader` (scroll + clicks unlock) as the panels *start* to lift; the
+motion layer's first scan runs then, so the first fold arrives while it is
+being uncovered. `kozy:loader-done` follows when the curtain unmounts. Floors:
+1300ms from navigation start **and** 1000ms after first contentful paint (the
+CSS entrance in `.loader-char` is timed against these — move them together).
+It waits for fonts and the images in the first viewport, **not** `window.load`.
+
+**Navigation feedback.** `RouteProgress` (a sage hairline, in the root layout)
+starts on a same-origin link click heard in the *capture* phase — `<Link>`
+cancels the event in its own handler — or a `method="get"` /
+`data-route-progress` form, waits 120ms so prefetched routes never flash it,
+and finishes when the pathname or query commits. `product/[handle]/loading.tsx`
+gives product navigation an instant skeleton.
 
 Reveal targets start hidden **in CSS**, under `prefers-reduced-motion:
 no-preference`, so the hidden state is correct before first paint with no class
@@ -363,18 +442,30 @@ on `<html>`. A head-script watchdog force-shows everything if the motion layer
 never reports in — a JS failure degrades to an unanimated page, never a blank
 one.
 
-### ⚠️ Rule 1 — never put `data-reveal` inside a `Suspense` boundary
+### Rule 1 — the motion layer never touches an unhydrated node
 
-Streamed HTML is in the DOM before React hydrates it. The DOM-scanning motion
-layer can reach that node in the gap and write inline styles React never
-rendered — a genuine hydration mismatch, after which the tree is not patched.
+Streamed HTML is in the DOM before React hydrates it, and an inline style
+written in that gap is a genuine hydration mismatch, after which the tree is
+not patched. This bit twice while it was an authoring rule ("never put
+`data-reveal` inside Suspense").
 
-This has bitten twice. `Spotlight` passes `reveal={false}` for this reason.
-**If a streamed section needs an entrance, run it from inside a client
-component with `useGSAP`** (post-hydration by construction) and ship the markup
-visible so a GSAP failure costs the animation, not the content.
-`StoryBoard` is the worked example, including the "already on screen, don't
-hide it now" guard.
+It is now **enforced in the motion layer**: a node without React's
+`__reactFiber$` key is skipped, left unclaimed, and retried every 100ms
+(bounded). So `data-reveal` inside a streamed section is safe. The old
+workarounds — `Spotlight`'s `reveal={false}`, `StoryBoard` running its own
+`useGSAP` entrance — still work and were left alone. That key is a React
+internal: if reveals ever stop firing after a React upgrade, check it first.
+
+### Rule 1b — start states before paint, triggers a frame later
+
+On a route change the scan runs inside `useGSAP`'s layout effect, so start
+states are on before the new page paints (it used to be a rAF late: a group
+painted visible, vanished, then animated in). Triggers are armed **one frame
+later**, because Next resets the scroll after this effect and a trigger armed
+against the old scroll position fires for everything above it at once.
+Everything is created through `contextSafe`, so `revertOnUpdate` really does
+clean up — triggers created in a rAF outside the context used to leak across
+the whole session.
 
 ### Rule 2 — the DOM is watched, not scanned once
 
@@ -504,14 +595,16 @@ hero's shorter "real rest" was only ~17% short and nobody had noticed.
 
 `npm run dev` + Playwright (already in `node_modules`, no install needed).
 
-1. **The loading curtain** holds the page up to 5.6s cold (`MIN_MS` 3200 /
-   `MAX_MS` 5600 in `components/motion/loading-screen.tsx`) and **swallows
-   clicks**. Do **not** use a fixed wait — under several browser contexts in one
-   run it overruns and a click silently does nothing, which reads exactly like a
-   dead control. Wait for it to leave:
+1. **The loading curtain** holds the page ~1.3–3s cold (`MIN_MS` /
+   `MIN_VISIBLE_MS` / `MAX_MS` in `components/motion/loading-screen.tsx`).
+   `[data-loader]` is dropped as the panels *start* to lift — clicks pass
+   through from then — but the panels stay on screen ~1.2s more. Do **not**
+   use a fixed wait. For interaction wait on the attribute; for a screenshot
+   wait for the element itself:
 
    ```js
-   await page.waitForFunction(() => !document.querySelector("[data-loader]"));
+   await page.waitForFunction(() => !document.querySelector("[data-loader]")); // clickable
+   await page.waitForFunction(() => !document.querySelector(".loader"));       // fully gone
    ```
 
 2. **The newsletter popup** fires 15s after arrival and intercepts every tap
@@ -534,7 +627,12 @@ hero's shorter "real rest" was only ~17% short and nobody had noticed.
    still listening; and a killed session leaves a lock so it refuses to start,
    naming a **dead** PID. Check the port
    (`netstat -ano | Select-String ":3000"`) rather than believing either.
-6. **Never leave two dev servers running against this repo.** Turbopack keeps a
+6. **The viewport-cookie bootstrap reloads a first visit** whose width
+   disagrees with its user agent (e.g. a 390px headless Chrome). A check at a
+   mobile width tears down mid-run ("Execution context was destroyed") unless
+   the cookie is preset:
+   `context.addCookies([{ name: "kozy_is_mobile", value: "1", url }])`.
+7. **Never leave two dev servers running against this repo.** Turbopack keeps a
    persistent cache in `.next`, and a second server on another port writes to
    the same one. The symptoms do not name the cause:
    - `Persisting failed: Another write batch or compaction is already active`
@@ -556,9 +654,6 @@ it.
 
 ## 10. Known pre-existing issues (not yours unless asked)
 
-- **`npm run lint` fails** on
-  `src/components/ui/product-image-rotator.tsx:38` — `react-hooks/refs`,
-  "Cannot access refs during render". Pre-existing; `npm run build` is clean.
 - **A few Shopify originals are too big for Shopify itself to resize.** This
   was "the image optimiser 500s everywhere"; most of it is fixed — see
   *Image sizing* in §6 — but files around 18 MB come back untransformed and
@@ -569,15 +664,14 @@ it.
 - `README.md` is stale — see §1.
 - `scripts/` is empty despite a commit adding Shopify test scripts.
 - **There are two GI tag assets, on purpose.** `public/icons/gi-tag.png` is
-  the original: 2528x4288 and **7.64 MB**, with the badge occupying only the
-  middle ~54% of a mostly-transparent canvas — so at any height you set, the
-  mark renders about half the box and sits off-centre.
-  `public/icons/gi-tag-mark.png` is that artwork trimmed to its ink box
-  (2184x2329, nearly square) and resized, at **299 KB**. The product buy panel
-  uses the trimmed one; `gallery.tsx` and `product-card.tsx` still position
-  the original by hand and were left alone. Move them over when you next touch
-  them — that file is also a prime candidate for the image-optimiser timeouts
-  noted above.
+  the original artwork, with the badge occupying only the middle ~54% of a
+  mostly-transparent canvas — so at any height you set, the mark renders about
+  half the box and sits off-centre. It has been resized to 189x320 (25 KB; it
+  was 2528x4288 and 7.8 MB) with the same proportions, so the card's hand
+  positioning is unchanged. `public/icons/gi-tag-mark.png` is that artwork
+  trimmed to its ink box (now 240x256). The product buy panel uses the trimmed
+  one; `product-card.tsx` still positions the original by hand. Move it over
+  when you next touch it.
 - **The GI mark is shown on every product, unconditionally** — in the gallery,
   on the card, and now beside the price. A GI registration is a legal
   certification for *Jodhpur block print* specifically, so this is a real
@@ -586,7 +680,8 @@ it.
   tag. Flagged, not changed: all three placements predate and match each
   other.
 - **The PWA manifest has no usable icon.** `src/app/manifest.ts` points its
-  only icon at `/logo/Kozy Logo.png` — 3836x2160, non-square, 3.18 MB. Chrome
+  only icon at `/logo/kozy-logo-web.png` — 720x405 and non-square (it was the
+  3.18 MB master; the weight is fixed, the shape is not). Chrome
   wants a square 192 and a square 512 to offer an install prompt, so it
   currently offers none. This needs real square assets cut from the mark; it
   is not something to fake. The colours in that file were the dead palette too
@@ -602,7 +697,14 @@ it.
   here; one that records why the obvious approach failed is the house style.
 - Copy goes in `src/lib/site.ts`, never inlined in JSX.
 - New photographic surfaces go through `Plate`; new CTAs through
-  `ActionButton`; new rails through `.rail` or `Carousel`.
+  `ActionButton`; new rails through `.rail` or `Carousel`. A remote image
+  outside `Plate` imports `Image` from `@/components/ui/shop-image`.
+- **Never point a `<Link>` at a route handler.** `<Link>` prefetches, and a
+  prefetch is a real GET: `/api/auth/logout` deletes every customer cookie on
+  GET, so the "Sign out" `ActionButton` signed customers out the moment it
+  scrolled into view in production, and the header's sign-in link minted a new
+  PKCE verifier on every page view. `ActionButton` now renders a plain `<a>`
+  for `/api/` hrefs; anywhere else, use `<a>` or `prefetch={false}`.
 - Layouts that *reorder* between breakpoints get an explicit
   `grid-template-areas` map in `globals.css` (`.hero-bento`, `.story-grid`),
   not a pile of `order-*` utilities.

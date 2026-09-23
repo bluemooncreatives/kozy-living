@@ -13,6 +13,7 @@ import BackToTop from "@/components/ui/back-to-top";
 import { displayFace } from "@/components/ui/section";
 import clsx from "clsx";
 import { footerColumns, legalLinks, site } from "@/lib/site";
+import { splitText } from "@/components/motion/split-text";
 
 /**
  * Footer: the newsletter line, four tracked-out link columns with the rotating
@@ -66,8 +67,8 @@ export default async function Footer() {
       {/* Newsletter */}
       <div className="shell rule-b flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between md:py-14">
         <div>
-          <h2 className={clsx(displayFace, "text-display-lg")}>
-            Join the inner circle
+          <h2 data-split="" className={clsx(displayFace, "text-display-lg")}>
+            {splitText("Join the inner circle")}
           </h2>
           <p className="body-mono mt-3 max-w-measure">
             Styling notes from the studio and first look at every new piece.
@@ -77,7 +78,10 @@ export default async function Footer() {
       </div>
 
       {/* Link columns + the seal */}
-      <div className="shell relative grid grid-cols-2 gap-x-8 gap-y-10 py-10 md:grid-cols-4 md:py-14 lg:pr-40">
+      <div
+        data-reveal-group
+        className="shell relative grid grid-cols-2 gap-x-8 gap-y-10 py-10 md:grid-cols-4 md:py-14 lg:pr-40"
+      >
         {columns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
             <p className="eyebrow text-muted">{column.title}</p>

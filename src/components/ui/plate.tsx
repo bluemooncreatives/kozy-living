@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import CornerArrow from "./arrow-badge";
 import ClipRotator from "./clip-rotator";
 import ProductImageRotator from "./product-image-rotator";
@@ -151,7 +151,15 @@ export default function Plate({
           the arrow button is a sibling further down rather than a child: put
           it in here and the notch would erase the very button it is cut for. */}
       <div className={clsx("plate absolute inset-0", arrow && "notch-tr")}>
+        {/* `data-reveal-media`: when the motion layer reveals this plate - or
+            the card or group it sits in - the photograph settles from a slight
+            push-in to rest while the frame rises, so a plate arrives as a
+            picture coming into focus rather than a box fading up. It is the
+            WRAPPER that scales, never the media: the <img>/<video> carries the
+            hover push as a CSS transition, and two owners of one transform is
+            how a hover dies and every tweened frame drags through 700ms. */}
         <div
+          data-reveal-media=""
           {...(parallax ? { "data-parallax": String(parallax) } : {})}
           className={clsx(
             "absolute inset-0",
@@ -166,6 +174,7 @@ export default function Plate({
               delay={galleryDelay}
               interval={galleryInterval}
               showIndicators={showIndicators}
+              priority={priority}
               className={mediaClass}
             />
           ) : gallery?.length ? (

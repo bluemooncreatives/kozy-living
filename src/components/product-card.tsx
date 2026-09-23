@@ -102,6 +102,10 @@ export default function ProductCard({
   const [added, setAdded] = useState(false);
   const [result, setResult] = useState<CartActionState>(null);
   const [motionReady, setMotionReady] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  // Set by any manual paging, cleared when the pointer leaves. Without it the
+  // hover preview would win over the shopper paging back to the first shot.
+  const [paged, setPaged] = useState(false);
 
   // Product rails can arrive through a streamed Suspense boundary. Opting in
   // to the global motion layer from an effect guarantees GSAP never writes an
@@ -134,22 +138,35 @@ export default function ProductCard({
   const page = (e: React.MouseEvent, by: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setShot((current) => {
-      const len = gallery.length || 1;
-      return (((current + by) % len) + len) % len;
-    });
+    // From the shot ON SCREEN, not the stored one: under a hover those differ
+    // (see `activeIndex`), and stepping from the stored 0 would land on the
+    // shot the hover is already showing - a first click that does nothing.
+    const len = gallery.length || 1;
+    setPaged(true);
+    setShot((((activeIndex + by) % len) + len) % len);
   };
 
   const goToShot = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
+    setPaged(true);
     setShot(index);
   };
 
-  const activeIndex =
+  const pagedIndex =
     gallery.length > 0
       ? ((shot % gallery.length) + gallery.length) % gallery.length
       : 0;
+
+  // A mouse resting on an untouched card turns it to its second shot - the
+  // plate already stacks every shot and cross-fades between them, so this is
+  // state, not another image. Only while the shopper has not paged the card
+  // themselves: their choice wins over the hover. Mouse only - on touch the
+  // pointerenter that precedes a tap would flip the photograph mid-tap.
+  const activeIndex =
+    hovered && !paged && pagedIndex === 0 && gallery.length > 1
+      ? 1
+      : pagedIndex;
 
   function add() {
     if (!selectedVariant || !isAvailable || pending) return;
@@ -194,6 +211,13 @@ export default function ProductCard({
           ? { "data-reveal": "" }
           : { "data-reveal-client": "" }
         : {})}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") setHovered(true);
+      }}
+      onPointerLeave={() => {
+        setHovered(false);
+        setPaged(false);
+      }}
       className={clsx(
         "group flex h-full flex-col rounded-plate transition-all duration-300 hover:border-ink/20 hover:shadow-sm",
         className,
@@ -204,7 +228,7 @@ export default function ProductCard({
         <Plate
           src={gallery.length ? undefined : product.featuredImage?.url}
           gallery={gallery.length ? gallery : undefined}
-          galleryIndex={shot}
+          galleryIndex={activeIndex}
           alt={product.featuredImage?.altText || product.title}
           aspect="4/5"
           placeholderText={product.title.split(" ")[0] ?? "kozy"}
@@ -227,8 +251,8 @@ export default function ProductCard({
             <NextImage
               src="/icons/gi-tag.png"
               alt="GI registered craft"
-              width={2528}
-              height={4288}
+              width={189}
+              height={320}
               className="h-10 w-auto sm:h-11"
             />
             {!product.availableForSale || badge ? (

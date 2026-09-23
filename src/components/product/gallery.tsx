@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import clsx from "clsx";
 import { useProduct, useUpdateURL } from "./product-context";
 

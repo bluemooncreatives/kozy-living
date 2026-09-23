@@ -23,6 +23,7 @@ import CircledWord from "@/components/ui/circled-word";
 import WordmarkBand from "@/components/ui/wordmark-band";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
+import { splitText } from "@/components/motion/split-text";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import CollectionShowcase, {
   CollectionShowcaseFallback,
@@ -220,10 +221,13 @@ function Hero() {
           <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-3.5 md:inset-x-5 md:bottom-5 md:gap-4">
             {/* Mobile-only textual context in crisp white */}
             <div className="flex flex-col gap-2 lg:hidden max-w-lg">
-              <h2 className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white drop-shadow-sm">
+              <h2
+                data-split=""
+                className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white drop-shadow-sm"
+              >
                 {statement.lines.map((line) => (
                   <span key={line} className="block">
-                    {ringWord(line, statement.circled, "white")}
+                    {splitText(ringWord(line, statement.circled, "white"))}
                   </span>
                 ))}
               </h2>
@@ -251,10 +255,10 @@ function Hero() {
 
         {/* --------------------------------------------------------- saying */}
         <div className="bento-say panel hidden lg:flex flex-col justify-between gap-6 p-6 md:p-8 lg:p-9">
-          <h2 className={clsx(displayFace, "text-display-lg")}>
+          <h2 data-split="" className={clsx(displayFace, "text-display-lg")}>
             {statement.lines.map((line) => (
               <span key={line} className="block">
-                {ringWord(line, statement.circled)}
+                {splitText(ringWord(line, statement.circled))}
               </span>
             ))}
           </h2>
@@ -340,6 +344,8 @@ async function HeroProductTiles() {
           galleryDelay={index * 1600}
           galleryInterval={4000}
           showIndicators={true}
+          // First viewport on desktop - the only reels on the page that are.
+          priority
           tone={index === 0 ? 0 : 3}
           tag={tile.tag}
           placeholderText={index === 0 ? "kraft" : "rest"}
@@ -452,6 +458,7 @@ async function BoldStatement() {
       <div className="lg:grid lg:grid-cols-12 lg:items-end lg:gap-x-4">
         <h2
           id="statement"
+          data-split=""
           className={clsx(
             displayFace,
             "text-display-xl lg:col-span-7 lg:col-start-3",
@@ -459,7 +466,7 @@ async function BoldStatement() {
         >
           {boldStatement.title.map((line) => (
             <span key={line} className="block">
-              {line}
+              {splitText(line)}
             </span>
           ))}
         </h2>
@@ -989,9 +996,10 @@ function ClosingBand() {
         <Link
           href={ctaBand.href}
           aria-label={ctaBand.wordmark}
+          data-split=""
           className="wordmark absolute inset-x-0 bottom-0 z-10 block translate-y-[46%] select-none whitespace-nowrap text-center leading-[0.78] text-ink"
         >
-          {ctaBand.wordmark}
+          {splitText(ctaBand.wordmark)}
         </Link>
 
         <div className="absolute bottom-0 hidden md:block right-4 z-20 translate-y-[28%] md:right-12">

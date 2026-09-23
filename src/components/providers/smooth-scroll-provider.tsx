@@ -15,7 +15,7 @@ const options: LenisOptions = {
   autoToggle: true,
   smoothWheel: true,
   syncTouch: false,
-  lerp: 0.09,
+  lerp: 0.1,
   wheelMultiplier: 1,
   touchMultiplier: 1,
   orientation: "vertical",

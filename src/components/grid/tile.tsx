@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import Image from "next/image";
+import Image from "@/components/ui/shop-image";
 import Label from "../label";
 
 /**

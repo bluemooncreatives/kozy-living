@@ -596,6 +596,41 @@
 
   .action-btn-label {
     @apply whitespace-nowrap;
+    /* The slot the label rolls through. A flex item, so the clip does not
+       move its baseline - the pill centres its children. */
+    display: inline-block;
+    overflow: hidden;
+  }
+
+  /* The label roll. The copy beneath is generated content with an EMPTY
+     alternative text (`/ ""`): without it, `content: attr()` is folded into
+     the accessible name and every button would announce its label twice. The
+     plain declaration before it is the fallback for engines that do not
+     parse the alt-text form. */
+  .action-btn-roll {
+    position: relative;
+    display: inline-block;
+    transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .action-btn-roll::after {
+    content: attr(data-text);
+    content: attr(data-text) / "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :where(.action-btn, .action-btn-solid, .action-btn-glass):hover .action-btn-roll {
+      transform: translateY(-100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :where(.action-btn, .action-btn-solid, .action-btn-glass):focus-visible .action-btn-roll {
+      transform: translateY(-100%);
+    }
   }
 
   .action-btn-icon {
@@ -1193,6 +1228,52 @@
   will-change: auto;
 }
 
+/* ---------------------------------------------------------------------------
+   Split headlines (`data-split`, markup from `motion/split-text.tsx`)
+
+   Each word rises out of its own slot. The slot is a `clip-path`, NOT
+   `overflow: hidden`: an inline-block that clips with overflow takes its
+   bottom margin edge as its baseline, which lifts every masked word off the
+   line by its descent. A clip path changes nothing about layout, so the
+   heading sets exactly as it would unsplit.
+
+   EVERYTHING HERE IS IN `em`, on purpose. Headings on this site run from
+   `leading-[0.8]` (the product title) to 1.25, so a percentage of the word's
+   own box is a different distance on every one - at 0.8 a 140% drop left
+   the tops of the hidden glyphs showing through the bottom of the slot. In
+   em the geometry is fixed to the type: ink reaches at most ~0.2em above the
+   line box and the slot opens 0.25em below it, so a 1.6em drop always clears.
+
+   The insets are negative so ascenders, descenders and overhangs are never
+   trimmed while the word is at rest; the clip comes off entirely once the
+   reveal has played.
+--------------------------------------------------------------------------- */
+
+.split-mask {
+  display: inline-block;
+  clip-path: inset(-0.35em -0.2em -0.25em -0.2em);
+}
+
+.split-word,
+.split-unit {
+  display: inline-block;
+}
+
+[data-split][data-reveal-done] .split-mask {
+  clip-path: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-split]:not([data-reveal-done]) .split-word {
+    transform: translateY(1.6em);
+  }
+
+  [data-split]:not([data-reveal-done]) .split-unit {
+    opacity: 0;
+    transform: translateY(0.4em);
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -1241,6 +1322,13 @@ html:has([data-loader]) body {
      mobile-menu dialogs are z-[1000], so anything lower leaves the header
      painting straight over the curtain. Nothing outranks a loading screen. */
   z-index: 1100;
+}
+
+/* The attribute is dropped as the panels START to lift (see `unlock` in the
+   component), so the page takes clicks during the exit instead of after it.
+   A departing curtain that still swallows a click reads as a dead page. */
+.loader:not([data-loader]) {
+  pointer-events: none;
 }
 
 .loader-panel {
@@ -1296,7 +1384,7 @@ html:has([data-loader]) body {
      parse - longest on the slow connection the curtain exists to cover. As a
      stylesheet animation it starts on the first painted frame, with no
      JavaScript involved. GSAP only ever takes over for the exit. */
-  animation: loader-mark 3.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: loader-mark 2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes loader-mark {
@@ -1346,10 +1434,14 @@ html:has([data-loader]) body {
      the type breathing. The idle's stagger is wider than the arrival's, so the
      ripple travels at a different rate than the entrance did and the two do
      not look like one animation restarting. */
+  /* Timed against the curtain's `MIN_MS` (1300): ten glyphs at 0.04s apart
+     plus a 0.9s rise put the last one down at ~1.3s after first paint. Slow
+     this down and the floor has to move with it, or the panels start
+     leaving while the word is still being written. */
   animation:
-    loader-char 1.25s cubic-bezier(0.16, 1, 0.3, 1) both,
+    loader-char 0.9s cubic-bezier(0.16, 1, 0.3, 1) both,
     loader-char-idle 2.4s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 0.05s), calc(1.25s + var(--i, 0) * 0.075s);
+  animation-delay: calc(var(--i, 0) * 0.04s), calc(0.9s + var(--i, 0) * 0.075s);
 }
 
 @keyframes loader-char {
