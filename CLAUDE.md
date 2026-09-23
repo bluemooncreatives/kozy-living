@@ -130,6 +130,27 @@ not convenience:
 - `.rail` sets `scroll-padding-inline: var(--gutter)` so the first cell lands
   on the page grid rather than flush to the screen edge.
 
+### The social card renders outside the browser
+
+`src/components/opengraph-image.tsx` has no access to `globals.css` or to
+`next/font`, so it repeats the palette by hand - which is exactly how it spent
+months drawn in the *previous* project's colours (espresso ground, amber
+accent) with the title set in a generic `serif` this brand does not own.
+`.serif` here is the UI face at bold, not a serif, which is very likely how
+that got in. It is now indigo / oat / sage, set in Franxurter.
+
+**`next/og` cannot use Plus Jakarta Sans.** It rasterises through satori,
+which parses fonts with opentype and does not handle **variable** fonts -
+handing it one fails deep in the parser and, because the image is streamed,
+surfaces as a 500 on the route rather than as a catchable error. Both Jakarta
+files here are variable. `staticFont()` in that file reads the sfnt table
+directory and refuses anything carrying `fvar`, so a variable face degrades to
+the default rather than taking the route down.
+
+If you touch the palette, these two files do not follow automatically:
+`src/components/opengraph-image.tsx` and `src/app/manifest.ts` (whose
+`theme_color` tints the browser chrome on Android).
+
 ### Signature motifs
 
 The giant lowercase `.wordmark` bleeding past its frame · the rotating sage
@@ -456,6 +477,16 @@ hero's shorter "real rest" was only ~17% short and nobody had noticed.
    still listening; and a killed session leaves a lock so it refuses to start,
    naming a **dead** PID. Check the port
    (`netstat -ano | Select-String ":3000"`) rather than believing either.
+6. **Never leave two dev servers running against this repo.** Turbopack keeps a
+   persistent cache in `.next`, and a second server on another port writes to
+   the same one. The symptoms do not name the cause:
+   - `Persisting failed: Another write batch or compaction is already active`
+     repeating in the log, and
+   - **metadata routes 404 for no reason** - `/manifest.webmanifest` served a
+     404 from a corrupted cache while `next build` happily listed it as a
+     static route.
+   Check the port before starting one, and if the cache is already poisoned:
+   stop every server, `rm -rf .next`, start one.
 
 Check real breakpoints, not just two. The sweep that caught the landscape-card
 bug: 320 / 360 / 390 / 414 / 480 / 540 / 600 / 640 / 700 / 767 / 768 / 820 /
@@ -476,6 +507,12 @@ it.
   `IMG_1695.png`. Affects the whole site, not one section.
 - `README.md` is stale — see §1.
 - `scripts/` is empty despite a commit adding Shopify test scripts.
+- **The PWA manifest has no usable icon.** `src/app/manifest.ts` points its
+  only icon at `/logo/Kozy Logo.png` — 3836x2160, non-square, 3.18 MB. Chrome
+  wants a square 192 and a square 512 to offer an install prompt, so it
+  currently offers none. This needs real square assets cut from the mark; it
+  is not something to fake. The colours in that file were the dead palette too
+  and have been fixed.
 
 ---
 
