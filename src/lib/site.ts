@@ -144,7 +144,7 @@ export const boldStatement = {
  * `LookbookDeck`), so reordering this list never changes the shape.
  *
  * `handle` does two jobs, as in the story band: it is the destination (only
- * when the collection is live - two of the first page's never existed) and,
+ * when the collection is live - a dead handle opens the full catalogue) and,
  * where `images` is empty, the source of the plate's photography, borrowed
  * from that collection's products. Configured stills win over live ones.
  *
@@ -156,10 +156,24 @@ export type LookbookEntry = {
   title: string;
   description: string;
   handle: string;
+  /**
+   * A product handle, for a card that is ONE Kompanion rather than a shelf -
+   * the His & Her kit is a product in Shopify, not a collection. When set, the
+   * card links to that product and borrows its photographs; `handle` is only
+   * the fallback destination if the product has been removed.
+   */
+  product?: string;
   images: readonly string[];
 };
 
 export const lookbook: readonly LookbookEntry[] = [
+  {
+    tag: "dabu",
+    description: "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
+    title: "Krafted by Kozy",
+    handle: "crafted-by-kozy",
+    images: [],
+  },
   {
     tag: "waffle",
     description: "Everyday waffle-weave staples in easy, honest cotton.",
@@ -173,16 +187,20 @@ export const lookbook: readonly LookbookEntry[] = [
     ],
   },
   {
-    tag: "slub cotton",
-    description: "Slub-cotton seating built soft, slouchy and low to the ground.",
-    title: "Kloud Series",
-    handle: "kloud",
-    images: [
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0049.png?v=1788636351",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1884.jpg?v=1788636350",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
-    ],
+    tag: "pets",
+    description: "Carriers, seating and clothing for the companion who shares your slow hours.",
+    title: "Pet Kollection",
+    handle: "pet-collection",
+    images: [],
+  },
+  {
+    tag: "rituals",
+    description: "A his & hers set in natural cotton, Natural Indigo and Tulsi - robes, slippers and more.",
+    title: "His & Her Ritual Kit",
+    // A single Kompanion rather than a shelf - see `product` on the type.
+    product: "neelu-tulsi-his-hers-ritual-kit",
+    handle: "ritual-kits",
+    images: [],
   },
   {
     tag: "dabu",
@@ -195,25 +213,6 @@ export const lookbook: readonly LookbookEntry[] = [
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/5A7D8EAA-E90A-4449-B0C0-4C7C5CA38535.jpg?v=1788636170",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/DB2B40CD-1A34-48FC-98D5-63220DD3DD2B.jpg?v=1788636171",
     ],
-  },
-  {
-    tag: "linen blend",
-    description: "Low floor seating in linen blend, made for gathering on the ground.",
-    title: "Floor Lounge",
-    handle: "kozy-lounge",
-    images: [
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1032.jpg?v=1788636331",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1915.jpg?v=1788636331",
-    ],
-  },
-  {
-    tag: "dabu",
-    description: "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
-    title: "Krafted by Kozy",
-    handle: "crafted-by-kozy",
-    images: [],
   },
   {
     tag: "waffle",

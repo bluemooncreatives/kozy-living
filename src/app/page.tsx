@@ -6,6 +6,7 @@ import {
   getCollectionProducts,
   getCollections,
   getPrimaryMenu,
+  getProduct,
   getProducts,
 } from "@/lib/shopify";
 import { shopCategories } from "@/lib/menu";
@@ -408,18 +409,31 @@ async function BoldStatement() {
     ),
   );
 
-  /* Entries without configured stills borrow their collection's product
-     photography. Each fetch is caught on its own: an outage costs a plate its
-     photograph (it falls back to Plate's toned placeholder), never the
-     section - and this section is not behind Suspense, so it must not throw. */
-  const borrowed = await Promise.all(
+  /* A card that names a `product` is one Kompanion, not a shelf: it links to
+     that product and shows its photographs. Resolved first, because whether
+     the product still exists decides both the link and the pictures. */
+  const products = await Promise.all(
     lookbook.map((entry) =>
-      !entry.images.length && live.has(entry.handle)
-        ? getCollectionProducts({ collection: entry.handle })
-            .then((products) => galleryFor(products, 12))
-            .catch(() => [])
-        : [],
+      entry.product ? getProduct(entry.product).catch(() => undefined) : undefined,
     ),
+  );
+
+  /* Entries without configured stills borrow their collection's product
+     photography - or their own product's. Each fetch is caught on its own: an
+     outage costs a plate its photograph (it falls back to Plate's toned
+     placeholder), never the section - and this section is not behind
+     Suspense, so it must not throw. */
+  const borrowed = await Promise.all(
+    lookbook.map((entry, index) => {
+      if (entry.images.length) return [];
+      const product = products[index];
+      if (product) return galleryFor([product], 12);
+      return live.has(entry.handle)
+        ? getCollectionProducts({ collection: entry.handle })
+            .then((items) => galleryFor(items, 12))
+            .catch(() => [])
+        : [];
+    }),
   );
 
   /* This store's collections overlap heavily - Slippers holds the Kessentials
@@ -448,7 +462,11 @@ async function BoldStatement() {
       title: entry.title,
       tag: entry.tag,
       description: entry.description,
-      href: live.has(entry.handle) ? `/search/${entry.handle}` : "/search",
+      href: products[index]
+        ? `/product/${products[index]!.handle}`
+        : live.has(entry.handle)
+          ? `/search/${entry.handle}`
+          : "/search",
       images,
     };
   });
