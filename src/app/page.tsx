@@ -27,6 +27,7 @@ import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import CollectionShowcase, {
   CollectionShowcaseFallback,
 } from "@/components/home/collection-showcase";
+import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
 import {
   getColourEntries,
   shopColourHref,
@@ -64,8 +65,15 @@ export const metadata = {
  * Homepage. Section order follows the reference layout top to bottom:
  * hero frame + wordmark → meta rule → bold statement + staggered lookbook →
  * collection showcase → category pills → bestsellers → shop by colour →
- * experience band → material strip → testimonial → rest ticker → new
- * arrivals → spotlight → guides → journal → closing "shop now" band.
+ * experience band → material strip → the story band → testimonial → rest
+ * ticker → new arrivals → spotlight → guides → journal → closing "shop now"
+ * band.
+ *
+ * The story band sits where it does on purpose: the material strip names the
+ * fibres, the band explains who works them and why, and the quote that
+ * follows is the studio's own line. It is also the one wide two-column block
+ * on the page, so the hairline strip above it keeps it off the back of the
+ * experience band's photography.
  */
 export default function Home() {
   return (
@@ -92,6 +100,11 @@ export default function Home() {
 
       <ExperienceBand />
       <MaterialStrip />
+
+      <Suspense fallback={<StoryBandFallback />}>
+        <StoryBand />
+      </Suspense>
+
       <Testimonial />
       <RestTicker />
 

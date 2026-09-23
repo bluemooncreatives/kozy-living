@@ -252,6 +252,113 @@ export const brandPartners = [
 ] as const;
 
 /**
+ * The homepage story band - the brand's own section, sitting between the
+ * fibre strip and the studio quote.
+ *
+ * FOUR PILLARS, and every claim here is one the brand already makes on
+ * `/about-us` (see `whyKraft` and `sustainability`): the fibre, the makers,
+ * the print and the purpose. Nothing invented, nothing certified that has not
+ * been earned.
+ *
+ * `collection` is a Shopify handle and does two jobs: the card borrows that
+ * collection's live product photography, and - only when the handle actually
+ * exists on the store - the card links into it. A handle the merchant has not
+ * built falls back to `href` and to the stills below, so the band never ships
+ * a dead link or an empty frame.
+ *
+ * `lede.accent` is set in the UI face's true italic, in sage. Franxurter has
+ * one upright weight and no italic, so the emphasis lives on Jakarta - and
+ * sage measures 6.50 on the indigo scrim these cards carry, which is where
+ * flat sage is allowed to hold type.
+ */
+export const aboutStory = {
+  eyebrow: "Our story",
+  /**
+   * Broken by hand, and kept SHORT on purpose: this heading sets in Franxurter
+   * inside the narrow left column of a two-column band, where a long line
+   * simply rewraps and the hand-set rag stops meaning anything. The ellipse
+   * loops the phrase below, so keep it verbatim and keep it on one line.
+   */
+  title: ["Behind your", "quietest hour"],
+  circled: "quietest hour",
+  body: "Kozy Living began with one idea: you don't need to add more to your day. Everything we make is designed in-house, worked in 100% natural fibres, and made with craft clusters across India - so the ten minutes you already take feel like a ritual rather than a gap.",
+  /** Sits under the meter on wide screens, where the left column has room. */
+  meterNote:
+    "Four things we don't compromise on - the cloth, the hands, the print, and what the Kompanion is actually for.",
+  primary: { label: "Read our story", href: "/about-us" },
+  secondary: { label: "Meet the Kompanions", href: "/search" },
+  /** The panel that closes the rail - see the note in `story-board.tsx`. */
+  closing: {
+    label: "The long version",
+    title: "Everything behind the cloth",
+  },
+  pillars: [
+    {
+      index: "01",
+      kicker: "The cloth",
+      lede: { lead: "Natural fibres,", accent: "only" },
+      body: "Cotton waffle weave, slub cotton, percale, linen blends and wool - consciously sourced, including surplus fabric kept in use.",
+      cta: "See the weaves",
+      collection: "kessentials",
+      href: "/about-us",
+      alt: "Waffle weave and slub cotton Kompanions folded on the studio table.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1694_d0fd0a48-49cb-46ac-a8ec-fbf065b857f6.jpg?v=1788636341",
+      ],
+    },
+    {
+      index: "02",
+      kicker: "The hands",
+      lede: { lead: "Made with", accent: "craft clusters" },
+      body: "Designed in-house by Khushi Faruqi, then made in collaboration with craft clusters across India - artisanal processes, not volume machinery.",
+      cta: "Meet the collective",
+      /* No handle: the makers are not a shelf. This card always goes to the
+         story, and always uses the studio stills. */
+      collection: null,
+      href: "/about-us",
+      alt: "Cloth on the studio table part-way through a hand-block print run.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1880.jpg?v=1788636348",
+      ],
+    },
+    {
+      index: "03",
+      kicker: "The print",
+      lede: { lead: "Dabu,", accent: "block by block" },
+      body: "A mud-and-gum resist is stamped onto the cloth by hand before it ever meets the dye, so no two repeats are identical.",
+      cta: "See Dabu pieces",
+      collection: "dabu-printed-pillows",
+      href: "/blogs",
+      alt: "A Dabu hand-block print in indigo, close on the weave.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1895_c94dd5b4-daca-47b9-94aa-d5aa31527cd5.jpg?v=1788636351",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/CEDD7B20-D83F-4050-9CEB-D693C7AE6269.jpg?v=1788636170",
+      ],
+    },
+    {
+      index: "04",
+      kicker: "The point",
+      lede: { lead: "Used,", accent: "not looked at" },
+      body: "Every Kompanion is built multipurpose and made to be leaned on daily - which is why we don't call them decor.",
+      cta: "Shop Kompanions",
+      collection: "kozy-lounge",
+      href: "/search",
+      alt: "A floor lounge layered with biscuit pillows and a linen blend throw.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
+      ],
+    },
+  ],
+} as const;
+
+/**
  * The dark quote card. This is the brand's own closing line, so it is
  * attributed to the studio rather than to a named person - putting invented
  * words in a real founder's mouth is not a thing a storefront should do.

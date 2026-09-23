@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 import { Navbar } from "@/components/layout/navbar";
@@ -112,29 +113,47 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${franxurter.variable} ${jakarta.variable}`}>
       <head>
+        {/* STAYS a raw <script>. `next/script` does not emit a real script
+            element into the server HTML - it pushes the content into a
+            `self.__next_s` array for its own runtime to inject on the client -
+            and structured data that only exists after JavaScript runs is
+            structured data a crawler may never read. This one is data, not
+            code, so it has nothing to execute and nothing to gain. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
           }}
         />
+        {/* The two bootstrap scripts go through `next/script` rather than a
+            bare <script> element.
+
+            A raw <script> in a component tree only ever executes from the
+            server-rendered HTML - React does not run one it renders on the
+            client - and React 19 now warns about exactly that ("Encountered a
+            script tag while rendering React component"). `beforeInteractive`
+            hands them to Next's own script pipeline, which injects them into
+            the initial document ahead of hydration: the same moment they ran
+            before, minus the warning. Each needs a stable `id` so Next can
+            dedupe it across navigations.
+
+            This applies to the two EXECUTABLE scripts only. The JSON-LD
+            above stays a raw tag - see the note on it. */}
+
         {/* The failure catch for the motion layer. Reveal targets are hidden
             by CSS; if the layer has not reported in within two seconds, this
             forces them all visible again. It touches no attribute on <html>,
             because React reconciles those and a script-added class there is a
             hydration mismatch. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal],[data-reveal-client]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`,
-          }}
-        />
+        <Script id="kozy-motion-watchdog" strategy="beforeInteractive">
+          {`(function(){try{setTimeout(function(){if(window.__motionReady)return;var s=document.createElement('style');s.textContent='[data-reveal],[data-reveal-client]{opacity:1!important;transform:none!important}';document.head.appendChild(s)},2000)}catch(e){}})()`}
+        </Script>
+
         {/* Sync mobile viewport state into a cookie so server components can
             strictly paginate 10 items for mobile views and 24 items for desktop views. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{function check(){var m=window.innerWidth<768?'1':'0';var match=document.cookie.match(/(?:^|; )kozy_is_mobile=([^;]*)/);var current=match?match[1]:null;if(current!==m){document.cookie='kozy_is_mobile='+m+'; path=/; max-age=31536000; SameSite=Lax';var isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);if(current!==null||(m==='1'&&!isMobileUA)){window.location.reload();}}}check();window.addEventListener('resize',function(){clearTimeout(window.__kzResize);window.__kzResize=setTimeout(check,250);});}catch(e){}})()`,
-          }}
-        />
+        <Script id="kozy-viewport-cookie" strategy="beforeInteractive">
+          {`(function(){try{function check(){var m=window.innerWidth<768?'1':'0';var match=document.cookie.match(/(?:^|; )kozy_is_mobile=([^;]*)/);var current=match?match[1]:null;if(current!==m){document.cookie='kozy_is_mobile='+m+'; path=/; max-age=31536000; SameSite=Lax';var isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);if(current!==null||(m==='1'&&!isMobileUA)){window.location.reload();}}}check();window.addEventListener('resize',function(){clearTimeout(window.__kzResize);window.__kzResize=setTimeout(check,250);});}catch(e){}})()`}
+        </Script>
       </head>
       <body className="flex min-h-screen flex-col bg-paper text-ink antialiased">
         {/* First child of <body> and outside every provider: the curtain has

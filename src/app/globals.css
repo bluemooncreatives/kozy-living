@@ -945,6 +945,206 @@
   .rail::-webkit-scrollbar {
     display: none;
   }
+
+  /* ----------------------------------------------------------- story band
+
+     The homepage About section. Four regions - the meter, the editorial
+     column, the card rail and the rail's arrows - and they do not simply
+     stack: on a phone the copy leads and the meter drops BELOW the cards to
+     share a row with the arrows, while on a wide screen the meter climbs
+     above the copy in a left column beside a full-height rail.
+
+     That is a reorder no flex/order pair expresses cleanly, so it is an
+     explicit area map - the same idiom `.hero-bento` uses a few rules up. */
+  .story-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "copy copy"
+      "rail rail"
+      "meter nav";
+    column-gap: 1rem;
+    row-gap: 1.75rem;
+  }
+
+  .story-grid>* {
+    min-width: 0;
+  }
+
+  .story-copy {
+    grid-area: copy;
+  }
+
+  .story-meter {
+    grid-area: meter;
+  }
+
+  .story-rail-area {
+    grid-area: rail;
+  }
+
+  .story-nav {
+    grid-area: nav;
+  }
+
+  @media (min-width: 1024px) {
+    .story-grid {
+      grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "meter rail"
+        "copy  rail"
+        "copy  nav";
+      column-gap: 3rem;
+      row-gap: 2.25rem;
+    }
+
+    /* Centred, not bottom-anchored.
+       Anchoring it to the foot of the column put every spare pixel into ONE
+       gap between the meter's note and the eyebrow - around 280px of nothing
+       at 1440, which reads as a broken grid rather than as breathing room.
+       Centring splits that surplus above and below, and the rail height below
+       is tuned so there is not much of it left to split. */
+    .story-copy {
+      align-self: center;
+    }
+  }
+
+  /* The rail bleeds to both screen edges on a phone - a card stopping short
+     of the edge reads as a grid that happens to overflow, where a card
+     running off it reads as something to push. Inside the two-column layout
+     there is no page edge to reach, so it returns to the track. */
+  .story-rail {
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+  }
+
+  @media (min-width: 1024px) {
+    .story-rail {
+      margin-inline: 0;
+      padding-inline: 0;
+      scroll-padding-inline: 0;
+    }
+  }
+
+  /* Ink at both ends of the card, open through the middle so the photograph
+     is never uniformly greyed: the lede sits in the top band, the body and
+     its pill in the bottom one, and the cloth itself reads between them.
+
+     The lower band is deliberately heavy and starts high. Across the three
+     card sizes the body copy begins between 62% and 72% down, and the
+     photography here is pale waffle cotton in daylight - at the 40% the
+     first version carried, cream type over a lit slipper measured about 3.4
+     and was genuinely hard to read. By 68% this is at 84%, which puts the
+     same type near 6:1 whatever the photograph is doing underneath. */
+  .story-card-shade {
+    background: linear-gradient(180deg,
+        rgb(35 50 75 / 84%) 0%,
+        rgb(35 50 75 / 70%) 18%,
+        rgb(35 50 75 / 32%) 32%,
+        rgb(35 50 75 / 16%) 44%,
+        rgb(35 50 75 / 44%) 57%,
+        rgb(35 50 75 / 84%) 69%,
+        rgb(35 50 75 / 92%) 100%);
+  }
+
+  /* ------------------------------------------------ the staggered card
+
+     Two cards are on screen and they are deliberately NOT the same. The one
+     the meter is on carries `is-active`: its copy sits at the foot of the
+     frame and its photograph is clear. The card queued behind it holds its
+     copy high and wears a haze. Press an arrow and the class moves, so the
+     two trade states and the copy visibly travels - the movement the whole
+     band is built around.
+
+     `bottom` rather than a transform: the block has to travel relative to the
+     CARD's height, and a percentage translate resolves against the element's
+     own height instead. Only two of these are ever on screen, so the layout
+     cost of animating `bottom` is not worth a transform's contortions. */
+  .story-card-body {
+    bottom: 1.25rem;
+    transition: bottom 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (min-width: 768px) {
+    .story-card-body {
+      bottom: 1.5rem;
+    }
+  }
+
+  .story-card:not(.is-active) .story-card-body {
+    bottom: 26%;
+  }
+
+  /* Softens the photograph of a queued card. Ivory rather than ink, and
+     UNDER the scrim, so the picture recedes without the copy above it
+     losing its ground - see `.story-card-shade-raised`. */
+  /* A queued card stands slightly shorter than the leading one - the
+     reference insets it top and bottom, and that inset is most of what makes
+     one of the two read as "in front". The cell centres it, so the card grows
+     and shrinks about its own middle. */
+  .story-card {
+    height: 100%;
+    transition: height 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .story-card:not(.is-active) {
+    height: 91%;
+  }
+
+  .story-card-veil {
+    background: rgb(246 244 240 / 20%);
+    opacity: 1;
+    transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .story-card.is-active .story-card-veil {
+    opacity: 0;
+  }
+
+  /* Raised copy lands between 50% and 70% of the card, where the standing
+     gradient is still open at roughly 35% - cream type measured about 3.4
+     there. This lays a second band at exactly that height for as long as the
+     copy is up there, and fades out as the card takes the lead and the copy
+     drops back into the gradient that was built for it. */
+  .story-card-shade-raised {
+    opacity: 0;
+    transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    background: linear-gradient(180deg,
+        rgb(35 50 75 / 0%) 20%,
+        rgb(35 50 75 / 44%) 42%,
+        rgb(35 50 75 / 72%) 56%,
+        rgb(35 50 75 / 72%) 86%,
+        rgb(35 50 75 / 52%) 100%);
+  }
+
+  .story-card:not(.is-active) .story-card-shade-raised {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .story-card,
+    .story-card-body,
+    .story-card-veil,
+    .story-card-shade-raised {
+      transition: none;
+    }
+  }
+
+  /* The card's photography already leans in on hover - the rotator carries
+     its own `group-hover` scale. This is the other half of the gesture: the
+     icon well of the pill turns, the same 45 degrees `ActionButton` tweens
+     when the pill itself is the thing being hovered. */
+  .story-card-icon {
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .story-card:hover .story-card-icon {
+      transform: rotate(45deg);
+    }
+  }
 }
 
 /* ---------------------------------------------------------------------------

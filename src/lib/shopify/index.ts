@@ -1,3 +1,4 @@
+import { houseSpelling, houseSpellingSeo } from "./house-spelling";
 import { NextRequest, NextResponse } from "next/server";
 import {
   HIDDEN_PRODUCT_TAG,
@@ -259,6 +260,10 @@ function reshapeProduct(
 
   return {
     ...rest,
+    title: houseSpelling(product.title),
+    description: houseSpelling(product.description),
+    descriptionHtml: houseSpelling(product.descriptionHtml),
+    seo: houseSpellingSeo(product.seo),
     images: reshapeImages(images, product.title),
     variants: removeEdgesAndNodes(variants),
     collections: collections ? removeEdgesAndNodes(collections) : [],
@@ -330,7 +335,7 @@ type ShopifyMenuItemShape = {
 
 function reshapeMenuItem(item: ShopifyMenuItemShape): Menu {
   return {
-    title: item.title,
+    title: houseSpelling(item.title),
     path: normalizeMenuPath(item.url),
     ...(item.items?.length ? { items: item.items.map(reshapeMenuItem) } : {}),
   };
@@ -473,6 +478,10 @@ function reshapeCollection(
 
   return {
     ...collection,
+    // Merchant copy, so it goes through the house spelling on the way in.
+    title: houseSpelling(collection.title),
+    description: houseSpelling(collection.description),
+    seo: houseSpellingSeo(collection.seo),
     path: `/search/${collection.handle}`,
   };
 }
@@ -584,9 +593,15 @@ function reshapeCatalogProduct(
 
   return {
     ...rest,
+    title: houseSpelling(product.title),
     tags: product.tags ?? [],
     options: product.options ?? [],
-    collections: collections ? removeEdgesAndNodes(collections) : [],
+    collections: collections
+      ? removeEdgesAndNodes(collections).map((entry) => ({
+          ...entry,
+          title: houseSpelling(entry.title),
+        }))
+      : [],
     // Both connections are optional in practice: a cached catalogue entry
     // written before the fragment carried them deserialises without either.
     images: images ? reshapeImages(images, product.title) : [],
@@ -1065,9 +1080,10 @@ function reshapeArticle(
 
   return {
     ...rest,
-    excerpt: article.excerpt?.trim() || summarize(content),
+    title: houseSpelling(article.title),
+    excerpt: houseSpelling(article.excerpt?.trim() || summarize(content)),
     blogHandle: handleOfBlog,
-    blogTitle: blog?.title ?? blogTitle ?? handleOfBlog,
+    blogTitle: houseSpelling(blog?.title ?? blogTitle ?? handleOfBlog),
     path: `/blogs/${handleOfBlog}/${article.handle}`,
   };
 }
