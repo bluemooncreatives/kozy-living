@@ -136,71 +136,135 @@ export const boldStatement = {
 } as const;
 
 /**
- * The staggered lookbook cluster. Four plates of one height, dropped to four
- * different depths so the row reads as a zigzag rather than a grid: the first
- * sits highest, the second drops, the third drops furthest, the fourth comes
- * back up halfway. `lift` is that depth as a step (0 highest, 4 lowest) and
- * the paragraph above sits in the notch the shallow plates leave open.
- * Tags name the fibre, titles the Kompanion.
+ * The staggered lookbook cluster, read four at a time. The arrows above the
+ * cluster page through this list in fours, so its length should stay a
+ * multiple of four - a short last page leaves a hole in the zigzag.
+ *
+ * The zigzag itself belongs to the four SLOTS, not to these entries (see
+ * `LookbookDeck`), so reordering this list never changes the shape.
+ *
+ * `handle` does two jobs, as in the story band: it is the destination (only
+ * when the collection is live - two of the first page's never existed) and,
+ * where `images` is empty, the source of the plate's photography, borrowed
+ * from that collection's products. Configured stills win over live ones.
+ *
+ * Tags name the fibre or the craft where the brand has named one; they feed
+ * the alt text and the placeholder's ghost type, not the visible card.
  */
-export const lookbook = [
+export type LookbookEntry = {
+  tag: string;
+  title: string;
+  description: string;
+  handle: string;
+  images: readonly string[];
+};
+
+export const lookbook: readonly LookbookEntry[] = [
   {
     tag: "waffle",
     description: "Everyday waffle-weave staples in easy, honest cotton.",
     title: "Kessentials",
     handle: "kessentials",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
     images: [
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1677.jpg?v=1788636340",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1694_d0fd0a48-49cb-46ac-a8ec-fbf065b857f6.jpg?v=1788636341",
     ],
-    lift: 0,
   },
   {
     tag: "slub cotton",
     description: "Slub-cotton seating built soft, slouchy and low to the ground.",
     title: "Kloud Series",
     handle: "kloud",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
     images: [
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/85aeb9ef-fd0d-4cf2-a72f-af881a17b4fb.jpg?v=1788636352",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0049.png?v=1788636351",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1884.jpg?v=1788636350",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
     ],
-    lift: 3,
   },
   {
     tag: "dabu",
     description: "Dabu-printed carriers and matching pieces for both ends of the leash.",
     title: "Pet & Parent",
     handle: "pet-parent",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
     images: [
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/CEDD7B20-D83F-4050-9CEB-D693C7AE6269.jpg?v=1788636170",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/5A7D8EAA-E90A-4449-B0C0-4C7C5CA38535.jpg?v=1788636170",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/DB2B40CD-1A34-48FC-98D5-63220DD3DD2B.jpg?v=1788636171",
     ],
-    lift: 4,
   },
   {
     tag: "linen blend",
     description: "Low floor seating in linen blend, made for gathering on the ground.",
     title: "Floor Lounge",
     handle: "kozy-lounge",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
     images: [
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1032.jpg?v=1788636331",
       "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1915.jpg?v=1788636331",
     ],
-    lift: 2,
   },
-] as const;
+  {
+    tag: "dabu",
+    description: "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
+    title: "Krafted by Kozy",
+    handle: "crafted-by-kozy",
+    images: [],
+  },
+  {
+    tag: "waffle",
+    description: "Soft layers for slow mornings, long evenings and everything between.",
+    title: "Bathrobes",
+    handle: "bathrobes",
+    images: [],
+  },
+  {
+    tag: "dabu",
+    description: "Hand-block printed pillows that bring a quiet, artful mood to a corner.",
+    title: "Dabu Pillows",
+    handle: "dabu-printed-pillows",
+    images: [],
+  },
+  {
+    tag: "slippers",
+    description: "Soft slippers for the unhurried hours between rooms.",
+    title: "Slippers",
+    handle: "slippers",
+    images: [],
+  },
+  {
+    tag: "rituals",
+    description: "Kompanions gathered into one set for a slower morning ritual.",
+    title: "Ritual Kits",
+    handle: "ritual-kits",
+    images: [],
+  },
+  {
+    tag: "dabu",
+    description: "Dabu-printed carriers for the outings you take together.",
+    title: "Pet Karrier",
+    handle: "pet-carrier",
+    images: [],
+  },
+  {
+    tag: "pets",
+    description: "Low, soft seating so your companion has a corner of their own.",
+    title: "Pet Seating",
+    handle: "pet-seating",
+    images: [],
+  },
+  {
+    tag: "pets",
+    description: "The same fibres and prints as their parent's, scaled down.",
+    title: "Pet Klothing",
+    handle: "pet-clothing",
+    images: [],
+  },
+];
 
 /**
  * The two-up experience band: a wide photographic panel, a sage statement

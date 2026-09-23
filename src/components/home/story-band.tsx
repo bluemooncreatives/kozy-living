@@ -1,5 +1,5 @@
 import { getCollectionProducts, getCollections } from "@/lib/shopify";
-import type { Image as ShopifyImage, Product } from "@/lib/shopify/types";
+import { galleryFor } from "@/lib/shop/gallery";
 import { aboutStory } from "@/lib/site";
 import StoryBoard, { type StoryCard } from "./story-board";
 
@@ -24,25 +24,6 @@ import StoryBoard, { type StoryCard } from "./story-board";
  * Every fetch is individually caught. A Storefront API outage costs this band
  * its live photography, never the section.
  */
-
-/** Lead shots first, then alternates - one image per product before seconds. */
-function galleryFor(products: Product[], limit = 4): ShopifyImage[] {
-  const ordered = [
-    ...products.map((product) => product.featuredImage),
-    ...products.flatMap((product) => product.images ?? []),
-  ];
-  const seen = new Set<string>();
-  const gallery: ShopifyImage[] = [];
-
-  for (const image of ordered) {
-    if (!image?.url || seen.has(image.url)) continue;
-    seen.add(image.url);
-    gallery.push(image);
-    if (gallery.length >= limit) break;
-  }
-
-  return gallery;
-}
 
 export default async function StoryBand() {
   const live = new Set(

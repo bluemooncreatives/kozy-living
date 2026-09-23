@@ -22,9 +22,16 @@ import { site } from "@/lib/site";
  * bold utility: asking for 700 makes the browser synthesise it, and a faked
  * bold on a display face at hero scale is immediately visible. Weight in this
  * system comes from the face you choose, not from a number.
+ *
+ * All three faces ship as subset WOFF2 (402 KB of TTF became 127 KB): the
+ * Vietnamese block was dropped; every OpenType feature, the `wght` axis and
+ * the hinting were kept. The TTFs stay beside them ONLY for the social card -
+ * `next/og` rasterises through satori, which cannot parse WOFF2. Re-cut from
+ * the TTFs with `pyftsubset --flavor=woff2 --layout-features='*'` if a face
+ * is ever replaced.
  */
 const franxurter = localFont({
-  src: "../../public/font/Franxurter.ttf",
+  src: "../../public/font/Franxurter.woff2",
   variable: "--font-franxurter",
   weight: "400",
   style: "normal",
@@ -35,12 +42,12 @@ const franxurter = localFont({
 const jakarta = localFont({
   src: [
     {
-      path: "../../public/font/PlusJakartaSans-Variable.ttf",
+      path: "../../public/font/PlusJakartaSans-Variable.woff2",
       weight: "200 800",
       style: "normal",
     },
     {
-      path: "../../public/font/PlusJakartaSans-Italic-Variable.ttf",
+      path: "../../public/font/PlusJakartaSans-Italic-Variable.woff2",
       weight: "200 800",
       style: "italic",
     },

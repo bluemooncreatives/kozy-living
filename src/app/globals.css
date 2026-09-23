@@ -143,6 +143,24 @@
   transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* The lookbook's page turn (`LookbookDeck`). A CSS entrance rather than the
+   motion layer's `data-reveal`, because these plates mount after a click and
+   must never start hidden waiting for a scroll trigger that has already
+   passed. `--turn-from` carries the direction, so the cards arrive from the
+   side the arrow points to. Reduced motion gets the swap with no travel. */
+@media (prefers-reduced-motion: no-preference) {
+  .lookbook-turn {
+    animation: lookbook-turn 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes lookbook-turn {
+  from {
+    opacity: 0;
+    transform: translateX(var(--turn-from, 1.5rem));
+  }
+}
+
 .ritual-caption-mobile { display: none; }
 .colour-palette-mobile-grid { min-width: 0; }
 

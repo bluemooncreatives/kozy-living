@@ -28,6 +28,10 @@ import CollectionShowcase, {
   CollectionShowcaseFallback,
 } from "@/components/home/collection-showcase";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
+import LookbookDeck, {
+  type LookbookCard,
+} from "@/components/home/lookbook-deck";
+import { galleryFor, imageKey } from "@/lib/shop/gallery";
 import {
   getColourEntries,
   shopColourHref,
@@ -383,7 +387,8 @@ function HeroTileFallbacks() {
  * then a drop, then the deepest, then back up halfway. Because only the first
  * plate rides at the top, the paragraph can occupy the gap the other three
  * leave - which is why the copy is absolutely placed at `lg` and simply
- * stacked below that.
+ * stacked below that. The cluster pages through the whole `lookbook` in fours
+ * - see `LookbookDeck`, which owns the paging and the zigzag.
  */
 async function BoldStatement() {
   /* The lookbook is editorial copy carrying a collection handle, and two of
@@ -397,14 +402,50 @@ async function BoldStatement() {
     ),
   );
 
-  /** Indexed by each plate's `lift` step. 0 is the top of the row. */
-  const drop = [
-    "lg:mt-0",
-    "lg:mt-10",
-    "lg:mt-[4.5rem]",
-    "lg:mt-[8.5rem]",
-    "lg:mt-[13rem]",
-  ];
+  /* Entries without configured stills borrow their collection's product
+     photography. Each fetch is caught on its own: an outage costs a plate its
+     photograph (it falls back to Plate's toned placeholder), never the
+     section - and this section is not behind Suspense, so it must not throw. */
+  const borrowed = await Promise.all(
+    lookbook.map((entry) =>
+      !entry.images.length && live.has(entry.handle)
+        ? getCollectionProducts({ collection: entry.handle })
+            .then((products) => galleryFor(products, 12))
+            .catch(() => [])
+        : [],
+    ),
+  );
+
+  /* This store's collections overlap heavily - Slippers holds the Kessentials
+     pair, Dabu Pillows the Kloud cushion - so the same photograph would open
+     two different pages of the deck. Claim frames in list order and skip any
+     already on an earlier plate - by `imageKey`, since the curated stills and
+     the borrowed ones name the same file differently. */
+  const claimed = new Set(
+    lookbook.flatMap((entry) => entry.images.map(imageKey)),
+  );
+
+  const cards: LookbookCard[] = lookbook.map((entry, index) => {
+    const alt = `${entry.title} - ${entry.tag}`;
+    let images = entry.images.map((url) => ({ url, altText: alt }));
+
+    if (!images.length) {
+      const fresh = borrowed[index].filter((image) => !claimed.has(imageKey(image.url)));
+      // Everything already shown elsewhere: a repeat beats a blank plate.
+      images = (fresh.length ? fresh : borrowed[index])
+        .slice(0, 4)
+        .map((image) => ({ url: image.url, altText: image.altText || alt }));
+      images.forEach((image) => claimed.add(imageKey(image.url)));
+    }
+
+    return {
+      title: entry.title,
+      tag: entry.tag,
+      description: entry.description,
+      href: live.has(entry.handle) ? `/search/${entry.handle}` : "/search",
+      images,
+    };
+  });
 
   return (
     <section aria-labelledby="statement" className="shell pb-10 md:pb-16">
@@ -427,58 +468,7 @@ async function BoldStatement() {
         <ArrowDownRight className="mb-2 hidden h-10 w-10 shrink-0 md:block md:h-16 md:w-16 lg:col-span-2 lg:col-start-10 lg:mb-0 lg:h-20 lg:w-20 lg:translate-y-6" />
       </div>
 
-      <div className="relative mt-8 md:mt-10 lg:mt-16">
-        {/* On wide screens this drops into the notch the staggered plates
-            leave open; below that it is simply the paragraph after the head. */}
-        <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[38%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[28rem]">
-          {boldStatement.body}
-        </p>
-
-        {/* Four equal tracks. The plates keep one aspect so the zigzag comes
-            purely from the drop, exactly as in the reference. */}
-        <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4 lg:items-start">
-          {lookbook.map((item, index) => {
-            const gallery = "images" in item && Array.isArray(item.images)
-              ? (item.images as readonly string[]).map((url) => ({
-                  url,
-                  altText: `${item.title} - ${item.tag}`,
-                }))
-              : "image" in item && item.image
-                ? [{ url: item.image as string, altText: `${item.title} - ${item.tag}` }]
-                : null;
-
-            return (
-              <li key={item.title} className={clsx(drop[item.lift])}>
-                <Link
-                  href={
-                    live.has(item.handle) ? `/search/${item.handle}` : "/search"
-                  }
-                  className="group block"
-                  prefetch={false}
-                >
-                  <Plate
-                    src={"image" in item ? (item.image as string) : undefined}
-                    gallery={gallery}
-                    galleryAuto={Boolean(gallery && gallery.length > 1)}
-                    galleryDelay={index * 1300}
-                    galleryInterval={3600 + (index % 2) * 600}
-                    showIndicators={true}
-                    alt={`${item.title} - ${item.tag}`}
-                    aspect="5/7"
-                    arrow
-                    arrowTone={index === 1 ? "sage" : "card"}
-                    description={item.description}
-                    title={item.title}
-                    tone={(index % 4) as 0 | 1 | 2 | 3}
-                    placeholderText={item.tag}
-                    sizes="(min-width: 1024px) 25vw, 50vw"
-                  />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <LookbookDeck cards={cards} intro={boldStatement.body} />
     </section>
   );
 }

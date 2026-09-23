@@ -215,6 +215,23 @@ StandardsTicker (reverse)
 ClosingBand
 ```
 
+### The paged lookbook (under "Do Less, With Intention")
+
+`BoldStatement` resolves the data; `src/components/home/lookbook-deck.tsx`
+(client) renders it. The four staggered plates are **pages of `lookbook` in
+`site.ts`**, turned together by one prev/next pair above the cluster. Keep
+that list a multiple of four. The zigzag belongs to the four *slots*
+(`DROP` in the deck), not to the entries.
+
+- Entries with empty `images` borrow their collection's product photography.
+  Collections here share products heavily, so frames are deduped across the
+  whole deck with `imageKey()` (`src/lib/shop/gallery.ts`). Compare with that,
+  **not** with URLs: the image fragment's transform renames the file
+  (`IMG_1695.png` → `IMG_1695_2048x.png.webp`).
+- Only the first page carries `data-reveal`. Pages mounted by a click use
+  `reveal={false}` and the `.lookbook-turn` CSS entrance. A `data-reveal`
+  element mounted after its scroll trigger has passed would sit at opacity 0.
+
 The story band sits where it does on purpose: the material strip names the
 fibres, the band says who works them and why, and the quote that follows is the
 studio's own line. The hairline strip above it also keeps the band off the back
