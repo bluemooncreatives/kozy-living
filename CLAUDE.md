@@ -204,24 +204,35 @@ lookup will 404. Handles are renamed in Shopify Admin, with a redirect.
 
 ```text
 Hero (bento + wordmark band)
-BoldStatement (+ staggered lookbook)
-StandardsTicker
+CollectionFilters         ← Suspense   category pills, directly under the hero
+BoldStatement (+ staggered lookbook)  ← Suspense
 CollectionShowcase        ← Suspense
-CollectionFilters         ← Suspense
 Bestsellers               ← Suspense
 ShopByColour              ← Suspense
-ExperienceBand
-MaterialStrip
-StoryBand  ("Our story")  ← Suspense   ★ added in this session
+StandardsTicker
+CuratedEdits              ← Suspense   ("New Kompanions")
+StandardsTicker (reverse)
+StoryBand  ("Our story")  ← Suspense
 Testimonial
 RestTicker
-CuratedEdits              ← Suspense
 Spotlight                 ← Suspense
 Guides
 Journal                   ← Suspense
-StandardsTicker (reverse)
+StandardsTicker
 ClosingBand
 ```
+
+The order is merchandise first, story second - the pattern the comparable
+stores share (Brooklinen, Parachute, Okhai, Jaypore: hero → categories →
+products → why-us → story → journal). The pills are the category row under
+the hero; on a phone they are one swipeable row, not a four-line wrap.
+**Products repeating across the rails, spotlight and lookbook is deliberate**
+(the owner's call): a shopper meets the core Kompanions wherever they land.
+Do not de-duplicate them.
+
+`BoldStatement` is behind Suspense (with `StatementFallback`) because it sits
+below the hero's full-viewport frame; unwrapped, its Shopify lookups held the
+first byte of the whole page.
 
 ### The paged lookbook (under "Do Less, With Intention")
 
@@ -244,10 +255,10 @@ that list a multiple of four. The zigzag belongs to the four *slots*
   `reveal={false}` and the `.lookbook-turn` CSS entrance. A `data-reveal`
   element mounted after its scroll trigger has passed would sit at opacity 0.
 
-The story band sits where it does on purpose: the material strip names the
-fibres, the band says who works them and why, and the quote that follows is the
-studio's own line. The hairline strip above it also keeps the band off the back
-of the experience band's photography.
+The story band sits where it does on purpose: it says who works the fibres and
+why, and the quote that follows is the studio's own line. The icon ticker above
+it (the page's second of three) replaced a static fibre strip; the band that
+used to sit before it, `ExperienceBand`, was removed.
 
 ---
 

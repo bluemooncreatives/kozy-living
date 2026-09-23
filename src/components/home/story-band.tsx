@@ -5,7 +5,7 @@ import StoryBoard, { type StoryCard } from "./story-board";
 
 /**
  * The About band on the homepage - the brand speaking for itself, between the
- * fibre strip and the studio quote.
+ * icon ticker and the studio quote.
  *
  * DYNAMIC IN BOTH DIRECTIONS. The copy is `aboutStory` in `@/lib/site`, so the
  * voice is revised in one file; the photography and the destinations come from

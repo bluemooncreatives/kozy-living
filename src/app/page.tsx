@@ -47,10 +47,8 @@ import {
 } from "@/components/ui/section";
 import {
   boldStatement,
-  brandPartners,
   ctaBand,
   restTicker,
-  experienceBand,
   featureBand,
   guidesFeature,
   hero,
@@ -68,32 +66,40 @@ export const metadata = {
 };
 
 /**
- * Homepage. Section order follows the reference layout top to bottom:
- * hero frame + wordmark → meta rule → bold statement + staggered lookbook →
- * collection showcase → category pills → bestsellers → shop by colour →
- * experience band → material strip → the story band → testimonial → rest
- * ticker → new arrivals → spotlight → guides → journal → closing "shop now"
- * band.
+ * Homepage. Merchandise first, story second, the way the stores this one sits
+ * beside are built (Brooklinen, Parachute, Okhai, Jaypore all run hero →
+ * categories → products → why-us → story → journal):
  *
- * The story band sits where it does on purpose: the material strip names the
- * fibres, the band explains who works them and why, and the quote that
- * follows is the studio's own line. It is also the one wide two-column block
- * on the page, so the hairline strip above it keeps it off the back of the
- * experience band's photography.
+ *   hero → category pills → bold statement + lookbook → ritual showcase →
+ *   bestsellers → shop by colour → standards ticker → new arrivals →
+ *   standards ticker → the story band → studio quote → rest ticker →
+ *   spotlight → guides → journal → standards ticker → closing "shop now".
+ *
+ * The pills sit directly under the hero as the category row, so the first
+ * thing after the frame is a way into the shop; the lookbook under them is
+ * itself four shelves, so the opening reads as navigation, then the edit.
+ *
+ * Products may repeat between the rails, the spotlight and the lookbook. That
+ * is deliberate: a shopper who arrives mid-page still meets the same core
+ * Kompanions wherever they land.
  */
 export default function Home() {
   return (
     <>
       <Hero />
-      <BoldStatement />
-      <StandardsTicker />
-
-      <Suspense fallback={<CollectionShowcaseFallback />}>
-        <CollectionShowcase />
-      </Suspense>
 
       <Suspense fallback={null}>
         <CollectionFilters />
+      </Suspense>
+
+      {/* Below the hero's full-viewport frame, so it streams rather than
+          holding the first byte of the whole page on its Shopify lookups. */}
+      <Suspense fallback={<StatementFallback />}>
+        <BoldStatement />
+      </Suspense>
+
+      <Suspense fallback={<CollectionShowcaseFallback />}>
+        <CollectionShowcase />
       </Suspense>
 
       <Suspense fallback={<RailFallback />}>
@@ -104,8 +110,14 @@ export default function Home() {
         <ShopByColour />
       </Suspense>
 
-      <ExperienceBand />
-      <MaterialStrip />
+      <StandardsTicker />
+
+      <Suspense fallback={null}>
+        <CuratedEdits />
+      </Suspense>
+
+      {/* Reversed, so it does not read as the pass above repeated. */}
+      <StandardsTicker reverse />
 
       <Suspense fallback={<StoryBandFallback />}>
         <StoryBand />
@@ -113,10 +125,6 @@ export default function Home() {
 
       <Testimonial />
       <RestTicker />
-
-      <Suspense fallback={null}>
-        <CuratedEdits />
-      </Suspense>
 
       <Suspense fallback={null}>
         <Spotlight />
@@ -128,7 +136,7 @@ export default function Home() {
         <Journal />
       </Suspense>
 
-      <StandardsTicker reverse />
+      <StandardsTicker />
       <ClosingBand />
     </>
   );
@@ -472,7 +480,10 @@ async function BoldStatement() {
   });
 
   return (
-    <section aria-labelledby="statement" className="shell pb-10 md:pb-16">
+    <section
+      aria-labelledby="statement"
+      className="shell pb-10 pt-12 md:pb-16 md:pt-20"
+    >
       <div className="lg:grid lg:grid-cols-12 lg:items-end lg:gap-x-4">
         <h2
           id="statement"
@@ -494,6 +505,30 @@ async function BoldStatement() {
       </div>
 
       <LookbookDeck cards={cards} intro={boldStatement.body} />
+    </section>
+  );
+}
+
+/**
+ * Holds roughly the statement's height while its lookups stream, so the
+ * sections under it do not jump when it lands. Static copy, so the head is
+ * the real one.
+ */
+function StatementFallback() {
+  return (
+    <section aria-hidden className="shell pb-10 pt-12 md:pb-16 md:pt-20">
+      <p className={clsx(displayFace, "text-display-xl lg:pl-[16.66%]")}>
+        {boldStatement.title.map((line) => (
+          <span key={line} className="block">
+            {line}
+          </span>
+        ))}
+      </p>
+      <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="plate aspect-[3/4] animate-pulse" />
+        ))}
+      </div>
     </section>
   );
 }
@@ -524,7 +559,10 @@ async function CollectionFilters() {
   if (!categories.length) return null;
 
   return (
-    <section aria-label="Browse categories" className="shell pb-10 md:pb-14">
+    // The category row every reference store puts directly under the hero,
+    // run edge to edge as a ticker. Kept tight: the statement below brings
+    // its own top space.
+    <section aria-label="Browse categories" className="overflow-x-clip pb-2 md:pb-4">
       <CollectionPillRail items={categories} />
     </section>
   );
@@ -622,102 +660,12 @@ function RailFallback() {
   );
 }
 
-/* ------------------------------------------------------- experience band */
+/* ------------------------------------------------------- standards ticker */
 
 /**
- * The asymmetric band: one wide photographic panel, and beside it a sage
- * statement card stacked over a smaller panel.
- */
-function ExperienceBand() {
-  return (
-    <section
-      aria-label="Why shop with us"
-      className="shell grid grid-cols-1 gap-3 py-10 md:py-14 lg:grid-cols-[1.55fr_1fr]"
-    >
-      <Link href={experienceBand.wide.href} className="group block">
-        <Plate
-          gallery={
-            "images" in experienceBand.wide && Array.isArray(experienceBand.wide.images)
-              ? (experienceBand.wide.images as readonly string[]).map((url) => ({
-                  url,
-                  altText: "Moments of rest",
-                }))
-              : undefined
-          }
-          galleryAuto
-          galleryDelay={600}
-          galleryInterval={4400}
-          showIndicators={true}
-          src={"image" in experienceBand.wide ? (experienceBand.wide.image as string) : undefined}
-          aspect="16/10"
-          arrow
-          tone={1}
-          placeholderText="warmth"
-          caption={experienceBand.wide.caption}
-          className="h-full"
-          sizes="(min-width: 1024px) 60vw, 100vw"
-          alt="A corner of a room layered with floor pillows, a throw and a linen blend cushion."
-        />
-      </Link>
-
-      {/* grid-cols-1, not a bare grid: an implicit column is auto-sized, so the
-          plate's ratio-derived width sized the track instead of the reverse. */}
-      <div className="grid grid-cols-1 gap-3">
-        <Link
-          href={experienceBand.accent.href}
-          className="panel-sage group relative flex flex-col justify-between overflow-hidden p-6 md:p-8"
-        >
-          <span aria-hidden className="text-2xl leading-none">
-            ✳
-          </span>
-          <div className="mt-10">
-            <span className="chip">{experienceBand.accent.chip}</span>
-            <h2 className="serif mt-4 text-display-md">
-              {experienceBand.accent.title}
-            </h2>
-          </div>
-          <span className="arrow-btn absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
-            <ArrowUpRight />
-          </span>
-        </Link>
-
-        <Link href={experienceBand.small.href} className="group block">
-          <Plate
-            gallery={
-              "images" in experienceBand.small && Array.isArray(experienceBand.small.images)
-                ? (experienceBand.small.images as readonly string[]).map((url) => ({
-                    url,
-                    altText: "Artisan craft detail",
-                  }))
-                : undefined
-            }
-            galleryAuto
-            galleryDelay={2200}
-            galleryInterval={4400}
-            showIndicators={true}
-            src={"image" in experienceBand.small ? (experienceBand.small.image as string) : undefined}
-            aspect="16/10"
-            arrow
-            tone={3}
-            placeholderText="detail"
-            caption={experienceBand.small.caption}
-            className="h-full"
-            sizes="(min-width: 1024px) 35vw, 100vw"
-            alt="A Dabu hand-block print in indigo, close on the weave."
-          />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------- material strip */
-
-/** Hairline band of material and ethics credentials, set as wordmarks. */
-/**
- * The house glyphs on a quiet band. It runs twice on this page - once under
- * the opening statement and once before the closing band - so the second pass
- * drifts the other way rather than reading as the same strip repeated.
+ * The house glyphs on a quiet band. It runs three times on this page - after
+ * the first shelves, before the story band and before the closing band - and
+ * alternates direction so no pass reads as the one before it repeated.
  */
 function StandardsTicker({ reverse = false }: { reverse?: boolean }) {
   return (
@@ -726,23 +674,6 @@ function StandardsTicker({ reverse = false }: { reverse?: boolean }) {
       className="rule-y overflow-x-clip bg-paper py-6 md:py-8"
     >
       <IconMarquee reverse={reverse} />
-    </section>
-  );
-}
-
-function MaterialStrip() {
-  return (
-    <section aria-label="Our standards" className="rule-y bg-card">
-      <ul className="shell flex flex-wrap items-center justify-between gap-x-8 gap-y-5 py-7">
-        {brandPartners.map((partner) => (
-          <li
-            key={partner}
-            className="serif text-display-sm uppercase tracking-normal text-ink/70"
-          >
-            {partner}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

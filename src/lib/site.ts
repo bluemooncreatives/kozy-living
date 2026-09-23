@@ -266,57 +266,8 @@ export const lookbook: readonly LookbookEntry[] = [
 ];
 
 /**
- * The two-up experience band: a wide photographic panel, a sage statement
- * card, and a smaller photographic panel stacked beside it.
- */
-export const experienceBand = {
-  wide: {
-    caption:
-      "We call them Kompanions, not products - krafted to support the moments of rest you already have.",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Untitled_design_2c1e5ce6-7925-429a-815e-30d532269847.jpg?v=1788636354",
-    images: [
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Untitled_design_2c1e5ce6-7925-429a-815e-30d532269847.jpg?v=1788636354",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0120.jpg?v=1788636349",
-    ],
-    href: "/search",
-  },
-  accent: {
-    chip: "kozyliving.com",
-    title: "Turn your routine into a ritual",
-    href: "/search",
-  },
-  small: {
-    caption:
-      "designed in-house, made in collaboration with craft clusters across India.",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
-    images: [
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9774ec93-dce6-49a1-ba50-ec350ae25b8b.jpg?v=1788636351",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/5A7D8EAA-E90A-4449-B0C0-4C7C5CA38535.jpg?v=1788636170",
-      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
-    ],
-    href: "/about-us",
-  },
-} as const;
-
-/**
- * The hairline strip between the experience band and the quote.
- *
- * These are the brand's actual material palette, not certification marks. The
- * previous copy listed FSC / OEKO-TEX / Fair Trade badges the brand has not
- * claimed; naming the fibres says more and is true.
- */
-export const brandPartners = [
-  "Cotton Waffle",
-  "Slub Cotton",
-  "Cotton Percale",
-  "Linen Blends",
-  "Wool",
-] as const;
-
-/**
  * The homepage story band - the brand's own section, sitting between the
- * fibre strip and the studio quote.
+ * icon ticker and the studio quote.
  *
  * FOUR PILLARS, and every claim here is one the brand already makes on
  * `/about-us` (see `whyKraft` and `sustainability`): the fibre, the makers,

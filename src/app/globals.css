@@ -734,6 +734,112 @@
     @apply border-ink bg-ink text-paper;
   }
 
+  /* ------------------------------------------------ category pill ticker
+
+     `CollectionPillRail`. ActionButton's silhouette - label, then a circular
+     icon well socketed into the end - so the strip reads as a row of the
+     site's own CTAs rather than as generic filter chips.
+
+     Ivory pill / indigo well at rest; on hover the pill floods indigo and
+     the well turns sage and gently lifts the icon (sage/indigo
+     6.50). The lead "All Kompanions" pill starts in that solid state, which
+     is what marks where the loop begins. */
+  .cat-pill {
+    @apply inline-flex h-11 shrink-0 items-center justify-between gap-3 rounded-chip border border-ink/15 bg-card pl-5 pr-1 font-sans text-ui font-semibold leading-none text-ink md:h-12 md:gap-4 md:pl-6 md:pr-1.5;
+    transition:
+      background-color 220ms ease,
+      border-color 220ms ease,
+      color 220ms ease;
+  }
+
+  .cat-pill-label {
+    @apply whitespace-nowrap leading-none;
+  }
+
+  .cat-pill-icon {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-ink text-paper md:h-9 md:w-9;
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cat-pill-glyph {
+    @apply block h-[1.05rem] w-[1.05rem] shrink-0;
+  }
+
+  .cat-pill:hover,
+  .cat-pill:focus-visible,
+  .cat-pill-lead {
+    @apply border-ink bg-ink text-paper;
+  }
+
+  .cat-pill:hover .cat-pill-icon,
+  .cat-pill:focus-visible .cat-pill-icon,
+  .cat-pill-lead .cat-pill-icon {
+    @apply bg-sage text-ink;
+  }
+
+  .cat-pill:hover .cat-pill-icon,
+  .cat-pill:focus-visible .cat-pill-icon {
+    transform: translateY(-1px) scale(1.06);
+  }
+
+  /* The lead pill is already solid, so its hover answers by lifting the
+     ground a shade instead of by changing state. */
+  .cat-pill-lead:hover {
+    @apply bg-ink/90;
+  }
+
+  /* sage-deep: flat sage measures 1.85 on cream and would not be there. */
+  .cat-pill-sep {
+    @apply select-none px-3 text-[0.9rem] leading-none text-sage-deep md:px-5;
+  }
+
+  .pill-marquee {
+    /* Vertical room so a focus ring is not shaved off by the clip. */
+    @apply overflow-hidden py-1.5;
+    /* Pills surface from and sink into the page rather than being cut off
+       by the screen edge. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--gutter-fade, 6%),
+      #000 calc(100% - var(--gutter-fade, 6%)),
+      transparent
+    );
+  }
+
+  @media (min-width: 1024px) {
+    .pill-marquee {
+      --gutter-fade: 8%;
+    }
+  }
+
+  /* Never carry a pill out from under the pointer, or the keyboard. */
+  .pill-marquee:hover .marquee-track,
+  .pill-marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* No motion: the menu once, as a row the finger can scroll. */
+  @media (prefers-reduced-motion: reduce) {
+    .pill-marquee {
+      @apply overflow-x-auto;
+      scrollbar-width: none;
+      mask-image: none;
+      padding-inline: var(--gutter);
+    }
+
+    .pill-marquee::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pill-marquee [data-dup] {
+      display: none;
+    }
+  }
+
   /* Hide scrollbar while preserving scroll functionality */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
