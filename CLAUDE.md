@@ -236,6 +236,10 @@ that list a multiple of four. The zigzag belongs to the four *slots*
   whole deck with `imageKey()` (`src/lib/shop/gallery.ts`). Compare with that,
   **not** with URLs: the image fragment's transform renames the file
   (`IMG_1695.png` → `IMG_1695_2048x.png.webp`).
+- An entry with `product` set is one Kompanion, not a shelf (the His & Her
+  Ritual Kit is a Shopify *product*, not a collection): it links to
+  `/product/<handle>` and borrows that product's photographs, with `handle`
+  as the fallback destination if the product is gone.
 - Only the first page carries `data-reveal`. Pages mounted by a click use
   `reveal={false}` and the `.lookbook-turn` CSS entrance. A `data-reveal`
   element mounted after its scroll trigger has passed would sit at opacity 0.
