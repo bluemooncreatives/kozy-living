@@ -13,6 +13,11 @@
  * covered by one rule: the shop heading, the breadcrumb, the nav, the search
  * results, the cards, and the `<title>` that goes to Google.
  *
+ * The second rule is "Pet Collection" -> "Pet Kollection". Same story: the
+ * store's nav item already reads "Pet Kollection" (alongside "Pet Karrier"
+ * and "Pet Klothing"), but the collection it points at is still titled "Pet
+ * Collection" - so the two spellings sit one click apart.
+ *
  * WHAT THIS DELIBERATELY DOES NOT TOUCH:
  *
  *   handles      `crafted-by-kozy` is an identifier, not copy. Rewriting it
@@ -25,6 +30,11 @@
  *   craft        "craft clusters", "craft-led" and "Craft Technique" are the
  *                ordinary English word and are correct as they are. Only the
  *                whole word "crafted" carries the house K.
+ *   collection   likewise. Only the phrase "Pet Collection" takes the K, not
+ *                the bare word - the storefront says "collection" constantly
+ *                in its own chrome ("this collection is empty", every
+ *                breadcrumb), and Kollection is the name of ONE shelf, not a
+ *                replacement for the noun.
  */
 
 /**
@@ -37,18 +47,41 @@
 export function houseSpelling<T extends string | null | undefined>(text: T): T {
   if (typeof text !== "string" || !text) return text;
 
-  return text.replace(/crafted/gi, (match, offset: number, whole: string) => {
-    // A word character or a hyphen in front means this is the tail of a
-    // compound - `handcrafted`, `hand-crafted` - and not the standalone word.
-    const before = whole[offset - 1];
-    if (before && /[\w-]/.test(before)) return match;
+  const kIfUpper = (word: string) =>
+    (word[0] === word[0]!.toUpperCase() ? "K" : "k") + word.slice(1);
 
-    const after = whole[offset + match.length];
-    if (after && /\w/.test(after)) return match;
+  return text
+    .replace(/crafted/gi, (match, offset: number, whole: string) => {
+      // A word character or a hyphen in front means this is the tail of a
+      // compound - `handcrafted`, `hand-crafted` - and not the standalone
+      // word.
+      const before = whole[offset - 1];
+      if (before && /[\w-]/.test(before)) return match;
 
-    const isUpper = match[0] === match[0]!.toUpperCase();
-    return (isUpper ? "K" : "k") + match.slice(1);
-  }) as T;
+      const after = whole[offset + match.length];
+      if (after && /\w/.test(after)) return match;
+
+      return kIfUpper(match);
+    })
+    // Only after "Pet", and only as whole words: the bare noun stays a noun.
+    // The separator is captured rather than assumed so "Pet  Collection" and
+    // "Pet-Collection" survive the round trip unchanged apart from the K.
+    .replace(
+      /pet([\s-]+)collection/gi,
+      (match, gap: string, offset: number, whole: string) => {
+        // Guard both ends by hand rather than with a word boundary, so
+        // "carpet collection" and "Pet Collections" are both left alone.
+        const before = whole[offset - 1];
+        if (before && /\w/.test(before)) return match;
+
+        const after = whole[offset + match.length];
+        if (after && /\w/.test(after)) return match;
+
+        const pet = match.slice(0, match.length - gap.length - "collection".length);
+        const collection = match.slice(match.length - "collection".length);
+        return pet + gap + kIfUpper(collection);
+      },
+    ) as T;
 }
 
 /** The SEO block as Shopify returns it, with both fields normalised. */

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { brandIcons } from "@/components/ui/brand-icons";
+import { giTag } from "@/lib/site";
+import giTagMark from "../../../public/icons/gi-tag-mark.png";
 import { Product } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
@@ -13,6 +15,7 @@ const PET_PARENT_COLLECTION_HANDLE = "pet-parent";
 const PET_COLLECTION_HANDLE = "pet-collection";
 /** Collection handle for the in-house craft line. */
 const KRAFTED_BY_KOZY_COLLECTION_HANDLE = "crafted-by-kozy";
+
 
 /**
  * One box for every badge, sized so a two-badge cluster still leaves the
@@ -99,7 +102,14 @@ export function ProductDescription({ product }: { product: Product }) {
   return (
     <div>
       <div className="flex items-start justify-between gap-3">
-        <Headline as="h1" className="flex-1">
+        {/* `leading-[0.9]`, tighter than the `display-xl` token's own 1.02.
+            Franxurter's caps are only about 0.72em of its em box, so a line
+            height that reads as tight in a grotesk leaves a visible band of
+            air between lines here - and a product title routinely runs to
+            three. The token stays as it is; this is the one heading on the
+            site that is both display-sized AND multi-line in a narrow
+            column. */}
+        <Headline as="h1" className="flex-1 leading-[0.8]">
           {product.title}
         </Headline>
         <div className="flex shrink-0 items-start gap-1">
@@ -125,16 +135,78 @@ export function ProductDescription({ product }: { product: Product }) {
         </div>
       </div>
 
-      <p className="ui-mono mt-4 flex items-baseline gap-2">
-        {isRange ? <span>from</span> : null}
+      {/* ------------------------------------------------------------ price
+
+          The one number a shopper is looking for on this panel, and it was
+          set at `text-ui` - 13px, the same size as a caption - so it read as
+          metadata rather than as the price. It is now the UI face at
+          `display-md`, the largest step that still belongs to Jakarta rather
+          than to the display face. */}
+      <p className="mt-5 flex items-baseline gap-2">
+        {isRange ? <span className="ui-mono text-muted">from</span> : null}
         <Price
+          className="serif text-display-md"
           amount={minVariantPrice.amount}
           currencyCode={minVariantPrice.currencyCode}
         />
         {!product.availableForSale ? (
-          <span className="ml-2 opacity-70">· Sold out</span>
+          <span className="ui-mono text-muted">· Sold out</span>
         ) : null}
       </p>
+
+      {/* --------------------------------------------------- the GI mark
+
+          Its own row under the price, and it now SAYS what it is rather than
+          hiding the words in a hover tooltip - a mark this small is
+          unreadable, and a tooltip is no use at all on a touch screen.
+
+          No panel behind it: it sits straight on the page ground, with a
+          hairline doing the separating instead of a fill. The mark is already
+          a printed label with its own paper and scalloped edge, so a second
+          card behind it read as a box inside a box.
+
+          Everything here is `spec-mono`/`ui-mono` - caption sizes. This is
+          provenance, not a heading: it sits UNDER the price and must not
+          compete with it. */}
+      <div
+        data-gi-mark
+        className="mt-5 flex items-start gap-3 sm:gap-4"
+      >
+        {/* A trimmed cut of the artwork, not `/icons/gi-tag.png`. That file
+            is a 7.64 MB, 2528x4288 canvas whose badge occupies only the
+            middle ~54%, so at any height set here the mark would render
+            around half the box and sit off-centre. This one is the same
+            artwork trimmed to its ink box (2184x2329) at 299 KB. */}
+        <Image
+          src={giTagMark}
+          alt={giTag.alt}
+          className="h-14 w-auto shrink-0 sm:h-[4.25rem]"
+        />
+
+        {/* `self-stretch` rather than a fixed height, so the rule always
+            matches whichever of the two columns is taller - which flips
+            between them as the copy rewraps on a narrow screen. */}
+        <span aria-hidden className="w-px shrink-0 self-stretch bg-rule" />
+
+        {/* `min-w-0` or the long note refuses to wrap and pushes the row
+            past the panel on a phone. */}
+        <div className="min-w-0">
+          {/* Title and registration on one line, told apart by weight rather
+              than by a separator - a middot here dangles at the start of the
+              second line as soon as the pair wraps on a phone. */}
+          <p className="ui-mono flex flex-wrap items-baseline gap-x-2">
+            <span className="font-semibold">{giTag.title}</span>
+            <span className="spec-mono text-ink/70">{giTag.subtitle}</span>
+          </p>
+          {/* Desktop only. On a phone the buy panel is the whole screen and
+              this paragraph pushed the variant picker and Add to Cart below
+              the fold - the mark and its two named lines already carry the
+              claim, and this is the elaboration. */}
+          <p className="spec-mono mt-2 hidden text-pretty sm:block">
+            {giTag.note}
+          </p>
+        </div>
+      </div>
 
       <div className="mt-8">
         <VariantSelector options={product.options} variants={product.variants} />

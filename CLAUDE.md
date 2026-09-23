@@ -242,13 +242,23 @@ away in the nav from `Krafted by Kozy`. Normalising centrally covers the shop
 heading, breadcrumb, nav, search results, cards and the `<title>` sent to
 Google in one rule.
 
-The rule is deliberately narrow — whole word only, case-preserving:
+There are **two** rules, both narrow and case-preserving:
 
 ```text
-Crafted → Krafted    crafted → krafted    CRAFTED → KRAFTED
-handcrafted, hand-crafted, craft, craft clusters, Craft Technique → untouched
-handles (crafted-by-kozy) → untouched, they are identifiers
+Crafted      → Krafted     crafted → krafted     CRAFTED → KRAFTED
+Pet Collection → Pet Kollection  (only after "Pet", only as whole words)
+
+untouched: handcrafted · hand-crafted · craft · craft clusters ·
+           Craft Technique · "this collection is empty" · carpet collection ·
+           Pet Collections · handles like crafted-by-kozy and pet-collection
 ```
+
+The bare noun is never touched. "Kollection" is the name of one shelf, not a
+replacement for a word the storefront's own chrome says constantly.
+
+Applied at every reshape choke point, **including the nested `collections`
+array on a product** — those titles travel with the product and get rendered
+downstream as badges and labels, and they were missed on the first pass.
 
 ### Known Shopify data defects (fix in Admin, not in code)
 
@@ -277,6 +287,36 @@ href = live.has(handle) ? `/search/${handle}` : fallbackHref;
 ```
 
 `BoldStatement`, `HeroProductTiles` and `StoryBand` all do this. Keep it.
+
+### Image sizing — set once, in the fragment
+
+`src/lib/shopify/fragments/image.ts` is the single choke point every image URL
+passes through, and it carries
+`url(transform: { maxWidth: 2048, preferredContentType: WEBP })`.
+
+This is not a nicety. The originals on this store are enormous — a product
+shot measured 3375x4219 and **9.44 MB** — and Next's optimiser has to download
+the whole file before it can resize it, once per width variant. A product page
+asks for a dozen of those at several widths, the optimiser gives up at 7s, and
+the page fills with `/_next/image … 500` and broken frames. Shopify's own CDN
+does that first resize in about a second instead.
+
+Both arguments are load-bearing: capping alone left PNGs as PNGs, and a 2048px
+PNG of a photograph is still 6.55 MB. WEBP rather than JPG because these
+images have alpha.
+
+`fragments/cart.ts` spells its image fields out instead of spreading this
+fragment, so it repeats the cap at 512 (a cart thumb renders at ~64px). If you
+add another place that selects `Image.url` by hand, cap it there too.
+
+⚠️ **Comments inside these fragments must be GraphQL `#` comments.** They live
+inside a JS template literal, and a `/* */` comment containing backticks
+closes the string early — which is a parse error that points at the wrong
+line.
+
+⚠️ `width` and `height` still describe the **original**, not the transformed
+URL. Nothing reads them today — every surface renders through `next/image`
+with `fill` — but do not assume they match the bytes you fetched.
 
 ### Shop URL state
 
@@ -502,11 +542,32 @@ it.
 - **`npm run lint` fails** on
   `src/components/ui/product-image-rotator.tsx:38` — `react-hooks/refs`,
   "Cannot access refs during render". Pre-existing; `npm run build` is clean.
-- **Next's image optimiser returns 500** (7s timeout) on several large Shopify
-  PNGs in dev — `IMG_0049.png`, `IMG_1283.png`, `IMG_1285.png`,
-  `IMG_1695.png`. Affects the whole site, not one section.
+- **A few Shopify originals are too big for Shopify itself to resize.** This
+  was "the image optimiser 500s everywhere"; most of it is fixed — see
+  *Image sizing* in §6 — but files around 18 MB come back untransformed and
+  still time out. Fixing those means re-uploading the assets smaller in
+  Shopify; there is nothing left to do in code. Known offenders:
+  `Simple_Aesthetic_Fashion_Brand_Photo_Collage_Instagram_Post_-_14/-_15.png`
+  (3375x4219, 18.38 MB) and `IMG_1283.png`.
 - `README.md` is stale — see §1.
 - `scripts/` is empty despite a commit adding Shopify test scripts.
+- **There are two GI tag assets, on purpose.** `public/icons/gi-tag.png` is
+  the original: 2528x4288 and **7.64 MB**, with the badge occupying only the
+  middle ~54% of a mostly-transparent canvas — so at any height you set, the
+  mark renders about half the box and sits off-centre.
+  `public/icons/gi-tag-mark.png` is that artwork trimmed to its ink box
+  (2184x2329, nearly square) and resized, at **299 KB**. The product buy panel
+  uses the trimmed one; `gallery.tsx` and `product-card.tsx` still position
+  the original by hand and were left alone. Move them over when you next touch
+  them — that file is also a prime candidate for the image-optimiser timeouts
+  noted above.
+- **The GI mark is shown on every product, unconditionally** — in the gallery,
+  on the card, and now beside the price. A GI registration is a legal
+  certification for *Jodhpur block print* specifically, so this is a real
+  claim about provenance, not decoration. If the catalogue ever carries a
+  product that is not block print, this needs gating on the collection or a
+  tag. Flagged, not changed: all three placements predate and match each
+  other.
 - **The PWA manifest has no usable icon.** `src/app/manifest.ts` points its
   only icon at `/logo/Kozy Logo.png` — 3836x2160, non-square, 3.18 MB. Chrome
   wants a square 192 and a square 512 to offer an install prompt, so it

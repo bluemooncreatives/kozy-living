@@ -10,7 +10,14 @@ const cartProductFragment = /* GraphQL */ `
     handle
     title
     featuredImage {
-      url
+      # A cart line renders this at ~64px, so it has no business pulling a
+      # multi-megabyte original - see the note in fragments/image.ts. This
+      # fragment spells the fields out rather than spreading the image
+      # fragment, so the cap has to be repeated here.
+      #
+      # A GraphQL comment, not a JS one: this is inside a template literal,
+      # and a /* */ comment carrying backticks closes the string early.
+      url(transform: { maxWidth: 512, preferredContentType: WEBP })
       altText
       width
       height

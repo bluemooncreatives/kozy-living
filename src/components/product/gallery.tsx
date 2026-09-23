@@ -44,13 +44,6 @@ export default function Gallery({
           </div>
         )}
 
-        <Image
-          src="/icons/gi-tag.png"
-          alt="GI registered craft"
-          width={2528}
-          height={4288}
-          className="pointer-events-none absolute left-4 top-4 h-16 w-auto sm:h-20 lg:h-28"
-        />
 
         {images.length > 1 ? (
           <>
@@ -122,13 +115,6 @@ export default function Gallery({
           })}
         </ul>
       ) : null}
-
-      {/* The GI tag's own text, set out in full below the thumbnails. */}
-      <div className="rule-t mt-4 pt-4 text-center">
-        <p className="eyebrow">Jodhpur Block Print</p>
-        <p className="spec-mono mt-1">A GI Registered Kraft</p>
-        <p className="spec-mono mt-2">Rooted in Ritual &middot; Handcrafted in India</p>
-      </div>
     </form>
   );
 }

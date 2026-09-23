@@ -44,7 +44,7 @@ export const brandIcons = {
   },
   pet: {
     src: pawIcon,
-    alt: "Pet Collection",
+    alt: "Pet Kollection",
     scale: "scale-[0.96]",
   },
   cook: {

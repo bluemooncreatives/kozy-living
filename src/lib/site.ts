@@ -517,6 +517,29 @@ export const socialLinks = [
   { title: "Email", href: "mailto:care@kozyliving.com" },
 ] as const;
 
+/* ------------------------------------------------------------------ gi tag */
+
+/**
+ * The GI mark on the product buy panel.
+ *
+ * Every line here is the artwork's own wording, transcribed - including
+ * "Kraft", which is the badge's spelling and must not be normalised away.
+ *
+ * `note` is the only line that is not on the badge, and it deliberately
+ * explains what a Geographical Indication IS rather than making any further
+ * claim about this product. A GI is a legal certification; the badge asserts
+ * one, and this file does not get to add to it. See the note in CLAUDE.md
+ * about the mark currently rendering on every product unconditionally.
+ */
+export const giTag = {
+  title: "Jodhpur Block Print",
+  /* Sits on the same line as the title, in caption size. */
+  subtitle: "A GI Registered Kraft",
+  note: "A Geographical Indication is a legal mark that ties a craft to the place it is made and the method registered to it. Jodhpur block print carries one.",
+  /** Alt text for the mark itself, for anyone who cannot see it. */
+  alt: "Jodhpur Block Print - a GI registered Kraft",
+} as const;
+
 /* ------------------------------------------------------------------ contact */
 
 /**

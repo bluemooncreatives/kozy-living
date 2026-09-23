@@ -33,7 +33,7 @@ const STORIES = [
     copy: "Matching comfort made for shared rituals with your little companion.",
   },
   {
-    title: "Pet Collection",
+    title: "Pet Kollection",
     mobileCopy: "For your favourite companion.",
     handle: "pet-collection",
     href: "/search/pet-collection",

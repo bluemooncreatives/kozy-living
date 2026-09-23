@@ -266,7 +266,15 @@ function reshapeProduct(
     seo: houseSpellingSeo(product.seo),
     images: reshapeImages(images, product.title),
     variants: removeEdgesAndNodes(variants),
-    collections: collections ? removeEdgesAndNodes(collections) : [],
+    // The nested collection titles are merchant copy too - they travel with
+    // the product and get rendered as badges and labels downstream, so they
+    // need the same normalising the top-level collection gets.
+    collections: collections
+      ? removeEdgesAndNodes(collections).map((entry) => ({
+          ...entry,
+          title: houseSpelling(entry.title),
+        }))
+      : [],
   };
 }
 function reshapeProducts(products: ShopifyProduct[]) {
