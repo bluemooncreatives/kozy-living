@@ -1105,203 +1105,226 @@
     display: none;
   }
 
-  /* ----------------------------------------------------------- story band
-
-     The homepage About section. Four regions - the meter, the editorial
-     column, the card rail and the rail's arrows - and they do not simply
-     stack: on a phone the copy leads and the meter drops BELOW the cards to
-     share a row with the arrows, while on a wide screen the meter climbs
-     above the copy in a left column beside a full-height rail.
-
-     That is a reorder no flex/order pair expresses cleanly, so it is an
-     explicit area map - the same idiom `.hero-bento` uses a few rules up. */
+  /* About Kozy: four stable slots, shared card details and a reversible deck. */
   .story-grid {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "copy copy"
-      "rail rail"
-      "meter nav";
-    column-gap: 1rem;
-    row-gap: 1.75rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "copy" "actions" "rail";
+    gap: 1.75rem;
   }
-
-  .story-grid>* {
-    min-width: 0;
+  .story-grid > * { min-width: 0; }
+  .story-copy { grid-area: copy; padding-inline: 0.25rem; }
+  .story-heading { max-width: 100%; }
+  .story-intro { @apply font-sans text-body text-muted; max-width: 28rem; margin-top: 1.5rem; }
+  .story-actions {
+    grid-area: actions;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.75rem;
   }
-
-  .story-copy {
-    grid-area: copy;
+  .story-controls {
+    position: relative;
+    z-index: 20;
+    @apply border-t border-ink/15;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.875rem;
+    margin-top: 0.25rem;
   }
-
-  .story-meter {
-    grid-area: meter;
+  .story-position { @apply font-sans text-micro text-muted; display: flex; align-items: center; gap: 0.75rem; font-variant-numeric: tabular-nums; }
+  .story-position > span:first-child { @apply text-ink; }
+  .story-position-line { @apply bg-ink/20; height: 1px; width: 3rem; }
+  .story-nav { display: flex; gap: 0.5rem; }
+  .story-intro-actions { margin-top: 1.25rem; }
+  .story-mobile-nav { display: none; }
+  .story-nav button {
+    @apply border border-ink/20 bg-card text-ink hover:border-ink hover:bg-ink hover:text-paper;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    transition: background-color 180ms ease, color 180ms ease;
   }
-
-  .story-rail-area {
+  .story-nav button:last-child { @apply border-ink bg-ink text-paper hover:bg-sage hover:text-ink; }
+  .story-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .story-nav svg { width: 1.125rem; height: 1.125rem; }
+  .story-rail {
     grid-area: rail;
+    display: flex;
+    align-self: stretch;
+    align-items: stretch;
+    gap: 0.75rem;
+    touch-action: pan-y pinch-zoom;
+    cursor: grab;
   }
-
-  .story-nav {
-    grid-area: nav;
+  .story-cell { position: relative; display: flex; flex: 1 1 0; min-width: 0; min-height: 26rem; }
+  .story-small-slot { position: relative; display: flex; min-height: 13rem; min-width: 0; }
+  .story-card {
+    @apply rounded-plate text-paper;
+    --story-surface: var(--ink);
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+    display: flex;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
   }
-
+  .story-card-surface {
+    min-width: 0;
+    min-height: 0;
+    @apply rounded-plate;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    background: var(--story-surface);
+    --story-notch: 100px;
+    mask-image: var(--notch-corner), linear-gradient(#000, #000), linear-gradient(#000, #000);
+    mask-size: var(--story-notch) var(--story-notch), calc(100% - var(--story-notch)) 100%, var(--story-notch) calc(100% - var(--story-notch));
+    mask-position: top right, top left, bottom right;
+    mask-repeat: no-repeat;
+  }
+  .story-corner-bl .story-card-surface {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cpath transform='rotate(180 48 48)' d='M0 0L23.010 0A14 14 0 0 1 36.727 16.800A36 36 0 0 0 79.200 59.273A14 14 0 0 1 96 72.990L96 96L0 96Z' fill='%23000'/%3E%3C/svg%3E"), linear-gradient(#000, #000), linear-gradient(#000, #000);
+    mask-position: bottom left, top right, top left;
+  }
+  .story-card-image { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+  .story-card-shade { position: absolute; inset: 0; z-index: -1; }
+  .story-card .story-card-shade {
+    background: linear-gradient(180deg, rgb(35 50 75 / 18%), rgb(35 50 75 / 4%) 25%, rgb(35 50 75 / 72%) 60%, rgb(35 50 75 / 96%));
+  }
+  .story-tag {
+    @apply font-sans text-micro;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    max-width: calc(100% - 2rem);
+    width: fit-content;
+    padding: 0.375rem 0.625rem;
+    border-radius: 999px;
+    line-height: 1.25;
+    background: rgb(35 50 75 / 85%);
+    color: var(--paper);
+  }
+  .story-corner-tr .story-tag { max-width: calc(100% - 5.5rem); }
+  .story-card-footer { position: relative; margin-top: auto; padding: 1.25rem; }
+  .story-card-footer h3 { @apply font-sans text-display-sm font-semibold; color: inherit; text-wrap: balance; }
+  .story-card-footer p { @apply font-sans text-spec; margin-top: 0.75rem; }
+  .story-card-small .story-card-footer { padding: 1rem; }
+  .story-card-small .story-card-footer h3 { @apply text-ui font-semibold; }
+  .story-card-small .story-card-footer p { display: none; }
+  .story-corner-button {
+    @apply absolute z-10 grid place-items-center text-paper;
+    width: 50px;
+    height: 50px;
+    top: 0;
+    right: 0;
+  }
+  .story-corner-bl .story-corner-button { top: auto; right: auto; bottom: 0; left: 0; }
+  .story-corner-shape { @apply absolute inset-0 h-full w-full fill-ink; }
+  .story-corner-arrow { position: relative; width: 1rem; height: 1rem; }
+  .story-preview-select { display: none; }
+  .story-corner-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 50%; }
+  .story-nav button:focus-visible, .story-rail:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .is-exchanging .story-card { will-change: transform; pointer-events: none; }
+  @media (min-width: 640px) {
+    .story-cell { min-height: 30rem; }
+    .story-small-slot { min-height: 15rem; }
+    .story-card-footer { padding: 1.5rem; }
+  }
   @media (min-width: 1024px) {
     .story-grid {
-      grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
-      grid-template-rows: auto 1fr auto;
-      grid-template-areas:
-        "meter rail"
-        "copy  rail"
-        "copy  nav";
-      column-gap: 3rem;
-      row-gap: 2.25rem;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      grid-template-rows: 1fr auto;
+      grid-template-areas: "copy rail" "actions rail";
+      column-gap: clamp(1.5rem, 3vw, 3rem);
+      row-gap: 2rem;
     }
-
-    /* Centred, not bottom-anchored.
-       Anchoring it to the foot of the column put every spare pixel into ONE
-       gap between the meter's note and the eyebrow - around 280px of nothing
-       at 1440, which reads as a broken grid rather than as breathing room.
-       Centring splits that surplus above and below, and the rail height below
-       is tuned so there is not much of it left to split. */
-    .story-copy {
-      align-self: center;
-    }
+    .story-cell { min-height: clamp(34rem, 41vw, 41rem); }
+    .story-small-slot { min-height: clamp(13rem, 16vw, 15.5rem); }
   }
-
-  /* The rail bleeds to both screen edges on a phone - a card stopping short
-     of the edge reads as a grid that happens to overflow, where a card
-     running off it reads as something to push. Inside the two-column layout
-     there is no page edge to reach, so it returns to the track. */
-  .story-rail {
-    margin-inline: calc(var(--gutter) * -1);
-    padding-inline: var(--gutter);
+  @media (max-width: 639px) {
+    .story-grid { gap: 1.5rem; }
+    .story-intro { margin-top: 1.25rem; }
+    .story-card-footer { padding: 0.875rem; }
+    .story-card-footer h3 { font-size: 1rem; line-height: 1.25; }
+    .story-card-footer p { font-size: 0.75rem; line-height: 1.5; margin-top: 0.625rem; }
+    .story-card-small .story-card-footer { padding: 0.75rem; }
+    .story-tag { left: 0.75rem; top: 0.875rem; padding: 0.3rem 0.45rem; }
   }
-
-  @media (min-width: 1024px) {
-    .story-rail {
-      margin-inline: 0;
-      padding-inline: 0;
-      scroll-padding-inline: 0;
-    }
-  }
-
-  /* Ink at both ends of the card, open through the middle so the photograph
-     is never uniformly greyed: the lede sits in the top band, the body and
-     its pill in the bottom one, and the cloth itself reads between them.
-
-     The lower band is deliberately heavy and starts high. Across the three
-     card sizes the body copy begins between 62% and 72% down, and the
-     photography here is pale waffle cotton in daylight - at the 40% the
-     first version carried, cream type over a lit slipper measured about 3.4
-     and was genuinely hard to read. By 68% this is at 84%, which puts the
-     same type near 6:1 whatever the photograph is doing underneath. */
-  .story-card-shade {
-    background: linear-gradient(180deg,
-        rgb(35 50 75 / 84%) 0%,
-        rgb(35 50 75 / 70%) 18%,
-        rgb(35 50 75 / 32%) 32%,
-        rgb(35 50 75 / 16%) 44%,
-        rgb(35 50 75 / 44%) 57%,
-        rgb(35 50 75 / 84%) 69%,
-        rgb(35 50 75 / 92%) 100%);
-  }
-
-  /* ------------------------------------------------ the staggered card
-
-     Two cards are on screen and they are deliberately NOT the same. The one
-     the meter is on carries `is-active`: its copy sits at the foot of the
-     frame and its photograph is clear. The card queued behind it holds its
-     copy high and wears a haze. Press an arrow and the class moves, so the
-     two trade states and the copy visibly travels - the movement the whole
-     band is built around.
-
-     `bottom` rather than a transform: the block has to travel relative to the
-     CARD's height, and a percentage translate resolves against the element's
-     own height instead. Only two of these are ever on screen, so the layout
-     cost of animating `bottom` is not worth a transform's contortions. */
-  .story-card-body {
-    bottom: 1.25rem;
-    transition: bottom 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @media (min-width: 768px) {
-    .story-card-body {
-      bottom: 1.5rem;
-    }
-  }
-
-  .story-card:not(.is-active) .story-card-body {
-    bottom: 26%;
-  }
-
-  /* Softens the photograph of a queued card. Ivory rather than ink, and
-     UNDER the scrim, so the picture recedes without the copy above it
-     losing its ground - see `.story-card-shade-raised`. */
-  /* A queued card stands slightly shorter than the leading one - the
-     reference insets it top and bottom, and that inset is most of what makes
-     one of the two read as "in front". The cell centres it, so the card grows
-     and shrinks about its own middle. */
-  .story-card {
-    height: 100%;
-    transition: height 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .story-card:not(.is-active) {
-    height: 91%;
-  }
-
-  .story-card-veil {
-    background: rgb(246 244 240 / 20%);
-    opacity: 1;
-    transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .story-card.is-active .story-card-veil {
-    opacity: 0;
-  }
-
-  /* Raised copy lands between 50% and 70% of the card, where the standing
-     gradient is still open at roughly 35% - cream type measured about 3.4
-     there. This lays a second band at exactly that height for as long as the
-     copy is up there, and fades out as the card takes the lead and the copy
-     drops back into the gradient that was built for it. */
-  .story-card-shade-raised {
-    opacity: 0;
-    transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
-    background: linear-gradient(180deg,
-        rgb(35 50 75 / 0%) 20%,
-        rgb(35 50 75 / 44%) 42%,
-        rgb(35 50 75 / 72%) 56%,
-        rgb(35 50 75 / 72%) 86%,
-        rgb(35 50 75 / 52%) 100%);
-  }
-
-  .story-card:not(.is-active) .story-card-shade-raised {
-    opacity: 1;
-  }
-
   @media (prefers-reduced-motion: reduce) {
+    .story-nav button { transition: none; }
+  }
+  /* Shared caption baseline, clear of either alternating corner socket. */
+  .story-card .story-card-footer { padding-bottom: 5rem; }
 
-    .story-card,
-    .story-card-body,
-    .story-card-veil,
-    .story-card-shade-raised {
-      transition: none;
+  /* Mobile story deck: one readable feature, three previews, one control row.
+     The same four card identities animate between these stable grid slots. */
+  @media (max-width: 639px) {
+    .story-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        "copy copy copy"
+        "feature feature feature"
+        "preview-a preview-b preview-c";
+      column-gap: 0.625rem;
+      row-gap: 0.875rem;
     }
-  }
-
-  /* The card's photography already leans in on hover - the rotator carries
-     its own `group-hover` scale. This is the other half of the gesture: the
-     icon well of the pill turns, the same 45 degrees `ActionButton` tweens
-     when the pill itself is the thing being hovered. */
-  .story-card-icon {
-    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .story-card:hover .story-card-icon {
-      transform: rotate(45deg);
+    .story-copy { padding-bottom: 0.875rem; }
+    .story-actions, .story-rail { display: contents; }
+    .story-cell:first-child {
+      grid-area: feature;
+      min-height: clamp(25rem, 110vw, 30rem);
+      touch-action: pan-y pinch-zoom;
+    }
+    .story-small-slot:first-child { grid-area: preview-a; }
+    .story-small-slot:nth-child(2) { grid-area: preview-b; }
+    .story-cell:nth-child(2) { grid-area: preview-c; }
+    .story-small-slot, .story-cell:nth-child(2) {
+      min-height: clamp(8.5rem, 40vw, 10rem);
+    }
+    .story-controls { display: none; }
+    .story-intro-actions { position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .story-mobile-nav { display: flex; flex-shrink: 0; }
+    .story-cell:first-child .story-card-footer { padding: 1.25rem 1.25rem 5rem; }
+    .story-cell:first-child .story-card-footer h3 { font-size: 1.5rem; line-height: 1.15; text-wrap: pretty; }
+    .story-cell:first-child .story-card-footer p { font-size: 0.875rem; line-height: 1.6; max-width: 28rem; }
+    .story-small-slot .story-tag, .story-cell:nth-child(2) .story-tag,
+    .story-small-slot .story-card-footer p, .story-cell:nth-child(2) .story-card-footer p { display: none; }
+    .story-small-slot .story-card-surface, .story-cell:nth-child(2) .story-card-surface {
+      --story-notch: 80px;
+      border-radius: 1rem;
+      mask-image: var(--notch-corner), linear-gradient(#000, #000), linear-gradient(#000, #000);
+      mask-position: top right, top left, bottom right;
+    }
+    .story-small-slot .story-corner-button, .story-cell:nth-child(2) .story-corner-button {
+      width: 44px; height: 44px; top: 0; right: 0; bottom: auto; left: auto;
+      display: none;
+    }
+    .story-small-slot .story-preview-select, .story-cell:nth-child(2) .story-preview-select {
+      position: absolute; inset: 0; z-index: 10; display: block;
+      width: 100%; height: 100%; border-radius: 1rem; cursor: pointer;
+    }
+    .story-preview-select:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .story-preview-arrow {
+      @apply bg-ink text-paper;
+      position: absolute; top: 2px; right: 2px;
+      display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+    }
+    .story-preview-arrow svg { width: 1rem; height: 1rem; }
+    .story-small-slot .story-card-footer, .story-cell:nth-child(2) .story-card-footer { padding: 0.625rem; }
+    .story-small-slot .story-card-footer h3, .story-cell:nth-child(2) .story-card-footer h3 {
+      font-size: 0.6875rem; line-height: 1.35; text-wrap: pretty;
     }
   }
 }

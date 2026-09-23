@@ -1,23 +1,20 @@
 "use client";
 
-import { useGSAP } from "@gsap/react";
 import clsx from "clsx";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Flip } from "gsap/Flip";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import ActionButton from "@/components/ui/action-button";
-import { ArrowUpRight } from "@/components/ui/arrow-badge";
+import { flushSync } from "react-dom";
+import { HiArrowLeft, HiArrowRight, HiArrowUpRight } from "react-icons/hi2";
+import Image from "@/components/ui/shop-image";
 import CircledWord from "@/components/ui/circled-word";
-import ProductImageRotator from "@/components/ui/product-image-rotator";
+import ActionButton from "@/components/ui/action-button";
 import { displayFace, Eyebrow } from "@/components/ui/section";
-import { useHorizontalScrollPassthrough } from "@/hooks/use-horizontal-scroll-passthrough";
 import { aboutStory } from "@/lib/site";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(Flip);
 
-/** One pillar, with its photography and its destination already resolved. */
 export type StoryCard = {
   index: string;
   kicker: string;
@@ -30,522 +27,411 @@ export type StoryCard = {
 };
 
 /**
- * The homepage story band.
- *
- * Four regions that the grid in `globals.css` reorders between breakpoints -
- * a numbered meter, the editorial column, the card rail and the rail's
- * arrows - all reading one piece of state: where the rail is scrolled to.
- *
- * THE RAIL IS A NATIVE SCROLLER, not a transform track. Touch, trackpad,
- * shift-wheel, the scrollbar and tabbing between the cards therefore all work
- * with no code at all, and the meter and the arrows are readouts of
- * `scrollLeft` rather than a second source of truth that can drift from it.
- *
- * THE CLOSING PANEL IS LOAD-BEARING, not decoration. A snap rail can only
- * park a cell at its start while there is a viewport of scrolling left, so
- * with four cards and two of them visible the fourth could never reach the
- * snapport - 04 would sit dead in the meter for the life of the section. The
- * fifth cell is what the last card scrolls against, and it earns the space by
- * carrying the handoff to the full story. Widths are then chosen so every
- * numbered card is reachable: see `stopsFor`.
+ * One circular deck occupies two small left slots and two large right slots.
+ * FLIP matches card identities across those containers so the actual card
+ * travels between them. Slots retain their size throughout an exchange.
  */
 export default function StoryBoard({ cards }: { cards: StoryCard[] }) {
   const scope = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLUListElement>(null);
-  const [active, setActive] = useState(0);
-  const [progress, setProgress] = useState(0);
-
-  useHorizontalScrollPassthrough(railRef);
-
-  const last = Math.max(0, cards.length - 1);
+  const motion = useRef<gsap.core.Timeline | null>(null);
+  const locked = useRef(false);
+  const queued = useRef<number | null>(null);
+  const advanceRef = useRef<((direction: number) => void) | null>(null);
+  const gesture = useRef<{ x: number; y: number } | null>(null);
+  const suppressClick = useRef(false);
+  const [offset, setOffset] = useState(0);
   const count = cards.length;
+  const smallCount = Math.min(2, Math.max(0, count - 1));
+  const ordered = cards.map(
+    (_, index) => cards[(index + count - smallCount + offset) % count]!,
+  );
 
-  /**
-   * Where each numbered card comes to rest, as a `scrollLeft` value.
-   *
-   * Measured rather than calculated: the cells are sized in percentages that
-   * change at three breakpoints, and the snapport is inset by the gutter on a
-   * phone and flush at desktop. Reading the boxes is the only version of this
-   * that cannot fall out of step with the stylesheet.
-   */
-  const stopsFor = useCallback(
-    (rail: HTMLUListElement) => {
-      const pad = parseFloat(getComputedStyle(rail).paddingInlineStart) || 0;
-      const max = Math.max(0, rail.scrollWidth - rail.clientWidth);
-      // Viewport x of scroll offset 0, so a cell's own offset is just the
-      // distance from it. Works mid-scroll and mid-animation alike.
-      const origin = rail.getBoundingClientRect().left + pad - rail.scrollLeft;
-
-      return Array.from({ length: count }, (_, index) => {
-        const cell = rail.children[index];
-        if (!(cell instanceof HTMLElement)) return 0;
-        const offset = cell.getBoundingClientRect().left - origin;
-        return Math.min(max, Math.max(0, offset));
+  const advance = useCallback(
+    (direction: number) => {
+      const root = scope.current;
+      if (!root || count < 2) return;
+      // Keep at most one pending intent, including reversals during a transition.
+      if (locked.current) {
+        queued.current = direction;
+        return;
+      }
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const targets = root.querySelectorAll("[data-story-card]");
+      const focusedCard =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement.closest<HTMLElement>("[data-story-card]")
+              ?.dataset.storyCard
+          : undefined;
+      const state = reduced
+        ? null
+        : Flip.getState(targets, { props: "borderRadius" });
+      locked.current = true;
+      flushSync(() =>
+        setOffset((value) => (value + direction + count) % count),
+      );
+      if (focusedCard) {
+        Array.from(root.querySelectorAll<HTMLElement>("[data-story-card]"))
+          .find((element) => element.dataset.storyCard === focusedCard)
+          ?.querySelector<HTMLElement>("a")
+          ?.focus({ preventScroll: true });
+      }
+      const finish = () => {
+        locked.current = false;
+        motion.current = null;
+        root.classList.remove("is-exchanging");
+        const next = queued.current;
+        queued.current = null;
+        if (next) advanceRef.current?.(next);
+      };
+      if (!state) {
+        finish();
+        return;
+      }
+      root.classList.add("is-exchanging");
+      motion.current = Flip.from(state, {
+        targets: root.querySelectorAll("[data-story-card]"),
+        duration: 0.72,
+        ease: "power3.inOut",
+        // Cards already have absolute positioning inside stable slots.
+        // Animate their bounds, not a scale that stretches text and buttons.
+        absolute: false,
+        scale: false,
+        zIndex: 5,
+        prune: true,
+        onEnter: (elements) =>
+          gsap.fromTo(
+            elements,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.55, delay: 0.2, clearProps: "opacity" },
+          ),
+        onComplete: finish,
       });
+      // Copy appears after the silhouette has moved, avoiding stretched text.
+      motion.current.fromTo(
+        root.querySelectorAll(".story-card-footer"),
+        {
+          opacity: 0,
+          y: 10,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out",
+          clearProps: "transform,opacity",
+        },
+        0.4,
+      );
     },
     [count],
   );
 
-  const measure = useCallback(() => {
-    const rail = railRef.current;
-    if (!rail) return;
+  useEffect(() => {
+    advanceRef.current = advance;
+    return () => {
+      advanceRef.current = null;
+    };
+  }, [advance]);
 
-    const stops = stopsFor(rail);
-    if (!stops.length) return;
-
-    // `<=` so a tie resolves to the LATER card. If the widths are ever changed
-    // to something where the final stop clamps onto the one before it, the
-    // meter still reaches its last numeral at the end of the rail rather than
-    // stalling one short of it.
-    let nearest = 0;
-    let shortest = Infinity;
-    stops.forEach((stop, index) => {
-      const distance = Math.abs(stop - rail.scrollLeft);
-      if (distance <= shortest) {
-        shortest = distance;
-        nearest = index;
+  useEffect(() => {
+    const root = scope.current;
+    if (!root) return;
+    // A breakpoint change finishes the current exchange before new geometry
+    // is measured. Cleanup also prevents a timeline surviving navigation.
+    let width = root.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (root.clientWidth !== width) {
+        width = root.clientWidth;
+        queued.current = null;
+        motion.current?.progress(1);
       }
     });
+    observer.observe(root);
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reduce = () => {
+      if (media.matches) {
+        queued.current = null;
+        motion.current?.progress(1);
+      }
+    };
+    media.addEventListener("change", reduce);
+    const rail = root.querySelector<HTMLElement>("#story-rail");
+    let wheelDistance = 0;
+    let wheelTime = 0;
+    const wheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      const now = performance.now();
+      if (now - wheelTime > 180) wheelDistance = 0;
+      wheelTime = now;
+      if (locked.current) {
+        wheelDistance = 0;
+        return;
+      }
+      wheelDistance += event.deltaX;
+      if (Math.abs(wheelDistance) >= 50) {
+        advanceRef.current?.(wheelDistance > 0 ? 1 : -1);
+        wheelDistance = 0;
+      }
+    };
+    rail?.addEventListener("wheel", wheel, { passive: false });
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", reduce);
+      rail?.removeEventListener("wheel", wheel);
+      queued.current = null;
+      motion.current?.kill();
+    };
+  }, []);
 
-    const span = stops[last] ?? 0;
-    setActive(nearest);
-    setProgress(span > 1 ? Math.min(1, Math.max(0, rail.scrollLeft / span)) : 0);
-  }, [last, stopsFor]);
-
-  // Percentage cells mean a resize moves the scroll range under a stationary
-  // rail: the readout has to be recomputed, not only updated on scroll.
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(rail);
-    return () => observer.disconnect();
-  }, [measure]);
-
-  const goTo = useCallback(
-    (index: number) => {
-      const rail = railRef.current;
-      if (!rail) return;
-
-      const stops = stopsFor(rail);
-      const target = stops[Math.min(last, Math.max(0, index))];
-      if (target === undefined) return;
-
-      rail.scrollTo({
-        left: target,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-      });
-    },
-    [last, stopsFor],
+  const renderCard = (card: StoryCard, small: boolean) => (
+    <article
+      key={card.index}
+      data-flip-id={`story-${card.index}`}
+      data-story-card={card.index}
+      className={clsx(
+        "story-card group",
+        small && "story-card-small",
+        cards.indexOf(card) % 2 === 0 ? "story-corner-tr" : "story-corner-bl",
+      )}
+      aria-label={`${card.lede.lead} ${card.lede.accent}`}
+    >
+      <div className="story-card-surface">
+        <div className="story-card-image">
+          {card.images[0] && (
+            <Image
+              src={card.images[0].url}
+              alt={card.alt}
+              fill
+              sizes="(min-width: 1024px) 28vw, 48vw"
+              className="object-cover"
+              draggable={false}
+            />
+          )}
+        </div>
+        <span className="story-card-shade" aria-hidden />
+        <span className="story-tag">{card.kicker}</span>
+        <div className="story-card-footer">
+          <h3>
+            {card.lede.lead} {card.lede.accent}
+          </h3>
+          <p>{card.body}</p>
+        </div>
+      </div>
+      <StoryCornerLink href={card.href} label={card.cta} />
+      <button
+        type="button"
+        className="story-preview-select"
+        aria-label={`Show ${card.lede.lead} ${card.lede.accent}`}
+        aria-controls="story-rail"
+        onClick={() => {
+          const distance = (cards.indexOf(card) - offset + count) % count;
+          if (distance)
+            advance(distance > count / 2 ? distance - count : distance);
+        }}
+      >
+        <span className="story-preview-arrow" aria-hidden>
+          <HiArrowUpRight />
+        </span>
+      </button>
+    </article>
   );
 
-  /* ------------------------------------------------------------- entrance */
-
-  /**
-   * Written here rather than with the site-wide `data-reveal` attribute on
-   * purpose. This section streams inside a `<Suspense>` boundary, and the
-   * DOM-scanning motion layer can reach a streamed node in the window between
-   * its HTML arriving and React hydrating it - a real hydration mismatch, and
-   * the reason the homepage's Spotlight opts out of reveals entirely. Running
-   * the tween from inside the component means it cannot start before
-   * hydration.
-   *
-   * It fails safe in the other direction too: the markup ships visible, so a
-   * GSAP failure costs the animation rather than the section.
-   */
-  useGSAP(
-    () => {
-      const root = scope.current;
-      if (!root) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-      // Already on screen - or already scrolled past - by the time this runs.
-      // Hiding it now would be a flash of disappearing content, not an
-      // entrance.
-      if (root.getBoundingClientRect().top < window.innerHeight * 0.85) return;
-
-      const rise = gsap.utils.toArray<HTMLElement>("[data-story-rise]", root);
-      const cells = gsap.utils.toArray<HTMLElement>("[data-story-cell]", root);
-      if (!rise.length && !cells.length) return;
-
-      gsap.set([...rise, ...cells], { opacity: 0, y: 24 });
-
-      ScrollTrigger.create({
-        trigger: root,
-        start: "top 80%",
-        once: true,
-        onEnter: () => {
-          gsap.to(rise, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            stagger: 0.08,
-          });
-          gsap.to(cells, {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            delay: 0.12,
-            ease: "power3.out",
-            stagger: 0.1,
-          });
-        },
-      });
-    },
-    { scope, dependencies: [count] },
-  );
-
-  /* ---------------------------------------------------------------- render */
-
-  /**
-   * One shape for every cell, including the closing panel, so the rail reads
-   * as one band rather than as boxes of different sizes.
-   *
-   * BELOW lg THE HEIGHT COMES FROM THE RATIO, not from a step scale. The width
-   * is a percentage of the viewport and the height was fixed, so the card
-   * slowly flattened as the screen grew and went LANDSCAPE across the small
-   * tablet range - 1.15:1 at 600px - which is the one proportion this
-   * composition cannot survive: it stacks a lede on top of a body and a pill,
-   * and needs the photograph between them. A ratio holds 2:3 at every width
-   * instead, and `min-h` keeps the smallest phones from squeezing the copy.
-   *
-   * At lg the rail sits in a fixed two-column grid beside the editorial
-   * column, so the height is pinned there and the ratio goes back to being
-   * whatever the track width makes it (0.52 at 1024 through 0.74 at 1536 -
-   * all portrait).
-   *
-   * The widths are NOT free. With five cells and two visible, a cell must be
-   * at least 50% of the rail for the fourth card to reach the snapport - see
-   * the note on the closing panel above.
-   */
-  const CELL =
-    "flex items-center aspect-[2/3] min-h-[24rem] w-[80%] shrink-0 snap-start sm:w-[58%] md:w-[52%] lg:aspect-auto lg:h-[31rem] lg:min-h-0 xl:h-[35rem]";
+  if (!count) return null;
 
   return (
-    <div ref={scope} className="story-grid">
-      {/* ------------------------------------------------------------ meter */}
-      <div data-story-rise className="story-meter flex flex-col gap-5">
-        <div className="flex items-center gap-2.5 sm:gap-4">
-          {cards[0] ? (
-            <Numeral
-              card={cards[0]}
-              index={0}
-              active={active}
-              onSelect={goTo}
-            />
-          ) : null}
-
-          {/* The track runs between 01 and the rest, as the reference draws
-              it, and fills with the true scroll fraction - so it travels with
-              the finger instead of stepping when a card lands. */}
-          <span
-            aria-hidden
-            className="relative h-px min-w-[1.25rem] flex-1 bg-rule"
-          >
-            <span
-              className="absolute inset-y-0 left-0 bg-ink"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </span>
-
-          <span className="flex items-center gap-0.5 sm:gap-1.5">
-            {cards.slice(1).map((card, offset) => (
-              <Numeral
-                key={card.index}
-                card={card}
-                index={offset + 1}
-                active={active}
-                onSelect={goTo}
-              />
-            ))}
-          </span>
-        </div>
-
-        <p className="body-mono hidden max-w-[24rem] lg:block">
-          {aboutStory.meterNote}
-        </p>
-      </div>
-
-      {/* ------------------------------------------------------------- copy */}
+    <div
+      ref={scope}
+      className="story-grid"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Our story"
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        advance(event.key === "ArrowRight" ? 1 : -1);
+      }}
+    >
       <div className="story-copy">
-        <div data-story-rise>
-          <Eyebrow align="left">{aboutStory.eyebrow}</Eyebrow>
-        </div>
-
+        <Eyebrow align="left">{aboutStory.eyebrow}</Eyebrow>
         <h2
-          data-story-rise
           id="home-story"
-          /* Franxurter is wide and the left column is roughly a third of the
-             shell, so the largest step is earned rather than assumed: it only
-             comes in at xl, where the column is finally wide enough to hold
-             "quietest hour" on one line. Below that the heading would rewrap
-             into four lines and the column would outgrow the rail beside it. */
-          className={clsx(displayFace, "mt-4 text-display-lg xl:text-display-xl")}
+          className={clsx(displayFace, "story-heading mt-4 text-display-lg")}
         >
           {aboutStory.title.map((line) => (
-            <span key={line} className="block">
-              {ringPhrase(line, aboutStory.circled)}
+            <span className="block" key={line}>
+              {line === aboutStory.circled ? (
+                <CircledWord>{line}</CircledWord>
+              ) : (
+                line
+              )}
             </span>
           ))}
         </h2>
-
-        <p data-story-rise className="body-mono mt-6 max-w-measure text-pretty">
-          {aboutStory.body}
-        </p>
-
-        <div data-story-rise className="mt-7 flex flex-wrap items-center gap-3">
+        <p className="story-intro">{aboutStory.summary}</p>
+        <div className="story-intro-actions">
           <ActionButton
             label={aboutStory.primary.label}
             href={aboutStory.primary.href}
-            icon="arrow"
             variant="solid"
           />
-          <ActionButton
-            label={aboutStory.secondary.label}
-            href={aboutStory.secondary.href}
-            icon="arrow"
-          />
+          <div className="story-nav story-mobile-nav">
+            <button
+              type="button"
+              aria-label="Previous story card"
+              aria-controls="story-rail"
+              disabled={count < 2}
+              onClick={() => advance(-1)}
+            >
+              <HiArrowLeft aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label="Next story card"
+              aria-controls="story-rail"
+              disabled={count < 2}
+              onClick={() => advance(1)}
+            >
+              <HiArrowRight aria-hidden />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* ------------------------------------------------------------- rail */}
-      <ul
-        ref={railRef}
+      <div
         id="story-rail"
-        role="list"
-        onScroll={measure}
-        data-lenis-prevent-horizontal
-        aria-label="What Kozy Living is built on"
-        className="rail story-rail story-rail-area gap-3 pb-1"
+        className="story-rail story-rail-area"
+        tabIndex={0}
+        aria-label="Story cards. Swipe or use the left and right arrow keys."
+        onPointerDown={(event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          suppressClick.current = false;
+          gesture.current = { x: event.clientX, y: event.clientY };
+        }}
+        onPointerMove={(event) => {
+          if (!gesture.current) return;
+          const x = event.clientX - gesture.current.x;
+          const y = event.clientY - gesture.current.y;
+          if (Math.abs(y) > 12 && Math.abs(y) > Math.abs(x)) {
+            gesture.current = null;
+            return;
+          }
+          if (Math.abs(x) > 8 && Math.abs(x) > Math.abs(y)) {
+            suppressClick.current = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+        }}
+        onPointerUp={(event) => {
+          const start = gesture.current;
+          gesture.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          if (start && Math.abs(event.clientX - start.x) > 40)
+            advance(event.clientX < start.x ? 1 : -1);
+        }}
+        onPointerCancel={() => {
+          gesture.current = null;
+        }}
+        onPointerLeave={() => {
+          if (!suppressClick.current) gesture.current = null;
+        }}
+        onDragStart={(event) => event.preventDefault()}
+        onClickCapture={(event) => {
+          if (suppressClick.current) {
+            event.preventDefault();
+            event.stopPropagation();
+            suppressClick.current = false;
+          }
+        }}
       >
-        {cards.map((card, index) => (
-          <li key={card.index} data-story-cell className={CELL}>
-            <Link
-              href={card.href}
-              prefetch={false}
-              /* `is-active` is the card the meter is currently on. It drives
-                 the whole staggered look: the leading card drops its copy to
-                 the foot of the frame and clears the haze off its
-                 photograph, while the cards queued behind it hold their copy
-                 high. Pressing an arrow moves the class, and the two cards
-                 trade positions - which is the movement the reference is
-                 built around. */
-              className={clsx(
-                "story-card group relative isolate block w-full overflow-hidden rounded-plate bg-ink p-5 outline-none ring-ink/40 focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-paper md:p-6",
-                index === active && "is-active",
-              )}
-            >
-              {/* Negative z inside an isolated card: these paint over the
-                  card's own indigo fill and under every line of copy, which
-                  is what lets the numeral sit between the scrim and the text
-                  rather than on top of it. */}
-              <div
-                aria-hidden
-                className="absolute inset-0 -z-10 overflow-hidden rounded-plate"
-              >
-                <ProductImageRotator
-                  images={card.images}
-                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 58vw, 80vw"
-                  delay={index * 700}
-                  interval={5200}
-                  showIndicators={false}
-                />
-              </div>
-              {/* Haze over the photograph of a card that is not the leading
-                  one. It sits UNDER the scrim, so it softens the picture
-                  without touching the ground the copy is read against. */}
-              <span
-                aria-hidden
-                className="story-card-veil pointer-events-none absolute inset-0 -z-10"
-              />
-              <span
-                aria-hidden
-                className="story-card-shade pointer-events-none absolute inset-0 -z-10"
-              />
-              {/* The second scrim, for the raised state. Copy held high sits
-                  where the standing gradient is still open, so this one
-                  carries its own dark band at that height and fades out again
-                  the moment the card takes the lead. */}
-              <span
-                aria-hidden
-                className="story-card-shade-raised pointer-events-none absolute inset-0 -z-10"
-              />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -bottom-3 right-3 -z-10 font-display text-[5.5rem] leading-none text-paper/25 md:text-[7rem]"
-              >
-                {card.index}
-              </span>
-
-              <div className="relative max-w-[15rem]">
-                <h3 className="serif text-display-md !text-paper">
-                  {card.lede.lead}{" "}
-                  {/* Franxurter has no italic and one weight, so the emphasis
-                      lives on Jakarta's true italic. Sage measures 6.50 on the
-                      indigo scrim, which is where flat sage may carry type. */}
-                  <em className="font-normal italic text-sage">
-                    {card.lede.accent}
-                  </em>
-                </h3>
-                <p className="mt-2.5 font-sans text-micro uppercase tracking-micro text-paper/75">
-                  {card.kicker}
-                </p>
-              </div>
-
-              {/* Absolutely placed, not the tail of a flex column: this
-                  block travels between two heights and `bottom` is the one
-                  property that can be animated between them without the top
-                  block moving with it. */}
-              <div className="story-card-body absolute inset-x-5 md:inset-x-6">
-                <p className="max-w-[20rem] font-sans text-xs leading-relaxed text-paper/85 sm:text-sm">
-                  {card.body}
-                </p>
-                {/* A span, not an ActionButton: the whole card is already the
-                    link, and a nested anchor or button is invalid markup and
-                    a second tab stop for the same destination. */}
-                <span className="action-btn-glass mt-4">
-                  <span className="action-btn-label">{card.cta}</span>
-                  <span className="action-btn-icon story-card-icon">
-                    <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </span>
-                </span>
-              </div>
-            </Link>
-          </li>
+        {ordered.slice(smallCount, smallCount + 2).map((card) => (
+          <div className="story-cell" key={card.index}>
+            {renderCard(card, false)}
+          </div>
         ))}
-
-        {/* The cell the fourth card scrolls against - and the handoff for
-            anyone who swiped all the way through and wants the rest. */}
-        <li data-story-cell className={CELL}>
-          <Link
-            href={aboutStory.primary.href}
-            /* `is-active` unconditionally: this panel is never a queued card,
-               so it keeps full height and no haze whatever the meter says. */
-            className="story-card is-active panel-sage group relative flex h-full w-full flex-col justify-between overflow-hidden p-6 outline-none ring-ink/40 focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-paper md:p-7"
-          >
-            <span aria-hidden className="text-2xl leading-none">
-              ✳
-            </span>
-            <div>
-              <p className="font-sans text-micro uppercase tracking-micro text-ink/70">
-                {aboutStory.closing.label}
-              </p>
-              <h3 className="serif mt-3 text-display-md">
-                {aboutStory.closing.title}
-              </h3>
-              <span className="action-btn-solid mt-6">
-                <span className="action-btn-label">
-                  {aboutStory.primary.label}
-                </span>
-                <span className="action-btn-icon story-card-icon">
-                  <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </span>
-              </span>
-            </div>
-          </Link>
-        </li>
-      </ul>
-
-      {/* -------------------------------------------------------------- nav */}
-      <div data-story-rise className="story-nav flex items-center gap-2.5">
-        <button
-          type="button"
-          onClick={() => goTo(active - 1)}
-          disabled={active <= 0}
-          aria-label="Previous"
-          aria-controls="story-rail"
-          className="arrow-btn border-ink/15 bg-card text-ink hover:border-ink hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-ink/15 disabled:hover:bg-card disabled:hover:text-ink"
-        >
-          <Chevron direction="left" />
-        </button>
-        <button
-          type="button"
-          onClick={() => goTo(active + 1)}
-          disabled={active >= last}
-          aria-label="Next"
-          aria-controls="story-rail"
-          className="arrow-btn disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-ink disabled:hover:bg-ink disabled:hover:text-paper"
-        >
-          <Chevron direction="right" />
-        </button>
       </div>
+      <div className="story-actions">
+        {ordered.slice(0, smallCount).map((card) => (
+          <div className="story-small-slot" key={card.index}>
+            {renderCard(card, true)}
+          </div>
+        ))}
+        <div className="story-controls">
+          <span className="story-position" aria-hidden>
+            <span>{String(offset + 1).padStart(2, "0")}</span>
+            <span className="story-position-line" />
+            <span>{String(count).padStart(2, "0")}</span>
+          </span>
+          <div className="story-nav">
+            <button
+              type="button"
+              aria-label="Previous story card"
+              aria-controls="story-rail"
+              disabled={count < 2}
+              onClick={() => advance(-1)}
+            >
+              <HiArrowLeft aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label="Next story card"
+              aria-controls="story-rail"
+              disabled={count < 2}
+              onClick={() => advance(1)}
+            >
+              <HiArrowRight aria-hidden />
+            </button>
+          </div>
+        </div>
+      </div>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        Featured story: {cards[offset]?.lede.lead} {cards[offset]?.lede.accent}.{" "}
+        {offset + 1} of {count}.
+      </p>
     </div>
   );
 }
 
-/**
- * One numeral in the meter. It is a real control - tapping 03 takes you to the
- * third card - which is what earns the meter its space on a phone, where the
- * arrows are otherwise the only way through the rail without swiping.
- */
-function Numeral({
-  card,
-  index,
-  active,
-  onSelect,
-}: {
-  card: StoryCard;
-  index: number;
-  active: number;
-  onSelect: (index: number) => void;
-}) {
-  const isActive = index === active;
-
+/** Same socketed arrow as the plates, with a small SVG contour morph. */
+function StoryCornerLink({ href, label }: { href: string; label: string }) {
+  const path = useRef<SVGPathElement>(null);
+  const rest =
+    "M32 3C48 3 61 16 61 32C61 48 48 61 32 61C16 61 3 48 3 32C3 16 16 3 32 3Z";
+  const hover =
+    "M32 3C53 3 61 11 61 32C61 53 53 61 32 61C11 61 3 53 3 32C3 11 11 3 32 3Z";
+  const morph = (active: boolean) => {
+    if (!path.current) return;
+    gsap.to(path.current, {
+      attr: { d: active ? hover : rest },
+      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? 0
+        : 0.35,
+      ease: "power2.out",
+      overwrite: true,
+    });
+  };
+  useEffect(() => {
+    const element = path.current;
+    return () => {
+      if (element) gsap.killTweensOf(element);
+    };
+  }, []);
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(index)}
-      aria-current={isActive ? "true" : undefined}
-      aria-label={`${card.kicker}: ${card.lede.lead} ${card.lede.accent}`}
-      className={clsx(
-        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-sans text-ui font-semibold tabular-nums transition-colors duration-300 sm:h-10 sm:w-10",
-        isActive
-          ? "bg-ink text-paper"
-          : "text-muted hover:bg-wash hover:text-ink",
-      )}
+    <Link
+      href={href}
+      prefetch={false}
+      className="story-corner-button"
+      aria-label={label}
+      onMouseEnter={() => morph(true)}
+      onMouseLeave={() => morph(false)}
+      onFocus={() => morph(true)}
+      onBlur={() => morph(false)}
     >
-      {card.index}
-    </button>
-  );
-}
-
-/** Loops the hand-drawn ellipse around `phrase` where it appears in `line`. */
-function ringPhrase(line: string, phrase: string) {
-  const at = line.indexOf(phrase);
-  if (at === -1) return line;
-
-  return (
-    <>
-      {line.slice(0, at)}
-      <CircledWord>{phrase}</CircledWord>
-      {line.slice(at + phrase.length)}
-    </>
-  );
-}
-
-/** Drawn rather than typed, so the weight matches the UI face. */
-function Chevron({ direction }: { direction: "left" | "right" }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {direction === "left" ? (
-        <path d="M19 12H5m0 0 6-6m-6 6 6 6" />
-      ) : (
-        <path d="M5 12h14m0 0-6-6m6 6-6 6" />
-      )}
-    </svg>
+      <svg viewBox="0 0 64 64" aria-hidden className="story-corner-shape">
+        <path ref={path} d={rest} />
+      </svg>
+      <HiArrowUpRight aria-hidden className="story-corner-arrow" />
+    </Link>
   );
 }

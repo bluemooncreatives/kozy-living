@@ -169,7 +169,8 @@ export type LookbookEntry = {
 export const lookbook: readonly LookbookEntry[] = [
   {
     tag: "dabu",
-    description: "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
+    description:
+      "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
     title: "Krafted by Kozy",
     handle: "crafted-by-kozy",
     images: [],
@@ -188,14 +189,16 @@ export const lookbook: readonly LookbookEntry[] = [
   },
   {
     tag: "pets",
-    description: "Carriers, seating and clothing for the companion who shares your slow hours.",
+    description:
+      "Carriers, seating and clothing for the companion who shares your slow hours.",
     title: "Pet Kollection",
     handle: "pet-collection",
     images: [],
   },
   {
     tag: "rituals",
-    description: "A his & hers set in natural cotton, Natural Indigo and Tulsi - robes, slippers and more.",
+    description:
+      "A his & hers set in natural cotton, Natural Indigo and Tulsi - robes, slippers and more.",
     title: "His & Her Ritual Kit",
     // A single Kompanion rather than a shelf - see `product` on the type.
     product: "neelu-tulsi-his-hers-ritual-kit",
@@ -204,7 +207,8 @@ export const lookbook: readonly LookbookEntry[] = [
   },
   {
     tag: "dabu",
-    description: "Dabu-printed carriers and matching pieces for both ends of the leash.",
+    description:
+      "Dabu-printed carriers and matching pieces for both ends of the leash.",
     title: "Pet & Parent",
     handle: "pet-parent",
     images: [
@@ -216,14 +220,16 @@ export const lookbook: readonly LookbookEntry[] = [
   },
   {
     tag: "waffle",
-    description: "Soft layers for slow mornings, long evenings and everything between.",
+    description:
+      "Soft layers for slow mornings, long evenings and everything between.",
     title: "Bathrobes",
     handle: "bathrobes",
     images: [],
   },
   {
     tag: "dabu",
-    description: "Hand-block printed pillows that bring a quiet, artful mood to a corner.",
+    description:
+      "Hand-block printed pillows that bring a quiet, artful mood to a corner.",
     title: "Dabu Pillows",
     handle: "dabu-printed-pillows",
     images: [],
@@ -237,7 +243,8 @@ export const lookbook: readonly LookbookEntry[] = [
   },
   {
     tag: "rituals",
-    description: "Kompanions gathered into one set for a slower morning ritual.",
+    description:
+      "Kompanions gathered into one set for a slower morning ritual.",
     title: "Ritual Kits",
     handle: "ritual-kits",
     images: [],
@@ -251,7 +258,8 @@ export const lookbook: readonly LookbookEntry[] = [
   },
   {
     tag: "pets",
-    description: "Low, soft seating so your companion has a corner of their own.",
+    description:
+      "Low, soft seating so your companion has a corner of their own.",
     title: "Pet Seating",
     handle: "pet-seating",
     images: [],
@@ -286,7 +294,7 @@ export const lookbook: readonly LookbookEntry[] = [
  * flat sage is allowed to hold type.
  */
 export const aboutStory = {
-  eyebrow: "Our story",
+  eyebrow: "About Kozy Living",
   /**
    * Broken by hand, and kept SHORT on purpose: this heading sets in Franxurter
    * inside the narrow left column of a two-column band, where a long line
@@ -294,6 +302,8 @@ export const aboutStory = {
    * loops the phrase below, so keep it verbatim and keep it on one line.
    */
   title: ["Behind your", "quietest hour"],
+  summary:
+    "Designed in-house and made with craft clusters across India. We bring natural fibres and thoughtful design to the little rituals that make you feel at home.",
   circled: "quietest hour",
   body: "Kozy Living began with one idea: you don't need to add more to your day. Everything we make is designed in-house, worked in 100% natural fibres, and made with craft clusters across India - so the ten minutes you already take feel like a ritual rather than a gap.",
   /** Sits under the meter on wide screens, where the left column has room. */
@@ -369,6 +379,34 @@ export const aboutStory = {
         "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
       ],
     },
+    {
+      index: "05",
+      kicker: "The ritual",
+      lede: { lead: "Slow mornings,", accent: "soft layers" },
+      body: "Robes, slippers and thoughtful sets for the small moments of rest already in your day.",
+      cta: "Explore ritual kits",
+      collection: "ritual-kits",
+      href: "/search",
+      alt: "Soft cotton pieces for everyday moments of rest.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
+      ],
+    },
+    {
+      index: "06",
+      kicker: "The companions",
+      lede: { lead: "Together,", accent: "at home" },
+      body: "Carriers, seating and clothing for the companion who shares your slow hours.",
+      cta: "Meet the pet kollection",
+      collection: "pet-collection",
+      href: "/search",
+      alt: "Hand-block printed pieces for pets and their people.",
+      images: [
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_4035.png?v=1788636358",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/CEDD7B20-D83F-4050-9CEB-D693C7AE6269.jpg?v=1788636170",
+      ],
+    },
   ],
 } as const;
 
@@ -383,7 +421,8 @@ export const testimonial = {
   quote: site.statement,
   name: site.name,
   role: "The studio philosophy",
-  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
+  image:
+    "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
 } as const;
 
 /**
@@ -404,7 +443,8 @@ export const ctaBand = {
   wordmark: "shop now",
   href: "/search",
   seal: "krafted for moments of rest · ",
-  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
+  image:
+    "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
 } as const;
 
 /** Journal teaser - copy left, image right. */
@@ -413,7 +453,8 @@ export const guidesFeature = {
   title: "Notes on rest, ritual and kraft",
   body: "How a waffle weave earns its texture, what Dabu hand-block printing actually involves, and how to care for natural fibres so they soften rather than wear out.",
   cta: "Read the journal",
-  image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1880.jpg?v=1788636348",
+  image:
+    "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1880.jpg?v=1788636348",
   href: "/blogs",
 } as const;
 
@@ -432,21 +473,24 @@ export const journalPosts = [
   {
     slug: "why-waffle-weave",
     title: "Why Waffle Weave Belongs in Your Slowest Hour",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
+    image:
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
     excerpt:
       "The honeycomb structure holds air, which is what makes a waffle robe dry quickly and breathe against skin. A look at how the weave is built and why it suits an unhurried morning...",
   },
   {
     slug: "dabu-hand-block-printing",
     title: "Dabu: The Mud-Resist Print Behind Our Indigo",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1895_c94dd5b4-daca-47b9-94aa-d5aa31527cd5.jpg?v=1788636351",
+    image:
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1895_c94dd5b4-daca-47b9-94aa-d5aa31527cd5.jpg?v=1788636351",
     excerpt:
       "Before dye touches cloth, a mud-and-gum resist is hand-stamped onto it block by block. Nothing about the process is fast, and every repeat carries the hand that placed it...",
   },
   {
     slug: "in-between-moments",
     title: "The In-Between Moments Are the Ritual",
-    image: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
+    image:
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
     excerpt:
       "Not the grand reset, but the ten minutes on the floor before the day starts. A case for textiles that support the routines already in your day rather than asking for new ones...",
   },

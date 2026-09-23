@@ -78,42 +78,39 @@ export default async function StoryBand() {
 }
 
 /**
- * Streamed placeholder. It holds the band's real geometry - meter row, copy
- * column, two cards - so the page below does not jump when the Shopify call
- * resolves.
+ * Streamed placeholder mirrors the intro, two small cards and large cards.
  */
 export function StoryBandFallback() {
   return (
     <section aria-hidden className="shell py-12 md:py-16">
       <div className="story-grid">
-        <div className="story-meter flex items-center gap-4">
-          <span className="h-10 w-10 animate-pulse rounded-full bg-wash" />
-          <span className="h-px flex-1 bg-rule" />
-          <span className="h-10 w-24 animate-pulse rounded-chip bg-wash" />
-        </div>
-
         <div className="story-copy">
           <div className="h-4 w-28 animate-pulse rounded-chip bg-wash" />
           <div className="mt-5 h-10 w-full max-w-md animate-pulse rounded bg-wash" />
           <div className="mt-3 h-10 w-3/4 max-w-sm animate-pulse rounded bg-wash" />
           <div className="mt-6 h-16 w-full max-w-measure animate-pulse rounded bg-wash" />
+          <div className="mt-5 h-11 w-40 animate-pulse rounded-chip bg-wash" />
         </div>
 
-        <div className="story-rail-area flex gap-3 overflow-hidden">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className="story-rail story-rail-area">
+          {Array.from({ length: 2 }).map((_, index) => (
             <div
               key={index}
-              /* Mirrors the live cell shape in `story-board.tsx` - if that
-                 changes, this has to move with it or the band jumps when the
-                 Shopify call resolves. */
-              className="aspect-[2/3] min-h-[24rem] w-[80%] shrink-0 animate-pulse rounded-plate bg-wash sm:w-[58%] md:w-[52%] lg:aspect-auto lg:h-[31rem] lg:min-h-0 xl:h-[35rem]"
+              className="story-cell animate-pulse rounded-plate bg-wash"
             />
           ))}
         </div>
 
-        <div className="story-nav flex items-center gap-2.5">
-          <span className="h-10 w-10 animate-pulse rounded-full bg-wash" />
-          <span className="h-10 w-10 animate-pulse rounded-full bg-wash" />
+        <div className="story-actions">
+          <div className="story-small-slot animate-pulse rounded-plate bg-wash" />
+          <div className="story-small-slot animate-pulse rounded-plate bg-wash" />
+          <div className="story-controls">
+            <span className="h-3 w-24 animate-pulse rounded bg-wash" />
+            <div className="story-nav">
+              <span className="h-11 w-11 animate-pulse rounded-full bg-wash" />
+              <span className="h-11 w-11 animate-pulse rounded-full bg-wash" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

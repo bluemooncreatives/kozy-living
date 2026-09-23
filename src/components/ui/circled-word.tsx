@@ -141,7 +141,7 @@ export default function CircledWord({
         className="pointer-events-none absolute -inset-x-[6%] -inset-y-[18%] h-[136%] w-[112%]"
       >
         <path
-          d="M104 6C64 3 18 12 8 30c-9 17 30 26 82 27 47 1 100-7 105-25C199 16 168 7 128 5"
+          d="M118 9C78-1 18 12 8 30c-9 17 30 26 82 27 47 1 100-7 105-25C199 16 168 3 128 5C111 6 97 8 88 12"
           /* No dash in the markup on purpose: the ring ships drawn, and only
              the motion layer ever hides it. JavaScript failing costs the
              draw-on, never the ellipse. */
