@@ -33,6 +33,15 @@ postcard popup (client)
 
 ## 1. Add the customer scopes to the custom app
 
+> Since January 2026, Shopify no longer issues a permanent `shpat_...` token
+> for *new* apps created from Shopify Admin — only from the Dev Dashboard,
+> which hands out a client ID/secret instead (see `src/lib/shopify/admin.ts`
+> and `.env.sample`). The steps below still apply as written to an
+> **already-existing** custom app with a token you're just adding scopes to;
+> for a Dev Dashboard app, add the scopes in the Dev Dashboard's API access
+> settings instead of step 1–5 below — there is no token to reveal, the
+> updated scopes just take effect on the next token exchange.
+
 The Admin token already in `.env.local` belongs to the custom app that owns the
 contact form, and it was created with metaobject scopes only. Writing a customer
 needs two more.

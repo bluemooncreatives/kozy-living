@@ -47,7 +47,14 @@ TWITTER_SITE='https://kozyliving.com'
 
 SHOPIFY_STORE_DOMAIN='your-store.myshopify.com'
 SHOPIFY_STOREFRONT_ACCESS_TOKEN='your_storefront_token'
+
+# Admin credentials for the contact form — a permanent token from a classic
+# custom app, OR a Dev Dashboard app's client ID/secret (exchanged server-side
+# for a token that expires every ~24h). See .env.sample for both forms.
 SHOPIFY_ADMIN_ACCESS_TOKEN='shpat_...'
+# SHOPIFY_ADMIN_CLIENT_ID='...'
+# SHOPIFY_ADMIN_CLIENT_SECRET='...'
+
 SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID='...'
 ```
 

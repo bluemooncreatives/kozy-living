@@ -13,6 +13,8 @@ const envSchema = z.object({
   SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN: z.string().optional(),
   SHOPIFY_STOREFRONT_PRIVATE_TOKEN: z.string().optional(),
   SHOPIFY_ADMIN_ACCESS_TOKEN: z.string().optional(),
+  SHOPIFY_ADMIN_CLIENT_ID: z.string().optional(),
+  SHOPIFY_ADMIN_CLIENT_SECRET: z.string().optional(),
 });
 
 envSchema.parse(process.env);
