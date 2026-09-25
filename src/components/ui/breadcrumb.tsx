@@ -23,12 +23,18 @@ export default function Breadcrumb({
 
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="shell flex flex-wrap items-center gap-2 py-5">
+      {/* `flex-nowrap` + `overflow-x-auto` rather than `flex-wrap`: a wrapped
+          trail stranded the current page alone on a second row, which read as
+          a font-size jump (indigo `aria-current` beside muted-gray ancestors)
+          rather than as what it was - a line break. A scrolling single line
+          keeps every crumb on the one baseline at any width, including a
+          three-deep trail on a narrow phone. */}
+      <ol className="shell flex flex-nowrap items-center gap-2 overflow-x-auto py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {ancestors.map((crumb) => (
-          <li key={crumb.href} className="flex items-center gap-2">
+          <li key={crumb.href} className="flex shrink-0 items-center gap-2">
             <Link
               href={crumb.href}
-              className="micro-mono text-muted transition-opacity hover:opacity-60"
+              className="micro-mono whitespace-nowrap text-muted transition-opacity hover:opacity-60"
             >
               {crumb.title}
             </Link>
@@ -37,8 +43,14 @@ export default function Breadcrumb({
             </span>
           </li>
         ))}
-        <li>
-          <span aria-current="page" className="micro-mono">
+        {/* `flex items-center`, matching every ancestor `<li>` above - not a
+            plain block. Both sat in the same flex row under `ol`'s own
+            `items-center`, but a block box and a flex box compute slightly
+            different heights for the same one line of text, and the ol then
+            centred each on its own mismatched height: 2px of drift, visible
+            as the current page sitting off the ancestors' baseline. */}
+        <li className="flex shrink-0 items-center">
+          <span aria-current="page" className="micro-mono whitespace-nowrap">
             {current}
           </span>
         </li>

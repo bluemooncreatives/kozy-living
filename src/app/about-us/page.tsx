@@ -11,6 +11,7 @@ import {
   aboutCta,
   aboutImages,
   collective,
+  founderImages,
   heritage,
   site,
   studioNote,
@@ -285,24 +286,42 @@ function Collective() {
       </div>
 
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {collective.members.map((member) => (
-          <li
-            key={member.name}
-            className="panel p-6 md:p-8"
-          >
-            <div className="plate flex aspect-[4/5] w-full items-center justify-center bg-sage-wash">
-              <span aria-hidden className="wordmark text-[5rem] leading-none text-ink/70">
-                {member.name.charAt(0)}
-              </span>
-            </div>
-            <p className="micro-mono mt-5 text-muted">{member.role}</p>
-            <h3 className="serif mt-2 text-display-sm">{member.name}</h3>
-            {member.credential ? (
-              <p className="spec-mono mt-2">{member.credential}</p>
-            ) : null}
-            <p className="body-mono mt-3 text-pretty">{member.body}</p>
-          </li>
-        ))}
+        {collective.members.map((member) => {
+          // Khushi is the only named individual and the only one with a real
+          // photograph - everyone else keeps the initial-in-a-plate card,
+          // which is honest about who this brand can and cannot put a face
+          // to (see CLAUDE.md §2 on invented people).
+          const portrait =
+            member.name === site.founder ? founderImages[0] : null;
+
+          return (
+            <li key={member.name} className="panel p-6 md:p-8">
+              {portrait ? (
+                <Plate
+                  src={portrait.url}
+                  alt={portrait.alt}
+                  aspect="4/5"
+                  className="w-full"
+                />
+              ) : (
+                <div className="plate flex aspect-[4/5] w-full items-center justify-center bg-sage-wash">
+                  <span
+                    aria-hidden
+                    className="wordmark text-[5rem] leading-none text-ink/70"
+                  >
+                    {member.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <p className="micro-mono mt-5 text-muted">{member.role}</p>
+              <h3 className="serif mt-2 text-display-sm">{member.name}</h3>
+              {member.credential ? (
+                <p className="spec-mono mt-2">{member.credential}</p>
+              ) : null}
+              <p className="body-mono mt-3 text-pretty">{member.body}</p>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

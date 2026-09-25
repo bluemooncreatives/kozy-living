@@ -1905,3 +1905,737 @@ html:has([data-loader]) body {
     }
   }
 }
+
+
+
+/* ---------------------------------------------------------------------------
+   The Kozy Story + the founder's note
+
+   Two standalone editorial routes that shadow Shopify pages of the same
+   handle (see the header comment in each page file).
+
+   THE RULE BOTH PAGES ARE BUILT AGAINST: an editorial column is a measure,
+   and a measure inside a 96rem shell leaves half a widescreen empty. Every
+   band here is either a scatter across the full grid or a two-column
+   composition with something real in the second column. A single left-aligned
+   column of body copy across the whole shell is the shape to avoid - it is
+   what the first cut of these pages did, and it read as a page that had not
+   finished loading.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  /* -------------------------------------------------------------- collage */
+
+  .collage {
+    position: relative;
+    overflow: clip;
+    padding-block: 2.5rem 3.5rem;
+  }
+
+  /* Drawn, not imaged: the same geometry as the seal and the notch, at no
+     request cost and at any size.
+
+     Faded out at the top and bottom rather than cut: the band clips, and a
+     hairline that stops dead at a horizontal edge read as three stray stubs
+     hanging into the wordmark below. */
+  .collage-arcs {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: rgba(95, 113, 120, 0.22);
+    stroke-width: 1;
+    pointer-events: none;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 18%,
+      #000 78%,
+      transparent
+    );
+  }
+
+  /* The stack is centred as ONE BLOCK, and the lines are staggered inside
+     it - the reference's composition. Centring each line separately lost
+     the stagger, which is what makes the band read as set by hand.
+
+     The type size lives here rather than on the lines so the block's own
+     `em` is the line's em: the stagger, the tiles and the padding that
+     makes room for them are all measured in it.
+
+     The width term keeps every hung tile on screen. Measured in Franxurter
+     at this tracking, the lead is 9.36em; the widest tile hangs 1.6em past
+     its end and the last line's reaches 0.7em before the block. So the band
+     needs 11.66em, and the shell's content box / 11.9 is the largest size
+     that still clears the gutter. */
+  .collage-stack {
+    position: relative;
+    z-index: 1;
+    width: fit-content;
+    margin-inline: auto;
+    font-size: clamp(
+      2rem,
+      min(8.2vw, (min(100vw, 96rem) - 2 * var(--gutter)) / 11.9),
+      7rem
+    );
+  }
+
+  /* A button, but set as a line of the stack: block, shrink-wrapped to its
+     words so the click target is the type and not the whole band. */
+  .collage-line {
+    @apply display-face lowercase;
+    display: block;
+    width: fit-content;
+    font-size: 1em;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin: 0;
+    text-align: left;
+    cursor: pointer;
+    color: rgba(35, 50, 75, 0.14);
+    transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .collage-line:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 0.08em;
+    border-radius: 0.1em;
+  }
+
+  /* Enough lift to say "this answers", still well short of the solid line. */
+  .collage-line:not(.is-active):hover,
+  .collage-line:not(.is-active):focus-visible {
+    color: rgba(35, 50, 75, 0.34);
+  }
+
+  .collage-line.is-active {
+    color: var(--ink);
+    cursor: default;
+  }
+
+  /* Deepest first, then stepping back out: the last line starts left of
+     the one above it, so the large tile hung before it has open cream
+     above it rather than the second ghost's first letters. */
+  .collage-line:nth-child(2) {
+    margin-left: 2.2em;
+  }
+
+  .collage-line:nth-child(3) {
+    margin-left: 1.4em;
+  }
+
+  .collage-line:nth-child(4) {
+    margin-left: 0.9em;
+  }
+
+  /* The line's own box, shrink-wrapped to its words, so `left: 100%` on the
+     tile below means "where this line's type ends". */
+  .collage-words {
+    position: relative;
+    display: inline-block;
+  }
+
+  .collage-note {
+    @apply font-sans text-spec text-muted;
+    position: relative;
+    z-index: 1;
+    margin-top: 1.75rem;
+    margin-inline: auto;
+    max-width: 22rem;
+    text-align: center;
+  }
+
+  .collage-tile {
+    @apply rounded-plate;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--tint);
+    box-shadow: 0 18px 40px -28px rgba(35, 50, 75, 0.55);
+  }
+
+  /* Every set's frame for a slot, stacked; the pressed line's set shows. */
+  .collage-layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.08);
+    transition:
+      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .collage-layer.is-active {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Below md: the frames as a row under the stack. */
+  .collage-tiles {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .collage-tiles .collage-tile {
+    flex: 1 1 0;
+  }
+
+  .collage-tile-hung {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .collage {
+      padding-block: 4rem 5rem;
+    }
+
+    .collage-tiles {
+      display: none;
+    }
+
+    /* Room inside the centred block for the tiles that hang outside the
+       type (see the width note on `.collage-stack`), so it is the whole
+       composition that centres, not just the words. */
+    .collage-stack {
+      padding-left: 0.7em;
+      padding-right: 1.6em;
+    }
+
+    /* Sized in em of the line it hangs from, a third of an em clear of the
+       type, centred on the line box. Large on the first and last lines,
+       small between, as in the reference. The line leaves ~0.2em of air
+       above and below its glyphs, which is the room the drift works in -
+       and the large ones only ever sit beside a shorter neighbour. */
+    .collage-tile-hung {
+      --tile: 0.75em;
+      display: block;
+      position: absolute;
+      left: calc(100% + 0.3em);
+      top: calc(50% - var(--tile) / 2);
+      width: var(--tile);
+      border-radius: 0.16em;
+    }
+
+    .collage-line:first-child .collage-tile-hung,
+    .collage-line:last-child .collage-tile-hung {
+      --tile: 1.3em;
+    }
+
+    /* Alternating sides: the lead and the second ghost carry theirs after
+       the words, the first and third ghosts before them. */
+    .collage-line:nth-child(even) .collage-tile-hung {
+      left: auto;
+      right: calc(100% + 0.3em);
+    }
+  }
+
+  /* -------------------------------------------------------------- scatter */
+
+  .scatter {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-block: 3rem 4rem;
+  }
+
+  .scatter-intro {
+    max-width: 44rem;
+  }
+
+  .scatter-glyph {
+    color: var(--sage-deep);
+    font-size: 0.7em;
+    vertical-align: 0.15em;
+  }
+
+  .scatter-frame {
+    @apply rounded-plate;
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--tint);
+  }
+
+  .scatter-photo {
+    object-fit: cover;
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .scatter-card:hover .scatter-photo {
+      transform: scale(1.05);
+    }
+  }
+
+  /* The label sits ON the photograph as a pill - the card's only piece of
+     chrome, and the thing that makes a scattered grid read as a set. No
+     arrow and no hover inversion: those say "link", and these are not. */
+  .scatter-pill {
+    @apply font-sans text-micro uppercase rounded-chip;
+    position: absolute;
+    left: 0.6rem;
+    top: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--cream);
+    color: var(--ink);
+  }
+
+  .scatter-index {
+    @apply font-sans text-micro;
+    position: absolute;
+    right: 0.9rem;
+    bottom: 0.7rem;
+    color: var(--paper);
+    text-shadow: 0 1px 6px rgba(35, 50, 75, 0.7);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A hanging bullet: inline, it pulled the first line in and let every
+     wrapped line run back out under it. */
+  .scatter-body {
+    position: relative;
+    padding-left: 1rem;
+  }
+
+  .scatter-bullet {
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    color: var(--sage-deep);
+    font-size: 0.55em;
+  }
+
+  @media (min-width: 640px) {
+    .scatter {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem 1.25rem;
+    }
+
+    .scatter-intro {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* The scatter proper, in two steps.
+
+     1024-1279: the heading centred across the top and the four chapters as
+     one row under it, alternately dropped. A true scatter needs the room;
+     at this width its narrow cards set their paragraphs four words a line.
+
+     1280+: the scatter, on a sixteen-column map that is MIRROR-SYMMETRIC
+     about the page's centre line - 01 in 1-4 against 02 in 13-16, 03 in
+     5-7 against 04 in 10-12, the heading in 5-12. The first cut's twelve
+     columns put 03 at 3-6 and 04 at 8-11, one column off the mirror,
+     which is why the band read as sitting off-centre.
+
+     01 and 02 span both rows, so the first row is only as tall as the
+     heading and 03 / 04 tuck up under it - the first cut left a third of a
+     screen of empty cream there. The lower pair is a column narrower than
+     the outer pair, which is what makes the band read as a scatter around
+     its heading rather than as two rows of cards. */
+  @media (min-width: 1024px) {
+    .scatter {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 3rem 1.25rem;
+      padding-block: 4rem 5rem;
+      align-items: start;
+    }
+
+    .scatter-intro {
+      grid-column: 3 / 11;
+      text-align: center;
+      margin-inline: auto;
+    }
+
+    .scatter-card {
+      grid-column: span 3;
+      grid-row: 2;
+    }
+
+    .scatter-card.card-2,
+    .scatter-card.card-4 {
+      margin-top: 3rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .scatter {
+      grid-template-columns: repeat(16, minmax(0, 1fr));
+      grid-template-rows: auto auto;
+      column-gap: 1.5rem;
+    }
+
+    .scatter-intro {
+      grid-column: 5 / 13;
+      grid-row: 1;
+      padding-top: 1rem;
+    }
+
+    .scatter-card.card-1 {
+      grid-column: 1 / 5;
+      grid-row: 1 / 3;
+      margin-top: 4.5rem;
+    }
+
+    .scatter-card.card-2 {
+      grid-column: 13 / 17;
+      grid-row: 1 / 3;
+      margin-top: 0;
+    }
+
+    .scatter-card.card-3 {
+      grid-column: 5 / 8;
+      grid-row: 2;
+      margin-top: 4rem;
+    }
+
+    .scatter-card.card-4 {
+      grid-column: 10 / 13;
+      grid-row: 2;
+      margin-top: 0;
+    }
+  }
+
+  /* --------------------------------------------------------------- fibres */
+
+  /* Positioned, and the offset parent of every row: the card's parked `y`
+     is measured from row.offsetTop against this box. */
+  .fibre-board {
+    position: relative;
+    margin-top: 2.5rem;
+  }
+
+  .fibre-rows {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Below lg: dot | name over note over "seen in" | index | thumbnail. */
+  .fibre-row {
+    @apply rounded-plate;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.3rem 1rem;
+    padding: 1.1rem 1.25rem;
+    text-align: left;
+    color: var(--ink);
+    transition:
+      background 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      color 0.45s ease;
+  }
+
+  /* The hairline belongs to the list item, not the row. As an inset shadow
+     on the rounded button it followed the button's corners, so every rule
+     curled up at both ends. Either side of the live row it is dropped, so
+     the indigo fill does not sit between two lines. */
+  .fibre-rows > li + li {
+    border-top: 1px solid var(--rule);
+    transition: border-color 0.45s ease;
+  }
+
+  .fibre-rows > li:has(.is-active),
+  .fibre-rows > li:has(.is-active) + li {
+    border-top-color: transparent;
+  }
+
+  .fibre-row.is-active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .fibre-dot {
+    grid-row: 1;
+    grid-column: 1;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: var(--sage-deep);
+    transition: background 0.45s ease;
+  }
+
+  .fibre-row.is-active .fibre-dot {
+    background: var(--sage);
+  }
+
+  .fibre-name {
+    @apply font-sans text-display-sm font-semibold;
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .fibre-note,
+  .fibre-seen {
+    @apply font-sans text-spec;
+    grid-column: 2;
+    color: var(--muted);
+    transition: color 0.45s ease;
+  }
+
+  .fibre-note {
+    grid-row: 2;
+  }
+
+  .fibre-seen {
+    grid-row: 3;
+    font-style: italic;
+  }
+
+  /* On indigo the second lines go oat, never sage: sage on indigo is fine
+     for a dot, but at spec size it is the wrong end of the palette for
+     running type. */
+  .fibre-row.is-active .fibre-note,
+  .fibre-row.is-active .fibre-seen {
+    color: rgba(232, 217, 196, 0.85);
+  }
+
+  .fibre-index {
+    @apply font-sans text-micro;
+    grid-row: 1;
+    grid-column: 3;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.6;
+  }
+
+  .fibre-thumb {
+    @apply rounded-chip;
+    position: relative;
+    grid-row: 1 / span 3;
+    grid-column: 4;
+    width: 3.25rem;
+    height: 3.25rem;
+    overflow: hidden;
+    background: var(--tint);
+  }
+
+  .fibre-float {
+    display: none;
+  }
+
+  /* lg+: dot | name over note | "seen in" | the card's lane | index. The
+     fourth track is empty on purpose - it is where the card is laid over
+     the rows, so no row puts type underneath it. */
+  @media (min-width: 1024px) {
+    .fibre-row {
+      grid-template-columns:
+        auto minmax(0, 17rem) minmax(0, 15rem) minmax(20rem, 1fr)
+        auto;
+      padding: 1.5rem 1.75rem;
+    }
+
+    .fibre-seen {
+      grid-row: 1 / span 2;
+      grid-column: 3;
+    }
+
+    .fibre-index {
+      grid-row: 1 / span 2;
+      grid-column: 5;
+    }
+
+    /* Over the rows, in the lane the grid above leaves empty, parked on the
+       live row by `place()` in fibre-list.tsx. No pointer events, so the
+       rows beneath stay hoverable. Tilted by `rotate`, not `transform`:
+       GSAP owns the transform for the parked `y`. */
+    .fibre-float {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: clamp(4rem, 12%, 10rem);
+      z-index: 2;
+      width: clamp(16rem, 24vw, 21rem);
+      padding: 0.6rem 0.6rem 0.9rem;
+      pointer-events: none;
+      rotate: -3deg;
+      background: var(--card);
+      box-shadow: 0 30px 60px -32px rgba(35, 50, 75, 0.55);
+      @apply rounded-plate;
+    }
+  }
+
+  .fibre-float-photo {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--tint);
+    /* Concentric with the card: the plate radius less the card's padding. */
+    border-radius: 0.9rem;
+  }
+
+  .fibre-float-shot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .fibre-float-shot.is-active {
+    opacity: 1;
+  }
+
+  /* A weave with no Kompanion yet: its name, ghosted, on the oat plate -
+     the same answer `Plate` gives for a missing shoot. Indigo at 22% on
+     oat is decoration, not copy; the caption below says it properly. */
+  .fibre-float-empty {
+    @apply display-face lowercase;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+    font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+    line-height: 0.95;
+    color: rgba(35, 50, 75, 0.22);
+  }
+
+  .fibre-float-caption {
+    @apply font-sans text-spec text-muted;
+    margin-top: 0.75rem;
+    padding-inline: 0.35rem;
+  }
+
+  .fibre-float-kicker {
+    @apply font-sans text-micro uppercase text-ink;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  /* Under the list: what the live row is shown in, and the step onward. */
+  .fibre-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1.75rem;
+  }
+
+  .fibre-next {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full bg-card text-ink;
+    width: 3.25rem;
+    height: 3.25rem;
+    box-shadow: 0 10px 24px -16px rgba(35, 50, 75, 0.6);
+    transition:
+      background 0.3s ease,
+      color 0.3s ease;
+  }
+
+  /* Hover only where there is a hovering pointer: a tap leaves `:hover`
+     stuck on touch screens, and the button sat indigo after every press. */
+  .fibre-next:focus-visible {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .fibre-next:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+  }
+
+  /* --------------------------------------------------------------- letter */
+
+  /* The founder's letter is set against a ruled margin rather than in a card:
+     a page, not another panel. The rule is sage-deep at low alpha because
+     flat sage measures 1.85 on cream and would vanish as a hairline. */
+  .letter {
+    position: relative;
+    padding-left: 1.25rem;
+    border-left: 1px solid rgba(95, 113, 120, 0.35);
+  }
+
+  @media (min-width: 768px) {
+    .letter {
+      padding-left: 2rem;
+    }
+  }
+
+  .letter-lede {
+    @apply font-sans;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.1875rem);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* The quote that breaks the letter's measure. Tilted a degree and a half,
+     which is enough to read as placed by hand and little enough that the
+     type still sits on the page's baseline grid. */
+  .letter-quote {
+    @apply rounded-plate bg-sage-wash;
+    position: relative;
+    padding: 2rem;
+    transform: rotate(-1.5deg);
+  }
+
+  @media (min-width: 768px) {
+    .letter-quote {
+      padding: 2.5rem;
+    }
+  }
+
+  /* ------------------------------------------------------------ founder reel */
+
+  /* Horizontal, and deliberately full-bleed inside its own column: the
+     letter's left column runs shorter than the sticky quote beside it once
+     the three paragraphs end, and this is what fills that trailing blank
+     space instead of leaving it empty until the closing panel. A ticker
+     reads as "there is more to see", where an empty gap reads as unfinished
+     layout. */
+  /* Full-bleed - a set piece at the width of the viewport, not boxed into
+     one column of the shell grid above it. No radius of its own: a rounded
+     edge in the middle of the viewport would read as a mistake, where the
+     mask fading each side to nothing reads as the strip continuing past the
+     frame rather than stopping at it. */
+  .founder-reel {
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 4%,
+      black 96%,
+      transparent
+    );
+  }
+
+  .founder-reel-tile {
+    @apply rounded-plate bg-tint;
+    position: relative;
+    flex: none;
+    height: 14rem;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    margin-right: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .founder-reel-tile {
+      height: 19rem;
+      margin-right: 1rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .founder-reel-tile {
+      height: 22rem;
+    }
+  }
+
+  /* A nicety, not a requirement - the reel is decorative and keeps looping
+     regardless, but a reader who pauses on it gets a still frame to look at
+     rather than a blur. Fine pointers only: pausing on tap would just be
+     confusing on a phone. */
+  @media (hover: hover) and (pointer: fine) {
+    .founder-reel:hover .marquee-track,
+    .founder-reel:hover .marquee-track-reverse {
+      animation-play-state: paused;
+    }
+  }
+}

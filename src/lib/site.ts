@@ -27,9 +27,88 @@ export const site = {
     "Craft-led, conscious textiles from India. Cotton waffle weaves, slub cottons, percale, linen blends and wool - designed in-house, made with craft clusters across the country, and finished with traditional Dabu hand-block printing.",
   founder: "Khushi Faruqi",
   founderCredential: "Textile Design, NIFT Delhi",
+  /** Khushi's own account - distinct from `instagram` below, which is the
+      brand's. Used only on `/founders-note`, where the byline is hers. */
+  founderInstagram: "@khushifaruqii",
+  founderInstagramUrl: "https://www.instagram.com/khushifaruqii/",
   instagram: "@kozyliving_",
   instagramUrl: "https://www.instagram.com/kozyliving_/",
 } as const;
+
+/**
+ * Photographs of the founder herself - real stills, not studio product shots
+ * standing in for a portrait. Used on `/founders-note` (masthead, the letter's
+ * side column, the closing panel) and as the founder's card on `/about-us`.
+ *
+ * These are raw Shopify file URLs, not the transformed CDN images the
+ * Storefront API returns, so `ShopImage`'s loader rewrites them by `?width=`
+ * rather than by the `_NNNNx` filename suffix - see the note in
+ * `shop-image.tsx`. Capped at 2048 there either way.
+ */
+export const founderImages = [
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/WhatsApp_Image_2026-02-08_at_11.59.15_PM.jpg?v=1790369996",
+    alt: "Khushi Faruqi, founder of Kozy Living.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1171_43dfc109-e3d3-4a11-b902-f6443ff961fa.jpg?v=1790369997",
+    alt: "Khushi Faruqi at work in the Kozy Living studio.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_6338_eea1aae1-4c9b-4571-8f07-f080a9d1fbeb.jpg?v=1790369997",
+    alt: "Khushi Faruqi with Kozy Living textiles.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_2755_9be99538-96aa-4529-a92c-1c67d6431b73.jpg?v=1790369997",
+    alt: "Khushi Faruqi, founder of Kozy Living.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_6412_d18c7de3-251f-46e0-9763-eb814a5fa2a5.jpg?v=1790370000",
+    alt: "Khushi Faruqi in the studio with the craft clusters' work.",
+  },
+] as const;
+
+/**
+ * The reel on `/founders-note` - `founderImages` plus a silent clip and one
+ * more still, for the auto-scrolling column beside the letter.
+ *
+ * One entry is a VIDEO, not a photograph - `FounderReel` renders it as a
+ * silent, looping `<video>` rather than through `ShopImage`, which only
+ * handles Shopify's image transform. Its `poster` is the one non-portrait
+ * still in the set (a product promo frame): named `..._Poster_...` on
+ * Shopify, and used here for exactly that job, so the reel never shows a
+ * blank tile before the clip has a frame to paint.
+ */
+export const founderReel = [
+  ...founderImages,
+  {
+    type: "video" as const,
+    url: "https://cdn.shopify.com/videos/c/o/v/806a125208a44b90ad1c2e7ae99d6494.mp4",
+    poster:
+      "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/NEW_PRODUCT_WATCH_SALE_PROMO_Poster_25bd1395-74aa-4e03-8808-487406600e3f.png?v=1788636327",
+    alt: "A moment from the Kozy Living studio, in motion.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_8778.jpg?v=1788636329",
+    alt: "Khushi Faruqi with Kozy Living textiles.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1235.jpg?v=1788636320",
+    alt: "Kozy Living Textiles, styled.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/NEW_PRODUCT_WATCH_SALE_PROMO_Poster_-_4.jpg?v=1788636319",
+    alt: "A Kozy Living Kompanion.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1214.jpg?v=1788636316",
+    alt: "Kozy Living Textiles, styled.",
+  },
+  {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/NEW_PRODUCT_WATCH_SALE_PROMO_Poster_-_10.jpg?v=1788636316",
+    alt: "A Kozy Living Kompanion.",
+  },
+] as const;
 
 /*
  * NOTE: navigation lives in Shopify, not here.
@@ -883,4 +962,198 @@ export const aboutCta = {
   body: "Krafted in small batches from 100% natural fibres, in collaboration with craft clusters across India.",
   cta: "Shop all Kompanions",
   href: "/search",
+} as const;
+
+/* ------------------------------------------------------- the kozy story page */
+
+/**
+ * `/the-kozy-story` - the brand's own account of itself, in the founder’s
+ * words rather than the studio's.
+ *
+ * The handle is a Shopify page (`pages/the-kozy-story`, linked from the live
+ * menu), so this copy DELIBERATELY shadows whatever body that page carries:
+ * the route is a designed one, the same way `/shop-by-colour` is. See §4 of
+ * CLAUDE.md.
+ *
+ * House spelling applied to the source copy: companions -> Kompanions, and
+ * the standalone verb crafted -> krafted. The ordinary noun is left alone -
+ * "Indian craft", "craft clusters" and "colour, craft & consciousness" are
+ * correct as written.
+ */
+export const kozyStory = {
+  eyebrow: "The Kozy Story",
+  title: "Designed to give you moments of rest.",
+  lede: "Kozy Living Textiles are your in-between Kompanions, krafted to turn everyday moments into mindful daily rituals.",
+  /** The band that closes the masthead - the site's signature bleeding line. */
+  wordmark: "moments of rest",
+  seal: "the kozy story · krafted for rest · ",
+  /** Studio stills, used when the live collection photography is unavailable. */
+  alt: "Waffle weave and Dabu hand-block printed Kompanions in the studio.",
+  collection: "kessentials",
+  /**
+   * The chapters: how a Kompanion is made, told through the brand's own
+   * process photography, in the order the work happens - the cloth is
+   * printed as yardage, then patterned and cut, then finished.
+   *
+   * EVERY LINE HERE IS EITHER WHAT ITS PHOTOGRAPH SHOWS OR WHAT THE STORE
+   * ALREADY SAYS. The maker credits are the merchant's own product copy in
+   * Shopify: "Printed by Artisans of Yaseen Bhai Block Print Craft Cluster"
+   * (Tulsi Ritual Robe), Dabu "of Jodhpur" (Sunshine Floor Pillow, the Flow
+   * Kloud slippers), natural indigo and "Syahi (Iron Black)" (Dabu Speckled
+   * Cushion, Polka Kloud Komfort). Nothing else is named: headcounts, years
+   * and the individuals in these frames have not been given to us.
+   *
+   * TODO(brand): the copy credits the cluster for the work, NOT for these
+   * particular photographs. Confirm with the studio before tying a named
+   * printer or cluster to a specific frame.
+   *
+   * `media` is a raw Shopify file URL (resized by `ShopImage`'s loader - the
+   * pattern photo is a HEIC, which only Safari can show as-is, and Shopify
+   * converts it to WebP/JPEG as soon as a width is asked for) or a clip.
+   * The clip's poster is a frame of it saved locally, so the card is never
+   * an empty tint before the video decodes.
+   */
+  chaptersEyebrow: "How it is made",
+  chaptersTitle: "Made by hand, with craft clusters across India.",
+  chapters: [
+    {
+      index: "01",
+      kicker: "Hand-block printing",
+      title: "One block, pressed by hand.",
+      body: "Every repeat is printed by hand, by block-print artisans in Jodhpur - among them the Yaseen Bhai Block Print Craft Cluster. The printer sets a carved wooden block against the last impression and presses it in, square by square, down a long padded table.",
+      media: {
+        type: "image",
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1664_cc6a4799-b520-4db1-b9d2-bab197e0d74c.jpg?v=1790369997",
+        alt: "A printer pressing a carved wooden block into white cloth, building a checked repeat by hand.",
+      },
+    },
+    {
+      index: "02",
+      kicker: "Dabu mud-resist",
+      title: "Printed in mud, before the dye.",
+      body: "Dabu is a mud resist. The block is lifted from a tray of mud paste and laid down line by line; wherever the paste sits, the dye - natural indigo, or syahi, an iron black - cannot reach, and the pattern shows once the cloth is washed.",
+      media: {
+        type: "image",
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/PHOTO-2026-04-25-15-43-08_34c1e353-99d4-49b1-a326-7c28afb0d0cd.jpg?v=1790369996",
+        alt: "A printer lifting a wooden block from a tray of mud paste to print striped chevrons in Dabu resist.",
+      },
+    },
+    {
+      index: "03",
+      kicker: "Pattern & cutting",
+      title: "Drafted on paper, then cut.",
+      body: "Before any cloth is cut, each piece is drafted as a paper pattern - squared with a ruler, measured with the tape and checked against its spec sheet - so every Kompanion is cut to the same line.",
+      media: {
+        type: "image",
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1641.heic?v=1790369998",
+        alt: "A pattern master drafting a paper pattern with an L-square, a tape measure around his neck.",
+      },
+    },
+    {
+      index: "04",
+      kicker: "The finished cloth",
+      title: "Krafted for your daily rituals.",
+      body: "Printed, washed and finished, the cloth keeps the small shifts only a hand-pressed block leaves - then it is stitched into a Kompanion, labelled, and sent on to your everyday.",
+      media: {
+        type: "video",
+        url: "https://cdn.shopify.com/videos/c/o/v/806a125208a44b90ad1c2e7ae99d6494.mp4",
+        poster: "/media/finished-cloth-poster.jpg",
+        alt: "Close-up of finished hand-printed cloth, green rings around a blue flower, with a Kozy Living label tape.",
+      },
+    },
+  ],
+  /**
+   * The fibres, named and nothing more. Every weave here is one the brand
+   * lists; no hand or weight counts, because none have been given to us.
+   */
+  fibresEyebrow: "The material palette",
+  fibresTitle: "Five natural Indian textiles.",
+  /** Follows the count ("5 weaves, all natural."). */
+  fibresNote: "weaves, all natural.",
+  /** Desktop only - it describes the hover card, which phones do not get. */
+  fibresHint: "Hover or pick a row to see the cloth.",
+  /**
+   * The notes describe the WEAVE, not the product: "plain weave" and "slub"
+   * are what those cloths are, which is checkable, where a hand-feel or a GSM
+   * would be a claim nobody has given us. Keep them definitional.
+   */
+  fibres: [
+    /*
+     * `product` is the Kompanion the card shows for this weave - a handle
+     * picked because the product's own Shopify copy names the fabric, so
+     * the photograph is of the cloth the row describes. Waffle: the Kozy
+     * Kloud Robe ("Fabric: 100% Natural Cotton Waffle"). Slub: the Kozy
+     * Biscuit Floor Pillow ("breathable cotton slub").
+     *
+     * Percale, linen blends and wool have NO product in the catalogue yet,
+     * so they carry none and the card shows the weave's name on an oat panel
+     * rather than a borrowed photograph of some other cloth - that mismatch
+     * is exactly what this list used to show. Add the handle here when one
+     * ships. A handle that stops resolving falls back to the same panel.
+     */
+    { index: "01", name: "Cotton waffle weave", note: "Textured and highly absorbent", product: "hoodie-robe" },
+    { index: "02", name: "Slub cotton", note: "Irregular slub, woven in", product: "biscuits-floor-pillow-with-gusset" },
+    { index: "03", name: "Cotton percale", note: "Plain weave, crisp and closed" },
+    { index: "04", name: "Linen blends", note: "Linen worked with natural fibres" },
+    { index: "05", name: "Wool", note: "Naturally insulating" },
+  ],
+  /** Card caption and the line under the list, when the weave has a Kompanion. */
+  fibreSeenIn: "Seen in the",
+  /** The same, for a weave with no Kompanion in the catalogue yet. */
+  fibreInPalette: "Part of the material palette",
+  /** The control under the list that steps to the next weave. */
+  fibreNext: "Next weave",
+  /**
+   * The collage band. One solid line and three ghosted ones, with small
+   * photographs scattered between them - the page's loudest gesture, and the
+   * reason the story does not open on a column of body copy.
+   */
+  collage: {
+    lead: "Kraft-led & Konscious",
+    ghosts: ["Natural fibres", "Dabu hand-block", "Colour & comfort"],
+    note: "Four things the cloth carries before it ever reaches a room.",
+    /** The lines switch the photographs; ghosted type does not say so alone. */
+    hint: "Choose one to see it.",
+  },
+  /** The line the whole page is built to arrive at. */
+  close: {
+    eyebrow: "A reminder",
+    /** Joined and set as one balanced run - the breaks are not kept. */
+    lines: ["You don’t need to add", "more to your day. Just do", "what you do with more intention."],
+    /** Ringed by the hand-drawn ellipse. Must appear in `lines` verbatim. */
+    circled: "more intention",
+    body: "Kozy Living Textiles is a reminder that intention is not another thing to add. It is the way you do what you already do.",
+    primary: { label: "Read the founder’s note", href: "/founders-note" },
+    secondary: { label: "Shop all Kompanions", href: "/search" },
+  },
+} as const;
+
+/* ------------------------------------------------------- founder’s note page */
+
+/**
+ * `/founders-note` - Khushi's own letter, first person.
+ *
+ * `studioNote` on `/about-us` says a version of this in studio voice and is
+ * signed by the studio; this is the founder speaking, and is the only place
+ * on the site that does. Keep the two in step if either is revised.
+ *
+ * "Kozy Klub" is the brand's own term for its readers and is spelled that way
+ * on purpose.
+ */
+export const foundersNote = {
+  eyebrow: "Founder’s note",
+  /** Set as display type, split word by word. */
+  title: "I realised intention doesn’t come from adding more.",
+  standfirst: "It comes from engaging deeply with the routines that already exist.",
+  body: [
+    "Having studied Textile Design at NIFT Delhi, and being grateful for the recognition my work has received, I’ve always been drawn to how textiles shape emotion, atmosphere and everyday living.",
+    "While creating my own space, I found myself looking for home textiles that felt joyful and expressive, contemporary yet rooted in Indian craft. When I couldn’t find them, I began to create them.",
+    "Kozy Living grew from that exploration. A journey to bring colour, craft and consciousness into daily life. We turn familiar routines into moments of restful intention.",
+  ],
+  pull: "This is your gentle invitation to be mindful, present and full of colour.",
+  welcome: "Welcome to your Kozy Klub",
+  signature: site.founder,
+  signatureRole: site.founderCredential,
+  cta: { label: "Meet the Kompanions", href: "/search" },
+  back: { label: "The Kozy Story", href: "/the-kozy-story" },
 } as const;
