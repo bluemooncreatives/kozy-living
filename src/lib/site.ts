@@ -63,9 +63,9 @@ export const hero = {
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
   /** The statement panel in the top-right of the bento. */
   statement: {
-    lines: ["Krafted textiles", "by real hands", "for real rest"],
+    lines: ["Kraft-led & Koncious", "textiles for", "everyday rituals"],
     /** Ringed by the hand-drawn ellipse. Must appear in `lines` verbatim. */
-    circled: "real rest",
+    circled: "everyday rituals",
     body: "Designed in-house, shaped by the hands and heritage of India’s craft clusters. From tactile cottons to linen blends and wool, every weave carries a story of place, patience, and craft.",
   },
   /** The two small plates that close the bento. */
