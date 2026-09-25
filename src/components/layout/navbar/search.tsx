@@ -96,7 +96,10 @@ export function SearchBar({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="serif w-full rounded-plate border border-ink/15 bg-card px-5 py-4 pr-12 text-display-sm focus-visible:border-ink focus-visible:ring-0"
+          // 16px and regular weight: the bold display size read as a heading
+          // rather than a field, and anything under 16px makes iOS zoom the
+          // page on focus.
+          className="w-full rounded-chip border border-ink/15 bg-card px-5 py-3.5 pr-12 font-sans text-base text-ink placeholder:text-muted focus-visible:border-ink focus-visible:ring-0"
         />
         <MagnifyingGlassIcon
           aria-hidden

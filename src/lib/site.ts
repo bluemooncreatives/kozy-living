@@ -653,12 +653,15 @@ export const legalLinks = [
   { title: "Privacy Policy", path: "/privacy-policy" },
 ] as const;
 
-export const socialLinks = [
-  { title: "Instagram", href: site.instagramUrl },
-  { title: "Pinterest", href: "https://pinterest.com" },
-  { title: "YouTube", href: "https://youtube.com" },
-  { title: "Email", href: "mailto:care@kozyliving.com" },
-] as const;
+/** The phone navigation drawer's own chrome - the links are Shopify's. */
+export const navDrawer = {
+  /** Leads a section's own page inside it: "Explore Pet Kollection". */
+  explore: "Explore",
+  account: "My account",
+  open: "Open menu",
+  close: "Close menu",
+} as const;
+
 
 /* ------------------------------------------------------------------ gi tag */
 

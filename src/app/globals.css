@@ -2639,3 +2639,208 @@ html:has([data-loader]) body {
     }
   }
 }
+
+
+/* ---------------------------------------------------------------------------
+   The phone navigation drawer (`layout/navbar/mobile-menu.tsx`)
+
+   An accordion: one section open at a time, every tap target 44px or more.
+   See the component for why the headings are toggles, not links.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  .drawer-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 246, 235, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .drawer-icon-btn {
+    @apply inline-flex items-center justify-center rounded-full bg-card text-ink;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgba(35, 50, 75, 0.1);
+    transition: background 0.25s ease;
+  }
+
+  .drawer-icon-btn:active {
+    background: var(--tint);
+  }
+
+  .drawer-item {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* The row: a link for a leaf, a toggle for a section. Same box either way,
+     so the list reads as one rhythm. */
+  .drawer-row {
+    display: flex;
+    width: 100%;
+    min-height: 3.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.5rem;
+    text-align: left;
+    color: var(--ink);
+  }
+
+  .drawer-title {
+    @apply font-sans font-bold;
+    position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+    font-size: 1.3125rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  /* "You are here": a sage-deep dot hung in the gutter. sage-deep, not
+     sage - flat sage measures 1.85 on cream and would not be there. */
+  .drawer-title.is-here::before {
+    content: "";
+    position: absolute;
+    left: -0.85rem;
+    top: 0.5em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--sage-deep);
+  }
+
+  .drawer-count {
+    @apply font-sans text-micro font-semibold text-muted;
+    margin-top: 0.1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .drawer-row-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--muted);
+  }
+
+  .drawer-chevron {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--rule);
+    transition:
+      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+      background 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .drawer-chevron.is-open {
+    transform: rotate(180deg);
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  /* Height on grid rows, 0fr -> 1fr: no measuring, and correct however
+     the tiles wrap. The inner box clips while it grows. */
+  .drawer-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .drawer-panel.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .drawer-panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .drawer-panel.is-open .drawer-panel-inner {
+    padding-bottom: 1.25rem;
+  }
+
+  .drawer-all {
+    @apply font-sans text-ui font-semibold;
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    border-radius: 0.9rem;
+    /* Outlined, not filled: the open chevron above is the one solid indigo
+       mark in the section, and a second filled bar under it competed. */
+    border: 1px solid rgba(35, 50, 75, 0.18);
+    color: var(--ink);
+    transition: background 0.25s ease;
+  }
+
+  .drawer-all:active {
+    background: var(--card);
+  }
+
+  .drawer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .drawer-tile {
+    @apply font-sans text-ui;
+    display: flex;
+    height: 100%;
+    min-height: 2.75rem;
+    align-items: center;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.9rem;
+    background: var(--card);
+    color: var(--ink);
+    line-height: 1.25;
+    transition: background 0.25s ease;
+  }
+
+  .drawer-tile:active {
+    background: var(--tint);
+  }
+
+  .drawer-tile[aria-current="page"] {
+    background: var(--sage-wash);
+    font-weight: 600;
+  }
+
+  .drawer-foot {
+    margin-top: auto;
+    padding: 1.75rem 1.25rem calc(1.75rem + env(safe-area-inset-bottom));
+  }
+
+  .drawer-pill {
+    @apply inline-flex items-center gap-2 rounded-chip bg-card font-sans text-ui font-semibold text-ink;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid rgba(35, 50, 75, 0.1);
+  }
+
+  /* The rows arrive one after another as the panel slides in - short, and
+     only where motion is welcome. */
+  @media (prefers-reduced-motion: no-preference) {
+    .drawer-item {
+      animation: drawer-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: calc(120ms + var(--i, 0) * 40ms);
+    }
+  }
+
+  @keyframes drawer-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.6rem);
+    }
+  }
+}
