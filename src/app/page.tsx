@@ -239,9 +239,12 @@ function Hero() {
           <div className="absolute inset-x-3 bottom-3 z-20 flex flex-col gap-3.5 md:inset-x-5 md:bottom-5 md:gap-4">
             {/* Mobile-only textual context in crisp white */}
             <div className="flex flex-col gap-2 lg:hidden max-w-lg">
+              {/* The heading is the whole caption now the paragraph is gone,
+                  so it scales with the plate: 8vw keeps the widest line
+                  ("Kraft-led & Konscious", 9.68em) inside a 320px screen. */}
               <h2
                 data-split=""
-                className="display-face font-normal tracking-[-0.015em] text-display-md sm:text-display-lg text-white drop-shadow-sm"
+                className="display-face font-normal leading-[1.04] tracking-[-0.015em] text-[clamp(1.75rem,8vw,2.75rem)] text-white drop-shadow-sm"
               >
                 {statement.lines.map((line) => (
                   <span key={line} className="block">
@@ -249,9 +252,6 @@ function Hero() {
                   </span>
                 ))}
               </h2>
-              <p className="body-mono text-white/90 text-xs sm:text-sm max-w-measure drop-shadow-sm">
-                {statement.body}
-              </p>
             </div>
 
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3">
@@ -272,15 +272,20 @@ function Hero() {
         </Plate>
 
         {/* --------------------------------------------------------- saying */}
-        <div className="bento-say panel hidden lg:flex flex-col justify-between gap-6 p-6 md:p-8 lg:p-9">
-          <h2 data-split="" className={clsx(displayFace, "text-display-lg")}>
-            {statement.lines.map((line) => (
-              <span key={line} className="block">
-                {splitText(ringWord(line, statement.circled))}
-              </span>
-            ))}
+        {/* The headline alone, sized to the panel. It sat at display-lg in
+            three forced lines, which used under half of this box once the
+            paragraph beneath it went. Now it flows as one balanced run and
+            takes its size from the panel's own width (`.bento-say-title`),
+            so it fills the box at every desktop width. */}
+        <div className="bento-say panel hidden lg:flex flex-col justify-center p-6 md:p-8 lg:p-9">
+          <h2
+            data-split=""
+            className={clsx(displayFace, "bento-say-title text-balance")}
+          >
+            {splitText(
+              ringWord(statement.lines.join(" "), statement.circled),
+            )}
           </h2>
-          <p className="body-mono max-w-measure">{statement.body}</p>
         </div>
 
         {/* ---------------------------------------------------- two closers */}

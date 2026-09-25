@@ -11,6 +11,9 @@ import { splitText } from "@/components/motion/split-text";
 import WordCollage from "@/components/story/word-collage";
 import ChapterScatter from "@/components/story/chapter-scatter";
 import FibreList, { type FibreKompanion } from "@/components/story/fibre-list";
+import StoryHeroGrid from "@/components/story/story-hero-grid";
+import { ArrowUpRight } from "@/components/ui/arrow-badge";
+import Link from "next/link";
 import { imageKey } from "@/lib/shop/gallery";
 import { getCollectionProducts, getProduct } from "@/lib/shopify";
 import { aboutStory, kozyStory, whyKraft } from "@/lib/site";
@@ -35,12 +38,12 @@ import { aboutStory, kozyStory, whyKraft } from "@/lib/site";
      fibres      the material palette as a list that answers back
      close       the line the whole page exists to arrive at
 
-   Every product photograph on the page is one request's worth of live
-   Shopify photography, resolved once in `stills()` and handed down. Two
-   bands are the exception, because each of their frames goes with its
-   words: the chapters' process photography is fixed per chapter in
-   `kozyStory.chapters`, and each fibre is shown in the Kompanion made of
-   it (`fibreKompanions()`).
+   The collage and the closing panel draw on one request's worth of live
+   Shopify photography, resolved once in `stills()` and handed down. Three
+   bands are chosen instead, because each of their frames goes with its
+   words: the masthead wall (`kozyStory.hero.frames`), the chapters' process
+   photography (`kozyStory.chapters`), and each fibre shown in the Kompanion
+   made of it (`fibreKompanions()`).
 --------------------------------------------------------------------------- */
 
 export const metadata: Metadata = {
@@ -54,14 +57,14 @@ export const metadata: Metadata = {
  * used to overlap (fibres started at 2, inside the collage's 1-4), so all five
  * fibre photographs were ones the reader had already scrolled past.
  */
-const SLOT = { mast: 0, collage: 1, close: 5 } as const;
+const SLOT = { collage: 0, close: 4 } as const;
 /**
  * The collage's other three sets - one per line it can switch to - come from
  * the frames past `close`, so the opening set stays disjoint from every other
  * band and the rest only repeat once the store runs out of photographs.
  */
-const COLLAGE_EXTRA = 6;
-const SHOTS = 18;
+const COLLAGE_EXTRA = 5;
+const SHOTS = 17;
 
 /** Photography for the whole page, live where possible. */
 async function stills() {
@@ -143,7 +146,7 @@ export default async function KozyStoryPage() {
   return (
     <>
       <Breadcrumb current={kozyStory.eyebrow} />
-      <Masthead lead={shots[SLOT.mast]} />
+      <Masthead />
 
       <div className="shell">
         <WordCollage
@@ -188,47 +191,110 @@ export default async function KozyStoryPage() {
 /* ---------------------------------------------------------------- masthead */
 
 /**
- * Centred, not bottom-aligned, and the frame is capped in height: a tall
- * plate beside a short column of copy is what put half a widescreen of empty
- * cream above this headline in the first cut.
+ * The masthead, after the "Our Work" wireframe: the title top-left, the lede
+ * top-right, and a four-by-two grid of square frames beneath with two cells
+ * left EMPTY on purpose - the gaps are what make it read as a curated wall
+ * rather than a product grid - and an outlined cell closing the set with the
+ * one onward link.
+ *
+ * The map is `grid-template-areas` in `.story-hero-grid` (globals.css), with
+ * `.` for the empty cells; below md it is two columns with no gaps.
+ *
+ * MOTION, all on the site's own system. The title rises word by word
+ * (`Headline`'s split); the frames stagger in as a `data-reveal-group`, each
+ * photograph settling from a slight zoom (`Plate`'s `data-reveal-media`); and
+ * on scroll the second and fourth columns drift against the first and third
+ * (`StoryHeroGrid`). The four brand facts close the band, as before.
  */
-function Masthead({ lead }: { lead?: { url: string; alt: string } }) {
+function Masthead() {
+  const { hero } = kozyStory;
+  const cells = ["a", "b", "c", "d", "e"] as const;
+  // Pixels of travel across the grid's pass, BY COLUMN: two cells stacked in
+  // one column must share a value, or the upper one slides into the lower
+  // across a 16px gap. Col 1 (a, d) holds still; 2 (e) and 4 (c, more) rise
+  // against 3 (b), which is what separates the grid into layers.
+  const column = { 1: 0, 2: 70, 3: -30, 4: 50 } as const;
+  const drift: Record<(typeof cells)[number] | "more", number> = {
+    a: column[1],
+    d: column[1],
+    e: column[2],
+    b: column[3],
+    c: column[4],
+    more: column[4],
+  };
+
   return (
-    <section aria-labelledby="story" className="shell overflow-x-clip pb-6">
-      <div className="grid grid-cols-1 items-center gap-6 md:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-12">
-        <div data-reveal-group>
+    <section aria-labelledby="story" className="shell pb-10 md:pb-14">
+      <div className="flex flex-col gap-6 pt-2 md:flex-row md:items-end md:justify-between md:gap-12 md:pt-4">
+        <div>
           <Eyebrow align="left">{kozyStory.eyebrow}</Eyebrow>
+          {/* No measure cap: the wireframe's title is two lines, and it
+              balances against the lede beside it. A 13ch cap set it in
+              four and pushed the whole wall below the fold. */}
           <Headline as="h1" id="story" className="mt-4">
             {kozyStory.title}
           </Headline>
-          <p className="body-mono mt-6 max-w-measure text-pretty">
-            {kozyStory.lede}
-          </p>
-
-          {/* The four things the brand actually claims, borrowed from the
-              About page so the two pages cannot drift apart. */}
-          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-6 sm:grid-cols-4 lg:mt-10">
-            {whyKraft.stats.map((stat) => (
-              <div key={stat.label}>
-                <dt className="serif text-display-sm">{stat.value}</dt>
-                <dd className="micro-mono mt-1 text-muted">{stat.label}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
-
-        <Plate
-          src={lead?.url}
-          alt={lead?.alt ?? kozyStory.alt}
-          aspect="4/5"
-          tone={1}
-          parallax={40}
-          placeholderText="rest"
-          priority
-          sizes="(min-width: 1024px) 44vw, 100vw"
-          className="lg:max-h-[32rem] xl:max-h-[36rem]"
-        />
+        <p
+          data-reveal=""
+          className="body-mono max-w-[24rem] text-pretty md:mb-2 md:text-right"
+        >
+          {kozyStory.lede}
+        </p>
       </div>
+
+      <StoryHeroGrid className="story-hero-grid mt-8 md:mt-12">
+        {cells.map((cell, i) => {
+          const frame = hero.frames[i];
+
+          return (
+            <div key={cell} className="story-hero-cell" style={{ gridArea: cell }}>
+              <div data-drift={drift[cell]}>
+                <Plate
+                  src={frame?.url}
+                  alt={frame?.alt ?? kozyStory.alt}
+                  tag={frame?.tag}
+                  aspect="1/1"
+                  tone={((i % 3) + 1) as 1 | 2 | 3}
+                  placeholderText="rest"
+                  parallax={14}
+                  reveal={false}
+                  // The top row is the first viewport; the second is not.
+                  priority={i < 3}
+                  sizes="(min-width: 768px) 24vw, 48vw"
+                />
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="story-hero-cell" style={{ gridArea: "more" }}>
+          <div data-drift={drift.more} className="h-full">
+            <Link href={hero.more.href} className="story-hero-more">
+              <span className="eyebrow">{hero.more.eyebrow}</span>
+              <span className="story-hero-more-note">{hero.more.note}</span>
+              <span className="story-hero-more-link">
+                {hero.more.label}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </StoryHeroGrid>
+
+      {/* The four things the brand actually claims, borrowed from the About
+          page so the two pages cannot drift apart. */}
+      <dl
+        data-reveal-group
+        className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-6 sm:grid-cols-4 md:mt-14"
+      >
+        {whyKraft.stats.map((stat) => (
+          <div key={stat.label}>
+            <dt className="serif text-display-sm">{stat.value}</dt>
+            <dd className="micro-mono mt-1 text-muted">{stat.label}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }

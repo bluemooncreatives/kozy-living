@@ -2844,3 +2844,134 @@ html:has([data-loader]) body {
     }
   }
 }
+
+
+/* ---------------------------------------------------------------------------
+   The hero's statement panel (`.bento-say` in app/page.tsx)
+--------------------------------------------------------------------------- */
+
+@layer components {
+  /* The panel is its own size container, so the headline can be sized to
+     the box it has to fill rather than to the viewport - the bento column
+     is 465px wide at 1024 and stops growing at 705px, which no vw-based
+     size tracks.
+
+     The divisor is the widest unbreakable run: "everyday rituals" is one
+     unit (it carries the ring), measured at ~7.3em in Franxurter at this
+     tracking, plus the ellipse's overhang either side. 100cqi / 8 is the
+     largest size at which that phrase still fits one line of the panel. */
+  .bento-say {
+    container-type: inline-size;
+  }
+
+  .bento-say-title {
+    font-size: clamp(2.25rem, calc(100cqi / 8), 5.25rem);
+    line-height: 1.02;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   /the-kozy-story masthead grid (see `Masthead` in its page file)
+--------------------------------------------------------------------------- */
+
+@layer components {
+  /* Two columns on a phone, packed: a b / c d / e more. From md, the
+     wireframe's four-by-two wall with two cells left empty (`.`) - the gaps
+     are the composition, not missing content. */
+  .story-hero-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "a b"
+      "c d"
+      "e more";
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .story-hero-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-areas:
+        "a . b c"
+        "d e . more";
+      gap: 1rem;
+    }
+  }
+
+  /* A slow zoom on the photograph under a fine pointer. `scale`, not
+     `transform`: the motion layer owns the image's transform for the
+     settle-in, and the two would overwrite each other. */
+  @media (hover: hover) and (pointer: fine) {
+    .story-hero-cell img {
+      transition: scale 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .story-hero-cell:hover img {
+      scale: 1.05;
+    }
+  }
+
+  /* The closing cell: the wireframe's outlined square with its underlined
+     link in the corner. A hairline, not a fill, so it reads as the frame
+     the next Kompanion would go in. */
+  .story-hero-more {
+    @apply rounded-plate;
+    display: flex;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    flex-direction: column;
+    padding: 1rem;
+    border: 1px solid rgba(35, 50, 75, 0.22);
+    color: var(--ink);
+    transition:
+      background 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.45s ease;
+  }
+
+  @media (min-width: 768px) {
+    .story-hero-more {
+      padding: 1.5rem;
+    }
+  }
+
+  .story-hero-more-note {
+    @apply font-sans text-spec text-muted;
+    margin-top: 0.75rem;
+    max-width: 16rem;
+    text-wrap: pretty;
+  }
+
+  .story-hero-more-link {
+    @apply font-sans text-ui font-semibold;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    align-self: flex-end;
+    text-decoration: underline;
+    text-decoration-color: rgba(35, 50, 75, 0.35);
+    text-underline-offset: 0.3em;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .story-hero-more-link svg {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .story-hero-more:hover,
+  .story-hero-more:focus-visible {
+    background: var(--sage-wash);
+    border-color: var(--ink);
+  }
+
+  .story-hero-more:hover .story-hero-more-link,
+  .story-hero-more:focus-visible .story-hero-more-link {
+    text-decoration-color: var(--ink);
+  }
+
+  .story-hero-more:hover .story-hero-more-link svg,
+  .story-hero-more:focus-visible .story-hero-more-link svg {
+    transform: translate(2px, -2px);
+  }
+}

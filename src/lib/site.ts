@@ -146,12 +146,18 @@ export const hero = {
   flagMark: { lead: "Handcrafted", place: "in India" },
   blurb:
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
-  /** The statement panel in the top-right of the bento. */
+  /**
+   * The statement panel in the top-right of the bento - the headline alone.
+   * The body paragraph that used to sit under it was removed at the owner's
+   * request; the panel now gives the whole box to the type.
+   *
+   * "Konscious", with the s - it read "Koncious" here while the story page
+   * spelled it correctly.
+   */
   statement: {
-    lines: ["Kraft-led & Koncious", "textiles for", "everyday rituals"],
+    lines: ["Kraft-led & Konscious", "textiles for", "everyday rituals"],
     /** Ringed by the hand-drawn ellipse. Must appear in `lines` verbatim. */
     circled: "everyday rituals",
-    body: "Designed in-house, shaped by the hands and heritage of India’s craft clusters. From tactile cottons to linen blends and wool, every weave carries a story of place, patience, and craft.",
   },
   /** The two small plates that close the bento. */
   tiles: [
@@ -987,6 +993,57 @@ export const kozyStory = {
   eyebrow: "The Kozy Story",
   title: "Designed to give you moments of rest.",
   lede: "Kozy Living Textiles are your in-between Kompanions, krafted to turn everyday moments into mindful daily rituals.",
+  hero: {
+    /**
+     * The masthead wall, in cell order (a, b, c on the top row; d, e below).
+     * Chosen, not borrowed: this band used to take the collection's first
+     * frames, which on this store are five studio shots of slippers and
+     * robes - a shop grid, on the page that is meant to say who makes the
+     * cloth and why. Each frame here carries one part of that story, and its
+     * `tag` names the part.
+     *
+     * All are the store's own product photography (Shopify file URLs, sized
+     * by `ShopImage`). Credits stay with what the store says: the Tulsi
+     * robe's copy names the Yaseen Bhai Block Print Craft Cluster, so its
+     * tag is the neutral "Printed by hand" rather than a claim about who is
+     * in the frame. The process photographs are NOT repeated here - they
+     * belong to the chapters band further down.
+     */
+    frames: [
+      {
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1235.jpg?v=1788636320",
+        alt: "Eyes closed in low sun, wearing the Morning Sky Ritual Robe - waffle cotton with Dabu hand-block trim.",
+        tag: "The ritual",
+      },
+      {
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_5245.jpg?v=1788636159",
+        alt: "Close-up of Dabu hand-block prints in indigo and ochre.",
+        tag: "Dabu hand-block",
+      },
+      {
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0857.jpg?v=1788636322",
+        alt: "The Tulsi Ritual Robe, Dabu hand-block printed in green and indigo.",
+        tag: "Printed by hand",
+      },
+      {
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1866.jpg?v=1788636345",
+        alt: "The Dabu Speckled Cushion beside a cup of coffee and an open book.",
+        tag: "Slow mornings",
+      },
+      {
+        url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/9A8CCDE6-D286-47A8-9B01-7FC01ECB6AF0.jpg?v=1788636331",
+        alt: "A dog asleep in an indigo Dabu print lounger.",
+        tag: "Rest, for everyone",
+      },
+    ],
+    /** The wall's closing cell - the one onward link in the band. */
+    more: {
+      eyebrow: "The Kompanions",
+      note: "Every Kompanion, krafted from natural fibres.",
+      label: "Shop all Kompanions",
+      href: "/search",
+    },
+  },
   /** The band that closes the masthead - the site's signature bleeding line. */
   wordmark: "moments of rest",
   seal: "the kozy story · krafted for rest · ",

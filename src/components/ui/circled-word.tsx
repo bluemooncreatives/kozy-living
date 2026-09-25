@@ -99,7 +99,12 @@ export default function CircledWord({
 
       ScrollTrigger.create({
         trigger: scope.current,
-        start: "top 82%",
+        // Almost the foot of the screen, not 82%: the phone hero sets its
+        // headline at the bottom of a full-height plate, where the ringed
+        // phrase lands at ~87% of the first viewport - on screen, yet never
+        // crossing an 82% line until the reader scrolled, so it showed only
+        // the round cap of an undrawn stroke as a stray dot.
+        start: "top 96%",
         once: true,
         onEnter: () => {
           // Re-measure here, not only at mount: fonts, a Suspense boundary
