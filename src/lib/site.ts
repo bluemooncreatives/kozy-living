@@ -58,7 +58,13 @@ export const announcement = "Krafted to give you moments of rest";
  * instead.
  */
 export const hero = {
-  flag: "Made in India",
+  flag: "Handcrafted in India",
+  /**
+   * The same claim, split for the two-line origin mark on the hero plate.
+   * Kept beside `flag` rather than derived from it: the social card (which
+   * cannot read this layout) still wants the sentence whole.
+   */
+  flagMark: { lead: "Handcrafted", place: "in India" },
   blurb:
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
   /** The statement panel in the top-right of the bento. */

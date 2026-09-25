@@ -212,12 +212,21 @@ function Hero() {
           alt="A floor lounge set with waffle weave and slub cotton Kompanions in warm daylight."
           reveal={false}
         >
-          <div className="glass absolute left-3 top-3 z-20 max-w-[16rem] py-2.5 md:left-5 md:top-5">
-            <p className="flex items-center gap-1.5 text-ui font-semibold text-paper">
-              <span aria-hidden className="text-sage">
-                ✳
+          {/* Origin mark. A glass pill here read as a third button beside the
+              two real ones at the foot of the plate; a hairline-ruled stack
+              is quieter and cannot be mistaken for a control. It carries its
+              own shadow because the plate's scrim is bottom-weighted and the
+              top-left corner of a pale photograph gives cream type nothing. */}
+          <div className="absolute left-3 top-3 z-20 flex items-stretch gap-2.5 md:left-5 md:top-5">
+            <span
+              aria-hidden
+              className="w-px shrink-0 bg-sage/80 drop-shadow-[0_1px_2px_rgba(35,50,75,0.55)]"
+            />
+            <p className="flex flex-col leading-tight [text-shadow:0_1px_6px_rgba(35,50,75,0.65)]">
+              <span className="eyebrow text-sage-wash">{hero.flagMark.lead}</span>
+              <span className="text-ui font-semibold text-paper">
+                {hero.flagMark.place}
               </span>
-              {hero.flag}
             </p>
           </div>
 
