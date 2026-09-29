@@ -470,6 +470,13 @@ being uncovered. `kozy:loader-done` follows when the curtain unmounts. Floors:
 CSS entrance in `.loader-char` is timed against these — move them together).
 It waits for fonts and the images in the first viewport, **not** `window.load`.
 
+⚠️ In `next dev`, React's double-mount runs `LoadingScreen`'s cleanup at
+hydration, which drops `data-loader`. The effect now re-sets the attribute
+when it runs again. Without that, `kozy:loader-exit` never fired in dev, and
+every first-fold reveal waited for `loader-done`, after the curtain had
+already cleared. If first-fold animations look late in dev only, check this
+first.
+
 **Navigation feedback.** `RouteProgress` (a sage hairline, in the root layout)
 starts on a same-origin link click heard in the *capture* phase — `<Link>`
 cancels the event in its own handler — or a `method="get"` /
@@ -546,6 +553,14 @@ sample the path with `getPointAtLength()`, push each point through
 `onEnter` (fonts and Suspense can resize the word after mount), and **drop the
 dasharray entirely on complete** — a stale dasharray measured against an old
 width re-opens the ring on the next resize.
+
+`CircledWord` also waits for the curtain. A ring in the first fold used to
+set up its scroll trigger at mount, under the curtain, so the whole draw
+played behind the panels. It now sets up on `kozy:loader-exit` (with the
+motion layer's `loader-done` fallback and 5s bail), waits for
+`document.fonts.ready`, and delays 0.75s when it is already on screen. The
+panels lift upward, so the top of the page is uncovered last, and at 0.75s
+the sage panel's foot has just left the screen (measured).
 
 ---
 

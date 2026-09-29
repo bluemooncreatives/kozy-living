@@ -30,9 +30,10 @@ export default function CircledWord({
   const scope = useRef<HTMLSpanElement>(null);
 
   useGSAP(
-    () => {
+    (_context, contextSafe) => {
       const path = scope.current?.querySelector<SVGPathElement>("path");
-      if (!path) return;
+      if (!path || !contextSafe) return;
+      let live = true;
 
       /**
        * How long this path is ON SCREEN, which is not what `getTotalLength()`
@@ -97,29 +98,81 @@ export default function CircledWord({
 
       conceal();
 
-      ScrollTrigger.create({
-        trigger: scope.current,
-        // Almost the foot of the screen, not 82%: the phone hero sets its
-        // headline at the bottom of a full-height plate, where the ringed
-        // phrase lands at ~87% of the first viewport - on screen, yet never
-        // crossing an 82% line until the reader scrolled, so it showed only
-        // the round cap of an undrawn stroke as a stray dot.
-        start: "top 96%",
-        once: true,
-        onEnter: () => {
-          // Re-measure here, not only at mount: fonts, a Suspense boundary
-          // above, or a breakpoint change can all have resized the word
-          // between the two moments, and the dash has to match the box it is
-          // actually about to be drawn into.
-          conceal();
-          gsap.to(path, {
-            strokeDashoffset: 0,
-            duration: 1.1,
-            ease: "power2.inOut",
-            onComplete: reveal,
-          });
-        },
+      /** Seconds to hold the draw. Non-zero only for a ring already on screen
+          as the curtain lifts - see the note below. A ring further down the
+          page draws the moment it is scrolled to, as before. */
+      let lead = 0;
+      let armedAt = 0;
+
+      // Re-measure at draw time, not only at mount: fonts, a Suspense boundary
+      // above, or a breakpoint change can all have resized the word between
+      // the two moments, and the dash has to match the box it is actually
+      // about to be drawn into. `fonts.ready` first, because a ring measured
+      // against the fallback face is sized for a word that is about to widen.
+      const draw = contextSafe(() => {
+        if (!live) return;
+        conceal();
+        gsap.to(path, {
+          strokeDashoffset: 0,
+          duration: 1.1,
+          delay: performance.now() - armedAt < 400 ? lead : 0,
+          ease: "power2.inOut",
+          onComplete: reveal,
+        });
       });
+
+      const arm = contextSafe(() => {
+        if (!live) return;
+        armedAt = performance.now();
+        ScrollTrigger.create({
+          trigger: scope.current,
+          // Almost the foot of the screen, not 82%: the phone hero sets its
+          // headline at the bottom of a full-height plate, where the ringed
+          // phrase lands at ~87% of the first viewport - on screen, yet never
+          // crossing an 82% line until the reader scrolled, so it showed only
+          // the round cap of an undrawn stroke as a stray dot.
+          start: "top 96%",
+          once: true,
+          onEnter: () => {
+            document.fonts.ready.then(draw, draw);
+          },
+        });
+      });
+
+      /* The loading curtain, when one is up.
+       *
+       * A ring in the first fold used to arm at mount - under the curtain - so
+       * its trigger fired at once and the whole draw played behind the
+       * panels: on a reload it finished ~0.8s before the curtain lifted, and
+       * the reader only ever saw a finished ring. It now arms on the same cue
+       * the motion layer's first scan waits for (the panels starting to
+       * lift), with the same second chance and the same 5s ceiling, and
+       * `lead` lets the words rise out of their masks before the pen starts.
+       */
+      const curtain = document.querySelector("[data-loader]");
+      let bail = 0;
+      const onCurtain = () => {
+        window.removeEventListener("kozy:loader-exit", onCurtain);
+        window.removeEventListener("kozy:loader-done", onCurtain);
+        clearTimeout(bail);
+        lead = 0.75;
+        arm();
+      };
+
+      if (curtain) {
+        window.addEventListener("kozy:loader-exit", onCurtain);
+        window.addEventListener("kozy:loader-done", onCurtain);
+        bail = window.setTimeout(onCurtain, 5000);
+      } else {
+        arm();
+      }
+
+      return () => {
+        live = false;
+        clearTimeout(bail);
+        window.removeEventListener("kozy:loader-exit", onCurtain);
+        window.removeEventListener("kozy:loader-done", onCurtain);
+      };
     },
     { scope }
   );
