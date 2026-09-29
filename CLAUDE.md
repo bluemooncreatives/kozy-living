@@ -190,6 +190,32 @@ its first byte — warm TTFB measured 0.5–0.7s, now 0.01–0.05s. A menu edit 
 Admin now takes up to a minute to reach production. Do not put it back on
 `no-store`; if instant menu edits ever matter, revalidate a tag instead.
 
+### Enquiry forms — both write `contact_message`
+
+The contact form (`components/contact/`) and the B2B form on `/b2b-enquiries`
+(`components/b2b/`) are server actions that create a `contact_message`
+metaobject through the Admin API (`lib/shopify/admin.ts`). They share one
+inbox in Admin → Content → Metaobjects, told apart by the `source` field
+(`storefront-contact-form` / `storefront-b2b-form`). That definition has no
+trade columns, so the B2B action writes company, business type, products and
+quantity as labelled lines at the top of `message`. Giving them real fields
+means a separate `b2b_enquiry` definition. Do not add fields to
+`contact_message`: the contact form would then have to satisfy them.
+
+- The B2B honeypot is named `website`. **`company` is the contact form's
+  honeypot but a real, required field on the B2B form**, so do not copy the
+  honeypot across by name.
+- React 19 resets a form after its action runs. The B2B action echoes
+  `values` back on failure, and the fields re-seed from them through
+  `defaultValue` / `defaultChecked`.
+- Picking the **Customised** quantity opens a required `customQuantity`
+  field; the action requires it only then and stores
+  `Customised - 2,500 units`. `form.custom.option` in `site.ts` must match
+  that entry in `quantities` verbatim, or the field never opens.
+- `/b2b-enquiries` shadows the empty Shopify page of the same handle, the
+  same way `/founders-note` does. Its choice lists are in `b2bEnquiry` in
+  `site.ts` and are stored as label text.
+
 ### Handles vs titles
 
 A **handle** is an identifier that appears in URLs and in Shopify lookups. A
