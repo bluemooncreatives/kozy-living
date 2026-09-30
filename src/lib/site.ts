@@ -184,9 +184,9 @@ export const hero = {
   secondary: { label: "Our story", href: "/about-us" },
   /** The circular button that sits on the feature photograph. */
   circle: { label: "Shop now", href: "/search" },
-  /** Set in the display face in the band below the frame. */
+  /** Set in the display face in the band below the frame. The O is the
+      block-printed textile letter, not type - see WordmarkBand. */
   wordmark: "kozy living",
-  seal: "krafted for moments of rest · ",
   metaLeft: "Rooted in Indian Kraft",
   metaRight: "100% Natural Fibres",
 } as const;

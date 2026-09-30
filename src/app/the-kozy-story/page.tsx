@@ -162,13 +162,12 @@ export default async function KozyStoryPage() {
       <section className="shell overflow-x-clip">
         {/* Sized to fit, not at the hero's 18vw. "moments of rest" measures
             7.18em against "kozy living"'s 4.94em, so at the hero size it
-            needed ~129vw: the flex row squeezed the seal's box into an oval
-            and wrapped "rest" inside its own span, indented under "ments".
+            needed ~129vw: the flex row squeezed the letter's box and wrapped
+            "rest" inside its own span, indented under "ments".
             The divisor is that width plus a hair for a desktop scrollbar,
             and the shell's cap (96rem) is the ceiling. */}
         <WordmarkBand
           text={kozyStory.wordmark}
-          seal={kozyStory.seal}
           className="pb-10 text-[calc((min(100vw,96rem)-2*var(--gutter))/7.35)] md:pb-14"
         />
       </section>

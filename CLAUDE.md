@@ -153,8 +153,13 @@ If you touch the palette, these two files do not follow automatically:
 
 ### Signature motifs
 
-The giant lowercase `.wordmark` bleeding past its frame · the rotating sage
-`.seal` (only over the hero wordmark, the closing CTA, and as back-to-top) ·
+The giant lowercase `.wordmark` bleeding past its frame, whose **O is a
+photograph of the Dabu block print** (`public/kozy/o.png`, cut to the letter)
+rather than type — `WordmarkBand` pins it by *height* to the Franxurter O's
+0.586em and takes its width from the artwork's trimmed 474x512 ink box, with a
+side bearing that keeps the substitution advance-for-advance · the rotating
+sage `.seal` (the closing CTA, the story chapter marks, and back-to-top — it
+stood in for that O until the textile letter replaced it) ·
 the hand-drawn ellipse `CircledWord` · the `.arrow-btn` parked in a notched
 card corner · the `Plate` photographic card.
 
@@ -421,6 +426,14 @@ icons are now ≤256px, `gi-tag.png` is 189x320 (was 2528x4288, 7.8 MB), and the
 header/favicon/JSON-LD use `public/logo/kozy-logo-web.png` (720x405, 56 KB).
 The 3.2 MB masters in `public/logo/` are untouched; do not point anything that
 renders on every page at them.
+
+`public/kozy/o.png` (the wordmark's textile O) follows the same pattern: the
+2.39 MB master is kept beside it as `o-master.png` and the shipped file is that
+artwork **trimmed to its ink box** and capped at 512px tall (474x512, 148 KB).
+It is trimmed on purpose — `WordmarkBand` derives the letter's aspect ratio
+from those dimensions, so re-exporting it with transparent padding silently
+shrinks the O inside the word. The cap is sized from the largest render: the
+hero type tops out at 16rem, so the O paints at ~150px, ~300px at 2x.
 
 Fonts ship as subset **WOFF2** (402 KB of TTF → 127 KB). The TTFs stay only
 for the social card, because satori cannot parse WOFF2 — see the note on the
