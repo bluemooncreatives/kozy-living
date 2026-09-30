@@ -1,4 +1,5 @@
 import { COLOUR_METAFIELD_IDENTIFIERS } from "@/lib/shop/colours";
+import { MOOD_METAFIELD_IDENTIFIERS } from "@/lib/shop/moods";
 import imageFragment from "./image";
 
 /**
@@ -31,6 +32,11 @@ import imageFragment from "./image";
  * Identifiers the store has no definition for come back as `null` and are
  * dropped on reshape, so an unused candidate costs nothing but a null in the
  * array.
+ *
+ * `moods` is the same connection under an alias, asked for separately rather
+ * than appended to the colour identifiers: the colour reader takes the first
+ * `metafields` entry with a value, so a mood living there would be read as a
+ * colour on every product that has no colour of its own. See `lib/shop/moods.ts`.
  */
 export const productCardFragment = /* GraphQL */ `
   fragment productCard on Product {
@@ -89,6 +95,23 @@ export const productCardFragment = /* GraphQL */ `
       }
     }
     metafields(identifiers: [${COLOUR_METAFIELD_IDENTIFIERS}]) {
+      namespace
+      key
+      type
+      value
+      references(first: 12) {
+        nodes {
+          ... on Metaobject {
+            handle
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+    moods: metafields(identifiers: [${MOOD_METAFIELD_IDENTIFIERS}]) {
       namespace
       key
       type

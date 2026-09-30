@@ -166,6 +166,8 @@ export type ShopifyCatalogProduct = {
   variants: Connection<ProductVariant>;
   /** Asked for by identifier; a `null` entry is an identifier this store has no definition for. */
   metafields: (CatalogMetafield | null)[];
+  /** `custom.shop_mood` and kin, aliased apart from `metafields` - see `lib/shop/moods.ts`. */
+  moods?: (CatalogMetafield | null)[];
   collections: Connection<{ handle: string; title: string }>;
   createdAt: string;
   updatedAt: string;
@@ -173,13 +175,15 @@ export type ShopifyCatalogProduct = {
 
 export type CatalogProduct = Omit<
   ShopifyCatalogProduct,
-  "collections" | "images" | "variants" | "metafields"
+  "collections" | "images" | "variants" | "metafields" | "moods"
 > & {
   collections: { handle: string; title: string }[];
   images: Image[];
   variants: ProductVariant[];
   /** Nulls dropped - see `reshapeCatalogProduct`. */
   metafields: CatalogMetafield[];
+  /** Nulls dropped, like `metafields`. */
+  moods: CatalogMetafield[];
 };
 
 export type ShopifyCatalogOperation = {
@@ -232,6 +236,9 @@ export type ShopifyColourPaletteOperation = {
   data: { metaobjects: { nodes: ShopifyColourMetaobject[] } | null };
   variables: { first: number };
 };
+
+/** The mood metaobjects - the same node shape as the colour palette. */
+export type ShopifyMoodsOperation = ShopifyColourPaletteOperation;
 
 export type ShopifyCollection = {
   handle: string;
