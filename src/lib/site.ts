@@ -1315,3 +1315,35 @@ export const foundersNote = {
   cta: { label: "Meet the Kompanions", href: "/search" },
   back: { label: "The Kozy Story", href: "/the-kozy-story" },
 } as const;
+
+/**
+ * `/shop-by-mood` - the index of rituals and the Kompanions gathered under
+ * each. The MOODS themselves (names, one-line descriptions, order) are not
+ * here: they are the `shop_mood` metaobjects in Shopify Admin, so the brand
+ * can add a seventh or reword one without a deploy. This is only the page's
+ * own framing around them.
+ */
+export const shopByMood = {
+  metaTitle: "Shop by Mood",
+  metaDescription:
+    "Start with the moment rather than the thing. Kompanions gathered around the small rituals of a day - a slow morning, the first cup, an evening of rest, a lounge shared with someone you love.",
+  eyebrow: "Shop by mood",
+  /** `ring` must appear in `headline` verbatim - it is the phrase CircledWord loops. */
+  headline: "Begin with the moment",
+  ring: "moment",
+  lede: "Kompanions gathered around the small rituals of a day. Choose the moment you are making room for, and what was krafted for it gathers below.",
+  indexLabel: "The moods",
+  comingSoon: "Coming soon",
+  noMoods: "No moods are published yet.",
+  browseAll: "Browse every Kompanion",
+  resting: {
+    title: "Choose a moment to see what belongs to it",
+    body: "Pick a mood above and the Kompanions made for it will gather here.",
+  },
+  results: {
+    eyebrow: "Mood",
+    previous: "Previous mood",
+    next: "Next mood",
+    clear: "All moods",
+  },
+} as const;

@@ -434,6 +434,31 @@ is a link, not a click handler. That is what makes the shop server-rendered,
 shareable, back-button-correct and functional without JS. Do not move shop
 state into React state.
 
+### Shop by mood — `/shop-by-mood`
+
+The sibling of `/shop-by-colour`, on the same contract: one mood at a time,
+every choice a plain link, `?mood=<handle>` is the state, and step two stays
+empty until a mood is picked. The moods are **`shop_mood` metaobjects**
+(`name`, `description`, `sort_order`) referenced by the product metafield
+**`custom.shop_mood`**. The names and descriptions are merchant copy in Admin;
+only the page's framing is `shopByMood` in `site.ts`.
+
+- `lib/shop/moods.ts` does the merge that `palette.ts` does for colour:
+  metaobjects lead the order, the catalogue fills the counts, and moods only
+  products still carry trail at the end. A mood with nothing tagged renders as
+  a dimmed "coming soon" row (Gifting Rituals, as of 2026-10-01).
+- ⚠️ **Moods ride on the product as their own `moods:` alias** in
+  `productCardFragment`, not inside `metafields`. `productColours()` takes the
+  first `metafields` entry that has a value, so a mood placed there would be
+  read as a colour on every product that has no colour.
+- The index (`components/shop/mood-index.tsx`) is a typographic list beside a
+  sticky preview photograph. Hover/focus only changes which photograph the
+  preview shows, which is display state, not shop state. The results masthead
+  and the preview caption mount after a click, so they use CSS entrances
+  (`.mood-turn`, `.mood-preview-caption`), not `data-reveal`.
+- Moods are not a facet in the `/search` sidebar. Adding one means teaching
+  `facets.ts` to read `product.moods` and reserving `mood` in `RESERVED_PARAMS`.
+
 ---
 
 ## 7. Motion — and the rules that keep breaking
@@ -768,3 +793,13 @@ it.
   render the pill as a styled `<span>`. Invalid markup and a duplicate tab stop.
 - Prefer native scrolling + scroll-snap over transform tracks: touch,
   trackpad, keyboard and the scrollbar then work for free.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

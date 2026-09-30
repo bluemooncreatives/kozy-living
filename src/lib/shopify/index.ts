@@ -6,6 +6,7 @@ import {
   TAGS,
 } from "../constants";
 import { colourFromMetaobject, type ColourValue } from "../shop/colours";
+import { moodFromMetaobject, type MoodValue } from "../shop/moods";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import {
@@ -25,6 +26,7 @@ import {
   searchCatalogQuery,
 } from "./queries/catalog";
 import { getColourPaletteQuery } from "./queries/colours";
+import { getMoodsQuery } from "./queries/moods";
 import { getMenuQuery } from "./queries/menu";
 import {
   getProductQuery,
@@ -63,6 +65,7 @@ import {
   ShopifyCollectionsOperation,
   ShopifyCreateCartOperation,
   ShopifyMenuOperation,
+  ShopifyMoodsOperation,
   ShopifyPageOperation,
   ShopifyPagesOperation,
   ShopifyProduct,
@@ -609,7 +612,7 @@ function reshapeCatalogProduct(
 ): CatalogProduct | undefined {
   if (!product || product.tags?.includes(HIDDEN_PRODUCT_TAG)) return undefined;
 
-  const { collections, images, variants, metafields, ...rest } = product;
+  const { collections, images, variants, metafields, moods, ...rest } = product;
 
   return {
     ...rest,
@@ -632,7 +635,36 @@ function reshapeCatalogProduct(
     metafields: (metafields ?? []).filter(
       (field): field is NonNullable<typeof field> => Boolean(field)
     ),
+    moods: (moods ?? []).filter(
+      (field): field is NonNullable<typeof field> => Boolean(field)
+    ),
   };
+}
+
+/**
+ * The brand's moods, in the merchant's own order - the `shop_mood`
+ * metaobjects, read directly for the same reason as the colour palette below:
+ * the shop-by-mood index must show a mood nothing is tagged with yet.
+ *
+ * Degrades to `[]`, and the page then shows the moods its products carry.
+ */
+export async function getMoods(): Promise<MoodValue[]> {
+  try {
+    const res = await shopifyFetch<ShopifyMoodsOperation>({
+      query: getMoodsQuery,
+      tags: [TAGS.products],
+      variables: { first: 50 },
+    });
+
+    return (res.body?.data?.metaobjects?.nodes ?? [])
+      .map(moodFromMetaobject)
+      .filter((mood): mood is MoodValue => Boolean(mood));
+  } catch (error) {
+    if (isFrameworkControlFlowError(error)) throw error;
+
+    console.warn("Mood metaobjects unavailable:", error);
+    return [];
+  }
 }
 
 /**

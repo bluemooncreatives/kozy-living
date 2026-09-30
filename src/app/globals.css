@@ -3085,3 +3085,342 @@ html:has([data-loader]) body {
     transform: translate(2px, -2px);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Shop by mood (`/shop-by-mood`, `components/shop/mood-index.tsx`)
+
+   The index is typographic because a mood has no swatch - only a name and a
+   line the merchant wrote. Each row is a link laid out on an explicit area
+   map (the house rule for layouts that reorder between breakpoints):
+
+     phone    thumb | num   | arrow        desktop   num | name  | count | arrow
+              thumb | name  | arrow                  num | desc  | count | arrow
+              thumb | desc  | arrow
+              thumb | count | arrow
+
+   The thumbnail exists only below `lg`; above it the sticky preview beside the
+   list carries the photograph instead.
+
+   The fill behind a row is a `::before` that rises from the row's foot, so
+   hover reads as the row being lifted rather than a colour snapping on. The
+   showing mood keeps it, in indigo - its type flips to oat (9.30) and sage
+   (6.50), the only pairings this palette allows on the dark ground.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  .mood-index > li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .mood-row {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb num   arrow"
+      "thumb name  arrow"
+      "thumb desc  arrow"
+      "thumb count arrow";
+    column-gap: 1rem;
+    align-items: center;
+    padding: 1rem 0.75rem;
+    color: var(--ink);
+    transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* The lifted fill. Inset a hair from the rules so a filled row floats
+     between its hairlines rather than erasing them. */
+  .mood-row::before {
+    content: "";
+    position: absolute;
+    inset: 0.25rem 0;
+    z-index: -1;
+    border-radius: 1.5rem;
+    background: var(--card);
+    transform: scaleY(0);
+    transform-origin: 50% 100%;
+    transition:
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.4s ease;
+  }
+
+  .mood-row-thumb {
+    grid-area: thumb;
+    position: relative;
+    align-self: center;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: var(--oat);
+  }
+
+  .mood-row-num {
+    grid-area: num;
+    font-size: 0.8125rem;
+    line-height: 1;
+    /* sage-deep, not sage: flat sage measures 1.85 on cream. */
+    color: var(--sage-deep);
+  }
+
+  .mood-row-name {
+    grid-area: name;
+    margin-top: 0.3rem;
+    font-size: clamp(1.375rem, 1rem + 2.1vw, 2.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mood-row-desc {
+    grid-area: desc;
+    margin-top: 0.4rem;
+    max-width: 34rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mood-row-count {
+    grid-area: count;
+    margin-top: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .mood-row-arrow {
+    grid-area: arrow;
+    display: inline-flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(35, 50, 75, 0.18);
+    color: var(--ink);
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (min-width: 1024px) {
+    .mood-row {
+      grid-template-columns: 3.5rem minmax(0, 1fr) auto auto;
+      grid-template-areas:
+        "num name count arrow"
+        "num desc count arrow";
+      column-gap: 1.5rem;
+      padding: 1.6rem 1.25rem;
+    }
+
+    .mood-row-thumb {
+      display: none;
+    }
+
+    .mood-row-num {
+      align-self: start;
+      padding-top: 0.55rem;
+      font-size: 1.125rem;
+    }
+
+    .mood-row-name {
+      margin-top: 0;
+    }
+
+    .mood-row-count {
+      margin-top: 0;
+      text-align: right;
+    }
+
+    .mood-row-arrow {
+      height: 2.75rem;
+      width: 2.75rem;
+    }
+  }
+
+  /* Hover: the row lifts, the name and its line step in, and the arrow turns
+     from north-east to east - "this way" becoming "go". Fine pointers only: on
+     touch a hover state sticks after the tap and the row would look chosen. */
+  @media (hover: hover) and (pointer: fine) {
+    .mood-row:not(.is-dead):hover::before {
+      transform: scaleY(1);
+    }
+
+    .mood-row:not(.is-dead):not(.is-active):hover .mood-row-arrow {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      transform: rotate(45deg);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .mood-row:not(.is-dead):hover .mood-row-name,
+    .mood-row:not(.is-dead):hover .mood-row-desc {
+      transform: translateX(0.625rem);
+    }
+  }
+
+  .mood-row:focus-visible::before {
+    transform: scaleY(1);
+  }
+
+  /* The showing mood. */
+  .mood-row.is-active::before {
+    background: var(--ink);
+    transform: scaleY(1);
+  }
+
+  .mood-row.is-active {
+    color: var(--oat);
+  }
+
+  .mood-row.is-active .mood-row-num,
+  .mood-row.is-active .mood-row-count {
+    color: var(--sage);
+  }
+
+  .mood-row.is-active .mood-row-desc {
+    color: rgba(255, 246, 235, 0.72);
+  }
+
+  .mood-row.is-active .mood-row-arrow {
+    border-color: var(--sage);
+    background: var(--sage);
+    color: var(--ink);
+  }
+
+  /* In the set, not yet in stock. */
+  .mood-row.is-dead {
+    opacity: 0.42;
+    cursor: default;
+  }
+
+  /* -------------------------------------------------------------- preview */
+
+  .mood-preview-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgba(35, 50, 75, 0.78) 0%, rgba(35, 50, 75, 0.35) 38%, transparent 62%),
+      linear-gradient(to bottom, rgba(35, 50, 75, 0.35) 0%, transparent 28%);
+  }
+
+  /* The mood's number, set large over the photograph. */
+  .mood-preview-num {
+    position: absolute;
+    left: 1.25rem;
+    top: 0.75rem;
+    font-size: clamp(5rem, 9vw, 9rem);
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    color: rgba(255, 246, 235, 0.9);
+  }
+
+  .mood-preview-caption {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+
+  /* -------------------------------------------------------------- results */
+
+  /* A ghost numeral bleeding off the masthead's corner - graphic, not text to
+     read, so it sits at a whisper and carries no contrast duty. */
+  .mood-ghost-num {
+    position: absolute;
+    right: -0.04em;
+    bottom: -0.2em;
+    font-size: clamp(9rem, 32vw, 26rem);
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    color: rgba(232, 217, 196, 0.07);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .mood-step {
+    display: inline-flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 246, 235, 0.28);
+    color: var(--paper);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  .mood-step:hover {
+    border-color: var(--sage);
+    background: var(--sage);
+    color: var(--ink);
+  }
+
+  .mood-clear {
+    display: inline-flex;
+    height: 2.75rem;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    background: var(--oat);
+    padding: 0 1.1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color 0.3s ease;
+  }
+
+  .mood-clear:hover {
+    background: var(--paper);
+  }
+}
+
+/* Entrances for surfaces that mount after a click, where a `data-reveal`
+   scroll trigger would already have fired (same reasoning as `.lookbook-turn`).
+   The preview's caption and numeral are keyed on the mood, so they re-mount
+   and replay this on every hover. */
+@media (prefers-reduced-motion: no-preference) {
+  .mood-turn {
+    animation: mood-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .mood-preview-caption {
+    animation: mood-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .mood-preview-num {
+    animation: mood-num 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes mood-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mood-num {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.35em, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
