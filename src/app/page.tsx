@@ -295,13 +295,9 @@ function Hero() {
       </div>
 
       {/* The wordmark band. It used to live inside the frame; the bento has no
-          room for it, so it closes the section instead - with the seal
-          standing in for the O. */}
-      <WordmarkBand
-        text={hero.wordmark}
-        seal={hero.seal}
-        className="mt-6 md:mt-8"
-      />
+          room for it, so it closes the section instead - with the block-printed
+          textile letter standing in for the O. */}
+      <WordmarkBand text={hero.wordmark} className="mt-6 md:mt-8" />
 
       <div className="flex items-center justify-between pb-10 pt-4">
         <p className="eyebrow">{hero.metaLeft}</p>

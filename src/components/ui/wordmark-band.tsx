@@ -1,43 +1,58 @@
 import clsx from "clsx";
+import Image from "next/image";
 import { splitText } from "@/components/motion/split-text";
-import Seal from "./seal";
 
 /**
- * The giant wordmark, with the rotating seal standing in for its first "O".
+ * The giant wordmark, with the block-printed textile "O" standing in for its
+ * own first "O".
  *
- * The word is split on that letter and the seal takes its place, sized from
- * the real glyph rather than by eye. Measured out of Franxurter.ttf, at
- * unitsPerEm 2048, the O is:
+ * The letter is a photograph of the brand's Dabu print cut to an O
+ * (`public/kozy/o.png`), and it is sized from the real glyph rather than by
+ * eye. Measured out of Franxurter.ttf, at unitsPerEm 2048, the O is:
  *
- *   width / height  0.586em   (a true circle, which is why this works at all)
+ *   width / height  0.586em   (a true circle in this face)
  *   yMin / yMax     -0.005em / 0.581em
- *   advance         0.625em   -> 0.0195em of side bearing per side
+ *   advance         0.625em
  *
- * So the disc is 0.586em, not the eyeballed 0.82em it started as, and the
- * alignment is `baseline`, not `center`: the glyph is not centred on the line
+ * The photograph is NOT that circle: trimmed to its ink box it measures
+ * 474 x 512, i.e. 0.9258 wide for 1 tall. So the box is pinned by HEIGHT to
+ * the glyph's 0.586em and takes its width from that ratio (0.5425em) - match
+ * the width instead and the letter grows taller than the line it sits in.
+ *
+ * The side bearing is then (0.625 - 0.5425) / 2 = 0.04125em rather than the
+ * glyph's own 0.0195em, which keeps the substitution advance-for-advance: the
+ * word occupies exactly the width it would with the real O, so the band still
+ * fills the frame the way the vw-sized type was tuned to.
+ *
+ * Alignment is `baseline`, not `center`: the glyph is not centred on the line
  * box, it sits from a hair below the baseline to 0.581em above it. A flex item
  * with no text baseline aligns by its bottom margin edge, so the negative
- * bottom margin drops the disc the same 0.005em the real O overshoots by.
+ * bottom margin drops the letter the same 0.005em the real O overshoots by.
  *
  * Everything is in `em`, so it tracks the type size at every breakpoint with
  * no measurement at runtime.
  *
- * If the word has no "o" the seal is simply omitted rather than guessed at.
+ * If the word has no "o" the plate is simply omitted rather than guessed at.
  *
  * ENTRANCE. The pieces rise out of their own slots (`data-split`), which is the
  * loading curtain's gesture played in reverse: the curtain's wordmark leaves
  * upward, and this one arrives from below as the panels clear it. Split by
  * WORD, never by glyph - Franxurter carries 2,104 kerning pairs, and a glyph
  * in its own box is a glyph the font can no longer kern, which at 18vw is
- * plainly visible. The seal box travels as one unit with the rest.
+ * plainly visible. The letter box travels as one unit with the rest.
  */
+
+/** Trimmed ink box of `public/kozy/o.png`, 474 x 512. */
+const O_RATIO = 474 / 512;
+const O_HEIGHT_EM = 0.586;
+const O_WIDTH_EM = +(O_HEIGHT_EM * O_RATIO).toFixed(4);
+const O_BEARING_EM = +((0.625 - O_WIDTH_EM) / 2).toFixed(4);
+
 export default function WordmarkBand({
   text,
-  seal,
   className,
 }: {
   text: string;
-  seal: string;
   className?: string;
 }) {
   const at = text.toLowerCase().indexOf("o");
@@ -59,21 +74,34 @@ export default function WordmarkBand({
       <span aria-hidden>{splitText(before)}</span>
 
       {at === -1 ? null : (
-        /* The seal is taken out of flow inside a box sized to the glyph, so
+        /* The letter is taken out of flow inside a box sized to the glyph, so
            the box has no line content of its own. That matters: a flex item
-           WITH text in it aligns by that text's baseline, and the seal has a
-           glyph at its centre - which is what dropped the disc half a letter
-           low. With no in-flow content the baseline is synthesised from the
-           bottom border edge, which is the alignment the O actually needs. */
+           WITH text in it aligns by that text's baseline, and there is none
+           here to align to. With no in-flow content the baseline is
+           synthesised from the bottom border edge, which is the alignment the
+           O actually needs. */
         /* `shrink-0`: a flex item shrinks when the row overflows, and this
-           one has no content to hold it open - it lost width but not height
-           and the disc became an oval with its ring clipped. */
-        <span className="split-unit relative mx-[0.0195em] mb-[-0.005em] inline-block h-[0.586em] w-[0.586em] shrink-0">
-          <Seal
-            text={seal}
-            tone="ink"
-            size="fit"
-            className="absolute inset-0 h-full w-full"
+           one has no content to hold it open - it would lose width but not
+           height and the letter would squash. */
+        <span
+          className="split-unit relative inline-block shrink-0"
+          style={{
+            height: `${O_HEIGHT_EM}em`,
+            width: `${O_WIDTH_EM}em`,
+            marginInline: `${O_BEARING_EM}em`,
+            marginBottom: "-0.005em",
+          }}
+        >
+          <Image
+            src="/kozy/o.png"
+            alt=""
+            aria-hidden
+            fill
+            priority
+            /* 0.586em of an 18vw type size is ~10.5vw; without `sizes` a
+               `fill` image asks for the viewport width at every breakpoint. */
+            sizes="12vw"
+            className="object-contain"
           />
         </span>
       )}

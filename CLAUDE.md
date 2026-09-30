@@ -56,7 +56,7 @@ Read the VOICE note at the top of `src/lib/site.ts` before writing any copy.
   percentages, and every figure is a claim the brand actually makes.
 - Unverified values are marked `TODO(brand)` in `site.ts` — placeholders that
   keep a surface from rendering empty. Do not present them as fact.
-- The only named individual is the founder, **Khushi Faruqi** (Textile Design,
+- The only named individual is the founder, **Khushi Faruqui** (Textile Design,
   NIFT Delhi). The only confirmed contact channel is Instagram
   `@kozyliving_`. Phone, email and studio address in `site.ts` are marked
   `TODO(brand)` and are **not** verified.
@@ -153,8 +153,13 @@ If you touch the palette, these two files do not follow automatically:
 
 ### Signature motifs
 
-The giant lowercase `.wordmark` bleeding past its frame · the rotating sage
-`.seal` (only over the hero wordmark, the closing CTA, and as back-to-top) ·
+The giant lowercase `.wordmark` bleeding past its frame, whose **O is a
+photograph of the Dabu block print** (`public/kozy/o.png`, cut to the letter)
+rather than type — `WordmarkBand` pins it by *height* to the Franxurter O's
+0.586em and takes its width from the artwork's trimmed 474x512 ink box, with a
+side bearing that keeps the substitution advance-for-advance · the rotating
+sage `.seal` (the closing CTA, the story chapter marks, and back-to-top — it
+stood in for that O until the textile letter replaced it) ·
 the hand-drawn ellipse `CircledWord` · the `.arrow-btn` parked in a notched
 card corner · the `Plate` photographic card.
 
@@ -422,6 +427,25 @@ header/favicon/JSON-LD use `public/logo/kozy-logo-web.png` (720x405, 56 KB).
 The 3.2 MB masters in `public/logo/` are untouched; do not point anything that
 renders on every page at them.
 
+`public/kozy/` holds the two block-printed textile letters, and unlike
+`public/logo/` **no master is kept here** — both were delivered at 1254x1254
+and ~2.5 MB, and both were deleted once the shipped file was cut. Re-cutting
+either one means going back to the source artwork outside this repo.
+
+- `o.png` (474x512, 148 KB) is the wordmark's O — see §3.
+- `k.png` (178x192, 27 KB) is the category rail's separator
+  (`.cat-pill-sep`, in place of the `✳` that was there). It is one `src`
+  repeated ~40 times down the rail — the marquee carries several copies of the
+  menu — so it is one request however long the menu gets.
+
+Both are **trimmed to their ink box**, and that is load-bearing rather than
+tidiness: `WordmarkBand` derives the letter's aspect ratio from the file's
+dimensions, so re-exporting with transparent padding silently shrinks the O
+inside the word, and `.cat-pill-sep-mark` sets height with width auto for the
+same reason. The caps are sized from the largest render — the hero type tops
+out at 16rem, so the O paints at ~150px (~300px at 2x); the separator paints
+at 20/24px.
+
 Fonts ship as subset **WOFF2** (402 KB of TTF → 127 KB). The TTFs stay only
 for the social card, because satori cannot parse WOFF2 — see the note on the
 font block in `layout.tsx`.
@@ -688,13 +712,18 @@ hero's shorter "real rest" was only ~17% short and nobody had noticed.
    await page.waitForFunction(() => !document.querySelector(".loader"));       // fully gone
    ```
 
-2. **The newsletter popup** fires 15s after arrival and intercepts every tap
-   (Headless UI portal). Suppress it in `page.addInitScript`:
+2. **The newsletter popup** fires 15s after arrival — or the instant the
+   cursor crosses the top edge — and intercepts every tap (Headless UI
+   portal). Suppress it in `page.addInitScript`:
 
    ```js
    localStorage.setItem("kozy:newsletter",
      JSON.stringify({ state: "subscribed", at: Date.now() }));
    ```
+
+   `subscribed` is the state to preset: it silences the corner teaser too.
+   `dismissed` silences only the card and *shows* the teaser, which is what to
+   preset when the teaser is the thing under test (§12).
 
 3. **Node resolves `require("playwright")` from the script's own directory**,
    not the cwd. A script in a temp dir cannot see the project's
@@ -793,6 +822,99 @@ it.
   render the pill as a styled `<span>`. Invalid markup and a duplicate tab stop.
 - Prefer native scrolling + scroll-snap over transform tracks: touch,
   trackpad, keyboard and the scrollbar then work for free.
+
+---
+
+## 12. The newsletter — three surfaces, one record
+
+Added in this session. The signup exists in three places and they have to
+agree:
+
+| | file | shape |
+| --- | --- | --- |
+| Arrival card | `newsletter/newsletter-popup.tsx` + `newsletter-postcard.tsx` | the full drawing, in a Headless UI `Dialog` |
+| Corner teaser | `newsletter/newsletter-teaser.tsx` | what the card collapses into once closed |
+| Footer form | `ui/newsletter.tsx` | a bare field and one pill |
+
+All three post to the same server action (`newsletter/actions.ts` → Shopify
+Admin `customerCreate`, falling through to `customerEmailMarketingConsentUpdate`
+when the address already exists). Copy for all three is in `newsletter` in
+`site.ts`. Nothing about the signup is hard-coded in JSX.
+
+### The record — `newsletter/newsletter-state.ts`
+
+One module owns "has this visitor been asked, and what did they say". It used
+to be private to the popup, and the footer stored a subscribed customer in
+Shopify without touching it — so someone who signed up in the footer still got
+the card fifteen seconds later, asking for the address they had just given.
+
+Two stores, because the two answers do not have the same shelf life:
+
+```text
+localStorage    kozy:newsletter          the answer to the offer
+                  subscribed  terminal — no surface asks again, ever
+                  dismissed   snoozes the CARD for 30 days
+sessionStorage  kozy:newsletter-teaser   the teaser waved off for this session
+```
+
+Closing the teaser is deliberately *not* the month-long snooze: "not while I
+am reading this" is a smaller statement than "not this month".
+
+- Read through `useNewsletterState()`, which is **`useSyncExternalStore`**, not
+  an effect that seeds state. `getSnapshot` is called on every render and must
+  return the *same object* until something changes, so the read is cached at
+  module scope and dropped only on a write — a fresh read per call is a new
+  reference and re-renders forever.
+- Same-tab fan-out is a `kozy:newsletter-change` event. The `storage` event
+  only fires in the *other* tabs, so without it a footer signup would not
+  silence the card mounted beside it.
+- Every accessor is wrapped in try/catch: private browsing, blocked site data
+  and a full quota all **throw** on access rather than returning empty.
+
+### When the teaser is on screen
+
+`ready && !quiet && !cardOpen && !teaserClosed && record === "dismissed" &&
+suppressed(record)`.
+
+`ready` is false on the server and through hydration — neither store is
+readable there, so the first paint must not carry a tab the client removes.
+
+### The teaser is not a fourth seal
+
+The rotating `.seal` is reserved (hero wordmark, closing CTA, back-to-top);
+a fourth one parked in a corner is what turns a stamp into decoration. The tab
+borrows **`.cat-pill`'s silhouette** instead — label, then a circular icon well
+socketed into the end — in that pill's own hover colours: indigo ground, oat
+label (9.30), sage well with an indigo glyph (6.50).
+
+Load-bearing details in `.newsletter-teaser`:
+
+- **`z-index: 880`** — under the header (999), the cart drawer (1000), the
+  route hairline (1050) and the card itself (1100). A standing offer is the
+  least urgent thing on screen and must never sit over a cart being checked
+  out of.
+- **`[data-above-cart-bar]`** clears the mobile cart bar by its own height
+  (`4rem + 1px`) below `md`. That bar is fixed to the same edge, full width and
+  taller than the tab, so with anything in the cart the tab is simply behind
+  it. The flag comes from `useCart()`.
+- **Below 480px the label goes `sr-only`** and the tab is the mark alone, at
+  48px. The accessible name is on the button either way, so nothing is lost to
+  a screen reader.
+- The hover is the lift alone. `.cat-pill` answers a hover by flooding indigo,
+  but this tab is already indigo and the palette has no second one to move to —
+  `coal` is the same hex as `ink`. Darkening it by hand would put a fifth
+  colour in a four-colour system.
+
+### Triggers
+
+15s after arrival (paused while the tab is hidden), **or** exit intent,
+whichever comes first. Exit intent is bound to `document`'s `mouseout` with a
+null `relatedTarget` and `clientY <= 0`, and only on `(hover: hover) and
+(pointer: fine)` — a touch screen has no hover, so `mouseout` there fires on
+taps and would spring the card on the first one.
+
+`QUIET_PATHS` (`/contact`, `/account`, prefix-matched) suppress the card **and**
+the teaser: someone mid-enquiry or inside their account is mid-task.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

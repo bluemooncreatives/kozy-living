@@ -5,9 +5,11 @@ import { useId } from "react";
 
 /**
  * The rotating sage seal - the signature mark of this system. It appears
- * over the hero wordmark, over the closing CTA, and as the footer's
- * back-to-top control, and nowhere else, which is what keeps it reading as a
- * stamp rather than as decoration.
+ * over the closing CTA, in the story pages' chapter marks, and as the
+ * footer's back-to-top control, and nowhere else, which is what keeps it
+ * reading as a stamp rather than as decoration. It used to stand in for the
+ * wordmark's O as well; that slot is now the block-printed textile letter
+ * (see WordmarkBand).
  *
  * The ring of type is real text on an SVG `textPath`, so it stays a true
  * circle at any size. Only the ring rotates - the glyph in the middle is a

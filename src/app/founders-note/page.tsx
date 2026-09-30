@@ -31,7 +31,7 @@ import { founderImages, foundersNote, kozyStory, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Founder's Note",
-  description: `${foundersNote.standfirst} A note from ${site.founder}, founder of ${site.name} - ${site.founderCredential}.`,
+  description: `${foundersNote.title} - a note from ${site.founder}, founder of ${site.name} (${site.founderCredential}).`,
   openGraph: { type: "article" },
 };
 
@@ -63,15 +63,23 @@ function Masthead() {
       <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.7fr)] lg:gap-14">
         <div data-reveal-group>
           <Eyebrow align="left">{foundersNote.eyebrow}</Eyebrow>
-          <Headline as="h1" id="note" className="mt-4">
+          {/* `leading-[0.88]` for the same reason the product title overrides
+              the token (see `product-description.tsx`): Franxurter's caps fill
+              only ~0.72em of its em box, so `display-xl`'s 1.02 opens a
+              visible band between lines on a heading that runs to three of
+              them. The token stays where it is. */}
+          <Headline as="h1" id="note" className="mt-4 leading-[0.88]">
             {foundersNote.title}
           </Headline>
           <p className="serif mt-6 max-w-measure text-display-md text-pretty">
             {foundersNote.standfirst}
           </p>
 
+          {/* The standfirst above already says her name and her credential,
+              so repeating both here would read as a caption of that line.
+              What it does not carry is the one contact channel the brand has
+              confirmed. */}
           <p className="spec-mono mt-8 border-t border-rule pt-5">
-            {site.founder} · {site.founderCredential} ·{" "}
             <a
               href={site.founderInstagramUrl}
               target="_blank"
