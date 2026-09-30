@@ -7,8 +7,11 @@ the product they belong to, with the letters beside them.
 
 This runs on the Shopify **Basic** plan: no app, no Plus features.
 
-**Status (2026-10-01):** **Shopify Admin setup is complete** (§4, Steps 1–7).
-**No code has been written yet.** Next: Phase 2, the cart refactor (§5).
+**Status (2026-10-01):** **Shopify Admin setup is complete** (§4, Steps 1–7)
+and **the code is built** (§5, Phases 1–4), verified end to end against the
+live store on the dev server. **Left: one real test order** (Phase 5), which
+checks what only an order can show: checkout, the Admin order, the email, the
+packing slip and the Flow tags.
 
 ---
 
@@ -33,11 +36,12 @@ This runs on the Shopify **Basic** plan: no app, no Plus features.
   else, so a shopper can buy one without entering any. If those three should
   *require* initials, see §8.
 
-### Until the code ships
+### Until the code is deployed
 
-With the old option deleted, **the live site currently has no way for a
-shopper to ask for initials.** If that matters before launch, add a line such
-as "For initials, DM @kozyliving_" to the relevant product descriptions.
+With the old option deleted, **the production site has no way for a shopper to
+ask for initials until this code is deployed.** If that gap matters, add a line
+such as "For initials, DM @kozyliving_" to the relevant product descriptions
+until then.
 
 ---
 
@@ -251,7 +255,7 @@ collections"** and pick the product collections. The add-ons are in none.
 
 ## 5. Code plan
 
-### Phase 1 — Data layer
+### Phase 1 — Data layer ✅
 
 - One cached Storefront query, `metaobjects(type: "product_add_on")`, returns
   the entries with their fields and referenced variant (`id`, `price`,
@@ -267,7 +271,7 @@ collections"** and pick the product collections. The add-ons are in none.
   recommendations, collection pages and sitemap, at the reshape choke points.
   `/product/<addon-handle>` returns 404.
 
-### Phase 2 — Cart refactor (highest risk; done first, tested alone)
+### Phase 2 — Cart refactor ✅
 
 Today the cart identifies every line by **variant id** (`cart/actions.ts`,
 `cart/cart-math.ts`, `cart/cart-context.tsx`, the drawer `key`) and collapses
@@ -302,7 +306,7 @@ variant, so this has to change first.
 - Optimistic reducer: an add with add-ons always creates a new optimistic line
   (temp id), with children priced from the add-on variant.
 
-### Phase 3 — Product page
+### Phase 3 — Product page ✅
 
 - New client `AddOnPicker` between `VariantSelector` and `AddToCart` in
   `components/product/product-description.tsx`:
@@ -321,7 +325,7 @@ variant, so this has to change first.
   `site.ts`, following the VOICE note. Palette per CLAUDE.md §3: sage never
   carries type on light; use `sage-deep`.
 
-### Phase 4 — Cart drawer and quick-add
+### Phase 4 — Cart drawer and quick-add ✅
 
 - `cart/modal.tsx`: render add-ons under their item, e.g.
   *Initials · KF … ₹499 [remove]* and *Gift box … ₹999 [remove]*. No quantity
@@ -332,15 +336,49 @@ variant, so this has to change first.
 
 ### Phase 5 — Verification
 
-- Playwright across the CLAUDE.md §9 breakpoint sweep: add with initials; add
-  the same variant again with different initials; change quantity; remove the
-  item; remove only an add-on; invalid letters.
-- A **real test order** in test mode (the store identifies as "Kozy Living
-  Dev"). Check Admin → Orders (nesting and the Initials property), the
-  confirmation email, the packing slip and the Flow tags. Then create the two
-  saved order views (§4 Step 5.6), which Shopify only allows once an order
-  exists.
-- Update CLAUDE.md with the add-on model and the line-id cart.
+**Done on the dev server (2026-10-01), 16/16 checks, against the live store's
+cart API:** the picker shows both add-ons; empty initials are blocked with a
+message; the field filters to A–Z and 6 letters; the running total is shown;
+the Shopify cart holds the tote with `Initials=KF` and the gift box nested
+under it; a second tote with other initials is its own line; the drawer counts
+2 Kompanions, not 5 lines; quantity 2 moves both add-ons to 2; removing only
+the gift box keeps the tote and initials; removing a tote removes its add-ons;
+add-on products never appear in search and have no page; no console errors;
+no horizontal overflow at 320–1920 px.
+
+**Not yet seen:** Shopify's checkout page (its bot protection blocks the
+headless browser) and everything after an order is placed. The test order
+below covers both.
+
+**Built slightly differently from the plan:**
+
+- No separate live preview of the initials: the field itself shows the
+  letters as a spaced monogram in capitals, which is the preview.
+- The `required` field in Admin is not read (every add-on is optional,
+  decision 1).
+- A missing product, the add-ons' handles included, shows the not-found page
+  with status 200 + noindex rather than a 404. That is how every unknown
+  product link already behaves, because the product page streams its loading
+  skeleton first.
+
+**Still to do: one real test order.**
+
+1. Payments in test mode (Settings → Payments), or a 100%-off discount code.
+2. On the site: a tote with initials `KF` and a gift box → checkout → place
+   the order.
+3. Check:
+   - checkout showed both add-ons indented under the tote, with
+     `Initials: KF`;
+   - **Admin → Orders**: the same nesting and property;
+   - the order has the tags `personalised` and `gift-box` (Flow);
+   - the confirmation email lists the initials;
+   - the packing slip prints `Initials: KF` (Step 6).
+4. Create the two saved order views (§4 Step 5.6), which Shopify only allows
+   once an order exists.
+5. Cancel and refund the test order.
+
+The add-on model, the line-id cart and the traps are recorded in CLAUDE.md
+§13.
 
 ### Files touched
 

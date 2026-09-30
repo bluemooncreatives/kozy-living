@@ -178,7 +178,7 @@ type, so a missing shoot reads as a graphic panel rather than a broken image.
 | Source | What it holds |
 | --- | --- |
 | `src/lib/site.ts` | All editorial/marketing copy. Hero, statements, lookbook, about page, FAQ, footer, newsletter, the homepage story band. One file so the voice can be revised in one pass. |
-| **Shopify Admin** | Product titles and descriptions, collection titles and descriptions, **the entire navigation menu**, blog articles, images, prices, colour metaobjects. |
+| **Shopify Admin** | Product titles and descriptions, collection titles and descriptions, **the entire navigation menu**, blog articles, images, prices, colour metaobjects, and the personalisation add-ons (§13). |
 
 **There is deliberately no hard-coded nav in this repo.** The header, mobile
 drawer, search overlay and homepage category rail all read the Shopify menu via
@@ -300,7 +300,11 @@ used to sit before it, `ExperienceBand`, was removed.
 place to add anything that must apply site-wide:
 
 `reshapeProduct` · `reshapeCatalogProduct` · `reshapeCollection` ·
-`reshapeMenuItem` · `reshapeArticle` · `reshapeCart` · `reshapeImages`
+`reshapeMenuItem` · `reshapeArticle` · `reshapeCart` · `reshapeImages` ·
+`reshapeAddOn`
+
+`reshapeCart` also **nests add-on lines under their parent** and recomputes
+`totalQuantity` from the parents - see §13.
 
 ### House spelling normalisation
 
@@ -915,6 +919,83 @@ taps and would spring the card on the first one.
 
 `QUIET_PATHS` (`/contact`, `/account`, prefix-matched) suppress the card **and**
 the teaser: someone mid-enquiry or inside their account is mid-task.
+
+---
+
+## 13. Personalisation add-ons — initials (₹499) and gift box (₹999)
+
+Any product can take initials and/or a gift box, charged per unit and shown on
+the Shopify order indented under the product, with `Initials: KF` beside it.
+The full plan, the Admin setup and the edge-case tables are in
+`docs/personalisation-add-ons.md`; this is what the code relies on.
+
+### The model
+
+- Each add-on is a **hidden Shopify product** (tag `kozy-addon`, SKUs
+  `KOZY-ADDON-INITIALS` / `KOZY-ADDON-GIFTBOX`) plus a **`product_add_on`
+  metaobject** that points at its variant and carries the rules (kind, label,
+  max length, per-unit, active, apply-to-all). Prices come from the variant, so
+  a price edit is an Admin change only.
+- `getAddOns()` reads every entry in one cached query
+  (`queries/add-ons.ts`) and `reshapeAddOn` keeps the ones that are `active`
+  and `apply_to_all`. **Per-product add-ons are not implemented** - an entry
+  with `apply_to_all` off is ignored. The `required` field is read by nothing.
+- In the cart, an add-on is a **nested cart line** (`CartLineInput.parent`,
+  Storefront API 2025-10+). Its text is a line-item property on the child.
+- `kozy-addon` products are dropped in `reshapeProduct` (even where hidden
+  products are let through) and `reshapeCatalogProduct`, so they never list,
+  search, recommend or get a page.
+
+### The cart is addressed by LINE id, not variant
+
+`updateItemQuantity`, `removeItem`, the optimistic reducer, the reservation map
+and the drawer's `key` all use the cart **line id**. They used the variant id,
+and two totes with different initials are one variant and two lines. An
+optimistic line has no id until the server answers, so its buttons are
+disabled for that beat (it has a `tempKey` for React).
+
+### Traps, all measured against the live store
+
+- **Shopify merges two lines of one variant with identical attributes.** A
+  personalised parent therefore carries a private `_kozy_line: <uuid>`
+  attribute (`ADDON_PARENT_ATTRIBUTE`). Plain lines deliberately do not, so they
+  still merge.
+- **Child quantity does not follow the parent.** `updateItemQuantity` sends the
+  parent and its per-unit children in **one** `cartLinesUpdate`, then re-syncs
+  them if stock clamped the parent.
+- **Removing a parent removes its children** (Shopify cascades). Removing a
+  child alone leaves the parent.
+- **`parentRelationship` is on `CartLine`, not `BaseCartLine`** - select it in
+  an inline fragment or the query fails.
+- **Shopify's `totalQuantity` counts add-on lines**; `reshapeCart` replaces it
+  with the parents' sum, or the header reads "3" for one tote.
+- `addItem` adds the parent first, finds it by its marker, then nests the
+  children by **`parent.lineId`**, never `parent.merchandiseId`, which is
+  ambiguous when the cart already holds that variant. If the children fail,
+  the parent is removed again: a personalised product must never sit in the
+  cart without its paid line.
+- The server re-reads the add-ons from Shopify and re-validates the text on
+  every add. Never trust ids, prices or text from the browser.
+- Initials are **A–Z only, 1–6 letters** (the owner's rule). The shared rule is
+  `lib/shop/add-ons.ts`; the field filters as the shopper types, and the
+  server rejects anything else.
+- The order property name `Initials` comes from `addOns.orderLabels` in
+  `site.ts`. The workshop, the packing slip and the Shopify Flow tags read it -
+  change it with care.
+
+### Surfaces
+
+| File | Role |
+| --- | --- |
+| `components/product/add-on-picker.tsx` | The cards on the buy panel. Beside the add-to-cart form, not inside it, so Enter in the field does not submit. |
+| `components/cart/add-to-cart.tsx` | Owns the choices, validates, sends them, clears them after a successful add. |
+| `components/cart/modal.tsx` | Lists add-ons under their line, each removable; the line price includes them. |
+| Quick-add / product cards | Unchanged: they add the plain product. Add-ons are optional. |
+
+A missing product - including an add-on's handle - renders the not-found page
+with **status 200 + noindex**, because `product/[handle]/loading.tsx` streams
+the skeleton before the lookup finishes. That is the existing behaviour for
+every unknown handle, not something the add-ons introduced.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
