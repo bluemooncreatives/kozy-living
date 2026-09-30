@@ -746,17 +746,26 @@ export const contact = {
  */
 export const b2bEnquiry = {
   eyebrow: "B2B & Private Label",
-  title: "Krafted for the spaces you host.",
-  /** Ringed by the hand-drawn ellipse. Must appear in `title` verbatim. */
-  circled: "you host",
+  /** The brand's own supplied words - see the note on `foundersNote`. */
+  title: "Krafted for your everyday rituals",
+  /**
+   * Ringed by the hand-drawn ellipse. Must appear in `title` verbatim.
+   *
+   * The last word alone, not "everyday rituals": `CircledWord`'s svg overhangs
+   * its span by 6% a side, and the longer phrase wraps to the START of line
+   * two at every width up to 1024 - which put the left arc 4-13px outside the
+   * viewport, where `overflow-x: clip` on `html` shaved it off rather than
+   * scrolling. Ring a phrase that can begin a line and this is what happens.
+   */
+  circled: "rituals",
   /** Search and share snippet only - not rendered on the page. */
   description:
     "Bulk and private label textiles from Kozy Living for hotels and resorts, spas, boutiques, interior studios and retailers. Request a quote.",
   body: [
-    "Tell us a little about your business and what you have in mind. The studio reads every brief and comes back to you with a quote.",
+    "Tell us about your rituals, your requirements, the Kompanions you have in mind and the quantity you are planning for",
   ],
   materials: {
-    label: "What we work in",
+    label: "What we Kraft in",
     items: [
       "Cotton waffle weave",
       "Slub cotton",
@@ -766,20 +775,27 @@ export const b2bEnquiry = {
       "Dabu hand-block printing",
     ],
   },
+  /**
+   * The brand's own supplied words, all three steps.
+   *
+   * Step 01 is the same sentence as `body` above it, because that is how it
+   * was given to us on both surfaces. The two sit about a screen apart and
+   * read as a repeat - drop one before this goes in front of a trade buyer.
+   */
   steps: {
-    label: "How it works",
+    label: "How we Kraft together",
     items: [
       {
         title: "Share your brief",
-        body: "A few details on your business, the Kompanions you have in mind and the volume you are planning for.",
+        body: "Tell us about your rituals, your requirements, the Kompanions you have in mind and the quantity you are planning for",
       },
       {
-        title: "We review it",
-        body: "The studio looks at fibre, finish, customisation and timelines against your requirements.",
+        title: "We Kraft the direction",
+        body: "We look at materials, kraft, finishes, customisation & timelines to shape the right direction for your Kompanions",
       },
       {
-        title: "Receive your quote",
-        body: "We come back with pricing and next steps - samples, colourways and private label, where it fits.",
+        title: "Bring it to life",
+        body: "We come back with pricing, samples, colourways & next steps — including private label, where it fits",
       },
     ],
   },
