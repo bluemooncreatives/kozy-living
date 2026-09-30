@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Image from "next/image";
 import Link from "next/link";
 import type { IconType } from "react-icons";
 import {
@@ -119,7 +120,18 @@ export default function CollectionPillRail({
                   </span>
                 </Link>
                 <span aria-hidden className="cat-pill-sep">
-                  ✳
+                  {/* The block-printed K, the same textile artwork the
+                      wordmark's O is cut from. One src for every separator on
+                      the rail, so the ~40 repeats are one request. Trimmed
+                      178x192 - see the note on the asset in CLAUDE.md. */}
+                  <Image
+                    src="/kozy/k.png"
+                    alt=""
+                    width={178}
+                    height={192}
+                    sizes="28px"
+                    className="cat-pill-sep-mark"
+                  />
                 </span>
               </li>
             );

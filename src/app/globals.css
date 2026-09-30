@@ -830,9 +830,19 @@
     @apply bg-ink/90;
   }
 
-  /* sage-deep: flat sage measures 1.85 on cream and would not be there. */
+  /* The separator is the block-printed K, not a glyph, so this rule is pure
+     spacing - no colour or font-size to set. The padding is a shade tighter
+     than the asterisk's (px-3/md:px-5) because the mark is ~22px wide where
+     the glyph was ~14px, and the rail's rhythm is the gap between pills, not
+     the gap around the mark. */
   .cat-pill-sep {
-    @apply select-none px-3 text-[0.9rem] leading-none text-sage-deep md:px-5;
+    @apply flex shrink-0 select-none items-center px-2.5 md:px-4;
+  }
+
+  /* Height, width auto: the artwork is trimmed to its ink box, so a fixed
+     width would letterbox it the moment the crop changes. */
+  .cat-pill-sep-mark {
+    @apply h-5 w-auto md:h-6;
   }
 
   .pill-marquee {

@@ -427,13 +427,24 @@ header/favicon/JSON-LD use `public/logo/kozy-logo-web.png` (720x405, 56 KB).
 The 3.2 MB masters in `public/logo/` are untouched; do not point anything that
 renders on every page at them.
 
-`public/kozy/o.png` (the wordmark's textile O) follows the same pattern: the
-2.39 MB master is kept beside it as `o-master.png` and the shipped file is that
-artwork **trimmed to its ink box** and capped at 512px tall (474x512, 148 KB).
-It is trimmed on purpose — `WordmarkBand` derives the letter's aspect ratio
-from those dimensions, so re-exporting it with transparent padding silently
-shrinks the O inside the word. The cap is sized from the largest render: the
-hero type tops out at 16rem, so the O paints at ~150px, ~300px at 2x.
+`public/kozy/` holds the two block-printed textile letters, and unlike
+`public/logo/` **no master is kept here** — both were delivered at 1254x1254
+and ~2.5 MB, and both were deleted once the shipped file was cut. Re-cutting
+either one means going back to the source artwork outside this repo.
+
+- `o.png` (474x512, 148 KB) is the wordmark's O — see §3.
+- `k.png` (178x192, 27 KB) is the category rail's separator
+  (`.cat-pill-sep`, in place of the `✳` that was there). It is one `src`
+  repeated ~40 times down the rail — the marquee carries several copies of the
+  menu — so it is one request however long the menu gets.
+
+Both are **trimmed to their ink box**, and that is load-bearing rather than
+tidiness: `WordmarkBand` derives the letter's aspect ratio from the file's
+dimensions, so re-exporting with transparent padding silently shrinks the O
+inside the word, and `.cat-pill-sep-mark` sets height with width auto for the
+same reason. The caps are sized from the largest render — the hero type tops
+out at 16rem, so the O paints at ~150px (~300px at 2x); the separator paints
+at 20/24px.
 
 Fonts ship as subset **WOFF2** (402 KB of TTF → 127 KB). The TTFs stay only
 for the social card, because satori cannot parse WOFF2 — see the note on the
