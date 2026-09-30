@@ -25,7 +25,7 @@ export const site = {
   origin: "India",
   description:
     "Craft-led, conscious textiles from India. Cotton waffle weaves, slub cottons, percale, linen blends and wool - designed in-house, made with craft clusters across the country, and finished with traditional Dabu hand-block printing.",
-  founder: "Khushi Faruqi",
+  founder: "Khushi Faruqui",
   founderCredential: "Textile Design, NIFT Delhi",
   /** Khushi's own account - distinct from `instagram` below, which is the
       brand's. Used only on `/founders-note`, where the byline is hers. */
@@ -48,23 +48,23 @@ export const site = {
 export const founderImages = [
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/WhatsApp_Image_2026-02-08_at_11.59.15_PM.jpg?v=1790369996",
-    alt: "Khushi Faruqi, founder of Kozy Living.",
+    alt: "Khushi Faruqui, founder of Kozy Living.",
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1171_43dfc109-e3d3-4a11-b902-f6443ff961fa.jpg?v=1790369997",
-    alt: "Khushi Faruqi at work in the Kozy Living studio.",
+    alt: "Khushi Faruqui at work in the Kozy Living studio.",
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_6338_eea1aae1-4c9b-4571-8f07-f080a9d1fbeb.jpg?v=1790369997",
-    alt: "Khushi Faruqi with Kozy Living textiles.",
+    alt: "Khushi Faruqui with Kozy Living textiles.",
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_2755_9be99538-96aa-4529-a92c-1c67d6431b73.jpg?v=1790369997",
-    alt: "Khushi Faruqi, founder of Kozy Living.",
+    alt: "Khushi Faruqui, founder of Kozy Living.",
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_6412_d18c7de3-251f-46e0-9763-eb814a5fa2a5.jpg?v=1790370000",
-    alt: "Khushi Faruqi in the studio with the craft clusters' work.",
+    alt: "Khushi Faruqui in the studio with the craft clusters' work.",
   },
 ] as const;
 
@@ -90,7 +90,7 @@ export const founderReel = [
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_8778.jpg?v=1788636329",
-    alt: "Khushi Faruqi with Kozy Living textiles.",
+    alt: "Khushi Faruqui with Kozy Living textiles.",
   },
   {
     url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1235.jpg?v=1788636320",
@@ -427,7 +427,7 @@ export const aboutStory = {
       index: "02",
       kicker: "The hands",
       lede: { lead: "Made with", accent: "craft clusters" },
-      body: "Designed in-house by Khushi Faruqi, then made in collaboration with craft clusters across India - artisanal processes, not volume machinery.",
+      body: "Designed in-house by Khushi Faruqui, then made in collaboration with craft clusters across India - artisanal processes, not volume machinery.",
       cta: "Meet the collective",
       /* No handle: the makers are not a shelf. This card always goes to the
          story, and always uses the studio stills. */
@@ -1309,18 +1309,30 @@ export const kozyStory = {
  *
  * "Kozy Klub" is the brand's own term for its readers and is spelled that way
  * on purpose.
+ *
+ * `title`, `standfirst`, `body` and `pull` are the brand's own supplied words,
+ * kept verbatim - including "rooted in Indian Kraft" and the ampersand in
+ * "colour, craft & consciousness". They are hers to revise, not ours to tidy,
+ * so leave the punctuation (no terminal full stops, plain hyphens) as it is.
  */
 export const foundersNote = {
   eyebrow: "Founder’s note",
   /** Set as display type, split word by word. */
-  title: "I realised intention doesn’t come from adding more.",
-  standfirst: "It comes from engaging deeply with the routines that already exist.",
+  title: "I wanted to make the everyday routines feel more Kozy",
+  /**
+   * The letter opens by introducing her, so the masthead byline under this
+   * line carries the Instagram handle alone - the name and the credential are
+   * already in the sentence the reader has just read.
+   */
+  standfirst:
+    "Hello, I’m Khushi Faruqui - a Textile Designer and NIFT Delhi graduate",
   body: [
-    "Having studied Textile Design at NIFT Delhi, and being grateful for the recognition my work has received, I’ve always been drawn to how textiles shape emotion, atmosphere and everyday living.",
-    "While creating my own space, I found myself looking for home textiles that felt joyful and expressive, contemporary yet rooted in Indian craft. When I couldn’t find them, I began to create them.",
-    "Kozy Living grew from that exploration. A journey to bring colour, craft and consciousness into daily life. We turn familiar routines into moments of restful intention.",
+    "I’ve always been drawn to how textiles shape emotion, atmosphere and the way we experience our everyday lives and rituals",
+    "While creating my own Kozy corner, I found myself looking for home textiles that felt expressive, comforting and contemporary, yet rooted in Indian Kraft. When I couldn’t find them, I began designing and crafting them myself",
+    "Kozy Living grew from that exploration - a journey to bring colour, craft & consciousness into the rituals that make up our everyday lives",
+    "We believe the everyday deserves to feel good - through colour, comfort, craft and the little moments in between",
   ],
-  pull: "This is your gentle invitation to be mindful, present and full of colour.",
+  pull: "This is your invitation to make the everyday more Kozy",
   welcome: "Welcome to your Kozy Klub",
   signature: site.founder,
   signatureRole: site.founderCredential,

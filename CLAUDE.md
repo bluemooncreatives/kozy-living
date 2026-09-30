@@ -56,7 +56,7 @@ Read the VOICE note at the top of `src/lib/site.ts` before writing any copy.
   percentages, and every figure is a claim the brand actually makes.
 - Unverified values are marked `TODO(brand)` in `site.ts` — placeholders that
   keep a surface from rendering empty. Do not present them as fact.
-- The only named individual is the founder, **Khushi Faruqi** (Textile Design,
+- The only named individual is the founder, **Khushi Faruqui** (Textile Design,
   NIFT Delhi). The only confirmed contact channel is Instagram
   `@kozyliving_`. Phone, email and studio address in `site.ts` are marked
   `TODO(brand)` and are **not** verified.
