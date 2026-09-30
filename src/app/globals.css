@@ -154,6 +154,45 @@
   }
 }
 
+/* The B2B form's received state (`Received` in b2b-enquiry-form.tsx). Mounts
+   after a submit, so it is a CSS entrance for the same reason as the lookbook
+   turn above: a `data-reveal` scroll trigger has long since fired. */
+@media (prefers-reduced-motion: no-preference) {
+  .b2b-received > * {
+    animation: b2b-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .b2b-received > :nth-child(2) { animation-delay: 80ms; }
+  .b2b-received > :nth-child(3) { animation-delay: 140ms; }
+  .b2b-received > :nth-child(4) { animation-delay: 200ms; }
+  .b2b-received > :nth-child(5) { animation-delay: 260ms; }
+
+  .b2b-received-mark svg {
+    animation: b2b-draw 520ms ease 260ms both;
+  }
+
+  /* The custom-quantity field, which mounts when "Customised" is picked. */
+  .b2b-reveal {
+    animation: b2b-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes b2b-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@keyframes b2b-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes lookbook-turn {
   from {
     opacity: 0;
@@ -857,6 +896,77 @@
 
   .field-bare {
     @apply w-full rounded-chip border border-ink/15 bg-card px-5 py-3.5 font-sans text-ui text-ink transition-colors focus-visible:border-ink focus-visible:ring-0;
+  }
+
+  /* `/b2b-enquiries`. One column at every width: the copy, materials and
+     steps read first and the form follows underneath. The owner's call - it
+     was copy-beside-form at lg, like the contact page, and that was not
+     wanted here. The areas stay so the order is set in one place. */
+  .b2b-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "intro"
+      "details"
+      "form";
+  }
+
+  .b2b-grid-intro { grid-area: intro; }
+  .b2b-grid-form { grid-area: form; }
+  .b2b-grid-details { grid-area: details; }
+
+  /* Radio as pill (the B2B form's choice groups). The radio itself is
+     `sr-only` and still focusable, so the pill takes its states through the
+     sibling selector. Checked is the `.pill-active` fill, with a sage tick
+     drawn in - sage on indigo 6.50; sage on the ivory rest state would be
+     1.8, which is why the tick only exists once the pill is filled. */
+  .choice {
+    @apply cursor-pointer;
+  }
+
+  .choice-pill {
+    @apply pill select-none gap-0 font-medium;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      gap 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .choice-input:checked + .choice-pill {
+    @apply border-ink bg-ink text-paper;
+    gap: 0.4rem;
+  }
+
+  .choice-input:focus-visible + .choice-pill {
+    @apply outline outline-2 outline-offset-2 outline-ink;
+  }
+
+  .choice-tick {
+    @apply h-3.5 w-0 shrink-0 text-sage;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition:
+      width 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      stroke-dashoffset 320ms ease 80ms;
+  }
+
+  .choice-input:checked + .choice-pill .choice-tick {
+    @apply w-3.5;
+    stroke-dashoffset: 0;
+  }
+
+  /* The received panel's tick: an indigo disc with the stroke drawn on.
+     `pathLength="1"` is safe here - unlike `CircledWord` there is no
+     `non-scaling-stroke`, so dashes and length share one space. */
+  .b2b-received-mark {
+    @apply flex h-14 w-14 items-center justify-center rounded-full bg-ink text-sage;
+  }
+
+  .b2b-received-mark svg {
+    @apply h-6 w-6;
+    stroke-dasharray: 1;
   }
 
   /* The hero frame: exactly the viewport minus the header, at every size.

@@ -158,6 +158,15 @@ export default function LoadingScreen() {
       const el = root.current;
       if (!el) return;
 
+      // Re-assert the lock. The cleanup below drops it so a teardown never
+      // strands the page - but React's development double-mount runs that
+      // cleanup at hydration and then this effect again, replaying the whole
+      // curtain with the attribute already gone. `unlock()` then saw nothing
+      // to remove and never sent `kozy:loader-exit`, so in dev every first-fold
+      // reveal (and the `CircledWord` draw) waited for `loader-done`, after
+      // the curtain had already cleared. A no-op in production.
+      el.setAttribute("data-loader", "");
+
       const q = gsap.utils.selector(el);
       const chars = q("[data-loader-char]");
       const mark = q("[data-loader-mark]");

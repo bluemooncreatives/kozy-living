@@ -632,7 +632,7 @@ export const footerColumns = [
       { title: "About", path: "/about-us" },
       { title: "Kraft & Materials", path: "/about-us" },
       { title: "Journal", path: "/blogs" },
-      { title: "B2B & Private Label", path: "/contact" },
+      { title: "B2B & Private Label", path: "/b2b-enquiries" },
     ],
   },
   {
@@ -726,6 +726,104 @@ export const contact = {
       ],
     },
   ],
+} as const;
+
+/* ------------------------------------------------------------ b2b enquiries */
+
+/**
+ * `/b2b-enquiries` - the trade enquiry form. A designed route standing over
+ * the Shopify page of the same handle (linked from the live menu under The
+ * Kozy Story), whose body is empty.
+ *
+ * Every claim here is one the brand already makes in `heritage` and `faq`:
+ * bespoke bulk production for boutiques, interior studios and hospitality, in
+ * natural fibres, designed in-house. No lead times, minimum order quantities
+ * or client names - none have been given to us, and a trade buyer takes a
+ * stated MOQ as a commitment. Add them here once the brand confirms them.
+ *
+ * `businessTypes` and `quantities` are stored in Shopify as their label text,
+ * so renaming one changes what NEW enquiries say; old records keep theirs.
+ */
+export const b2bEnquiry = {
+  eyebrow: "B2B & Private Label",
+  title: "Krafted for the spaces you host.",
+  /** Ringed by the hand-drawn ellipse. Must appear in `title` verbatim. */
+  circled: "you host",
+  /** Search and share snippet only - not rendered on the page. */
+  description:
+    "Bulk and private label textiles from Kozy Living for hotels and resorts, spas, boutiques, interior studios and retailers. Request a quote.",
+  body: [
+    "Tell us a little about your business and what you have in mind. The studio reads every brief and comes back to you with a quote.",
+  ],
+  materials: {
+    label: "What we work in",
+    items: [
+      "Cotton waffle weave",
+      "Slub cotton",
+      "Cotton percale",
+      "Linen blends",
+      "Wool",
+      "Dabu hand-block printing",
+    ],
+  },
+  steps: {
+    label: "How it works",
+    items: [
+      {
+        title: "Share your brief",
+        body: "A few details on your business, the Kompanions you have in mind and the volume you are planning for.",
+      },
+      {
+        title: "We review it",
+        body: "The studio looks at fibre, finish, customisation and timelines against your requirements.",
+      },
+      {
+        title: "Receive your quote",
+        body: "We come back with pricing and next steps - samples, colourways and private label, where it fits.",
+      },
+    ],
+  },
+  form: {
+    required: "Required",
+    /** The form's three fieldsets, numbered in the markup. */
+    sections: ["About you", "Your business", "Your order"],
+    name: "Full name",
+    company: "Company / business name",
+    email: "Business email",
+    phone: "Phone / WhatsApp number",
+    businessType: "Business type",
+    /** Every label is a segment the brand already names as a partner. */
+    businessTypes: [
+      "Hotel / Resort",
+      "Spa / Wellness",
+      "Retailer",
+      "Interior / Design Studio",
+      "Distributor / Wholesaler",
+      "Other",
+    ],
+    products: "Products interested in",
+    productsHint: "e.g. waffle bathrobes, slippers, Dabu-printed pillows, ritual kits",
+    quantity: "Estimated quantity",
+    quantityUnit: "units",
+    quantities: ["Below 100", "100–500", "500–1,000", "1,000+", "Customised"],
+    /** Picking `option` opens a required number field under the pills.
+        `option` must match one of `quantities` verbatim. */
+    custom: {
+      option: "Customised",
+      label: "Your quantity",
+      placeholder: "e.g. 2500",
+    },
+    message: "Message / requirements",
+    optional: "Optional",
+    messageHint: "Colours, sizes, branding or private label, timelines - anything that helps us quote.",
+    submit: "Request a quote",
+    sending: "Sending…",
+    another: "Send another enquiry",
+    browse: { label: "Browse Kompanions", href: "/search" },
+    thanksEyebrow: "Enquiry received",
+    thanks: "Thank you - your brief is with the studio.",
+    thanksBody: "We usually reply within one business day, at the email you gave us.",
+  },
 } as const;
 
 /* ------------------------------------------------------------- newsletter */

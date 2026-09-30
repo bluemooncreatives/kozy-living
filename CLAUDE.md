@@ -190,6 +190,32 @@ its first byte — warm TTFB measured 0.5–0.7s, now 0.01–0.05s. A menu edit 
 Admin now takes up to a minute to reach production. Do not put it back on
 `no-store`; if instant menu edits ever matter, revalidate a tag instead.
 
+### Enquiry forms — both write `contact_message`
+
+The contact form (`components/contact/`) and the B2B form on `/b2b-enquiries`
+(`components/b2b/`) are server actions that create a `contact_message`
+metaobject through the Admin API (`lib/shopify/admin.ts`). They share one
+inbox in Admin → Content → Metaobjects, told apart by the `source` field
+(`storefront-contact-form` / `storefront-b2b-form`). That definition has no
+trade columns, so the B2B action writes company, business type, products and
+quantity as labelled lines at the top of `message`. Giving them real fields
+means a separate `b2b_enquiry` definition. Do not add fields to
+`contact_message`: the contact form would then have to satisfy them.
+
+- The B2B honeypot is named `website`. **`company` is the contact form's
+  honeypot but a real, required field on the B2B form**, so do not copy the
+  honeypot across by name.
+- React 19 resets a form after its action runs. The B2B action echoes
+  `values` back on failure, and the fields re-seed from them through
+  `defaultValue` / `defaultChecked`.
+- Picking the **Customised** quantity opens a required `customQuantity`
+  field; the action requires it only then and stores
+  `Customised - 2,500 units`. `form.custom.option` in `site.ts` must match
+  that entry in `quantities` verbatim, or the field never opens.
+- `/b2b-enquiries` shadows the empty Shopify page of the same handle, the
+  same way `/founders-note` does. Its choice lists are in `b2bEnquiry` in
+  `site.ts` and are stored as label text.
+
 ### Handles vs titles
 
 A **handle** is an identifier that appears in URLs and in Shopify lookups. A
@@ -444,6 +470,13 @@ being uncovered. `kozy:loader-done` follows when the curtain unmounts. Floors:
 CSS entrance in `.loader-char` is timed against these — move them together).
 It waits for fonts and the images in the first viewport, **not** `window.load`.
 
+⚠️ In `next dev`, React's double-mount runs `LoadingScreen`'s cleanup at
+hydration, which drops `data-loader`. The effect now re-sets the attribute
+when it runs again. Without that, `kozy:loader-exit` never fired in dev, and
+every first-fold reveal waited for `loader-done`, after the curtain had
+already cleared. If first-fold animations look late in dev only, check this
+first.
+
 **Navigation feedback.** `RouteProgress` (a sage hairline, in the root layout)
 starts on a same-origin link click heard in the *capture* phase — `<Link>`
 cancels the event in its own handler — or a `method="get"` /
@@ -520,6 +553,14 @@ sample the path with `getPointAtLength()`, push each point through
 `onEnter` (fonts and Suspense can resize the word after mount), and **drop the
 dasharray entirely on complete** — a stale dasharray measured against an old
 width re-opens the ring on the next resize.
+
+`CircledWord` also waits for the curtain. A ring in the first fold used to
+set up its scroll trigger at mount, under the curtain, so the whole draw
+played behind the panels. It now sets up on `kozy:loader-exit` (with the
+motion layer's `loader-done` fallback and 5s bail), waits for
+`document.fonts.ready`, and delays 0.75s when it is already on screen. The
+panels lift upward, so the top of the page is uncovered last, and at 0.75s
+the sage panel's foot has just left the screen (measured).
 
 ---
 
