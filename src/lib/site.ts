@@ -745,6 +745,18 @@ export const newsletter = {
   thanks: "Welcome to the ritual.",
   thanksBody:
     "A little Kozy ritual will find its way to your inbox, every now & then.",
+  /**
+   * The corner tab the card collapses into when it is closed unanswered.
+   * `label` is a fragment, not a sentence - it sits beside an envelope mark and
+   * is hidden entirely on a phone, where the tab is the mark alone. The two
+   * accessible names carry the whole meaning, which is why they are written
+   * out rather than derived from the label.
+   */
+  teaser: {
+    label: "Share a ritual",
+    open: "Open the newsletter signup",
+    close: "Hide the newsletter tab for now",
+  },
 } as const;
 
 /* ---------------------------------------------------------------- about page */

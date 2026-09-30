@@ -1906,6 +1906,138 @@ html:has([data-loader]) body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   The newsletter teaser
+
+   The corner tab the ritual card collapses into when it is closed unanswered.
+   See the header in `components/newsletter/newsletter-teaser.tsx` for why it
+   exists at all; what matters here is that it is NOT a fourth rotating seal.
+   That mark is reserved (hero wordmark, closing CTA, back-to-top), so this
+   borrows the other established silhouette instead - `.cat-pill`: a label with
+   a circular icon well socketed into the end, in that pill's own hover
+   colours. Indigo ground, oat label (9.30), sage well with an indigo glyph
+   (6.50).
+--------------------------------------------------------------------------- */
+
+@layer components {
+  .newsletter-teaser {
+    position: fixed;
+    right: 1rem;
+    /* The inset is part of the safe area, not added to it: on a notched phone
+       the home indicator already owns that strip. */
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    /* Under the header (999), the cart drawer (1000), the route hairline
+       (1050) and the card itself (1100). A standing offer is the least urgent
+       thing on the screen, and must never sit over a cart being checked out
+       of. */
+    z-index: 880;
+    display: flex;
+  }
+
+  @media (min-width: 640px) {
+    .newsletter-teaser {
+      right: 1.5rem;
+      bottom: max(1.5rem, env(safe-area-inset-bottom));
+    }
+  }
+
+  /* The mobile cart bar is fixed to the same edge, full width and taller than
+     this tab, so with anything in the cart the tab would simply be behind it.
+     Cleared by the bar's own height - 4rem plus its top border - and only
+     below `md`, which is where that bar exists. */
+  @media (max-width: 767px) {
+    .newsletter-teaser[data-above-cart-bar] {
+      bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 4rem + 1px);
+    }
+  }
+
+  .newsletter-teaser-tab {
+    @apply inline-flex h-12 items-center justify-center gap-3 rounded-chip bg-ink pl-5 pr-1.5 font-sans text-ui font-semibold leading-none text-tint shadow-lift;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* The lift IS the hover. `.cat-pill` answers a hover by flooding indigo, but
+     this tab is already indigo and the palette has no second one to move to -
+     `coal` is the same hex. Darkening it by hand would put a fifth colour in a
+     four-colour system for the sake of a hover nobody asked for. */
+  .newsletter-teaser-tab:hover {
+    transform: translateY(-2px);
+  }
+
+  .newsletter-teaser-icon {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-ink;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .newsletter-teaser-tab:hover .newsletter-teaser-icon {
+    transform: scale(1.06);
+  }
+
+  .newsletter-teaser-label {
+    @apply whitespace-nowrap;
+  }
+
+  /* A phone gives this the mark alone. The label is the first thing to go:
+     a tab wide enough to read is a tab wide enough to be in the way, and the
+     envelope carries the meaning on its own - the accessible name is on the
+     button either way, so nothing is lost to a screen reader. */
+  @media (max-width: 479px) {
+    .newsletter-teaser-tab {
+      @apply h-12 w-12 gap-0 p-0;
+    }
+
+    .newsletter-teaser-label {
+      @apply sr-only;
+    }
+  }
+
+  /* Parked on the tab's corner, matching the card's own close control. */
+  .newsletter-teaser-close {
+    @apply absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full border border-ink/10 bg-paper text-ink shadow-chip;
+    transition: transform 180ms ease;
+  }
+
+  .newsletter-teaser-close:hover {
+    transform: scale(1.08);
+  }
+
+  /* Rises into the corner rather than appearing there: the card it replaces
+     has just left the middle of the screen, and something arriving in silence
+     at the edge of vision is easy to miss entirely. */
+  @keyframes newsletter-teaser-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .newsletter-teaser {
+    animation: newsletter-teaser-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .newsletter-teaser {
+      animation: none;
+    }
+
+    .newsletter-teaser-tab,
+    .newsletter-teaser-icon,
+    .newsletter-teaser-close {
+      transition: none;
+    }
+
+    .newsletter-teaser-tab:hover,
+    .newsletter-teaser-tab:hover .newsletter-teaser-icon,
+    .newsletter-teaser-close:hover {
+      transform: none;
+    }
+  }
+}
+
 
 
 /* ---------------------------------------------------------------------------

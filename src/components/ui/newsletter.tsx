@@ -1,12 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import { useActionState, useId } from "react";
+import { useActionState, useEffect, useId } from "react";
 import ActionButton from "@/components/ui/action-button";
 import {
   subscribeToNewsletter,
   type NewsletterState,
 } from "@/components/newsletter/actions";
+import { writeRecord } from "@/components/newsletter/newsletter-state";
 
 /**
  * Newsletter capture for the footer: a bare underlined field and one pill, no
@@ -18,6 +19,10 @@ import {
  * this form used to acknowledge without storing anything, and two signup
  * surfaces with different meanings is the kind of thing nobody finds until a
  * campaign goes out to half a list.
+ *
+ * Success is also recorded locally, which is what stops the arrival card - and
+ * the corner teaser behind it - from asking a visitor who has just subscribed
+ * here for the address they gave thirty seconds ago.
  */
 export default function Newsletter({ className }: { className?: string }) {
   const [state, formAction, isPending] = useActionState<
@@ -25,6 +30,12 @@ export default function Newsletter({ className }: { className?: string }) {
     FormData
   >(subscribeToNewsletter, null);
   const id = useId();
+
+  useEffect(() => {
+    // `already` counts: the address is on the list either way, and that is the
+    // only question the other two surfaces are asking.
+    if (state?.ok) writeRecord("subscribed");
+  }, [state?.ok]);
 
   if (state?.ok) {
     return (

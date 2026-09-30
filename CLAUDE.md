@@ -622,13 +622,18 @@ hero's shorter "real rest" was only ~17% short and nobody had noticed.
    await page.waitForFunction(() => !document.querySelector(".loader"));       // fully gone
    ```
 
-2. **The newsletter popup** fires 15s after arrival and intercepts every tap
-   (Headless UI portal). Suppress it in `page.addInitScript`:
+2. **The newsletter popup** fires 15s after arrival — or the instant the
+   cursor crosses the top edge — and intercepts every tap (Headless UI
+   portal). Suppress it in `page.addInitScript`:
 
    ```js
    localStorage.setItem("kozy:newsletter",
      JSON.stringify({ state: "subscribed", at: Date.now() }));
    ```
+
+   `subscribed` is the state to preset: it silences the corner teaser too.
+   `dismissed` silences only the card and *shows* the teaser, which is what to
+   preset when the teaser is the thing under test (§12).
 
 3. **Node resolves `require("playwright")` from the script's own directory**,
    not the cwd. A script in a temp dir cannot see the project's
@@ -727,3 +732,97 @@ it.
   render the pill as a styled `<span>`. Invalid markup and a duplicate tab stop.
 - Prefer native scrolling + scroll-snap over transform tracks: touch,
   trackpad, keyboard and the scrollbar then work for free.
+
+---
+
+## 12. The newsletter — three surfaces, one record
+
+Added in this session. The signup exists in three places and they have to
+agree:
+
+| | file | shape |
+| --- | --- | --- |
+| Arrival card | `newsletter/newsletter-popup.tsx` + `newsletter-postcard.tsx` | the full drawing, in a Headless UI `Dialog` |
+| Corner teaser | `newsletter/newsletter-teaser.tsx` | what the card collapses into once closed |
+| Footer form | `ui/newsletter.tsx` | a bare field and one pill |
+
+All three post to the same server action (`newsletter/actions.ts` → Shopify
+Admin `customerCreate`, falling through to `customerEmailMarketingConsentUpdate`
+when the address already exists). Copy for all three is in `newsletter` in
+`site.ts`. Nothing about the signup is hard-coded in JSX.
+
+### The record — `newsletter/newsletter-state.ts`
+
+One module owns "has this visitor been asked, and what did they say". It used
+to be private to the popup, and the footer stored a subscribed customer in
+Shopify without touching it — so someone who signed up in the footer still got
+the card fifteen seconds later, asking for the address they had just given.
+
+Two stores, because the two answers do not have the same shelf life:
+
+```text
+localStorage    kozy:newsletter          the answer to the offer
+                  subscribed  terminal — no surface asks again, ever
+                  dismissed   snoozes the CARD for 30 days
+sessionStorage  kozy:newsletter-teaser   the teaser waved off for this session
+```
+
+Closing the teaser is deliberately *not* the month-long snooze: "not while I
+am reading this" is a smaller statement than "not this month".
+
+- Read through `useNewsletterState()`, which is **`useSyncExternalStore`**, not
+  an effect that seeds state. `getSnapshot` is called on every render and must
+  return the *same object* until something changes, so the read is cached at
+  module scope and dropped only on a write — a fresh read per call is a new
+  reference and re-renders forever.
+- Same-tab fan-out is a `kozy:newsletter-change` event. The `storage` event
+  only fires in the *other* tabs, so without it a footer signup would not
+  silence the card mounted beside it.
+- Every accessor is wrapped in try/catch: private browsing, blocked site data
+  and a full quota all **throw** on access rather than returning empty.
+
+### When the teaser is on screen
+
+`ready && !quiet && !cardOpen && !teaserClosed && record === "dismissed" &&
+suppressed(record)`.
+
+`ready` is false on the server and through hydration — neither store is
+readable there, so the first paint must not carry a tab the client removes.
+
+### The teaser is not a fourth seal
+
+The rotating `.seal` is reserved (hero wordmark, closing CTA, back-to-top);
+a fourth one parked in a corner is what turns a stamp into decoration. The tab
+borrows **`.cat-pill`'s silhouette** instead — label, then a circular icon well
+socketed into the end — in that pill's own hover colours: indigo ground, oat
+label (9.30), sage well with an indigo glyph (6.50).
+
+Load-bearing details in `.newsletter-teaser`:
+
+- **`z-index: 880`** — under the header (999), the cart drawer (1000), the
+  route hairline (1050) and the card itself (1100). A standing offer is the
+  least urgent thing on screen and must never sit over a cart being checked
+  out of.
+- **`[data-above-cart-bar]`** clears the mobile cart bar by its own height
+  (`4rem + 1px`) below `md`. That bar is fixed to the same edge, full width and
+  taller than the tab, so with anything in the cart the tab is simply behind
+  it. The flag comes from `useCart()`.
+- **Below 480px the label goes `sr-only`** and the tab is the mark alone, at
+  48px. The accessible name is on the button either way, so nothing is lost to
+  a screen reader.
+- The hover is the lift alone. `.cat-pill` answers a hover by flooding indigo,
+  but this tab is already indigo and the palette has no second one to move to —
+  `coal` is the same hex as `ink`. Darkening it by hand would put a fifth
+  colour in a four-colour system.
+
+### Triggers
+
+15s after arrival (paused while the tab is hidden), **or** exit intent,
+whichever comes first. Exit intent is bound to `document`'s `mouseout` with a
+null `relatedTarget` and `clientY <= 0`, and only on `(hover: hover) and
+(pointer: fine)` — a touch screen has no hover, so `mouseout` there fires on
+taps and would spring the card on the first one.
+
+`QUIET_PATHS` (`/contact`, `/account`, prefix-matched) suppress the card **and**
+the teaser: someone mid-enquiry or inside their account is mid-task.
+
