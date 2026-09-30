@@ -255,7 +255,15 @@ export default function CartModal() {
                                         (attribute) => (
                                           <span key={attribute.key}>
                                             {" · "}
-                                            {attribute.key}:{" "}
+                                            {/* "Personalised Initials ·
+                                                Initials: KF" says it twice;
+                                                the name is dropped where the
+                                                title already carries it. */}
+                                            {addOn.merchandise.product.title
+                                              .toLowerCase()
+                                              .includes(attribute.key.toLowerCase())
+                                              ? null
+                                              : `${attribute.key}: `}
                                             <span className="font-semibold">
                                               {attribute.value}
                                             </span>

@@ -148,8 +148,11 @@ export function AddOnPicker({
                           data-addon-field={addOn.id}
                           className={clsx(
                             "field-bare min-w-0 flex-1 py-2.5",
+                            // The letters read as a monogram; the hint stays
+                            // a hint - uppercase tracking turned "e.g. KF"
+                            // into "E.G. KF".
                             addOn.kind === "initials" &&
-                              "uppercase tracking-[0.2em]",
+                              "uppercase tracking-[0.2em] placeholder:normal-case placeholder:tracking-normal",
                             error && "border-ink"
                           )}
                         />
