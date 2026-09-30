@@ -1,15 +1,29 @@
 "use server";
 
-import { MAX_LINE_QUANTITY, TAGS } from "@/lib/constants";
+import {
+  ADDON_PARENT_ATTRIBUTE,
+  MAX_LINE_QUANTITY,
+  TAGS,
+} from "@/lib/constants";
+import { isValidInitials } from "@/lib/shop/add-ons";
 import {
   CartMutationError,
   addToCart,
   createCart,
+  getAddOns,
   getCart,
   removeFromCart,
   updateCart,
 } from "@/lib/shopify";
-import type { Cart, CartWarning } from "@/lib/shopify/types";
+import type {
+  Cart,
+  CartAttribute,
+  CartItem,
+  CartLineUpdateInput,
+  CartWarning,
+  ProductAddOn,
+} from "@/lib/shopify/types";
+import { addOns as addOnCopy } from "@/lib/site";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -27,6 +41,9 @@ const CART_COOKIE = "cartId";
 const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 const MERCHANDISE_ID_PATTERN = /^gid:\/\/shopify\/ProductVariant\/[\w-]+$/;
+
+// A cart line id carries its cart: gid://shopify/CartLine/<uuid>?cart=<key>.
+const LINE_ID_PATTERN = /^gid:\/\/shopify\/CartLine\/[\w-]+(\?cart=[\w-]+)?$/;
 
 function ok(message = ""): CartActionState {
   return { ok: true, message };
@@ -92,6 +109,10 @@ function isValidMerchandiseId(id: unknown): id is string {
   return typeof id === "string" && MERCHANDISE_ID_PATTERN.test(id);
 }
 
+function isValidLineId(id: unknown): id is string {
+  return typeof id === "string" && LINE_ID_PATTERN.test(id);
+}
+
 /**
  * Distinguishes "this cart id is dead" (checked out, expired, or minted by a
  * different store) from every other rejection, so only the former triggers a
@@ -122,9 +143,197 @@ function toMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+/**
+ * Runs `task` against the cart on the cookie, and against a brand-new cart if
+ * that one is dead (checked out or expired).
+ *
+ * Creating the cart here, inside the same action that adds the line, closes
+ * the first-visit race: the cart used to be created by an effect in the modal,
+ * so a fast click hit a missing cookie and failed while the optimistic UI
+ * happily showed the item as added. Only a dead cart id falls through to a
+ * replacement; anything else (bad variant, sold out) is a real failure and
+ * propagates.
+ */
+async function withLiveCart<T>(task: (cartId: string) => Promise<T>): Promise<T> {
+  const existingId = await readCartCookie();
+
+  if (existingId) {
+    try {
+      return await task(existingId);
+    } catch (error) {
+      if (!isMissingCartError(error)) throw error;
+    }
+  }
+
+  const created = await createCart();
+  if (!created.id) {
+    throw new Error("Shopify returned a cart without an id");
+  }
+  await setCartCookie(created.id);
+  return task(created.id);
+}
+
+/** An add-on as the browser asks for it: which one, and the text typed. */
+type AddOnRequest = { id: string; text?: string };
+
+/** More than any product offers; a longer list is not from our page. */
+const MAX_ADDONS_PER_LINE = 5;
+
+/**
+ * The line-item property an add-on's text is written under. It is what the
+ * workshop reads on the order ("Initials: KF"), so initials get a fixed name
+ * from the storefront's copy rather than whatever the merchant labelled the
+ * field for shoppers.
+ */
+function addOnAttributeKey(addOn: ProductAddOn): string {
+  return addOn.kind === "initials"
+    ? addOnCopy.orderLabels.initials
+    : (addOn.textLabel ?? addOn.title);
+}
+
+/**
+ * Turns what the browser asked for into cart lines, re-checked against the
+ * add-ons Shopify says exist. Nothing the browser sends is trusted: not the
+ * add-on ids, not the text, and never a price - the price is whatever the
+ * add-on's variant costs in Shopify, charged by Shopify at checkout.
+ */
+async function resolveAddOnLines(
+  merchandiseId: string,
+  requests: unknown
+): Promise<
+  | { ok: true; lines: { addOn: ProductAddOn; attributes: CartAttribute[] }[] }
+  | { ok: false; message: string }
+> {
+  if (!Array.isArray(requests) || requests.length > MAX_ADDONS_PER_LINE) {
+    return { ok: false, message: addOnCopy.errors.unavailable };
+  }
+
+  const offered = await getAddOns();
+
+  // An add-on is never itself the thing personalised.
+  if (offered.some((addOn) => addOn.variantId === merchandiseId)) {
+    return { ok: false, message: addOnCopy.errors.unavailable };
+  }
+
+  const lines: { addOn: ProductAddOn; attributes: CartAttribute[] }[] = [];
+  const seen = new Set<string>();
+
+  for (const request of requests as AddOnRequest[]) {
+    const addOn = offered.find((candidate) => candidate.id === request?.id);
+    if (!addOn || !addOn.available) {
+      return { ok: false, message: addOnCopy.errors.unavailable };
+    }
+    // A repeated id would charge twice for one embroidery.
+    if (seen.has(addOn.id)) continue;
+    seen.add(addOn.id);
+
+    const raw = typeof request.text === "string" ? request.text : "";
+    let text = "";
+
+    if (addOn.textLabel) {
+      if (addOn.kind === "initials") {
+        // Case and full-width letters are forgiven; anything else is refused
+        // rather than quietly dropped - the shopper has to see what will be
+        // stitched.
+        text = raw.normalize("NFKC").trim().toUpperCase();
+        if (text && !/^[A-Z]+$/.test(text)) {
+          return { ok: false, message: addOnCopy.errors.invalidInitials };
+        }
+        if (text.length > addOn.maxLength) {
+          return { ok: false, message: addOnCopy.errors.tooLong(addOn.maxLength) };
+        }
+        if (text && !isValidInitials(text, addOn.maxLength)) {
+          return { ok: false, message: addOnCopy.errors.invalidInitials };
+        }
+      } else {
+        text = raw
+          .normalize("NFC")
+          .replace(/[\u0000-\u001f\u007f]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, addOn.maxLength);
+      }
+
+      if (addOn.textRequired && !text) {
+        return { ok: false, message: addOnCopy.errors.missingText };
+      }
+    }
+
+    lines.push({
+      addOn,
+      attributes: text ? [{ key: addOnAttributeKey(addOn), value: text }] : [],
+    });
+  }
+
+  return { ok: true, lines };
+}
+
+/**
+ * Adds a Kompanion with its add-ons nested under it.
+ *
+ * Two calls rather than one. Shopify can nest a child in the same call by
+ * naming the parent's *variant*, but a cart may already hold that variant -
+ * the same tote, other initials - and then which line the child attaches to
+ * is Shopify's guess. Adding the parent first, finding it by its own unique
+ * marker, and nesting by line id takes the guess away.
+ *
+ * If the add-ons fail, the parent is removed again: a personalised Kompanion
+ * must never sit in a cart without the paid line that says what to stitch.
+ */
+async function addPersonalisedLine(
+  cartId: string,
+  merchandiseId: string,
+  quantity: number,
+  addOnLines: { addOn: ProductAddOn; attributes: CartAttribute[] }[]
+): Promise<CartWarning[]> {
+  const marker = crypto.randomUUID();
+  const added = await addToCart(cartId, [
+    {
+      merchandiseId,
+      quantity,
+      attributes: [{ key: ADDON_PARENT_ATTRIBUTE, value: marker }],
+    },
+  ]);
+
+  const parent = added.cart.lines.find((line) =>
+    line.attributes?.some(
+      (attribute) =>
+        attribute.key === ADDON_PARENT_ATTRIBUTE && attribute.value === marker
+    )
+  );
+  if (!parent?.id) {
+    throw new Error("The personalised line was not found after adding it");
+  }
+
+  try {
+    const nested = await addToCart(
+      cartId,
+      addOnLines.map(({ addOn, attributes }) => ({
+        merchandiseId: addOn.variantId,
+        // The parent's ACTUAL quantity, not the one asked for: Shopify clamps
+        // to stock, and initials for units that are not coming would be
+        // charged and never stitched.
+        quantity: addOn.chargePerUnit ? parent.quantity : 1,
+        attributes,
+        parent: { lineId: parent.id! },
+      }))
+    );
+    return [...added.warnings, ...nested.warnings];
+  } catch (error) {
+    await removeFromCart(cartId, [parent.id]).catch((cleanup) =>
+      console.error("Could not roll back a personalised line", cleanup)
+    );
+    throw error;
+  }
+}
+
 export async function addItem(
   _prevState: CartActionState,
-  payload: { merchandiseId: string | undefined; quantity?: number }
+  payload: {
+    merchandiseId: string | undefined;
+    quantity?: number;
+    addOns?: AddOnRequest[];
+  }
 ): Promise<CartActionState> {
   const merchandiseId = payload?.merchandiseId;
 
@@ -142,38 +351,23 @@ export async function addItem(
     return fail("Quantity must be at least 1.");
   }
 
+  const wantsAddOns = Array.isArray(payload.addOns) && payload.addOns.length > 0;
+
   try {
-    const existingId = await readCartCookie();
-    let warnings: CartWarning[] = [];
-    let added = false;
+    let warnings: CartWarning[];
 
-    // Fast path: add straight to the cart on the cookie, no read first.
-    if (existingId) {
-      try {
-        ({ warnings } = await addToCart(existingId, [
-          { merchandiseId, quantity },
-        ]));
-        added = true;
-      } catch (error) {
-        // Only a dead cart id falls through to a replacement; anything else
-        // (bad variant, sold out) is a real failure and propagates.
-        if (!isMissingCartError(error)) throw error;
-      }
-    }
+    if (wantsAddOns) {
+      const resolved = await resolveAddOnLines(merchandiseId, payload.addOns);
+      if (!resolved.ok) return fail(resolved.message);
 
-    // Creating the cart here, inside the same action that adds the line, closes
-    // the first-visit race: the cart used to be created by an effect in the
-    // modal, so a fast click hit a missing cookie and failed while the
-    // optimistic UI happily showed the item as added.
-    if (!added) {
-      const created = await createCart();
-      if (!created.id) {
-        throw new Error("Shopify returned a cart without an id");
-      }
-      await setCartCookie(created.id);
-      ({ warnings } = await addToCart(created.id, [
-        { merchandiseId, quantity },
-      ]));
+      warnings = await withLiveCart((cartId) =>
+        addPersonalisedLine(cartId, merchandiseId, quantity, resolved.lines)
+      );
+    } else {
+      // Fast path: add straight to the cart on the cookie, no read first.
+      ({ warnings } = await withLiveCart((cartId) =>
+        addToCart(cartId, [{ merchandiseId, quantity }])
+      ));
     }
 
     // `updateTag`, not `revalidateTag`. Next 16 deliberately withholds the
@@ -187,18 +381,42 @@ export async function addItem(
 
     return ok(describeWarnings(warnings));
   } catch (error) {
-    return fail(toMessage(error, "We couldn't add that to your cart."));
+    // A failed add can still have changed the cart (a rollback that itself
+    // failed), so the drawer re-reads either way.
+    updateTag(TAGS.cart);
+    return fail(
+      toMessage(
+        error,
+        wantsAddOns
+          ? addOnCopy.errors.failed
+          : "We couldn't add that to your cart."
+      )
+    );
   }
+}
+
+/**
+ * Sets the per-unit add-ons of `lineId` to the parent's quantity in `cart`.
+ * Returns the lines that need changing - none when they already agree.
+ */
+function addOnQuantityUpdates(
+  line: CartItem,
+  quantity: number,
+  perUnit: (addOn: CartItem) => boolean
+): CartLineUpdateInput[] {
+  return (line.addOns ?? [])
+    .filter((addOn) => addOn.id && perUnit(addOn) && addOn.quantity !== quantity)
+    .map((addOn) => ({ id: addOn.id!, quantity }));
 }
 
 export async function updateItemQuantity(
   _prevState: CartActionState,
   payload: {
-    merchandiseId: string;
+    lineId: string;
     quantity: number;
   }
 ): Promise<CartActionState> {
-  if (!isValidMerchandiseId(payload?.merchandiseId)) {
+  if (!isValidLineId(payload?.lineId)) {
     return fail("We couldn't update that item.");
   }
 
@@ -206,7 +424,7 @@ export async function updateItemQuantity(
     return fail("We couldn't update that quantity.");
   }
 
-  const { merchandiseId } = payload;
+  const { lineId } = payload;
   const quantity = clampQuantity(payload.quantity);
 
   try {
@@ -221,28 +439,46 @@ export async function updateItemQuantity(
         : fail("Your cart expired. Please add the item again.");
     }
 
-    // Shopify permits several lines for the same variant. Collapse them rather
-    // than updating the first and leaving the rest to double the total.
-    const matching = cart.lines.filter(
-      (line) => line.merchandise.id === merchandiseId && line.id
-    );
-    const [primary, ...duplicates] = matching;
+    const line = cart.lines.find((candidate) => candidate.id === lineId);
+
+    if (!line) {
+      // Removed in another tab, or by a click still in flight: the desired
+      // end state for a removal, a real failure for anything else.
+      updateTag(TAGS.cart);
+      return quantity === 0
+        ? ok()
+        : fail("That item is no longer in your cart.");
+    }
 
     let warnings: CartWarning[] = [];
 
-    if (!primary) {
-      if (quantity > 0) {
-        ({ warnings } = await addToCart(cartId, [{ merchandiseId, quantity }]));
-      }
-    } else if (quantity === 0) {
-      await removeFromCart(cartId, matching.map((line) => line.id!));
+    if (quantity === 0) {
+      // Shopify removes the add-ons along with it.
+      await removeFromCart(cartId, [lineId]);
     } else {
-      if (duplicates.length) {
-        await removeFromCart(cartId, duplicates.map((line) => line.id!));
+      // Per unit, by the merchant's own setting where the add-on still
+      // exists; where it has since been deleted, by whether it matched the
+      // parent before - a once-per-line add-on sits at 1 under a larger one.
+      const offered = line.addOns?.length ? await getAddOns() : [];
+      const perUnit = (addOn: CartItem) =>
+        offered.find((o) => o.variantId === addOn.merchandise.id)
+          ?.chargePerUnit ?? addOn.quantity === line.quantity;
+
+      // One call, so the Kompanion and its initials can never be charged for
+      // different numbers of units - Shopify does not move them together.
+      const result = await updateCart(cartId, [
+        { id: lineId, quantity },
+        ...addOnQuantityUpdates(line, quantity, perUnit),
+      ]);
+      warnings = result.warnings;
+
+      // Stock can clamp the parent below what was asked. The add-ons were
+      // sent the asked-for number, so bring them down to what is coming.
+      const settled = result.cart.lines.find((c) => c.id === lineId);
+      if (settled && settled.quantity !== quantity) {
+        const resync = addOnQuantityUpdates(settled, settled.quantity, perUnit);
+        if (resync.length) await updateCart(cartId, resync);
       }
-      ({ warnings } = await updateCart(cartId, [
-        { id: primary.id!, merchandiseId, quantity },
-      ]));
     }
 
     updateTag(TAGS.cart);
@@ -252,11 +488,15 @@ export async function updateItemQuantity(
   }
 }
 
+/**
+ * Removes one line: a Kompanion (its add-ons go with it - Shopify cascades)
+ * or a single add-on under one, which leaves the Kompanion in place.
+ */
 export async function removeItem(
   _prevState: CartActionState,
-  merchandiseId: string
+  lineId: string
 ): Promise<CartActionState> {
-  if (!isValidMerchandiseId(merchandiseId)) {
+  if (!isValidLineId(lineId)) {
     return fail("We couldn't remove that item.");
   }
 
@@ -268,14 +508,16 @@ export async function removeItem(
       return ok();
     }
 
-    const lineIds = cart.lines
-      .filter((line) => line.merchandise.id === merchandiseId && line.id)
-      .map((line) => line.id!);
+    const exists = cart.lines.some(
+      (line) =>
+        line.id === lineId ||
+        line.addOns?.some((addOn) => addOn.id === lineId)
+    );
 
     // Already gone (a duplicate click, or removed in another tab) is the
     // desired end state, not an error.
-    if (lineIds.length) {
-      await removeFromCart(cartId, lineIds);
+    if (exists) {
+      await removeFromCart(cartId, [lineId]);
     }
 
     updateTag(TAGS.cart);

@@ -6,7 +6,11 @@ import Marquee from "@/components/ui/marquee";
 import Carousel from "@/components/ui/carousel";
 import { SectionHead } from "@/components/ui/section";
 import { HIDDEN_PRODUCT_TAG } from "@/lib/constants";
-import { getProduct, getProductRecommendations } from "@/lib/shopify";
+import {
+  getAddOns,
+  getProduct,
+  getProductRecommendations,
+} from "@/lib/shopify";
 import { Image } from "@/lib/shopify/types";
 import { featureBand, site } from "@/lib/site";
 import { Metadata } from "next";
@@ -45,7 +49,9 @@ export default async function ProductPage({
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
-  const product = await getProduct(handle);
+  // In parallel: the add-ons are one store-wide query, cached on the same TTL
+  // as the product, so they cost the page no extra wait.
+  const [product, addOns] = await Promise.all([getProduct(handle), getAddOns()]);
   if (!product) return notFound();
 
   const productJsonLd = {
@@ -95,7 +101,7 @@ export default async function ProductPage({
           {/* Sticky so the buy panel stays reachable past a tall gallery. */}
           <div className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
             <Suspense fallback={null}>
-              <ProductDescription product={product} />
+              <ProductDescription product={product} addOns={addOns} />
             </Suspense>
           </div>
         </div>

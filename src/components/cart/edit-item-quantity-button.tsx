@@ -52,7 +52,9 @@ export function EditItemQuantityButton({
     reportStatus,
   } = useCart();
 
-  const merchandiseId = item.merchandise.id;
+  // Undefined on a line the server has not confirmed yet - see
+  // DeleteItemButton. It is disabled for that beat rather than guessing.
+  const lineId = item.id;
   // Buttons stay clickable while a request is in flight - the queue keeps the
   // server in order, so rapid clicking stays responsive instead of being
   // throttled to one round trip per unit.
@@ -61,20 +63,22 @@ export function EditItemQuantityButton({
   return (
     <form
       action={async () => {
+        if (!lineId) return;
+
         // Resolved from the reservation map, not from `item.quantity`: two
         // clicks landing before a re-render both read the same stale prop and
         // used to send the same absolute quantity, losing one of the clicks.
         const quantity = reserveLineQuantity(
-          merchandiseId,
+          lineId,
           type === "plus" ? 1 : -1,
           item.quantity
         );
 
-        updateCartItem(merchandiseId, type);
+        updateCartItem(lineId, type);
 
         try {
           const result = await runCartMutation(() =>
-            updateItemQuantity(null, { merchandiseId, quantity })
+            updateItemQuantity(null, { lineId, quantity })
           );
           reportStatus(result);
         } catch (error) {
@@ -84,11 +88,11 @@ export function EditItemQuantityButton({
             message: "We couldn't update that quantity.",
           });
         } finally {
-          settleLine(merchandiseId);
+          settleLine(lineId);
         }
       }}
     >
-      <SubmitButton type={type} disabled={atCeiling} />
+      <SubmitButton type={type} disabled={atCeiling || !lineId} />
     </form>
   );
 }

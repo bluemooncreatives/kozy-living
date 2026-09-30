@@ -1,6 +1,7 @@
 import { houseSpelling, houseSpellingSeo } from "./house-spelling";
 import { NextRequest, NextResponse } from "next/server";
 import {
+  ADDON_PRODUCT_TAG,
   HIDDEN_PRODUCT_TAG,
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
@@ -14,6 +15,7 @@ import {
   editCartItemsMutation,
   removeFromCartMutation,
 } from "./mutations/cart";
+import { getAddOnsQuery } from "./queries/add-ons";
 import { getCartQuery } from "./queries/cart";
 import {
   getCollectionProductsQuery,
@@ -36,6 +38,9 @@ import {
   Article,
   Blog,
   Cart,
+  CartItem,
+  CartLineInput,
+  CartLineUpdateInput,
   CartUserError,
   CartWarning,
   CatalogProduct,
@@ -46,6 +51,9 @@ import {
   Money,
   Page,
   Product,
+  ProductAddOn,
+  ShopifyAddOnMetaobject,
+  ShopifyAddOnsOperation,
   ShopifyAddToCartOperation,
   ShopifyArticle,
   ShopifyArticleOperation,
@@ -255,8 +263,12 @@ function reshapeProduct(
   product: ShopifyProduct,
   filterHiddenProducts: boolean = true
 ) {
+  // An add-on is filtered even where hidden products are allowed through (the
+  // product page passes `false`): it is a charge, not something to browse,
+  // and its page must 404 rather than render an orphan "Add to cart".
   if (
     !product ||
+    product.tags.includes(ADDON_PRODUCT_TAG) ||
     (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))
   ) {
     return undefined;
@@ -607,7 +619,13 @@ export const CATALOG_LIMIT = 2000;
 function reshapeCatalogProduct(
   product: ShopifyCatalogProduct
 ): CatalogProduct | undefined {
-  if (!product || product.tags?.includes(HIDDEN_PRODUCT_TAG)) return undefined;
+  if (
+    !product ||
+    product.tags?.includes(HIDDEN_PRODUCT_TAG) ||
+    product.tags?.includes(ADDON_PRODUCT_TAG)
+  ) {
+    return undefined;
+  }
 
   const { collections, images, variants, metafields, ...rest } = product;
 
@@ -669,6 +687,84 @@ export async function getColourPalette(): Promise<ColourValue[]> {
     return [];
   }
 }
+
+/* ------------------------------------------------------------ add-ons
+
+   Personalisation add-ons (initials, gift box) are `product_add_on`
+   metaobjects the merchant edits in Admin, each pointing at a hidden product
+   variant that is the thing actually charged. See
+   docs/personalisation-add-ons.md for the Admin side. */
+
+const ADDON_KINDS = new Set<ProductAddOn["kind"]>(["initials", "gift_box"]);
+
+/** Ceiling on a merchant-set `max_length`, whatever the definition allows. */
+const ADDON_TEXT_CEILING = 10;
+
+function reshapeAddOn(node: ShopifyAddOnMetaobject): ProductAddOn | undefined {
+  const field = (key: string) => node.fields.find((f) => f.key === key);
+  const text = (key: string) => field(key)?.value?.trim() || null;
+  // Shopify serialises a boolean field as the string "true" or "false".
+  const flag = (key: string) => field(key)?.value === "true";
+
+  const kind = text("kind") as ProductAddOn["kind"] | null;
+  const variant = field("variant")?.reference;
+
+  // Off in Admin, or offered only per product - which this storefront does
+  // not implement (docs, section 8). Unknown kinds are skipped rather than
+  // guessed at: the picker would not know which input to draw.
+  if (!flag("active") || !flag("apply_to_all")) return undefined;
+  if (!kind || !ADDON_KINDS.has(kind)) return undefined;
+  if (!variant?.id || !variant.price) return undefined;
+
+  const textLabel = text("text_label");
+  const maxLength = Number(text("max_length"));
+
+  return {
+    id: node.id,
+    kind,
+    title: text("title") ?? node.handle,
+    variantId: variant.id,
+    price: variant.price,
+    available: variant.availableForSale !== false,
+    textLabel,
+    // A required field with no label would be an input nobody can name.
+    textRequired: Boolean(textLabel) && flag("text_required"),
+    maxLength:
+      Number.isInteger(maxLength) && maxLength > 0
+        ? Math.min(maxLength, ADDON_TEXT_CEILING)
+        : ADDON_TEXT_CEILING,
+    helpText: text("help_text"),
+    policyNote: text("policy_note"),
+    chargePerUnit: flag("charge_per_unit"),
+  };
+}
+
+/**
+ * Every add-on the storefront should offer, in the merchant's order.
+ *
+ * Memoised per request - the product page and the add-to-cart action can both
+ * ask - and on the standard TTL, so a price edit in Admin is live within a
+ * minute in production. Degrades to `[]`: a store with no definition, or with
+ * Storefronts access switched off, just sells without add-ons.
+ */
+export const getAddOns = reactCache(async (): Promise<ProductAddOn[]> => {
+  try {
+    const res = await shopifyFetch<ShopifyAddOnsOperation>({
+      query: getAddOnsQuery,
+      tags: [TAGS.products],
+      variables: { first: 20 },
+    });
+
+    return (res.body?.data?.metaobjects?.nodes ?? [])
+      .map(reshapeAddOn)
+      .filter((addOn): addOn is ProductAddOn => Boolean(addOn));
+  } catch (error) {
+    if (isFrameworkControlFlowError(error)) throw error;
+
+    console.warn("Add-on metaobjects unavailable:", error);
+    return [];
+  }
+});
 
 /**
  * Every published product, in Shopify's best-selling order.
@@ -829,6 +925,40 @@ export class CartNotFoundError extends Error {
   }
 }
 
+/**
+ * Folds Shopify's flat line list into Kompanions with their add-ons nested
+ * underneath. Shopify returns a child line as a sibling that names its parent;
+ * every surface here wants the pairing instead, so it is made once.
+ *
+ * A child whose parent is not in the list (it should not happen - removing a
+ * parent removes its children) stays a line of its own rather than vanishing
+ * along with the money it represents.
+ */
+function nestCartLines(flat: CartItem[]): CartItem[] {
+  const parents = new Map<string, CartItem>();
+  for (const line of flat) {
+    if (line.id && !line.parentRelationship?.parent?.id) {
+      parents.set(line.id, { ...line, addOns: [] });
+    }
+  }
+
+  const lines: CartItem[] = [];
+  for (const line of flat) {
+    const parentId = line.parentRelationship?.parent?.id;
+    const parent = parentId ? parents.get(parentId) : undefined;
+
+    if (parent) {
+      parent.addOns!.push(line);
+    } else if (line.id && parents.has(line.id)) {
+      lines.push(parents.get(line.id)!);
+    } else {
+      lines.push(line);
+    }
+  }
+
+  return lines;
+}
+
 function reshapeCart(cart: ShopifyCart): Cart {
   // `cost` and `totalTaxAmount` are both nullable on the Storefront API - a
   // brand-new cart has no tax until an address is attached. Rebuild the object
@@ -839,16 +969,20 @@ function reshapeCart(cart: ShopifyCart): Cart {
     "INR";
   const zero: Money = { amount: "0.0", currencyCode };
 
+  const lines = nestCartLines(cart.lines ? removeEdgesAndNodes(cart.lines) : []);
+
   return {
     ...cart,
     checkoutUrl: cart.checkoutUrl ?? "",
-    totalQuantity: cart.totalQuantity ?? 0,
+    // Kompanions, not lines. Shopify's own figure counts every add-on, so a
+    // tote with initials and a gift box read as "3" in the header badge.
+    totalQuantity: lines.reduce((sum, line) => sum + line.quantity, 0),
     cost: {
       subtotalAmount: cart.cost?.subtotalAmount ?? zero,
       totalAmount: cart.cost?.totalAmount ?? zero,
       totalTaxAmount: cart.cost?.totalTaxAmount ?? zero,
     },
-    lines: cart.lines ? removeEdgesAndNodes(cart.lines) : [],
+    lines,
   };
 }
 
@@ -951,7 +1085,7 @@ export async function removeFromCart(
 
 export async function updateCart(
   cartId: string,
-  lines: { id: string; merchandiseId: string; quantity: number }[]
+  lines: CartLineUpdateInput[]
 ): Promise<{ cart: Cart; warnings: CartWarning[] }> {
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
     query: editCartItemsMutation,
@@ -967,7 +1101,7 @@ export async function updateCart(
 
 export async function addToCart(
   cartId: string,
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: CartLineInput[]
 ): Promise<{ cart: Cart; warnings: CartWarning[] }> {
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
     query: addToCartMutation,

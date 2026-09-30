@@ -19,6 +19,7 @@ import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
 import type { CartItem } from "@/lib/shopify/types";
 import clsx from "clsx";
+import { fromMinor, lineTotalMinor, visibleAttributes } from "./cart-math";
 
 type MerchandiseSearchParams = {
   [key: string]: string;
@@ -38,7 +39,20 @@ function compareLines(a: CartItem, b: CartItem): number {
   const byVariant = a.merchandise.title.localeCompare(b.merchandise.title);
   if (byVariant !== 0) return byVariant;
 
-  return a.merchandise.id.localeCompare(b.merchandise.id);
+  const byMerchandise = a.merchandise.id.localeCompare(b.merchandise.id);
+  if (byMerchandise !== 0) return byMerchandise;
+
+  // Two totes with different initials share everything above.
+  return lineKey(a).localeCompare(lineKey(b));
+}
+
+/**
+ * Stable identity for a row. Line id where the server has given one; the
+ * optimistic key until then. Never the variant: two personalised lines share
+ * it, and a shared key made React render one row twice.
+ */
+function lineKey(item: CartItem): string {
+  return item.id ?? item.tempKey ?? item.merchandise.id;
 }
 
 export default function CartModal() {
@@ -79,8 +93,12 @@ export default function CartModal() {
   // Compiler, which is enabled for this project.
   const lines = cart?.lines ? [...cart.lines].sort(compareLines) : [];
 
+  // An add-on that has gone unavailable blocks checkout the same way its
+  // Kompanion would - Shopify refuses the whole cart either way.
   const hasUnavailableLine = lines.some(
-    (line) => line.merchandise.availableForSale === false
+    (line) =>
+      line.merchandise.availableForSale === false ||
+      line.addOns?.some((addOn) => addOn.merchandise.availableForSale === false)
   );
   const canCheckout = Boolean(cart?.checkoutUrl) && !isMutating && lines.length > 0;
 
@@ -176,10 +194,10 @@ export default function CartModal() {
 
                       return (
                         <li
-                          // Keyed by variant, not list index. With an index key
-                          // a sorted list reassigned rows to different products
-                          // on every change.
-                          key={item.merchandise.id}
+                          // Keyed by line, not list index or variant. With an
+                          // index key a sorted list reassigned rows to
+                          // different products on every change.
+                          key={lineKey(item)}
                           className="rule-b flex gap-4 py-5"
                         >
                           <Link
@@ -223,6 +241,55 @@ export default function CartModal() {
                               <DeleteItemButton item={item} />
                             </div>
 
+                            {item.addOns?.length ? (
+                              <ul className="mt-3 space-y-1.5">
+                                {item.addOns.map((addOn) => (
+                                  <li
+                                    key={lineKey(addOn)}
+                                    className="flex items-start justify-between gap-2"
+                                  >
+                                    <p className="spec-mono min-w-0">
+                                      <span aria-hidden>+ </span>
+                                      {addOn.merchandise.product.title}
+                                      {visibleAttributes(addOn).map(
+                                        (attribute) => (
+                                          <span key={attribute.key}>
+                                            {" · "}
+                                            {attribute.key}:{" "}
+                                            <span className="font-semibold">
+                                              {attribute.value}
+                                            </span>
+                                          </span>
+                                        )
+                                      )}
+                                      {addOn.quantity > 1
+                                        ? ` × ${addOn.quantity}`
+                                        : ""}
+                                      {addOn.merchandise.availableForSale ===
+                                      false ? (
+                                        <span className="micro-mono block">
+                                          No longer available
+                                        </span>
+                                      ) : null}
+                                    </p>
+                                    <span className="flex shrink-0 items-center gap-1">
+                                      <Price
+                                        className="spec-mono"
+                                        amount={addOn.cost.totalAmount.amount}
+                                        currencyCode={
+                                          addOn.cost.totalAmount.currencyCode
+                                        }
+                                      />
+                                      <DeleteItemButton
+                                        item={addOn}
+                                        label={`Remove ${addOn.merchandise.product.title} from ${item.merchandise.product.title}`}
+                                      />
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
+
                             <div className="mt-auto flex items-end justify-between pt-4">
                               <div className="flex items-center overflow-hidden rounded-full border border-ink/20">
                                 <EditItemQuantityButton
@@ -237,9 +304,12 @@ export default function CartModal() {
                                   type="plus"
                                 />
                               </div>
+                              {/* The Kompanion with its add-ons: what this row
+                                  actually costs. The add-on rows above show
+                                  their own share. */}
                               <Price
                                 className="spec-mono"
-                                amount={item.cost.totalAmount.amount}
+                                amount={fromMinor(lineTotalMinor(item))}
                                 currencyCode={item.cost.totalAmount.currencyCode}
                               />
                             </div>
@@ -283,7 +353,7 @@ export default function CartModal() {
 
                     {hasUnavailableLine ? (
                       <p className="spec-mono mt-4">
-                        Remove the out-of-stock items to check out.
+                        Remove the unavailable items to check out.
                       </p>
                     ) : null}
 

@@ -83,7 +83,12 @@ export default function VariantSelector({
                   )
                 );
 
-                const isActive = state[optionNameLowerCase] === value;
+                // A lone value is already chosen - AddToCart treats it the
+                // same way - so it shows selected rather than asking for a
+                // click that changes nothing.
+                const isActive =
+                  state[optionNameLowerCase] === value ||
+                  option.values.length === 1;
 
                 return (
                   <button

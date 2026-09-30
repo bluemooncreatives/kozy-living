@@ -279,9 +279,70 @@ export type CartProduct = {
   featuredImage: Image;
 };
 
+export type CartAttribute = {
+  key: string;
+  value: string;
+};
+
+/**
+ * A personalisation add-on (initials, gift box) as the merchant defines it: a
+ * `product_add_on` metaobject pointing at the hidden product variant that is
+ * actually charged. Price and availability are read from that variant, so an
+ * Admin price edit needs no code change.
+ */
+export type ProductAddOn = {
+  /** Metaobject id. What the storefront sends back to name a choice. */
+  id: string;
+  kind: "initials" | "gift_box";
+  title: string;
+  variantId: string;
+  price: Money;
+  available: boolean;
+  /** Label of the text field; `null` when the add-on takes no text. */
+  textLabel: string | null;
+  textRequired: boolean;
+  maxLength: number;
+  helpText: string | null;
+  policyNote: string | null;
+  /** Child quantity follows the parent's; otherwise it is charged once. */
+  chargePerUnit: boolean;
+};
+
+export type ShopifyAddOnMetaobject = {
+  id: string;
+  handle: string;
+  fields: {
+    key: string;
+    value: string | null;
+    reference: {
+      id?: string;
+      availableForSale?: boolean;
+      price?: Money;
+      product?: { handle: string; tags: string[] };
+    } | null;
+  }[];
+};
+
+export type ShopifyAddOnsOperation = {
+  data: { metaobjects: { nodes: ShopifyAddOnMetaobject[] } | null };
+  variables: { first: number };
+};
+
 export type CartItem = {
   id: string | undefined;
+  /**
+   * React key for a line that exists only optimistically. A personalised line
+   * never merges with another, so until the server answers it has no id to be
+   * told apart by.
+   */
+  tempKey?: string;
   quantity: number;
+  /** Line-item properties. Keys starting with `_` are private. */
+  attributes?: CartAttribute[];
+  /** Raw parent link from Shopify; folded into `addOns` by `reshapeCart`. */
+  parentRelationship?: { parent: { id: string } } | null;
+  /** Add-on lines nested under this one (initials, gift box). */
+  addOns?: CartItem[];
   cost: {
     totalAmount: Money;
     /** Per-unit price after line discounts. Absent on optimistic-only lines. */
@@ -357,11 +418,7 @@ export type ShopifyUpdateCartOperation = {
   };
   variables: {
     cartId: string;
-    lines: {
-      id: string;
-      merchandiseId: string;
-      quantity: number;
-    }[];
+    lines: CartLineUpdateInput[];
   };
 };
 
@@ -385,11 +442,22 @@ export type ShopifyAddToCartOperation = {
   };
   variables: {
     cartId: string;
-    lines: {
-      merchandiseId: string;
-      quantity: number;
-    }[];
+    lines: CartLineInput[];
   };
+};
+
+export type CartLineInput = {
+  merchandiseId: string;
+  quantity: number;
+  attributes?: CartAttribute[];
+  /** Nests this line under an existing one (Storefront API 2025-10+). */
+  parent?: { lineId: string };
+};
+
+export type CartLineUpdateInput = {
+  id: string;
+  merchandiseId?: string;
+  quantity: number;
 };
 
 export type ShopifyProductRecommendationsOperation = {

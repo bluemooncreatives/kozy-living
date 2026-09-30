@@ -692,6 +692,41 @@ export const giTag = {
   alt: "Jodhpur Block Print - a GI registered Kraft",
 } as const;
 
+/* -------------------------------------------------------------- add-ons */
+
+/**
+ * The storefront's own words around the personalisation add-ons. The add-ons
+ * themselves - their titles, prices, help text, return note - are merchant
+ * data in Shopify (the `product_add_on` metaobjects); this is only the chrome
+ * around them, and the messages the add-to-cart action can return.
+ */
+export const addOns = {
+  /** Above the add-on cards on the product page. */
+  heading: "Make it yours",
+  /** Shown beside an add-on the merchant has marked unavailable. */
+  unavailable: "Currently unavailable",
+  /** Running total under the cards, once anything is picked. */
+  totalLabel: "Total with extras",
+  /** Placeholder in the initials field. */
+  initialsPlaceholder: "e.g. KF",
+  /**
+   * The property name written onto the order line. This is what the workshop
+   * reads in Shopify Admin and on the packing slip ("Initials: KF"), and what
+   * the Flow tagging keys off - change it with care.
+   */
+  orderLabels: {
+    initials: "Initials",
+  },
+  errors: {
+    missingText: "Add your initials, or untick the initials option.",
+    invalidInitials: "Initials can only be the letters A to Z.",
+    tooLong: (max: number) => `Initials can be at most ${max} letters.`,
+    unavailable:
+      "One of the extras you picked is no longer available. Please review and try again.",
+    failed: "We couldn't add that with its extras. Please try again.",
+  },
+} as const;
+
 /* ------------------------------------------------------------------ contact */
 
 /**

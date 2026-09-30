@@ -1,10 +1,14 @@
-import { MAX_LINE_QUANTITY } from "@/lib/constants";
+import {
+  ADDON_PARENT_ATTRIBUTE,
+  DEFAULT_OPTION,
+  MAX_LINE_QUANTITY,
+} from "@/lib/constants";
 import type {
   Cart,
   CartItem,
   Image,
   Money,
-  Product,
+  ProductAddOn,
   ProductVariant,
 } from "@/lib/shopify/types";
 
@@ -29,10 +33,20 @@ export type CartLineProduct = {
   featuredImage?: Image | null;
 };
 
+/** An add-on the shopper picked, with the text they typed for it. */
+export type ChosenAddOn = {
+  addOn: ProductAddOn;
+  text?: string;
+};
+
 export type CartAction =
   | {
       type: "UPDATE_ITEM";
-      payload: { merchandiseId: string; updateType: UpdateType };
+      /**
+       * Addressed by line id, never by variant: two totes with different
+       * initials are the same variant and two different lines.
+       */
+      payload: { lineId: string; updateType: UpdateType };
     }
   | {
       type: "ADD_ITEM";
@@ -41,6 +55,10 @@ export type CartAction =
         product: CartLineProduct;
         /** Units to add. Defaults to one. */
         quantity?: number;
+        /** Personalisation. A line carrying any is always a new line. */
+        addOns?: ChosenAddOn[];
+        /** React key for the new line until the server gives it an id. */
+        tempKey?: string;
       };
     };
 
@@ -117,6 +135,50 @@ export function clampQuantity(quantity: number): number {
   return Math.min(Math.max(Math.trunc(quantity), 0), MAX_LINE_QUANTITY);
 }
 
+/* --------------------------------- lines --------------------------------- */
+
+/** What one Kompanion costs in the cart, its add-ons included. */
+export function lineTotalMinor(item: CartItem): number {
+  return (item.addOns ?? []).reduce(
+    (sum, addOn) => sum + toMinor(addOn.cost.totalAmount.amount),
+    toMinor(item.cost.totalAmount.amount)
+  );
+}
+
+/** Properties a shopper should see - `_`-prefixed ones are private. */
+export function visibleAttributes(item: CartItem) {
+  return (item.attributes ?? []).filter(
+    (attribute) => !attribute.key.startsWith("_") && attribute.value
+  );
+}
+
+/**
+ * A line with no personalisation, the only kind a repeat add may merge into.
+ * Shopify merges by the same rule on its side: same variant, same attributes.
+ */
+export function isPlainLine(item: CartItem): boolean {
+  return (
+    !item.addOns?.length &&
+    !item.attributes?.some((a) => a.key === ADDON_PARENT_ATTRIBUTE)
+  );
+}
+
+function withQuantity(item: CartItem, quantity: number): CartItem {
+  if (quantity === item.quantity) return item;
+
+  return {
+    ...item,
+    quantity,
+    cost: {
+      ...item.cost,
+      totalAmount: money(
+        unitPriceMinor(item) * quantity,
+        item.cost.totalAmount.currencyCode
+      ),
+    },
+  };
+}
+
 /* -------------------------------- reducer -------------------------------- */
 
 export function applyUpdate(
@@ -133,15 +195,46 @@ export function applyUpdate(
   // Already at the ceiling - hand back the same object so React can bail out.
   if (newQuantity === item.quantity) return item;
 
-  const unit = unitPriceMinor(item);
-  const currencyCode = item.cost.totalAmount.currencyCode;
+  // A per-unit add-on moves with its Kompanion (the server sends both in one
+  // call). The client cannot see which add-ons are per unit, but one that
+  // matches the parent's quantity is - a once-per-line add-on stays at 1
+  // while the parent climbs past it.
+  const addOns = item.addOns?.map((addOn) =>
+    addOn.quantity === item.quantity ? withQuantity(addOn, newQuantity) : addOn
+  );
+
+  return { ...withQuantity(item, newQuantity), ...(addOns ? { addOns } : {}) };
+}
+
+function createAddOnLine(chosen: ChosenAddOn, quantity: number): CartItem {
+  const { addOn, text } = chosen;
+  const units = addOn.chargePerUnit ? quantity : 1;
 
   return {
-    ...item,
-    quantity: newQuantity,
+    id: undefined,
+    quantity: units,
+    // The key here only matters for display until the server answers; the
+    // server writes the real one (see `addOnAttributeKey` in actions.ts).
+    attributes: text ? [{ key: addOn.textLabel ?? addOn.title, value: text }] : [],
     cost: {
-      ...item.cost,
-      totalAmount: money(unit * newQuantity, currencyCode),
+      totalAmount: money(
+        toMinor(addOn.price.amount) * units,
+        addOn.price.currencyCode
+      ),
+      amountPerQuantity: addOn.price,
+    },
+    merchandise: {
+      id: addOn.variantId,
+      title: DEFAULT_OPTION,
+      availableForSale: addOn.available,
+      price: addOn.price,
+      selectedOptions: [],
+      product: {
+        id: addOn.id,
+        handle: "",
+        title: addOn.title,
+        featuredImage: { url: "", altText: addOn.title, width: 0, height: 0 },
+      },
     },
   };
 }
@@ -154,7 +247,7 @@ export function applyUpdate(
 export function recalculateCart(cart: Cart, lines: CartItem[]): Cart {
   const currencyCode = cartCurrency(cart, lines);
   const subtotalMinor = lines.reduce(
-    (sum, item) => sum + toMinor(item.cost.totalAmount.amount),
+    (sum, item) => sum + lineTotalMinor(item),
     0
   );
   const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
@@ -231,13 +324,17 @@ export function cartReducer(
 
   switch (action.type) {
     case "UPDATE_ITEM": {
-      const { merchandiseId, updateType } = action.payload;
+      const { lineId, updateType } = action.payload;
       const updatedLines = currentCart.lines
-        .map((item) =>
-          item.merchandise.id === merchandiseId
-            ? applyUpdate(item, updateType)
-            : item
-        )
+        .map((item) => {
+          if (item.id === lineId) return applyUpdate(item, updateType);
+
+          // Removing one add-on leaves its Kompanion in place.
+          const addOns = item.addOns?.filter((addOn) => addOn.id !== lineId);
+          return addOns && addOns.length !== item.addOns!.length
+            ? { ...item, addOns }
+            : item;
+        })
         .filter((item): item is CartItem => item !== null);
 
       // No `lines.length === 0` special case any more - recalculateCart zeroes
@@ -246,9 +343,28 @@ export function cartReducer(
       return recalculateCart(currentCart, updatedLines);
     }
     case "ADD_ITEM": {
-      const { variant, product, quantity: units } = action.payload;
+      const {
+        variant,
+        product,
+        quantity: units,
+        addOns = [],
+        tempKey,
+      } = action.payload;
+
+      if (addOns.length) {
+        // Always its own line: it never merges, on the server or here.
+        const quantity = clampQuantity(units ?? 1);
+        const line: CartItem = {
+          ...createOrUpdateCartItem(undefined, variant, product, quantity),
+          tempKey,
+          attributes: [{ key: ADDON_PARENT_ATTRIBUTE, value: tempKey ?? "" }],
+          addOns: addOns.map((chosen) => createAddOnLine(chosen, quantity)),
+        };
+        return recalculateCart(currentCart, [...currentCart.lines, line]);
+      }
+
       const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id
+        (item) => item.merchandise.id === variant.id && isPlainLine(item)
       );
 
       // Refuse to grow past the ceiling instead of showing a number the server
@@ -265,9 +381,9 @@ export function cartReducer(
       );
       const updatedLines = existingItem
         ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item
+            item === existingItem ? updatedItem : item
           )
-        : [...currentCart.lines, updatedItem];
+        : [...currentCart.lines, { ...updatedItem, tempKey }];
 
       return recalculateCart(currentCart, updatedLines);
     }

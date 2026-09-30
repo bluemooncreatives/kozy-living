@@ -16,18 +16,23 @@ import {
   cartReducer,
   clampQuantity,
   type CartLineProduct,
+  type ChosenAddOn,
   type UpdateType,
 } from "./cart-math";
 
 type CartContextType = {
   cart: Cart | undefined;
   /** Applies an optimistic line change. Does not talk to the server. */
-  updateCartItem: (merchandiseId: string, updateType: UpdateType) => void;
-  /** Applies an optimistic add of `quantity` units. Does not talk to the server. */
+  updateCartItem: (lineId: string, updateType: UpdateType) => void;
+  /**
+   * Applies an optimistic add of `quantity` units, with any add-ons nested
+   * under it. Does not talk to the server.
+   */
   addCartItem: (
     variant: ProductVariant,
     product: CartLineProduct,
-    quantity?: number
+    quantity?: number,
+    addOns?: ChosenAddOn[]
   ) => void;
   /**
    * Serialises a cart mutation behind every mutation already in flight, so
@@ -39,14 +44,14 @@ type CartContextType = {
    * clicks that have not reached the server yet. Independent of render timing.
    */
   reserveLineQuantity: (
-    merchandiseId: string,
+    lineId: string,
     delta: number,
     current: number
   ) => number;
   /** Reserves a removal (target quantity 0) for a line. */
-  reserveLineRemoval: (merchandiseId: string) => void;
+  reserveLineRemoval: (lineId: string) => void;
   /** Marks one reserved mutation for a line as settled. */
-  settleLine: (merchandiseId: string) => void;
+  settleLine: (lineId: string) => void;
   isMutating: boolean;
   status: CartActionState;
   reportStatus: (status: CartActionState) => void;
@@ -107,10 +112,10 @@ export function CartProvider({
   }, []);
 
   const reserveLineQuantity = useCallback(
-    (merchandiseId: string, delta: number, current: number) => {
-      const entry = intentRef.current.get(merchandiseId);
+    (lineId: string, delta: number, current: number) => {
+      const entry = intentRef.current.get(lineId);
       const target = clampQuantity((entry ? entry.target : current) + delta);
-      intentRef.current.set(merchandiseId, {
+      intentRef.current.set(lineId, {
         target,
         inFlight: (entry?.inFlight ?? 0) + 1,
       });
@@ -119,22 +124,22 @@ export function CartProvider({
     []
   );
 
-  const reserveLineRemoval = useCallback((merchandiseId: string) => {
-    const entry = intentRef.current.get(merchandiseId);
-    intentRef.current.set(merchandiseId, {
+  const reserveLineRemoval = useCallback((lineId: string) => {
+    const entry = intentRef.current.get(lineId);
+    intentRef.current.set(lineId, {
       target: 0,
       inFlight: (entry?.inFlight ?? 0) + 1,
     });
   }, []);
 
-  const settleLine = useCallback((merchandiseId: string) => {
-    const entry = intentRef.current.get(merchandiseId);
+  const settleLine = useCallback((lineId: string) => {
+    const entry = intentRef.current.get(lineId);
     if (!entry) return;
     const inFlight = entry.inFlight - 1;
     if (inFlight <= 0) {
-      intentRef.current.delete(merchandiseId);
+      intentRef.current.delete(lineId);
     } else {
-      intentRef.current.set(merchandiseId, { ...entry, inFlight });
+      intentRef.current.set(lineId, { ...entry, inFlight });
     }
   }, []);
 
@@ -149,20 +154,36 @@ export function CartProvider({
   const closeCart = useCallback(() => setIsCartOpen(false), []);
 
   const updateCartItem = useCallback(
-    (merchandiseId: string, updateType: UpdateType) => {
+    (lineId: string, updateType: UpdateType) => {
       updateOptimisticCart({
         type: "UPDATE_ITEM",
-        payload: { merchandiseId, updateType },
+        payload: { lineId, updateType },
       });
     },
     [updateOptimisticCart]
   );
 
   const addCartItem = useCallback(
-    (variant: ProductVariant, product: CartLineProduct, quantity = 1) => {
+    (
+      variant: ProductVariant,
+      product: CartLineProduct,
+      quantity = 1,
+      addOns: ChosenAddOn[] = []
+    ) => {
       updateOptimisticCart({
         type: "ADD_ITEM",
-        payload: { variant, product, quantity },
+        payload: {
+          variant,
+          product,
+          quantity,
+          addOns,
+          // Only a React key, so it needs to be unique, not unguessable -
+          // and `crypto.randomUUID` throws outside a secure context, which a
+          // phone testing against a LAN dev server is.
+          tempKey: `optimistic:${Date.now().toString(36)}-${Math.random()
+            .toString(36)
+            .slice(2)}`,
+        },
       });
     },
     [updateOptimisticCart]

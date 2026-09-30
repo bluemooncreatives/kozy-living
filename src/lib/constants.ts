@@ -54,5 +54,22 @@ export const sorting: SortFilterItem[] = [
 export const MAX_LINE_QUANTITY = 99;
 
 export const HIDDEN_PRODUCT_TAG = "nextjs-frontend-hidden";
+
+/**
+ * Marks a Shopify product that exists only to be charged as a personalisation
+ * add-on (initials, gift box). Unlike `HIDDEN_PRODUCT_TAG`, which hides a
+ * product from listings but still renders its page, an add-on has no page at
+ * all: it is never sold on its own. See docs/personalisation-add-ons.md.
+ */
+export const ADDON_PRODUCT_TAG = "kozy-addon";
+
+/**
+ * Hidden line attribute carried by any cart line that has add-ons nested under
+ * it. Its only job is to be unique: Shopify merges two lines of one variant
+ * with identical attributes, so without it two totes with different initials
+ * collapsed into one line and the second set of children landed on the first.
+ * The leading underscore keeps it out of checkout and the order email.
+ */
+export const ADDON_PARENT_ATTRIBUTE = "_kozy_line";
 export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2026-07/graphql.json";

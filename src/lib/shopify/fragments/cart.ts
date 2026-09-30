@@ -49,6 +49,22 @@ const cartFragment = /* GraphQL */ `
         node {
           id
           quantity
+          # Line-item properties: "Initials: KF" on an add-on line, and the
+          # private _kozy_line marker on the line it hangs from.
+          attributes {
+            key
+            value
+          }
+          # On CartLine only, not on the BaseCartLine interface that lines
+          # are typed as - selecting it bare is a schema error. An add-on
+          # line points at the Kompanion it belongs to through this.
+          ... on CartLine {
+            parentRelationship {
+              parent {
+                id
+              }
+            }
+          }
           cost {
             totalAmount {
               amount

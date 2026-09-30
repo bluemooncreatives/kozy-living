@@ -2,7 +2,7 @@ import Image from "next/image";
 import { brandIcons } from "@/components/ui/brand-icons";
 import { giTag } from "@/lib/site";
 import giTagMark from "../../../public/icons/gi-tag-mark.png";
-import { Product } from "@/lib/shopify/types";
+import { Product, ProductAddOn } from "@/lib/shopify/types";
 import Price from "../price";
 import VariantSelector from "./variant-selector";
 import Prose from "../prose";
@@ -80,7 +80,14 @@ function specsFor(product: Product) {
   });
 }
 
-export function ProductDescription({ product }: { product: Product }) {
+export function ProductDescription({
+  product,
+  addOns = [],
+}: {
+  product: Product;
+  /** Personalisation add-ons offered on this Kompanion. */
+  addOns?: ProductAddOn[];
+}) {
   const { minVariantPrice, maxVariantPrice } = product.priceRange;
   const isRange = minVariantPrice.amount !== maxVariantPrice.amount;
   const specs = specsFor(product);
@@ -213,7 +220,7 @@ export function ProductDescription({ product }: { product: Product }) {
       </div>
 
       <div className="mt-6">
-        <AddToCart product={product} />
+        <AddToCart product={product} addOns={addOns} />
       </div>
 
       {product.descriptionHtml ? (
