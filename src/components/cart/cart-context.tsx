@@ -53,6 +53,11 @@ type CartContextType = {
   /** Marks one reserved mutation for a line as settled. */
   settleLine: (lineId: string) => void;
   isMutating: boolean;
+  /**
+   * The same as `isMutating`, read synchronously - for a click handler that
+   * must not act on a render that is a frame behind (card Checkout).
+   */
+  hasPendingMutations: () => boolean;
   status: CartActionState;
   reportStatus: (status: CartActionState) => void;
   clearStatus: () => void;
@@ -64,6 +69,13 @@ type CartContextType = {
   isCartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
+  /**
+   * The variant just added, for a moment - the drawer marks its line and
+   * scrolls to it. Lines are sorted by title, so in a full cart the thing
+   * that was just added could otherwise be anywhere.
+   */
+  justAdded: string | null;
+  flagAdded: (variantId: string) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -85,6 +97,8 @@ export function CartProvider({
   const [pendingCount, setPendingCount] = useState(0);
   const [status, setStatus] = useState<CartActionState>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  const justAddedTimer = useRef<number | undefined>(undefined);
 
   // Serial chain. Cart mutations send an *absolute* quantity, so two in-flight
   // requests that resolve out of order leave the cart at the wrong number.
@@ -97,10 +111,24 @@ export function CartProvider({
     new Map<string, { target: number; inFlight: number }>()
   );
 
+  // Every caller runs this from inside an action or `startTransition`, and
+  // React 19 holds back state set synchronously in a transition until the
+  // whole action settles - by which point the count is back to zero. So the
+  // "Updating…" guard on checkout never once showed: the checkout link stayed
+  // live through every quantity change (measured). The count lives in a ref,
+  // readable at once, and reaches the render through a microtask, which runs
+  // outside the transition and renders straight away.
+  const pendingRef = useRef(0);
+  const syncPending = useCallback((by: number) => {
+    pendingRef.current = Math.max(0, pendingRef.current + by);
+    queueMicrotask(() => setPendingCount(pendingRef.current));
+  }, []);
+  const hasPendingMutations = useCallback(() => pendingRef.current > 0, []);
+
   const runCartMutation = useCallback(<T,>(task: () => Promise<T>): Promise<T> => {
-    setPendingCount((count) => count + 1);
+    syncPending(1);
     const run = queueRef.current.then(task, task).finally(() => {
-      setPendingCount((count) => Math.max(0, count - 1));
+      syncPending(-1);
     });
     // Swallow rejections on the chain itself so one failure cannot poison every
     // later mutation; the caller still sees its own rejection.
@@ -109,7 +137,7 @@ export function CartProvider({
       () => undefined
     );
     return run;
-  }, []);
+  }, [syncPending]);
 
   const reserveLineQuantity = useCallback(
     (lineId: string, delta: number, current: number) => {
@@ -151,6 +179,15 @@ export function CartProvider({
   const clearStatus = useCallback(() => setStatus(null), []);
 
   const openCart = useCallback(() => setIsCartOpen(true), []);
+
+  const flagAdded = useCallback((variantId: string) => {
+    window.clearTimeout(justAddedTimer.current);
+    // Through a microtask for the same reason as `syncPending`: every add
+    // calls this from inside its transition, where the mark would otherwise
+    // wait for Shopify's answer and land after the shopper had looked.
+    queueMicrotask(() => setJustAdded(variantId));
+    justAddedTimer.current = window.setTimeout(() => setJustAdded(null), 2600);
+  }, []);
   const closeCart = useCallback(() => setIsCartOpen(false), []);
 
   const updateCartItem = useCallback(
@@ -199,12 +236,15 @@ export function CartProvider({
       reserveLineRemoval,
       settleLine,
       isMutating: pendingCount > 0,
+      hasPendingMutations,
       status,
       reportStatus,
       clearStatus,
       isCartOpen,
       openCart,
       closeCart,
+      justAdded,
+      flagAdded,
     }),
     [
       optimisticCart,
@@ -215,12 +255,15 @@ export function CartProvider({
       reserveLineRemoval,
       settleLine,
       pendingCount,
+      hasPendingMutations,
       status,
       reportStatus,
       clearStatus,
       isCartOpen,
       openCart,
       closeCart,
+      justAdded,
+      flagAdded,
     ]
   );
 

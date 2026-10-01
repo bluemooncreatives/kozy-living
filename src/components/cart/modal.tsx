@@ -6,7 +6,9 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { getVariantChoices, type VariantChoice } from "./actions";
+import { LineVariantSelect } from "./line-variant-select";
 import { useCart } from "./cart-context";
 import { createUrl } from "@/lib/utils";
 import Image from "@/components/ui/shop-image";
@@ -51,6 +53,14 @@ function compareLines(a: CartItem, b: CartItem): number {
  * optimistic key until then. Never the variant: two personalised lines share
  * it, and a shared key made React render one row twice.
  */
+/**
+ * Brings the just-added line into view - once, as it mounts or is first
+ * flagged, not on every render while the flag holds.
+ */
+function scrollIntoViewOnce(node: HTMLLIElement | null) {
+  node?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
 function lineKey(item: CartItem): string {
   return item.id ?? item.tempKey ?? item.merchandise.id;
 }
@@ -64,8 +74,8 @@ export default function CartModal() {
     isCartOpen: isOpen,
     openCart,
     closeCart,
+    justAdded,
   } = useCart();
-  const quantityRef = useRef(cart?.totalQuantity ?? 0);
 
   const totalQuantity = cart?.totalQuantity ?? 0;
 
@@ -74,14 +84,23 @@ export default function CartModal() {
   // quick click hit a missing cookie, and stops the site minting a Shopify cart
   // for every visitor who never adds anything.
 
+  // The drawer used to open itself on any rise in `totalQuantity`. With a
+  // stepper on every card that meant a drawer sliding in on each "+", so it
+  // is now opened by the adds that mean "show me": the product page's Add to
+  // cart, a card's Buy now, the table's quick add.
+
+  // A double-clicked Buy now opened the drawer on the first click and shut it
+  // on the second: by then the backdrop is under the cursor, and a click
+  // there is "outside". Closes in the first moments after opening are taken
+  // as that echo, not as intent.
+  const openedAt = useRef(0);
   useEffect(() => {
-    // Only a genuine *increase* pops the drawer. The old condition fired on
-    // decrements too, so removing an item could yank the drawer back open.
-    if (totalQuantity > quantityRef.current && !isOpen) {
-      openCart();
-    }
-    quantityRef.current = totalQuantity;
-  }, [totalQuantity, isOpen, openCart]);
+    if (isOpen) openedAt.current = performance.now();
+  }, [isOpen]);
+  const closeUnlessJustOpened = () => {
+    if (performance.now() - openedAt.current < 400) return;
+    closeCart();
+  };
 
   // Stale banner from a previous interaction shouldn't greet the next open.
   useEffect(() => {
@@ -92,6 +111,36 @@ export default function CartModal() {
   // place mutated React state during render. Memoization is left to the React
   // Compiler, which is enabled for this project.
   const lines = cart?.lines ? [...cart.lines].sort(compareLines) : [];
+
+  // The options each line can switch to, fetched the first time the drawer
+  // opens with that product in it - not with the cart, which would make every
+  // page load pay for a product read per line. Products with one variant come
+  // back absent, and simply show no switcher.
+  const [choices, setChoices] = useState<Record<string, VariantChoice[]>>({});
+  const requested = useRef(new Set<string>());
+  const handlesKey = [
+    ...new Set(lines.map((line) => line.merchandise.product.handle)),
+  ]
+    .filter(Boolean)
+    .sort()
+    .join(",");
+
+  useEffect(() => {
+    if (!isOpen || !handlesKey) return;
+    const missing = handlesKey
+      .split(",")
+      .filter((handle) => !requested.current.has(handle));
+    if (!missing.length) return;
+    missing.forEach((handle) => requested.current.add(handle));
+
+    getVariantChoices(missing)
+      .then((found) => setChoices((current) => ({ ...current, ...found })))
+      .catch((error) => {
+        console.error(error);
+        // Let the next open try again.
+        missing.forEach((handle) => requested.current.delete(handle));
+      });
+  }, [isOpen, handlesKey]);
 
   // An add-on that has gone unavailable blocks checkout the same way its
   // Kompanion would - Shopify refuses the whole cart either way.
@@ -108,7 +157,7 @@ export default function CartModal() {
         <OpenCart quantity={totalQuantity} />
       </button>
       <Transition show={isOpen}>
-        <Dialog onClose={closeCart} className="relative z-[1000]">
+        <Dialog onClose={closeUnlessJustOpened} className="relative z-[1000]">
           <TransitionChild
             as={Fragment}
             enter="transition-opacity ease-out duration-300"
@@ -198,8 +247,26 @@ export default function CartModal() {
                           // index key a sorted list reassigned rows to
                           // different products on every change.
                           key={lineKey(item)}
-                          className="rule-b flex gap-4 py-5"
+                          ref={
+                            item.merchandise.id === justAdded
+                              ? scrollIntoViewOnce
+                              : undefined
+                          }
+                          className="rule-b relative flex gap-4 py-5"
                         >
+                          {/* The just-added mark: a wash behind the row that
+                              fades in and out, bled into the list's gutter so
+                              the row's own rule stays where it was. Painted
+                              first, so the positioned content sits over it. */}
+                          <span
+                            aria-hidden
+                            className={clsx(
+                              "pointer-events-none absolute -inset-x-5 inset-y-0 bg-sage-wash transition-opacity duration-700",
+                              item.merchandise.id === justAdded
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
                           <Link
                             href={merchandiseUrl}
                             onClick={closeCart}
@@ -219,7 +286,7 @@ export default function CartModal() {
                             ) : null}
                           </Link>
 
-                          <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="relative flex min-w-0 flex-1 flex-col">
                             <div className="flex items-start justify-between gap-3">
                               <Link
                                 href={merchandiseUrl}
@@ -229,7 +296,8 @@ export default function CartModal() {
                                 <p className="ui-mono normal-case">
                                   {item.merchandise.product.title}
                                 </p>
-                                {item.merchandise.title !== DEFAULT_OPTION ? (
+                                {item.merchandise.title !== DEFAULT_OPTION &&
+                                !choices[item.merchandise.product.handle] ? (
                                   <p className="spec-mono mt-1.5">
                                     {item.merchandise.title}
                                   </p>
@@ -240,6 +308,17 @@ export default function CartModal() {
                               </Link>
                               <DeleteItemButton item={item} />
                             </div>
+
+                            {/* Outside the link above: a control inside an
+                                <a> is invalid and steals its clicks. Plain
+                                and personalised lines alike - the initials
+                                travel with the line when its size changes. */}
+                            {choices[item.merchandise.product.handle] ? (
+                              <LineVariantSelect
+                                item={item}
+                                choices={choices[item.merchandise.product.handle]!}
+                              />
+                            ) : null}
 
                             {item.addOns?.length ? (
                               <ul className="mt-3 space-y-1.5">

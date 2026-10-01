@@ -475,10 +475,10 @@ the real variant.
 - **`useSelectedVariant()` is the one resolver.** The price and `AddToCart`
   both read it, so the price shown is always the price charged. Do not resolve
   the variant a second way anywhere on the panel.
-- **Cards and table rows never pick a variant.** The listing fragment fetches
-  `variants(first: 2)` only to tell one variant from several; a card with
-  several shows "Choose options" and links to the product page (as `QuickAdd`
-  does). The card used to add the first available variant silently.
+- **Cards DO pick a variant now - out loud** (owner's call, 2026-10-01,
+  reversing the earlier "never pick" rule for speed to checkout). See
+  *Card buying* in §13 for how the pick is made, shown and undone. The table
+  row's `QuickAdd` still only adds single-variant products.
 - Variant images are not switched by the gallery: as of 2026-10-01 no product
   has a different image per variant. If the merchant starts adding them,
   select `image` on the variant and drive the gallery from the same hook.
@@ -1009,9 +1009,91 @@ disabled for that beat (it has a `tempKey` for React).
 | File | Role |
 | --- | --- |
 | `components/product/add-on-picker.tsx` | The cards on the buy panel. Beside the add-to-cart form, not inside it, so Enter in the field does not submit. |
-| `components/cart/add-to-cart.tsx` | Owns the choices, validates, sends them, clears them after a successful add. |
+| `components/cart/add-to-cart.tsx` | Owns the choices, validates, sends them, clears them after a successful add. Also renders Buy now (see below). |
 | `components/cart/modal.tsx` | Lists add-ons under their line, each removable; the line price includes them. |
-| Quick-add / product cards | Unchanged: they add the plain product. Add-ons are optional. |
+| Product cards / quick-add | Add the plain product, never add-ons (see *Card buying*). |
+
+### Buy now — a cart of its own
+
+The buy panel's second button (`buyNow` in `cart/actions.ts`, copy in `buyNow`
+in `site.ts`) checks out **this one Kompanion and the extras picked for it**,
+and nothing else.
+
+- It **creates a separate Shopify cart** and sends the browser to that cart's
+  `checkoutUrl`. It never reads or writes the `cartId` cookie, never touches
+  the optimistic cart, and never opens the drawer. Adding to the shared cart
+  and checking *that* out would have bought everything else in it too. The
+  shopper's cart is still there, unchanged, when they come back.
+- Same validation as `addItem`, by the same code: variant id, quantity,
+  `resolveAddOnLines`, and personalisation through `addPersonalisedLine`
+  (parent first, children nested by line id, rollback). It also refuses an
+  add-on's own variant id on a *plain* buy, which `addItem` only checks when
+  extras are asked for.
+- Shopify clamps a sold-out line to nothing instead of failing, so the
+  returned cart is checked for the line (and every add-on under it) before the
+  URL goes back. The URL must be `https`.
+- Rate-limited at 20 per 10 minutes per client (`rate-limit.ts`, bucket
+  `buy-now`), because every call mints a cart.
+- Both buttons are in **one form**, so one `useFormStatus` pending state holds
+  both. The pressed button's `name="intent"` value (`add` / `buy`) comes
+  through in the FormData. After success the buttons stay disabled until the
+  page unloads, and a `pageshow` with `persisted` (Back from checkout via
+  bfcache) re-enables them. Add-on choices are kept, so Back finds the
+  initials still typed.
+- Buy now is hidden whenever Add to cart is disabled (no variant chosen, sold
+  out). A product **card's** Buy now is a different thing - it adds to the
+  shared cart and opens the drawer - see below.
+
+### Card buying — Buy now, Add, and the stepper they become
+
+`CardBuyControls` (`components/cart/card-buy-controls.tsx`, copy in `cardBuy`)
+is on every `ProductCard` (home rails, the shop grid, shop-by-colour/mood,
+related products) and on the homepage Spotlight.
+
+| State | Controls |
+| --- | --- |
+| Not in cart | bag-plus **Add** (quiet) · **Buy now** (adds AND opens the drawer) |
+| In cart (a *plain* line of this product) | `− n +` stepper · **Checkout** · "Size · Change" under it |
+| Sold out | one disabled pill |
+
+- The morph into a stepper is Baymard's list-page finding: the number is the
+  confirmation, it stops accidental duplicates, and quantity changes without
+  a trip to the cart. Personalised lines are never driven by the card - with
+  only a personalised line in the cart the card still offers Buy now.
+- **Which variant.** `lib/shop/variant-preference.ts`, in order: the variant
+  last picked for this product (product page or drawer switcher), the variant
+  sharing the most option values with what the shopper picked anywhere ("M"),
+  the first in stock. Stored in `localStorage` (`kozy:variant-pref`) and read
+  through `useSyncExternalStore`. The card's guess only drives the optimistic
+  line: `addPreferredItem` re-resolves by **handle** against live stock with
+  the same ranking (`lib/shop/variant-match.ts`, kept hook-free so the server
+  can import it), so a remembered size that sold out falls back silently and
+  the card then tracks the variant the server actually added.
+- **The drawer is where a pick is undone.** Every multi-variant line has a
+  native `<select>` (`LineVariantSelect`), fed lazily by `getVariantChoices`
+  the first time the drawer opens with that product. `changeLineVariant`
+  sends `cartLinesUpdate` with a new `merchandiseId`; measured: attributes and
+  nested add-ons survive (initials stay on a re-sized tote), and switching to a
+  variant already in the cart as a plain line merges them.
+- **The drawer no longer opens itself on every quantity rise.** It is opened
+  explicitly by the product page's Add to cart, a card's Buy now and
+  `QuickAdd`; a card's Add and stepper stay quiet (the mobile cart bar and
+  header badge confirm). The just-added line gets a fading sage wash and is
+  scrolled into view (`justAdded` / `flagAdded` in the context). Closes within
+  400ms of opening are ignored - a double-clicked Buy now otherwise closed the
+  drawer on its own second click, which landed on the backdrop.
+- **Card Checkout** goes straight to `cart.checkoutUrl`, unless a mutation is
+  pending or a line is unavailable, in which case it opens the drawer.
+- A stock clamp ("Limited stock…") is shown on the card as well as the
+  drawer: the count otherwise snapped back with no word of why.
+
+⚠️ **`isMutating` was always false during a mutation**, and so the drawer's
+"Updating…" hold on checkout never once showed. `runCartMutation` is called
+inside actions / `startTransition`, and React 19 holds state set there until
+the action settles. The count now lives in a ref (`hasPendingMutations()`,
+synchronous) and reaches the render through a microtask, outside the
+transition. Anything new that must know "is the cart settled?" in a click
+handler reads `hasPendingMutations()`, not `isMutating`.
 
 A missing product - including an add-on's handle - renders the not-found page
 with **status 200 + noindex**, because `product/[handle]/loading.tsx` streams

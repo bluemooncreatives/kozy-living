@@ -727,6 +727,55 @@ export const addOns = {
   },
 } as const;
 
+/* ------------------------------------------------------------------ buy now */
+
+/**
+ * The second button on the buy panel: straight to checkout with this one
+ * Kompanion (and the extras picked for it), leaving the cart as it was.
+ */
+export const buyNow = {
+  label: "Buy now",
+  pending: "Preparing checkout…",
+  redirecting: "Taking you to checkout…",
+  errors: {
+    unavailable: "This option has just sold out. Please choose another.",
+    failed: "We couldn't start your checkout. Please try again.",
+    busy: "Too many checkouts started just now. Please wait a moment and try again.",
+  },
+} as const;
+
+/**
+ * The buying controls on a product card (home rails, the shop grid, the
+ * spotlight). Buy now adds and opens the cart; the bag adds quietly; once in
+ * the cart both become a stepper and a way to check out.
+ */
+export const cardBuy = {
+  buyNow: "Buy now",
+  buying: "Adding…",
+  checkout: "Checkout",
+  soldOut: "Sold out",
+  inCart: "In cart:",
+  change: "Change",
+  addTitle: "Add to cart",
+  add: (title: string) => `Add ${title} to cart`,
+  buy: (title: string) => `Buy ${title} now`,
+  increase: (title: string) => `Add one more ${title}`,
+  decrease: (title: string) => `One fewer ${title}`,
+  remove: (title: string) => `Remove ${title} from cart`,
+  stepperLabel: (title: string) => `${title} in your cart`,
+  errors: {
+    add: "We couldn't add that to your cart.",
+    update: "We couldn't update that quantity.",
+  },
+} as const;
+
+/** The option switcher on a line in the cart drawer. */
+export const cartVariant = {
+  label: (title: string) => `Change option for ${title}`,
+  soldOut: "sold out",
+  error: "We couldn't change that option.",
+} as const;
+
 /* ------------------------------------------------------------------ contact */
 
 /**

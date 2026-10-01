@@ -6,12 +6,14 @@ import {
   TAGS,
 } from "@/lib/constants";
 import { isValidInitials } from "@/lib/shop/add-ons";
+import { optionScore } from "@/lib/shop/variant-match";
 import {
   CartMutationError,
   addToCart,
   createCart,
   getAddOns,
   getCart,
+  getProduct,
   removeFromCart,
   updateCart,
 } from "@/lib/shopify";
@@ -22,8 +24,10 @@ import type {
   CartLineUpdateInput,
   CartWarning,
   ProductAddOn,
+  ProductVariant,
 } from "@/lib/shopify/types";
-import { addOns as addOnCopy } from "@/lib/site";
+import { clientKey, rateLimited } from "@/lib/rate-limit";
+import { addOns as addOnCopy, buyNow as buyNowCopy } from "@/lib/site";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -285,7 +289,7 @@ async function addPersonalisedLine(
   merchandiseId: string,
   quantity: number,
   addOnLines: { addOn: ProductAddOn; attributes: CartAttribute[] }[]
-): Promise<CartWarning[]> {
+): Promise<{ cart: Cart; warnings: CartWarning[] }> {
   const marker = crypto.randomUUID();
   const added = await addToCart(cartId, [
     {
@@ -318,7 +322,10 @@ async function addPersonalisedLine(
         parent: { lineId: parent.id! },
       }))
     );
-    return [...added.warnings, ...nested.warnings];
+    return {
+      cart: nested.cart,
+      warnings: [...added.warnings, ...nested.warnings],
+    };
   } catch (error) {
     await removeFromCart(cartId, [parent.id]).catch((cleanup) =>
       console.error("Could not roll back a personalised line", cleanup)
@@ -360,9 +367,9 @@ export async function addItem(
       const resolved = await resolveAddOnLines(merchandiseId, payload.addOns);
       if (!resolved.ok) return fail(resolved.message);
 
-      warnings = await withLiveCart((cartId) =>
+      ({ warnings } = await withLiveCart((cartId) =>
         addPersonalisedLine(cartId, merchandiseId, quantity, resolved.lines)
-      );
+      ));
     } else {
       // Fast path: add straight to the cart on the cookie, no read first.
       ({ warnings } = await withLiveCart((cartId) =>
@@ -392,6 +399,305 @@ export async function addItem(
           : "We couldn't add that to your cart."
       )
     );
+  }
+}
+
+const HANDLE_PATTERN = /^[a-z0-9][a-z0-9_-]{0,254}$/i;
+
+/**
+ * The variant a card's one-tap add resolves to, against LIVE stock: the one
+ * the shopper picked before if it is still in stock, else the closest match to
+ * the options they have been picking, else the first in stock. The card only
+ * fetched two variants and its stored preference may be days old, so the
+ * card's own guess is never what gets added.
+ */
+function resolvePreferredVariant(
+  variants: ProductVariant[],
+  preferredId: unknown,
+  preferredOptions: unknown
+): ProductVariant | undefined {
+  const available = variants.filter((variant) => variant.availableForSale);
+  if (!available.length) return undefined;
+
+  const exact = available.find((variant) => variant.id === preferredId);
+  if (exact) return exact;
+
+  const wanted: Record<string, string> = {};
+  if (preferredOptions && typeof preferredOptions === "object") {
+    for (const [name, value] of Object.entries(preferredOptions).slice(0, 10)) {
+      if (typeof value === "string") wanted[name.toLowerCase()] = value;
+    }
+  }
+
+  let best = available[0]!;
+  let bestScore = optionScore(best, wanted);
+  for (const variant of available.slice(1)) {
+    const score = optionScore(variant, wanted);
+    if (score > bestScore) {
+      best = variant;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+export type PreferredAddState =
+  | { ok: true; message: string; variantId: string }
+  | { ok: false; message: string };
+
+/**
+ * The card's Buy now and Add: one unit of a product the card names by handle,
+ * in the variant `resolvePreferredVariant` settles on. A plain line, like the
+ * old card add - personalisation stays on the product page.
+ */
+export async function addPreferredItem(payload: {
+  handle: string;
+  variantId?: string;
+  options?: Record<string, string>;
+}): Promise<PreferredAddState> {
+  const handle = payload?.handle;
+  if (typeof handle !== "string" || !HANDLE_PATTERN.test(handle)) {
+    return { ok: false, message: "We couldn't find that Kompanion." };
+  }
+
+  try {
+    // Cached with every other product read; add-on products come back
+    // undefined from `reshapeProduct`, so they cannot be bought from here.
+    const product = await getProduct(handle);
+    if (!product) {
+      return { ok: false, message: "We couldn't find that Kompanion." };
+    }
+
+    const variant = product.availableForSale
+      ? resolvePreferredVariant(
+          product.variants,
+          payload.variantId,
+          payload.options
+        )
+      : undefined;
+    if (!variant) {
+      return { ok: false, message: "This Kompanion has just sold out." };
+    }
+
+    const { warnings } = await withLiveCart((cartId) =>
+      addToCart(cartId, [{ merchandiseId: variant.id, quantity: 1 }])
+    );
+
+    updateTag(TAGS.cart);
+    return { ok: true, message: describeWarnings(warnings), variantId: variant.id };
+  } catch (error) {
+    updateTag(TAGS.cart);
+    return {
+      ok: false,
+      message: toMessage(error, "We couldn't add that to your cart."),
+    };
+  }
+}
+
+export type VariantChoice = Pick<
+  ProductVariant,
+  "id" | "title" | "availableForSale" | "price" | "selectedOptions"
+>;
+
+/**
+ * The sizes / options the drawer can switch a line between, by product
+ * handle. Only products with a real choice are returned. Read-only and served
+ * from the same cache as the product pages, so opening the drawer does not
+ * cost a Shopify round trip per line.
+ */
+export async function getVariantChoices(
+  handles: string[]
+): Promise<Record<string, VariantChoice[]>> {
+  if (!Array.isArray(handles)) return {};
+  const wanted = [...new Set(handles)]
+    .filter((handle) => typeof handle === "string" && HANDLE_PATTERN.test(handle))
+    .slice(0, 50);
+
+  const entries = await Promise.all(
+    wanted.map(async (handle) => {
+      const product = await getProduct(handle).catch(() => undefined);
+      if (!product || product.variants.length < 2) return null;
+      return [
+        handle,
+        product.variants.map(
+          ({ id, title, availableForSale, price, selectedOptions }) => ({
+            id,
+            title,
+            availableForSale,
+            price,
+            selectedOptions,
+          })
+        ),
+      ] as const;
+    })
+  );
+
+  return Object.fromEntries(entries.filter((entry) => entry !== null));
+}
+
+/**
+ * Switches a cart line to another variant of the same product, keeping its
+ * quantity. Measured against the live store: the line keeps its attributes
+ * and its nested add-ons (initials survive a size change), and switching to a
+ * variant already in the cart as a plain line merges the two - which is what
+ * a shopper would expect.
+ */
+export async function changeLineVariant(payload: {
+  lineId: string;
+  merchandiseId: string;
+}): Promise<CartActionState> {
+  const { lineId, merchandiseId } = payload ?? {};
+  if (!isValidLineId(lineId) || !isValidMerchandiseId(merchandiseId)) {
+    return fail("We couldn't change that option.");
+  }
+
+  try {
+    const { cartId, cart } = await resolveCart();
+    const line = cart?.lines.find((candidate) => candidate.id === lineId);
+    if (!cartId || !line) {
+      updateTag(TAGS.cart);
+      return fail("That item is no longer in your cart.");
+    }
+    if (line.merchandise.id === merchandiseId) return ok();
+
+    // Only another variant of the SAME product, and only one in stock - the
+    // browser names the variant, so both are checked here.
+    const product = await getProduct(line.merchandise.product.handle);
+    const target = product?.variants.find((v) => v.id === merchandiseId);
+    if (!target) return fail("That option isn't available for this Kompanion.");
+    if (!target.availableForSale) return fail(`${target.title} has just sold out.`);
+
+    const { warnings } = await updateCart(cartId, [
+      { id: lineId, merchandiseId, quantity: line.quantity },
+    ]);
+
+    updateTag(TAGS.cart);
+    return ok(describeWarnings(warnings));
+  } catch (error) {
+    updateTag(TAGS.cart);
+    return fail(toMessage(error, "We couldn't change that option."));
+  }
+}
+
+export type BuyNowState =
+  | { ok: true; checkoutUrl: string }
+  | { ok: false; message: string };
+
+/**
+ * Generous next to the enquiry forms' five: going to checkout, coming back to
+ * change a size and going again is ordinary shopping. It exists because every
+ * call mints a Shopify cart, and an exported action is a public endpoint.
+ */
+const BUY_NOW_LIMIT = { windowMs: 10 * 60 * 1000, max: 20 };
+
+/**
+ * Buy now: a checkout for this one Kompanion and the extras picked for it.
+ *
+ * It builds its OWN cart rather than adding to the one on the cookie. Adding
+ * to the shared cart and checking that out would check out everything else
+ * the shopper had put aside too - "buy this" quietly becoming "buy all of
+ * this". The cookie, the drawer and the optimistic state are never touched,
+ * so the cart is still there, unchanged, when they come back; the throwaway
+ * cart is simply abandoned if they do not pay.
+ *
+ * Everything `addItem` checks is checked here, by the same code: the variant
+ * id, the quantity, and each add-on and its text against what Shopify says
+ * exists. Personalisation goes through `addPersonalisedLine` so it nests by
+ * line id and rolls back exactly as it does in the drawer.
+ */
+export async function buyNow(payload: {
+  merchandiseId: string | undefined;
+  quantity?: number;
+  addOns?: AddOnRequest[];
+}): Promise<BuyNowState> {
+  const merchandiseId = payload?.merchandiseId;
+
+  if (!isValidMerchandiseId(merchandiseId)) {
+    return { ok: false, message: "Please select an option first." };
+  }
+
+  const requested = payload.quantity ?? 1;
+  if (!isUsableQuantity(requested)) {
+    return { ok: false, message: "That quantity isn't valid." };
+  }
+
+  const quantity = clampQuantity(requested);
+  if (quantity < 1) {
+    return { ok: false, message: "Quantity must be at least 1." };
+  }
+
+  if (rateLimited("buy-now", await clientKey(), BUY_NOW_LIMIT)) {
+    return { ok: false, message: buyNowCopy.errors.busy };
+  }
+
+  const wantsAddOns = Array.isArray(payload.addOns) && payload.addOns.length > 0;
+
+  try {
+    // An add-on is only ever sold under a Kompanion. `addItem` gets this from
+    // `resolveAddOnLines`, which only runs when extras are asked for; a plain
+    // Buy now on an add-on's variant id would otherwise check out the gift
+    // box on its own.
+    const offered = await getAddOns();
+    if (offered.some((addOn) => addOn.variantId === merchandiseId)) {
+      return { ok: false, message: buyNowCopy.errors.unavailable };
+    }
+
+    let cart: Cart;
+    let expectedAddOns = 0;
+
+    if (wantsAddOns) {
+      const resolved = await resolveAddOnLines(merchandiseId, payload.addOns);
+      if (!resolved.ok) return { ok: false, message: resolved.message };
+      expectedAddOns = resolved.lines.length;
+
+      const created = await createCart();
+      if (!created.id) throw new Error("Shopify returned a cart without an id");
+      ({ cart } = await addPersonalisedLine(
+        created.id,
+        merchandiseId,
+        quantity,
+        resolved.lines
+      ));
+    } else {
+      cart = await createCart([{ merchandiseId, quantity }]);
+    }
+
+    // Shopify answers a sold-out variant by clamping the line - to nothing,
+    // for a single unit - rather than by failing, so a "successful" cart can
+    // be empty. Checked here, or the shopper lands on a checkout with nothing
+    // in it.
+    const line = cart.lines.find(
+      (candidate) =>
+        candidate.merchandise.id === merchandiseId && candidate.quantity > 0
+    );
+    if (!line || line.merchandise.availableForSale === false) {
+      return { ok: false, message: buyNowCopy.errors.unavailable };
+    }
+    if ((line.addOns?.length ?? 0) < expectedAddOns) {
+      return { ok: false, message: addOnCopy.errors.unavailable };
+    }
+
+    // Only ever Shopify's own https checkout - this value becomes a
+    // `location.assign` in the browser.
+    let checkoutUrl: URL;
+    try {
+      checkoutUrl = new URL(cart.checkoutUrl);
+    } catch {
+      throw new Error("Shopify returned a cart without a checkout URL");
+    }
+    if (checkoutUrl.protocol !== "https:") {
+      throw new Error(`Refusing a non-https checkout URL: ${checkoutUrl}`);
+    }
+
+    return { ok: true, checkoutUrl: checkoutUrl.toString() };
+  } catch (error) {
+    return {
+      ok: false,
+      message: toMessage(
+        error,
+        wantsAddOns ? addOnCopy.errors.failed : buyNowCopy.errors.failed
+      ),
+    };
   }
 }
 

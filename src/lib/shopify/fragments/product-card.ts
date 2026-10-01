@@ -18,11 +18,11 @@ import imageFragment from "./image";
  *   images(first: 5)    the card's arrows page through these. Five is a
  *                       browse, not the full set - the detail page is where
  *                       every shot lives.
- *   variants(first: 2)  enough to tell a single-variant product, which a card
- *                       can sell outright, from one with choices to make,
- *                       which has to go to the detail page for them. Pulling
- *                       all 250 to answer a yes/no question is what the
- *                       paragraph above rules out.
+ *   variants(first: 2)  enough for the card's optimistic guess at the variant
+ *                       its Buy now adds. The real choice is made on the
+ *                       server against the full product (`addPreferredItem`),
+ *                       so pulling all 250 per card buys nothing - that is
+ *                       what the paragraph above rules out.
  *
  * `options` carries names and values only - the facet engine groups on those.
  *

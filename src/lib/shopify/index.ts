@@ -1055,9 +1055,15 @@ function unwrapCartMutation(
   };
 }
 
-export async function createCart(): Promise<Cart> {
+/**
+ * Mints a cart, optionally with its first lines. The drawer's cart is created
+ * empty (`withLiveCart` adds to it straight after); Buy now creates its own
+ * single-Kompanion cart with the line already in it, saving a round trip.
+ */
+export async function createCart(lines: CartLineInput[] = []): Promise<Cart> {
   const res = await shopifyFetch<ShopifyCreateCartOperation>({
     query: createCartMutation,
+    variables: { lineItems: lines },
     cache: "no-store",
   });
 

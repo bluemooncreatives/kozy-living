@@ -14,7 +14,7 @@ import { Product } from "@/lib/shopify/types";
  * Adds reuse the same optimistic + serialised path as the rest of the cart.
  */
 export default function QuickAdd({ product }: { product: Product }) {
-  const { addCartItem, runCartMutation, reportStatus } = useCart();
+  const { addCartItem, runCartMutation, reportStatus, openCart } = useCart();
 
   const variant =
     product.variants.length === 1 ? product.variants[0] : undefined;
@@ -39,6 +39,7 @@ export default function QuickAdd({ product }: { product: Product }) {
       action={async () => {
         if (!variant) return;
         addCartItem(variant, product);
+        openCart();
 
         try {
           const result = await runCartMutation(() =>

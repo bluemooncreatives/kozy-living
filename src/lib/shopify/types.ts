@@ -419,6 +419,9 @@ export type ShopifyCartOperation = {
 
 export type ShopifyCreateCartOperation = {
   data: { cartCreate: CartMutationPayload };
+  variables: {
+    lineItems: CartLineInput[];
+  };
 };
 
 export type ShopifyUpdateCartOperation = {

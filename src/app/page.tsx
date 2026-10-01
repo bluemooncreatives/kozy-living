@@ -12,6 +12,7 @@ import {
 import { shopCategories } from "@/lib/menu";
 import { Product } from "@/lib/shopify/types";
 import ProductCard from "@/components/product-card";
+import { CardBuyControls } from "@/components/cart/card-buy-controls";
 import ArticleCard from "@/components/blog/article-card";
 import Price from "@/components/price";
 import Marquee from "@/components/ui/marquee";
@@ -827,8 +828,23 @@ async function Spotlight() {
               {product.description.length > 240 ? "…" : ""}
             </p>
           ) : null}
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link href={`/product/${product.handle}`} className="btn-solid">
+          {/* The same one-tap controls as every card, so the featured
+              Kompanion is as quick to buy as it is to look at. */}
+          <CardBuyControls
+            // Only what the controls read: the whole product would ship its
+            // description and every image to the client for nothing.
+            product={{
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+              availableForSale: product.availableForSale,
+              featuredImage: product.featuredImage,
+              variants: product.variants,
+            }}
+            className="mt-8 max-w-sm"
+          />
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <Link href={`/product/${product.handle}`} className="btn-outline">
               View piece
             </Link>
             <Link href="/search" className="link-arrow">
