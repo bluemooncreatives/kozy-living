@@ -49,6 +49,8 @@ export type ProductVariant = {
     value: string;
   }[];
   price: Money;
+  /** Selected by the product page only; the listing fragment leaves it out. */
+  compareAtPrice?: Money | null;
 };
 
 export type Image = {

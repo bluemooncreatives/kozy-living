@@ -12,7 +12,7 @@ import {
   type AddOnChoice,
   type AddOnChoices,
 } from "../product/add-on-picker";
-import { useProduct } from "../product/product-context";
+import { useSelectedVariant } from "../product/use-selected-variant";
 import { addItem, type CartActionState } from "./actions";
 import { fromMinor, toMinor } from "./cart-math";
 import { useCart } from "./cart-context";
@@ -111,35 +111,17 @@ export function AddToCart({
   /** Personalisation offered on this product. Empty hides the picker. */
   addOns?: ProductAddOn[];
 }) {
-  const { variants, availableForSale } = product;
+  const { availableForSale } = product;
   const { addCartItem, runCartMutation, reportStatus } = useCart();
-  const { state } = useProduct();
+  // Shared with the price above the picker, so the figure shown is the
+  // figure charged.
+  const { selectedVariant, hasOptionsToPick } = useSelectedVariant(product);
   // Local, so a failure raised inside the cart drawer doesn't also light up an
   // error under the button on the product page.
   const [result, setResult] = useState<CartActionState>(null);
   const [choices, setChoices] = useState<AddOnChoices>({});
   // Errors appear after the first attempt, not while someone is still typing.
   const [attempted, setAttempted] = useState(false);
-
-  // An option with a single value is not a choice, so it counts as chosen.
-  // Otherwise a lone value had to be clicked like a pill before the button
-  // woke up - the old "Initials: write them in notes" option did exactly that.
-  const fixedOptions = new Set(
-    product.options
-      .filter((option) => option.values.length === 1)
-      .map((option) => option.name.toLowerCase())
-  );
-
-  const variant = variants.find((variant: ProductVariant) =>
-    variant.selectedOptions.every(
-      (option) =>
-        option.value === state[option.name.toLowerCase()] ||
-        fixedOptions.has(option.name.toLowerCase())
-    )
-  );
-  const defaultVariant = variants.length === 1 ? variants[0] : undefined;
-  const selectedVariant = variant ?? defaultVariant;
-  const hasOptionsToPick = variants.length > 1;
 
   const errorMessage = result && !result.ok ? result.message : "";
 

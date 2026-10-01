@@ -462,6 +462,27 @@ is a link, not a click handler. That is what makes the shop server-rendered,
 shareable, back-button-correct and functional without JS. Do not move shop
 state into React state.
 
+### Variants — the price follows the selection
+
+24 of the store's 92 products are priced per variant (a shirt runs ₹1,200 →
+₹4,000 by size). The buy panel's price is `ProductPrice`
+(`components/product/product-price.tsx`): it reads "from" plus the range floor
+until the picker resolves to one variant, then shows that variant's price,
+its `compareAtPrice` if it is higher, and the variant's own sold-out state.
+It used to show `minVariantPrice` whatever was picked, while the cart charged
+the real variant.
+
+- **`useSelectedVariant()` is the one resolver.** The price and `AddToCart`
+  both read it, so the price shown is always the price charged. Do not resolve
+  the variant a second way anywhere on the panel.
+- **Cards and table rows never pick a variant.** The listing fragment fetches
+  `variants(first: 2)` only to tell one variant from several; a card with
+  several shows "Choose options" and links to the product page (as `QuickAdd`
+  does). The card used to add the first available variant silently.
+- Variant images are not switched by the gallery: as of 2026-10-01 no product
+  has a different image per variant. If the merchant starts adding them,
+  select `image` on the variant and drive the gallery from the same hook.
+
 ### Shop by mood — `/shop-by-mood`
 
 The sibling of `/shop-by-colour`, on the same contract: one mood at a time,

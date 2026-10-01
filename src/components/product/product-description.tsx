@@ -3,7 +3,7 @@ import { brandIcons } from "@/components/ui/brand-icons";
 import { giTag } from "@/lib/site";
 import giTagMark from "../../../public/icons/gi-tag-mark.png";
 import { Product, ProductAddOn } from "@/lib/shopify/types";
-import Price from "../price";
+import { ProductPrice } from "./product-price";
 import VariantSelector from "./variant-selector";
 import Prose from "../prose";
 import { AddToCart } from "../cart/add-to-cart";
@@ -88,8 +88,6 @@ export function ProductDescription({
   /** Personalisation add-ons offered on this Kompanion. */
   addOns?: ProductAddOn[];
 }) {
-  const { minVariantPrice, maxVariantPrice } = product.priceRange;
-  const isRange = minVariantPrice.amount !== maxVariantPrice.amount;
   const specs = specsFor(product);
   const handles = new Set(
     product.collections.map((collection) => collection.handle)
@@ -149,17 +147,7 @@ export function ProductDescription({
           metadata rather than as the price. It is now the UI face at
           `display-md`, the largest step that still belongs to Jakarta rather
           than to the display face. */}
-      <p className="mt-5 flex items-baseline gap-2">
-        {isRange ? <span className="ui-mono text-muted">from</span> : null}
-        <Price
-          className="serif text-display-md"
-          amount={minVariantPrice.amount}
-          currencyCode={minVariantPrice.currencyCode}
-        />
-        {!product.availableForSale ? (
-          <span className="ui-mono text-muted">· Sold out</span>
-        ) : null}
-      </p>
+      <ProductPrice product={product} />
 
       {/* --------------------------------------------------- the GI mark
 

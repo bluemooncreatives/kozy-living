@@ -122,8 +122,15 @@ export default function ProductCard({
   const href = `/product/${product.handle}`;
 
   const variants = product.variants ?? [];
-  const selectedVariant =
-    variants.find((v) => v.availableForSale) ?? variants[0];
+  // More than one variant means a size or option to choose, and the card has
+  // no picker. It used to add the first available one anyway - the XXS of a
+  // shirt priced ₹1,200 to ₹4,000, under a "from" price that said nothing
+  // about which size was coming. Those cards send the shopper to choose.
+  // (The listing fragment fetches two variants exactly to answer this.)
+  const needsChoice = variants.length > 1;
+  const selectedVariant = needsChoice
+    ? undefined
+    : (variants.find((v) => v.availableForSale) ?? variants[0]);
   const isAvailable = Boolean(
     product.availableForSale &&
       (selectedVariant ? selectedVariant.availableForSale : true),
@@ -343,73 +350,88 @@ export default function ProductCard({
 
         {/* 3. In-Box Order Counter & Dynamic Add Button */}
         <div className="mt-3 pt-1">
-          <form action={add} className="flex items-center gap-2">
-            {/* Pill Order Add Counter: [- 1 +] */}
-            <div
+          {needsChoice ? (
+            <Link
+              href={href}
+              aria-label={`Choose options for ${product.title}`}
               className={clsx(
-                "flex h-10 shrink-0 items-center justify-between rounded-full border border-ink/20 px-1 bg-card transition-opacity",
-                !isAvailable && "opacity-40 pointer-events-none",
+                "flex h-10 w-full items-center justify-center rounded-full border px-4 font-sans text-xs sm:text-sm font-semibold uppercase tracking-normal transition-all duration-200 select-none",
+                product.availableForSale
+                  ? "border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98]"
+                  : "border-ink/10 text-muted/60",
               )}
             >
-              <button
-                type="button"
-                onClick={() => step(-1)}
-                disabled={quantity <= 1 || !isAvailable}
-                aria-label={`Decrease quantity of ${product.title}`}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
+              {product.availableForSale ? "Choose options" : "Sold out"}
+            </Link>
+          ) : (
+            <form action={add} className="flex items-center gap-2">
+              {/* Pill Order Add Counter: [- 1 +] */}
+              <div
+                className={clsx(
+                  "flex h-10 shrink-0 items-center justify-between rounded-full border border-ink/20 px-1 bg-card transition-opacity",
+                  !isAvailable && "opacity-40 pointer-events-none",
+                )}
               >
-                <MinusIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  disabled={quantity <= 1 || !isAvailable}
+                  aria-label={`Decrease quantity of ${product.title}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <MinusIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
+                </button>
 
-              <span
-                aria-live="polite"
-                className="ui-mono w-6 text-center font-semibold text-sm tabular-nums text-ink select-none"
-              >
-                {quantity}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => step(1)}
-                disabled={quantity >= MAX_LINE_QUANTITY || !isAvailable}
-                aria-label={`Increase quantity of ${product.title}`}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <PlusIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
-              </button>
-            </div>
-
-            {/* Pill Dynamic Add to Cart Button: [ ADD ] */}
-            <button
-              type="submit"
-              disabled={!isAvailable || pending}
-              aria-label={`Add ${product.title} to cart`}
-              aria-busy={pending}
-              className={clsx(
-                "flex h-10 flex-1 items-center justify-center rounded-full border border-ink/25 px-4 font-sans text-xs sm:text-sm font-semibold uppercase tracking-normal transition-all duration-200 select-none",
-                isAvailable
-                  ? added
-                    ? "border-sage-deep bg-sage text-ink font-bold"
-                    : pending
-                      ? "border-ink/20 bg-ink/5 text-ink/70 cursor-wait"
-                      : "border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98]"
-                  : "border-ink/10 bg-transparent text-muted/60 cursor-not-allowed",
-              )}
-            >
-              {pending ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 animate-ping rounded-full bg-ink/70" />
-                  ADDING…
+                <span
+                  aria-live="polite"
+                  className="ui-mono w-6 text-center font-semibold text-sm tabular-nums text-ink select-none"
+                >
+                  {quantity}
                 </span>
-              ) : added ? (
-                <span>ADDED ✓</span>
-              ) : isAvailable ? (
-                <span>ADD</span>
-              ) : (
-                <span>SOLD OUT</span>
-              )}
-            </button>
-          </form>
+
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  disabled={quantity >= MAX_LINE_QUANTITY || !isAvailable}
+                  aria-label={`Increase quantity of ${product.title}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/10 active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <PlusIcon aria-hidden className="h-3.5 w-3.5 stroke-[2.5]" />
+                </button>
+              </div>
+
+              {/* Pill Dynamic Add to Cart Button: [ ADD ] */}
+              <button
+                type="submit"
+                disabled={!isAvailable || pending}
+                aria-label={`Add ${product.title} to cart`}
+                aria-busy={pending}
+                className={clsx(
+                  "flex h-10 flex-1 items-center justify-center rounded-full border border-ink/25 px-4 font-sans text-xs sm:text-sm font-semibold uppercase tracking-normal transition-all duration-200 select-none",
+                  isAvailable
+                    ? added
+                      ? "border-sage-deep bg-sage text-ink font-bold"
+                      : pending
+                        ? "border-ink/20 bg-ink/5 text-ink/70 cursor-wait"
+                        : "border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98]"
+                    : "border-ink/10 bg-transparent text-muted/60 cursor-not-allowed",
+                )}
+              >
+                {pending ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 animate-ping rounded-full bg-ink/70" />
+                    ADDING…
+                  </span>
+                ) : added ? (
+                  <span>ADDED ✓</span>
+                ) : isAvailable ? (
+                  <span>ADD</span>
+                ) : (
+                  <span>SOLD OUT</span>
+                )}
+              </button>
+            </form>
+          )}
 
           {errorMessage ? (
             <p
