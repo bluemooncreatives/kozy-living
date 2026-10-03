@@ -293,6 +293,22 @@ used to sit before it, `ExperienceBand`, was removed.
 
 ---
 
+### Product-page discovery and studio note
+
+The product page follows the gallery and buy panel with `CategoryShelf`, then
+compact `StudioNote`, category FAQ, the "Kompanion of the Month" ticker, and
+the original "You May Also Like" carousel using `ProductCard`. Copy lives in `productStudio` and
+`productDiscovery` in `site.ts`; both sections keep the existing palette/fonts.
+
+The category shelf complements automatic Shopify recommendations. `sameCategoryFor`
+uses actual collection membership, prefers deeper menu categories, then the
+smallest matching collection with other products. It excludes the current
+product and generic promotional shelves; no membership means no shelf. The
+lightweight catalogue supplies up to four sample-style cards, with a link to
+the selected live collection. These discovery cards link to product details.
+The shelf header is a compact title and outline collection CTA, with no
+eyebrow, description, or separate category/count row.
+
 ## 6. The Shopify layer
 
 `src/lib/shopify/index.ts`. Everything from the API passes through a

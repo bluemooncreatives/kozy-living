@@ -2,16 +2,14 @@ import Gallery from "@/components/product/gallery";
 import { ProductProvider } from "@/components/product/product-context";
 import { ProductDescription } from "@/components/product/product-description";
 import { FaqFallback, ProductFaq } from "@/components/faq/faq-section";
+import CategoryShelf from "@/components/product/category-shelf";
+import StudioNote from "@/components/product/studio-note";
 import ProductCard from "@/components/product-card";
-import Marquee from "@/components/ui/marquee";
 import Carousel from "@/components/ui/carousel";
 import { SectionHead } from "@/components/ui/section";
+import Marquee from "@/components/ui/marquee";
 import { HIDDEN_PRODUCT_TAG } from "@/lib/constants";
-import {
-  getAddOns,
-  getProduct,
-  getProductRecommendations,
-} from "@/lib/shopify";
+import { getAddOns, getProduct, getProductRecommendations } from "@/lib/shopify";
 import { Image } from "@/lib/shopify/types";
 import { featureBand, site } from "@/lib/site";
 import { Metadata } from "next";
@@ -52,7 +50,10 @@ export default async function ProductPage({
   const { handle } = await params;
   // In parallel: the add-ons are one store-wide query, cached on the same TTL
   // as the product, so they cost the page no extra wait.
-  const [product, addOns] = await Promise.all([getProduct(handle), getAddOns()]);
+  const [product, addOns] = await Promise.all([
+    getProduct(handle),
+    getAddOns(),
+  ]);
   if (!product) return notFound();
 
   const productJsonLd = {
@@ -88,7 +89,9 @@ export default async function ProductPage({
         className="shell grid grid-cols-1 gap-3 pb-10 pt-4 lg:grid-cols-[1.1fr_1fr]"
       >
         <Suspense
-          fallback={<div className="plate aspect-square w-full animate-pulse" />}
+          fallback={
+            <div className="plate aspect-square w-full animate-pulse" />
+          }
         >
           <Gallery
             images={product.images.slice(0, 6).map((image: Image) => ({
@@ -108,9 +111,17 @@ export default async function ProductPage({
         </div>
       </div>
 
-      {/* One ticker, not two. The pair of bands that used to sandwich the
-          buy panel belonged to the old system's rhythm; here the sage
-          separator does the punctuating. */}
+      <Suspense fallback={null}>
+        <CategoryShelf product={product} />
+      </Suspense>
+
+      <StudioNote />
+
+      <Suspense fallback={<FaqFallback />}>
+        <ProductFaq product={product} addOns={addOns} />
+      </Suspense>
+
+      {/* A visual break before the final product recommendations. */}
       <div className="rule-y py-5">
         <Marquee
           phrases={band}
@@ -120,14 +131,6 @@ export default async function ProductPage({
           duration={40}
         />
       </div>
-
-      {/* Straight after the buy panel's band, before the shelf of other
-          Kompanions: the questions that hold a purchase back are answered
-          while this one is still the one being considered. Keyed to the
-          product's category - see lib/shop/faq.ts. */}
-      <Suspense fallback={<FaqFallback />}>
-        <ProductFaq product={product} addOns={addOns} />
-      </Suspense>
 
       <Suspense fallback={null}>
         <RelatedProducts id={product.id} />
@@ -155,7 +158,6 @@ export default async function ProductPage({
 async function RelatedProducts({ id }: { id: string }) {
   const relatedProducts = await getProductRecommendations(id);
   if (!relatedProducts?.length) return null;
-
   const shelf = relatedProducts.slice(0, 9);
 
   return (

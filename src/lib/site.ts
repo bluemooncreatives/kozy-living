@@ -14,6 +14,27 @@
  * a surface from rendering empty; replace them before launch.
  */
 
+export const productDiscovery = {
+  title: "More of your kind.",
+  browse: "Explore",
+  cardLabel: "The collection edit",
+  soldOut: "Sold out",
+  from: "from",
+} as const;
+
+export const productStudio = {
+  eyebrow: "A note from the studio",
+  title: "Small rituals. Thoughtful beginnings.",
+  description: "We’re Kozy Living. We design textiles in-house and work with craft clusters across India to bring a little more intention to your everyday.",
+  action: "Meet Kozy Living",
+  stamp: "Krafted in India",
+  founderLabel: "The person behind Kozy",
+  originLabel: "Where we make",
+  origin: "With craft clusters across India",
+  materialLabel: "What we work with",
+  material: "Natural fibres & traditional Dabu printing",
+} as const;
+
 export const site = {
   name: "Kozy Living",
   wordmark: "KOZY",
