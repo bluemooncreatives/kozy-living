@@ -1,6 +1,7 @@
 import Gallery from "@/components/product/gallery";
 import { ProductProvider } from "@/components/product/product-context";
 import { ProductDescription } from "@/components/product/product-description";
+import { FaqFallback, ProductFaq } from "@/components/faq/faq-section";
 import ProductCard from "@/components/product-card";
 import Marquee from "@/components/ui/marquee";
 import Carousel from "@/components/ui/carousel";
@@ -119,6 +120,14 @@ export default async function ProductPage({
           duration={40}
         />
       </div>
+
+      {/* Straight after the buy panel's band, before the shelf of other
+          Kompanions: the questions that hold a purchase back are answered
+          while this one is still the one being considered. Keyed to the
+          product's category - see lib/shop/faq.ts. */}
+      <Suspense fallback={<FaqFallback />}>
+        <ProductFaq product={product} addOns={addOns} />
+      </Suspense>
 
       <Suspense fallback={null}>
         <RelatedProducts id={product.id} />

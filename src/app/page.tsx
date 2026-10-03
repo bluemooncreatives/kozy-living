@@ -31,6 +31,7 @@ import CollectionShowcase, {
   CollectionShowcaseFallback,
 } from "@/components/home/collection-showcase";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
+import { FaqFallback, HomeFaq } from "@/components/faq/faq-section";
 import LookbookDeck, {
   type LookbookCard,
 } from "@/components/home/lookbook-deck";
@@ -74,7 +75,7 @@ export const metadata = {
  *   hero → category pills → bold statement + lookbook → ritual showcase →
  *   bestsellers → shop by colour → standards ticker → new arrivals →
  *   standards ticker → the story band → studio quote → rest ticker →
- *   spotlight → guides → journal → standards ticker → closing "shop now".
+ *   spotlight → guides → journal → FAQ → standards ticker → closing "shop now".
  *
  * The pills sit directly under the hero as the category row, so the first
  * thing after the frame is a way into the shop; the lookbook under them is
@@ -135,6 +136,12 @@ export default function Home() {
 
       <Suspense fallback={null}>
         <Journal />
+      </Suspense>
+
+      {/* Last before the close: the questions a shopper still has after the
+          shelves and the story, answered beside a way to ask the studio. */}
+      <Suspense fallback={<FaqFallback home />}>
+        <HomeFaq />
       </Suspense>
 
       <StandardsTicker />

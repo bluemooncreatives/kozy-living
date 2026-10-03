@@ -587,34 +587,333 @@ export const journalPosts = [
   },
 ] as const;
 
-/** Homepage / support FAQ. */
-export const faqs = [
-  {
-    question: "What are Kompanions?",
-    answer:
-      "It is what we call our textiles. They are not decor objects to be looked at - they are krafted to be used, leaned on and lived with, supporting the moments of rest already in your day.",
+/* --------------------------------------------------------------------- faq */
+
+type FaqLink = { label: string; href: string };
+type FaqEntry = {
+  /** Stable: the row's DOM id and React key. Never shown. */
+  id: string;
+  question: string;
+  answer: string;
+  link?: FaqLink;
+};
+
+/**
+ * The FAQ board - homepage (after the journal) and every product page (under
+ * the buy panel). Built by `lib/shop/faq.ts`, drawn by `components/faq/`.
+ *
+ * Three shared topics, then one set per category. A product page leads with
+ * its own category's set; the homepage draws its most common questions from
+ * the shared topics as one list.
+ *
+ * EVERY ANSWER HERE IS A CLAIM THE BRAND ALREADY MAKES - in `site`, `heritage`,
+ * the story chapters, or the product descriptions in Shopify (the karrier's
+ * weight bands, the kit's box, the slipper's jute base). The store publishes
+ * no shipping or refund policy, so there are deliberately no questions about
+ * delivery times or returns. Add them when the policy exists, not before.
+ *
+ * The categories' Shopify collections live in `lib/shop/faq.ts`, not here:
+ * a handle is an identifier, not copy.
+ */
+export const faq = {
+  home: {
+    eyebrow: "Questions, answered",
+    title: "Ask the studio",
+    lede: "From the cloth and the kraft to caring for what you take home. Here are the questions we hear most.",
   },
-  {
-    question: "What are your textiles made from?",
-    answer:
-      "100% natural fibres. Our material palette is cotton waffle weave, slub cotton, cotton percale, linen blends, wool and other premium natural Indian textiles. We use consciously sourced natural dyes and surplus fabric from the industry.",
+  /** The product page's head when the product fits no category. */
+  product: {
+    eyebrow: "Questions, answered",
+    title: "Before it's yours",
+    lede: "The things people ask the studio most, about the cloth, the kraft and the order.",
   },
-  {
-    question: "Who makes them?",
-    answer:
-      "Every Kompanion is designed in-house and made in collaboration with craft clusters across India, using artisanal processes including traditional Dabu hand-block printing.",
+  /** Labels for topic groups on product pages. */
+  groups: { topics: "Ask about", categories: "By Kompanion" },
+  /** The row count's noun, beside the list's head. */
+  count: (n: number) => (n === 1 ? "1 question" : `${n} questions`),
+  /** The link that closes a category's list, to that shelf. */
+  shop: (label: string) => `Shop ${label}`,
+  open: "Show answer",
+  close: "Hide answer",
+
+  topics: [
+    {
+      key: "kompanions",
+      label: "Kompanions",
+      items: [
+        {
+          id: "what-are-kompanions",
+          question: "What are Kompanions?",
+          answer:
+            "It is what we call our textiles. They are not decor objects to be looked at - they are krafted to be used, leaned on and lived with, supporting the moments of rest already in your day.",
+        },
+        {
+          id: "who-makes-them",
+          question: "Who makes them?",
+          answer:
+            "Every Kompanion is designed in-house and made in collaboration with craft clusters across India, using artisanal processes including traditional Dabu hand-block printing.",
+          link: { label: "Read our story", href: "/the-kozy-story" },
+        },
+        {
+          id: "what-is-dabu",
+          question: "What is Dabu hand-block printing?",
+          answer:
+            "Dabu is a mud resist. The block is lifted from a tray of mud paste and laid down line by line; wherever the paste sits, the dye - natural indigo, or syahi, an iron black - cannot reach, and the pattern shows once the cloth is washed.",
+        },
+        {
+          id: "print-variation",
+          question: "Why does my print differ a little from the photograph?",
+          answer:
+            "Because a hand pressed it. Each repeat is laid down block by block, and the cloth keeps the small shifts only a hand-pressed block leaves. No two runs are identical, and that is the kraft, not a flaw.",
+        },
+      ],
+    },
+    {
+      key: "fabric",
+      label: "Fabric & care",
+      items: [
+        {
+          id: "made-from",
+          question: "What are your textiles made from?",
+          answer:
+            "100% natural fibres. Our material palette is cotton waffle weave, slub cotton, cotton percale, linen blends, wool and other premium natural Indian textiles. We use consciously sourced natural dyes and surplus fabric from the industry.",
+        },
+        {
+          id: "care",
+          question: "How do I care for natural fibres?",
+          answer:
+            "Wash cool and gently, dry in shade, and skip the fabric softener - it coats the fibre and flattens a waffle weave's texture. Naturally dyed and hand-printed pieces will soften and settle with use; that shift is the material behaving as it should.",
+        },
+        {
+          id: "surplus",
+          question: "What does surplus fabric mean?",
+          answer:
+            "Alongside new cloth, we work with surplus fabric from the textile industry - material already made that would otherwise go unused - so a Kompanion asks less of the world to exist.",
+        },
+      ],
+    },
+    {
+      key: "ordering",
+      label: "Ordering",
+      items: [
+        /* `personalise` and `gift` (below) are inserted here at runtime, from
+           the live add-ons, so their prices are Shopify's and never ours. */
+        {
+          id: "sizing-help",
+          question: "I'm between sizes. Can someone help me choose?",
+          answer:
+            "Yes. Message the studio on Instagram with what you are choosing between and we will help you pick - the same goes for any customisation you have in mind.",
+          link: { label: site.instagram, href: site.instagramUrl },
+        },
+        {
+          id: "bulk",
+          question: "Do you take bulk or private label orders?",
+          answer:
+            "Yes. Alongside retail we run bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands. Write to us with your brief to start a conversation.",
+          link: { label: "Start a B2B enquiry", href: "/b2b-enquiries" },
+        },
+      ],
+    },
+  ],
+
+  /* Which category a product belongs to is decided by precedence in
+     `lib/shop/faq.ts`, not by this copy's order. */
+  categories: {
+    bathrobes: {
+      label: "Bathrobes",
+      eyebrow: "Robe questions",
+      title: "Before the robe goes on",
+      lede: "Waffle, natural dye, two ways with the sleeve - what to know before your post-bath ritual.",
+      items: [
+        {
+          id: "robe-waffle",
+          question: "Why waffle weave for a robe?",
+          answer:
+            "The honeycomb structure holds air. That is what makes a waffle robe dry quickly, absorb well after a bath and breathe against skin - and it softens beautifully with every wash.",
+        },
+        {
+          id: "robe-sleeves",
+          question: "What are the two sleeve styles?",
+          answer:
+            "Most of our robes come two ways: an open wide sleeve that falls loose, or a sleeve finished with an attached scrunchie detail. Choose either on the product page.",
+        },
+        {
+          id: "robe-sizes",
+          question: "How are the robes sized?",
+          answer:
+            "In paired sizes - S-M, M-L and L-XL - so each one covers a range rather than a single number.",
+        },
+        {
+          id: "robe-dye",
+          question: "Will a naturally dyed robe change with washing?",
+          answer:
+            "It will soften, and that is the point. Naturally dyed cloth settles with use and develops a character of its own wash by wash, and natural indigo is known for its colourfastness and breathability.",
+        },
+      ],
+    },
+    pillows: {
+      label: "Pillows",
+      eyebrow: "Pillow questions",
+      title: "Before it settles in",
+      lede: "Fillers, prints, and why a textile form beats a ceramic one.",
+      items: [
+        {
+          id: "pillow-filler",
+          question: "Does it come with a filler?",
+          answer:
+            "Several of our pillows are offered two ways: the cover alone, or the cover with a recycled cotton and natural fibre filler. Where there is a choice, it is the Cushion Type option on the product page.",
+        },
+        {
+          id: "pillow-print",
+          question: "How are the pillows made?",
+          answer:
+            "Most are hand-block printed in Dabu by the craft clusters we work with; others are built from appliqué and patchwork. Either way, each one is designed in-house.",
+        },
+        {
+          id: "pillow-homes",
+          question: "Are they right for a home with pets or children?",
+          answer:
+            "That is part of why we make them. Our textile forms are a soft, unbreakable alternative to ceramic décor - made for homes with dogs and children in them, and for living in without the worry of something fragile.",
+        },
+      ],
+    },
+    slippers: {
+      label: "Slippers",
+      eyebrow: "Slipper questions",
+      title: "Before the first step",
+      lede: "What is underfoot, where they belong, and how the sizes run.",
+      items: [
+        {
+          id: "slipper-materials",
+          question: "What are the slippers made of?",
+          answer:
+            "Soft cotton uppers - double cloth cotton or cotton waffle, depending on the pair - padded with recycled cotton and natural fibre filling. The Kloud slippers sit on a recycled EVA sole with a natural jute base; the Puffers on a quilted, puffed waffle base that cushions every step.",
+        },
+        {
+          id: "slipper-indoors",
+          question: "Are they for indoors or out?",
+          answer:
+            "They are made for the house: slow mornings, post-shower resets and evening wind-downs. Soft cotton is happiest indoors.",
+        },
+        {
+          id: "slipper-sizes",
+          question: "How are the slippers sized?",
+          answer: "In paired UK sizes, from UK 3-4 up to UK 11-12.",
+        },
+      ],
+    },
+    "ritual-kits": {
+      label: "Ritual Kits",
+      eyebrow: "Ritual kit questions",
+      title: "Before the ritual begins",
+      lede: "What a kit holds, how it arrives, and how to make it yours.",
+      items: [
+        {
+          id: "kit-contents",
+          question: "What is inside a ritual kit?",
+          answer:
+            "A robe and the Kompanions that belong beside it. The Ritual Companion Set, for one, holds an oversized bathrobe, slippers, an eye mask, a scrunchie and a tote bag. Each kit's description lists exactly what is in it.",
+        },
+        {
+          id: "kit-box",
+          question: "How does a kit arrive?",
+          answer:
+            "In our in-house, handmade quilted box packaging - made from the same care and natural fabrics as the Kompanions inside, and designed to be kept, as storage at home or a travel insert.",
+        },
+        {
+          id: "kit-initials",
+          question: "Can a kit be personalised?",
+          answer:
+            "Yes. Initials can be added to the bathrobe and to the kit's accessories, so every piece in the ritual is yours.",
+        },
+      ],
+    },
+    pet: {
+      label: "Pet Kollection",
+      eyebrow: "Pet questions",
+      title: "For the furrie ones",
+      lede: "Sizing by weight, fabrics for fur and paws, and matching with your pet.",
+      items: [
+        {
+          id: "pet-karrier-size",
+          question: "How do I choose a karrier size?",
+          answer:
+            "By your pet's weight. The Polka Pet Karrier, for one, runs Mini (up to 1.4 kg), Small (2-4 kg), Medium (4-6.5 kg) and Large (7-10 kg). Each karrier lists its own bands on its page.",
+        },
+        {
+          id: "pet-fabric",
+          question: "What are the pet Kompanions made from?",
+          answer:
+            "Soft textiles chosen for fur and paws: gentle textured cotton for the floor pillows and breathable, skin-safe modal silk for the puffer leash covers, konsciously krafted with eco-conscious dyes.",
+        },
+        {
+          id: "pet-match",
+          question: "Can I match with my pet?",
+          answer:
+            "Yes - that is what the Pet & Parent shelf is for: twin sets and bandanas in the same signature Kozy prints, for matching pet-parent rituals.",
+          link: { label: "Shop Pet & Parent", href: "/search/pet-parent" },
+        },
+        {
+          id: "pet-custom",
+          question: "Can you make something to fit my pet?",
+          answer:
+            "Message the studio on Instagram. Need help choosing a size, or want a customisation? Tell us about your furrie baby and we will take it from there.",
+          link: { label: site.instagram, href: site.instagramUrl },
+        },
+      ],
+    },
   },
-  {
-    question: "How do I care for natural fibres?",
-    answer:
-      "Wash cool and gently, dry in shade, and skip the fabric softener - it coats the fibre and flattens a waffle weave's texture. Naturally dyed and hand-printed pieces will soften and settle with use; that shift is the material behaving as it should.",
+
+  /** Answers built from the product, or from the live add-ons. */
+  dynamic: {
+    sizes: {
+      question: "Which sizes does it come in?",
+      answer: (title: string) =>
+        `${title} comes in the sizes below. Between two? Message the studio on Instagram and we will help you choose.`,
+    },
+    sleeves: {
+      question: "Which sleeve should I choose?",
+      answer:
+        "This robe comes two ways. The open wide sleeve falls loose; the scrunchie detail is attached to the sleeve. Pick either in the panel above.",
+    },
+    filler: {
+      question: "Does it come with a filler?",
+      answer:
+        "Your choice - pick a cover alone, or the cover with its filler, in the panel above.",
+    },
+    personalise: {
+      question: "Can I personalise it?",
+      answer: (price: string, max: number) =>
+        `Yes. Any Kompanion can carry your initials, for ${price} each: letters A to Z, up to ${max} of them, added from the product page before you add it to your cart.`,
+    },
+    gift: {
+      question: "Can I send it as a gift?",
+      answer: (price: string) =>
+        `Add a gift box from the product page, for ${price} each. It travels with the Kompanion on the same order.`,
+    },
   },
-  {
-    question: "Do you take bulk or private label orders?",
-    answer:
-      "Yes. Alongside retail we run bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands. Write to us with your brief to start a conversation.",
+
+  /** The indigo panel beside the list. */
+  help: {
+    eyebrow: "Still wondering?",
+    title: "Write to the studio",
+    body: "The studio reads everything that comes in - fabric, fit, a gift, a bulk brief.",
+    primary: { label: "Message on Instagram", href: site.instagramUrl },
+    secondary: { label: "Contact form", href: "/contact" },
   },
-] as const;
+} as const satisfies {
+  topics: readonly { key: string; label: string; items: readonly FaqEntry[] }[];
+  categories: Record<
+    string,
+    {
+      label: string;
+      eyebrow: string;
+      title: string;
+      lede: string;
+      items: readonly FaqEntry[];
+    }
+  >;
+} & Record<string, unknown>;
 
 export const footerColumns = [
   {

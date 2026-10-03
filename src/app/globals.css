@@ -3566,3 +3566,470 @@ html:has([data-loader]) body {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   The FAQ band (`components/faq/`) - homepage and every product page.
+
+   The product page has four cells on an explicit area map:
+
+     phone     head             desktop   head    list
+               topics                     topics  list
+               list                       .       list
+               help                       help    help
+
+   On the homepage, the intro and the one list share their own grid. The intro
+   sticks below the header on desktop and releases before the full-width studio
+   panel; on mobile, all three parts follow normal document flow.
+
+   The product studio panel closes the band at full width. Its spare `1fr` row
+   takes up whatever the list is taller than the head and the pills.
+
+   A row is the mood index's language again: hairline-separated, and the open
+   one lifted on an ivory fill that rises from its foot (ivory on cream is
+   1.027 - the sliver that reads as a surface with no border). The toggle
+   turns its plus into a cross by rotating, and floods indigo while open.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  .faq-home-section {
+    background: var(--cream);
+  }
+
+  .faq-home-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .faq-home-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "list";
+    row-gap: 2.5rem;
+  }
+
+  .faq-home-head { grid-area: head; }
+  .faq-home-list { grid-area: list; min-width: 0; }
+
+  .faq-home-list-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.875rem;
+    color: var(--muted);
+  }
+
+  @media (min-width: 1024px) {
+    .faq-home-layout {
+      gap: 4rem;
+    }
+
+    .faq-home-grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      grid-template-areas: "head list";
+      column-gap: clamp(3rem, 7vw, 8rem);
+    }
+
+    .faq-home-head {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      align-self: start;
+      padding-top: 2.25rem;
+    }
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "topics"
+      "list"
+      "help";
+    row-gap: 2rem;
+  }
+
+  .faq-head { grid-area: head; }
+  .faq-topics { grid-area: topics; min-width: 0; }
+  .faq-list { grid-area: list; min-width: 0; }
+  .faq-help { grid-area: help; }
+
+  @media (min-width: 1024px) {
+    .faq-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: auto auto 1fr auto;
+      grid-template-areas:
+        "head   list"
+        "topics list"
+        ".      list"
+        "help   help";
+      column-gap: 4rem;
+      row-gap: 2.25rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .faq-grid {
+      column-gap: 6rem;
+    }
+  }
+
+  /* ------------------------------------------------------------- pills */
+
+  .faq-topics {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .faq-pill-group {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  /* One swipeable row on a phone, bled to the screen edges with the first
+     pill landing on the gutter (as `.rail` does) - eight pills wrapped into
+     four lines would push the questions off the first screen. */
+  .faq-pills {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.25rem var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .faq-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .faq-pills {
+      flex-wrap: wrap;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+  }
+
+  .faq-pill {
+    @apply font-sans text-ui font-semibold;
+    display: inline-flex;
+    height: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.3rem;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid rgba(35, 50, 75, 0.15);
+    background: var(--card);
+    padding: 0 1.15rem;
+    color: var(--ink);
+    transition:
+      background-color 220ms ease,
+      border-color 220ms ease,
+      color 220ms ease,
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* The count as the system's superscript numeral. sage-deep on the ivory
+     pill; flat sage once the pill is indigo (6.50) - sage never carries type
+     on a light ground. */
+  .faq-pill-count {
+    position: relative;
+    top: -0.45em;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--sage-deep);
+    transition: color 220ms ease;
+  }
+
+  .faq-pill.is-active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .faq-pill.is-active .faq-pill-count {
+    color: var(--sage);
+  }
+
+  /* Hover only sharpens the outline. Flooding indigo, as `.pill` does, would
+     make a hovered pill indistinguishable from the chosen one. */
+  @media (hover: hover) and (pointer: fine) {
+    .faq-pill:not(.is-active):hover {
+      border-color: var(--ink);
+    }
+  }
+
+  .faq-pill:active {
+    transform: scale(0.97);
+  }
+
+  /* -------------------------------------------------------------- rows */
+
+  .faq-rows > .faq-row {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .faq-row {
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* The lifted fill, inset a hair from the rules so an open row floats
+     between its hairlines rather than erasing them. */
+  .faq-row::before {
+    content: "";
+    position: absolute;
+    inset: 0.3rem 0;
+    z-index: -1;
+    border-radius: 1.5rem;
+    background: var(--card);
+    opacity: 0;
+    transform: scaleY(0.6);
+    transform-origin: 50% 100%;
+    transition:
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s ease;
+  }
+
+  .faq-row.is-open::before {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  .faq-q {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+    align-items: start;
+    border-radius: 1.5rem;
+    padding: 1.25rem 0.75rem;
+    text-align: left;
+  }
+
+  .faq-num {
+    padding-top: 0.3rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    /* sage-deep, not sage: flat sage measures 1.85 on cream. */
+    color: var(--sage-deep);
+    transition: color 0.4s ease;
+  }
+
+  .faq-question {
+    font-size: clamp(1.0625rem, 0.9rem + 0.7vw, 1.3125rem);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-toggle {
+    display: inline-flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(35, 50, 75, 0.18);
+    color: var(--ink);
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-toggle svg {
+    height: 1rem;
+    width: 1rem;
+  }
+
+  .faq-row.is-open .faq-num {
+    color: var(--ink);
+  }
+
+  .faq-row.is-open .faq-toggle {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    transform: rotate(45deg);
+  }
+
+  /* A closed row half-lifts under the pointer - a promise of the open state,
+     not the state itself. Fine pointers only: on touch a hover sticks after
+     the tap and a closed row would look open. */
+  @media (hover: hover) and (pointer: fine) {
+    .faq-row:not(.is-open):hover::before {
+      opacity: 0.6;
+      transform: scaleY(1);
+    }
+
+    .faq-row:not(.is-open):hover .faq-toggle {
+      border-color: var(--ink);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .faq-row:not(.is-open):hover .faq-question {
+      transform: translateX(0.375rem);
+    }
+  }
+
+  /* The answer. 0fr -> 1fr animates to the content's real height with
+     nothing to measure; the inner box clips it on the way. */
+  .faq-a {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-row.is-open .faq-a {
+    grid-template-rows: 1fr;
+  }
+
+  .faq-a-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Indented to the question's left edge, so number, question and answer
+     read as one column. */
+  .faq-a-body {
+    padding: 0 0.75rem 1.6rem calc(0.75rem + 2.25rem + 0.75rem);
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    transition:
+      opacity 0.3s ease,
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-row.is-open .faq-a-body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.08s;
+  }
+
+  @media (min-width: 1024px) {
+    .faq-q {
+      grid-template-columns: 3rem minmax(0, 1fr) auto;
+      column-gap: 1.25rem;
+      padding: 1.6rem 1.25rem;
+    }
+
+    .faq-num {
+      padding-top: 0.2rem;
+      font-size: 1.125rem;
+    }
+
+    .faq-toggle {
+      height: 2.75rem;
+      width: 2.75rem;
+    }
+
+    .faq-a-body {
+      padding: 0 calc(1.25rem + 2.75rem + 1.25rem) 2rem calc(1.25rem + 3rem + 1.25rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-row::before,
+    .faq-a,
+    .faq-a-body,
+    .faq-toggle {
+      transition: none;
+    }
+  }
+
+  /* A product's real option values, under its answer. Cream on the ivory
+     fill, held by its hairline. */
+  .faq-tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(35, 50, 75, 0.15);
+    background: var(--paper);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  /* ------------------------------------------------------- studio panel */
+
+  .faq-help {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .faq-help {
+      padding: 2.25rem;
+    }
+  }
+
+  /* A row from `md`: the words on the left, the two ways to write on the
+     right, so the band reads as one line of invitation, not a second card. */
+  @media (min-width: 768px) {
+    .faq-help {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .faq-help {
+      margin-top: 0.75rem;
+      padding: 2.5rem 3rem;
+    }
+  }
+
+  /* Graphic, not text - oat at a whisper, no contrast duty. Sits under the
+     copy inside the panel's own stacking context. */
+  .faq-help-ghost {
+    position: absolute;
+    right: 0.04em;
+    bottom: -0.3em;
+    z-index: -1;
+    font-size: clamp(10rem, 18vw, 15rem);
+    line-height: 0.8;
+    color: rgba(232, 217, 196, 0.08);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+/* Lists mounted by a pill press, after the motion layer's scroll trigger has
+   fired (same reasoning as `.lookbook-turn`). `--i` is the row's index, so the
+   new topic's questions arrive in a short stagger. */
+@media (prefers-reduced-motion: no-preference) {
+  .faq-turn {
+    animation: faq-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+
+@keyframes faq-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.9rem, 0);
+  }
+}
