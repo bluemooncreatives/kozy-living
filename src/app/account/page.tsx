@@ -1,7 +1,9 @@
 import Price from "@/components/price";
 import { Eyebrow, Headline } from "@/components/ui/section";
+import OrderItems from "@/components/account/order-items";
 import {
   fetchCustomerAccount,
+  fetchOrderLineItems,
   getCustomerSession,
 } from "@/lib/customer-account";
 import Link from "next/link";
@@ -54,7 +56,10 @@ export default async function AccountPage({
   }
 
   if (session.isExpired) redirect("/api/auth/refresh?returnTo=/account");
-  const customer = await fetchCustomerAccount(session.accessToken!);
+  const [customer, orderLines] = await Promise.all([
+    fetchCustomerAccount(session.accessToken!),
+    fetchOrderLineItems(session.accessToken!),
+  ]);
   if (!customer) redirect("/api/auth/refresh?returnTo=/account");
 
   return (
@@ -128,7 +133,7 @@ export default async function AccountPage({
                   key={order.id}
                   className="rule-b flex flex-wrap items-start justify-between gap-6 py-5"
                 >
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="ui-mono font-semibold">{order.name}</p>
                     <p className="spec-mono mt-1.5">
                       {new Intl.DateTimeFormat("en", {
@@ -140,6 +145,7 @@ export default async function AccountPage({
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
+                    <OrderItems lines={orderLines[order.id] ?? []} />
                   </div>
                   <div className="text-right">
                     <Price

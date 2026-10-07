@@ -2,10 +2,12 @@
 
 import {
   ADDON_PARENT_ATTRIBUTE,
+  KIT_ATTRIBUTE,
   MAX_LINE_QUANTITY,
   TAGS,
 } from "@/lib/constants";
 import { isValidInitials } from "@/lib/shop/add-ons";
+import { findKitVariant, isKitLine, type KitRequest } from "@/lib/shop/kit";
 import { optionScore } from "@/lib/shop/variant-match";
 import {
   CartMutationError,
@@ -13,6 +15,7 @@ import {
   createCart,
   getAddOns,
   getCart,
+  getKitBuilder,
   getProduct,
   removeFromCart,
   updateCart,
@@ -27,7 +30,11 @@ import type {
   ProductVariant,
 } from "@/lib/shopify/types";
 import { clientKey, rateLimited } from "@/lib/rate-limit";
-import { addOns as addOnCopy, buyNow as buyNowCopy } from "@/lib/site";
+import {
+  addOns as addOnCopy,
+  buyNow as buyNowCopy,
+  kitBuilder as kitCopy,
+} from "@/lib/site";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -273,16 +280,9 @@ async function resolveAddOnLines(
 }
 
 /**
- * Adds a Kompanion with its add-ons nested under it.
- *
- * Two calls rather than one. Shopify can nest a child in the same call by
- * naming the parent's *variant*, but a cart may already hold that variant -
- * the same tote, other initials - and then which line the child attaches to
- * is Shopify's guess. Adding the parent first, finding it by its own unique
- * marker, and nesting by line id takes the guess away.
- *
- * If the add-ons fail, the parent is removed again: a personalised Kompanion
- * must never sit in a cart without the paid line that says what to stitch.
+ * Adds a Kompanion with its add-ons nested under it. If the add-ons fail, the
+ * parent is removed again: a personalised Kompanion must never sit in a cart
+ * without the paid line that says what to stitch.
  */
 async function addPersonalisedLine(
   cartId: string,
@@ -290,12 +290,53 @@ async function addPersonalisedLine(
   quantity: number,
   addOnLines: { addOn: ProductAddOn; attributes: CartAttribute[] }[]
 ): Promise<{ cart: Cart; warnings: CartWarning[] }> {
+  const { cart, warnings } = await addNestedLine(
+    cartId,
+    { merchandiseId, quantity },
+    addOnLines.map(({ addOn, attributes }) => ({
+      merchandiseId: addOn.variantId,
+      perUnit: addOn.chargePerUnit,
+      attributes,
+    }))
+  );
+  return { cart, warnings };
+}
+
+/** A line nested under a parent: an add-on, or a piece of a kit. */
+type ChildLine = {
+  merchandiseId: string;
+  /** Quantity follows the parent's; otherwise it is charged once. */
+  perUnit: boolean;
+  attributes: CartAttribute[];
+};
+
+/**
+ * The shared mechanics of a parent with lines nested under it - a Kompanion
+ * with its add-ons, or a kit with its pieces.
+ *
+ * Two calls rather than one. Shopify can nest a child in the same call by
+ * naming the parent's *variant*, but a cart may already hold that variant -
+ * the same tote, other initials; another kit - and then which line the child
+ * attaches to is Shopify's guess. Adding the parent first, finding it by its
+ * own unique marker, and nesting by line id takes the guess away.
+ *
+ * If the children fail, the parent is removed again (Shopify removes any
+ * children that did land with it).
+ */
+async function addNestedLine(
+  cartId: string,
+  parentLine: { merchandiseId: string; quantity: number; attributes?: CartAttribute[] },
+  children: ChildLine[]
+): Promise<{ cart: Cart; warnings: CartWarning[]; parentId: string }> {
   const marker = crypto.randomUUID();
   const added = await addToCart(cartId, [
     {
-      merchandiseId,
-      quantity,
-      attributes: [{ key: ADDON_PARENT_ATTRIBUTE, value: marker }],
+      merchandiseId: parentLine.merchandiseId,
+      quantity: parentLine.quantity,
+      attributes: [
+        { key: ADDON_PARENT_ATTRIBUTE, value: marker },
+        ...(parentLine.attributes ?? []),
+      ],
     },
   ]);
 
@@ -312,12 +353,12 @@ async function addPersonalisedLine(
   try {
     const nested = await addToCart(
       cartId,
-      addOnLines.map(({ addOn, attributes }) => ({
-        merchandiseId: addOn.variantId,
+      children.map(({ merchandiseId, perUnit, attributes }) => ({
+        merchandiseId,
         // The parent's ACTUAL quantity, not the one asked for: Shopify clamps
         // to stock, and initials for units that are not coming would be
         // charged and never stitched.
-        quantity: addOn.chargePerUnit ? parent.quantity : 1,
+        quantity: perUnit ? parent.quantity : 1,
         attributes,
         parent: { lineId: parent.id! },
       }))
@@ -325,6 +366,7 @@ async function addPersonalisedLine(
     return {
       cart: nested.cart,
       warnings: [...added.warnings, ...nested.warnings],
+      parentId: parent.id,
     };
   } catch (error) {
     await removeFromCart(cartId, [parent.id]).catch((cleanup) =>
@@ -399,6 +441,235 @@ export async function addItem(
           : "We couldn't add that to your cart."
       )
     );
+  }
+}
+
+/* ------------------------------------------------------- custom kit builder */
+
+const KIT_LIMIT = { windowMs: 10 * 60 * 1000, max: 30 };
+
+/** No 0/O or 1/I: the packer reads this code off a slip, and so might a shopper. */
+const KIT_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+function newKitCode(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(5));
+  return `K-${Array.from(bytes, (b) => KIT_CODE_ALPHABET[b % KIT_CODE_ALPHABET.length]).join("")}`;
+}
+
+/**
+ * Turns what the builder asked for into a container line and its pieces,
+ * re-checked against the kit Shopify says exists. Nothing the browser sends is
+ * trusted: not the piece ids, not the sizes, not the letters, and never a
+ * price - each piece is charged at its own variant's price by Shopify.
+ */
+async function resolveKit(
+  request: unknown
+): Promise<
+  | {
+      ok: true;
+      containerId: string;
+      parentAttributes: CartAttribute[];
+      children: ChildLine[];
+      pieceTitles: string[];
+    }
+  | { ok: false; message: string }
+> {
+  const errors = kitCopy.errors;
+  const kit = await getKitBuilder();
+  if (!kit || !kit.containerAvailable) return { ok: false, message: errors.resting };
+
+  const payload = (request ?? {}) as Partial<KitRequest>;
+  const fabric = kit.fabrics.find((candidate) => candidate.id === payload.fabricId);
+  if (!fabric) return { ok: false, message: errors.fabric };
+
+  const asked = Array.isArray(payload.pieces) ? payload.pieces : [];
+  const pieceIds = asked.map((entry) => entry?.pieceId);
+  if (
+    asked.length < kit.minPieces ||
+    asked.length > kit.pieces.length ||
+    new Set(pieceIds).size !== pieceIds.length
+  ) {
+    return { ok: false, message: errors.tooFew(kit.minPieces) };
+  }
+
+  const chosen: { title: string; variantId: string; embroiderable: boolean }[] = [];
+  for (const entry of asked) {
+    const piece = kit.pieces.find((candidate) => candidate.id === entry?.pieceId);
+    if (!piece) return { ok: false, message: errors.failed };
+
+    const sizes: Record<string, string> = {};
+    for (const option of piece.sizeOptions) {
+      const value = entry.sizes?.[option.name];
+      if (typeof value !== "string" || !value) {
+        return { ok: false, message: errors.size(piece.title) };
+      }
+      sizes[option.name] = value;
+    }
+
+    // The fabric is matched here, against the chosen fabric entry - not
+    // taken from the browser - so a Block printed robe can never be bought
+    // at the Solid price, and one kit never mixes fabrics.
+    const variant = findKitVariant(piece, fabric.optionValue, sizes);
+    if (!variant?.availableForSale) {
+      return { ok: false, message: errors.soldOut(piece.title) };
+    }
+    chosen.push({
+      title: piece.title,
+      variantId: variant.id,
+      embroiderable: piece.embroiderable,
+    });
+  }
+
+  const thread = payload.threadId
+    ? kit.threads.find((candidate) => candidate.id === payload.threadId)
+    : undefined;
+  if (payload.threadId && !thread) return { ok: false, message: errors.thread };
+
+  // Case and full-width letters are forgiven; anything else is refused
+  // rather than quietly dropped - the shopper has to see what is stitched.
+  const initials =
+    typeof payload.initials === "string"
+      ? payload.initials.normalize("NFKC").trim().toUpperCase()
+      : "";
+  if (thread && !initials) return { ok: false, message: errors.initials };
+  if (initials && !thread) return { ok: false, message: errors.thread };
+  if (initials) {
+    if (!/^[A-Z]+$/.test(initials)) {
+      return { ok: false, message: errors.invalidInitials };
+    }
+    if (!isValidInitials(initials, kit.initialsMaxLength)) {
+      return { ok: false, message: errors.tooLong(kit.initialsMaxLength) };
+    }
+  }
+
+  const stitched = chosen.filter((piece) => piece.embroiderable);
+  if (initials && !stitched.length) {
+    return { ok: false, message: errors.noEmbroiderable };
+  }
+
+  const code = newKitCode();
+  const labels = kitCopy.orderLabels;
+  const kitAttribute = { key: KIT_ATTRIBUTE, value: code };
+
+  const children: ChildLine[] = chosen.map((piece) => ({
+    merchandiseId: piece.variantId,
+    perUnit: true,
+    attributes: [kitAttribute],
+  }));
+  if (initials && kit.initialsVariantId) {
+    children.push({
+      merchandiseId: kit.initialsVariantId,
+      perUnit: true,
+      attributes: [kitAttribute, { key: labels.initials, value: initials }],
+    });
+  }
+
+  return {
+    ok: true,
+    containerId: kit.containerVariantId,
+    parentAttributes: [
+      kitAttribute,
+      { key: labels.fabric, value: fabric.title },
+      ...(initials && thread
+        ? [
+            { key: labels.thread, value: thread.title },
+            { key: labels.initials, value: initials },
+            {
+              key: labels.embroiderOn,
+              value: stitched.map((piece) => piece.title).join(", "),
+            },
+          ]
+        : []),
+    ],
+    children,
+    pieceTitles: chosen.map((piece) => piece.title),
+  };
+}
+
+/**
+ * Adds a built kit: the ₹0 container line, with every piece (and an initials
+ * charge, when the merchant has set one) nested under it by line id.
+ *
+ * A kit is whole or absent. Shopify answers a piece that sold out a moment ago
+ * by clamping its line - to nothing, for one unit - rather than by failing, so
+ * the result is checked: a missing piece takes the whole kit back out, and a
+ * piece clamped below the rest brings the kit down to what can actually ship.
+ */
+export async function addKitItem(
+  _prevState: CartActionState,
+  payload: KitRequest
+): Promise<CartActionState> {
+  const requested = payload?.quantity ?? 1;
+  if (!isUsableQuantity(requested)) return fail("That quantity isn't valid.");
+  const quantity = clampQuantity(requested);
+  if (quantity < 1) return fail("Quantity must be at least 1.");
+
+  if (rateLimited("kit-builder", await clientKey(), KIT_LIMIT)) {
+    return fail(kitCopy.errors.busy);
+  }
+
+  try {
+    const resolved = await resolveKit(payload);
+    if (!resolved.ok) return fail(resolved.message);
+
+    const outcome = await withLiveCart(async (cartId) => {
+      const added = await addNestedLine(
+        cartId,
+        {
+          merchandiseId: resolved.containerId,
+          quantity,
+          attributes: resolved.parentAttributes,
+        },
+        resolved.children
+      );
+
+      const parent = added.cart.lines.find((line) => line.id === added.parentId);
+      const pieces = parent?.addOns ?? [];
+      const missing = resolved.children.findIndex(
+        (child) =>
+          !pieces.some(
+            (line) => line.merchandise.id === child.merchandiseId && line.quantity > 0
+          )
+      );
+
+      if (!parent || missing !== -1) {
+        await removeFromCart(cartId, [added.parentId]).catch((cleanup) =>
+          console.error("Could not roll back a kit", cleanup)
+        );
+        return {
+          ok: false as const,
+          message: kitCopy.errors.soldOut(
+            resolved.pieceTitles[missing] ?? resolved.pieceTitles[0] ?? "kit"
+          ),
+        };
+      }
+
+      const whole = Math.min(...pieces.map((line) => line.quantity), parent.quantity);
+      if (whole < parent.quantity || pieces.some((line) => line.quantity !== whole)) {
+        await updateCart(cartId, [
+          { id: parent.id!, quantity: whole },
+          ...pieces
+            .filter((line) => line.id && line.quantity !== whole)
+            .map((line) => ({ id: line.id!, quantity: whole })),
+        ]);
+        return { ok: true as const, warnings: added.warnings, clamped: true };
+      }
+
+      return { ok: true as const, warnings: added.warnings, clamped: false };
+    });
+
+    updateTag(TAGS.cart);
+    if (!outcome.ok) return fail(outcome.message);
+    return ok(
+      outcome.clamped
+        ? "Limited stock - your kit was set to the quantity still available."
+        : describeWarnings(outcome.warnings)
+    );
+  } catch (error) {
+    // A failed add can still have changed the cart (a rollback that itself
+    // failed), so the drawer re-reads either way.
+    updateTag(TAGS.cart);
+    return fail(toMessage(error, kitCopy.errors.failed));
   }
 }
 
@@ -781,7 +1052,21 @@ export async function updateItemQuantity(
       // Stock can clamp the parent below what was asked. The add-ons were
       // sent the asked-for number, so bring them down to what is coming.
       const settled = result.cart.lines.find((c) => c.id === lineId);
-      if (settled && settled.quantity !== quantity) {
+      if (settled && isKitLine(settled)) {
+        // A kit's container is never stock-tracked, so it is the PIECES that
+        // clamp - and a kit is only ever sent whole. Everything comes down to
+        // the fewest units any piece can supply.
+        const pieces = settled.addOns ?? [];
+        const whole = Math.min(settled.quantity, ...pieces.map((p) => p.quantity));
+        if (whole <= 0) {
+          await removeFromCart(cartId, [lineId]);
+        } else if (whole !== settled.quantity || pieces.some((p) => p.quantity !== whole)) {
+          await updateCart(cartId, [
+            { id: lineId, quantity: whole },
+            ...addOnQuantityUpdates(settled, whole, () => true),
+          ]);
+        }
+      } else if (settled && settled.quantity !== quantity) {
         const resync = addOnQuantityUpdates(settled, settled.quantity, perUnit);
         if (resync.length) await updateCart(cartId, resync);
       }

@@ -71,5 +71,24 @@ export const ADDON_PRODUCT_TAG = "kozy-addon";
  * The leading underscore keeps it out of checkout and the order email.
  */
 export const ADDON_PARENT_ATTRIBUTE = "_kozy_line";
+
+/**
+ * The custom kit builder's products (docs/custom-kit-builder.md). A piece -
+ * the kit's bathrobe, slippers, pouch and mask - is sold only inside a kit,
+ * and the container is the ₹0 line the pieces nest under. Both are Unlisted in
+ * Admin, which keeps Shopify's own surfaces clear; these tags are the
+ * storefront's half of the guarantee, so a piece flipped back to Active still
+ * never lists here and its product page still 404s.
+ */
+export const KIT_PIECE_TAG = "kozy-kit-piece";
+export const KIT_CONTAINER_TAG = "kozy-kit";
+
+/**
+ * Visible line property tying a kit's lines together ("Kit: K-7Q2X"). Not
+ * underscored on purpose: nesting is lost wherever Shopify does not keep it -
+ * the Customer Account API, order edits, POS, courier exports - and this code
+ * is what still groups the pieces there, and what the packer reads.
+ */
+export const KIT_ATTRIBUTE = "Kit";
 export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2026-07/graphql.json";

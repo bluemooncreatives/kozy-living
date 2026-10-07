@@ -1116,6 +1116,63 @@ with **status 200 + noindex**, because `product/[handle]/loading.tsx` streams
 the skeleton before the lookup finishes. That is the existing behaviour for
 every unknown handle, not something the add-ons introduced.
 
+---
+
+## 14. Custom kit builder — `/kit-builder`
+
+A shopper builds a kit from the base Kompanions (Bathrobe, Slippers, Makeup
+Pouch, Eye Mask) in one fabric, with optional initials in a chosen thread.
+Research, the Admin setup and the edge cases are in
+`docs/custom-kit-builder.md`; this is what the code relies on.
+
+### The model
+
+- **Pieces are Unlisted products** tagged `kozy-kit-piece`, each with a
+  **Fabric** option (`Solid` / `Block printed`) and usually Size. The fabric's
+  price is the variant's price; there is no surcharge product.
+- **The kit is a ₹0 container** (Unlisted, tag `kozy-kit`, SKU `KOZY-KIT`,
+  inventory untracked) with every piece nested under it by line id. The
+  container carries `Kit`, `Fabric`, `Thread`, `Initials` and `Embroider on`;
+  each piece carries `Kit`.
+- Four metaobject types drive it, all read by key in `getKitBuilder()`
+  (`queries/kit-builder.ts`): `kit_builder` (one settings entry, incl.
+  `container_variant`, `min_pieces`, `initials_max_length`, optional
+  `initials_variant`), `kit_piece`, `kit_fabric` (`option_value`) and
+  `embroidery_thread`. `null` means the builder rests.
+- `lib/shop/kit.ts` holds the rules both sides share - variant resolution by
+  Fabric + Size, `isKitLine`, `KitRequest` - so the page and the server always
+  pick the same variant.
+
+### Traps
+
+- **Unlisted products are invisible to listings.** Shopify returns them only by
+  handle, id or reference, so the builder reaches pieces ONLY through
+  `kit_piece.product`. And `reshapeProduct` / `reshapeCatalogProduct` drop
+  both kit tags, so pieces have their own `reshapeKitPiece`; never route them
+  through the product reshapes.
+- **Option values are compared forgivingly** (`sameOption`: case, spacing,
+  NFKC). The store has `Block printed` on the products and `Block Printed` in
+  the fabric entry; that is one fabric. Matching is by option **name**, not
+  position - the products list Size before Fabric.
+- **Shopify's linked "Fabric" option** (category metafield) returns the
+  entry's **Label** as the option value - verified 2026-10-08.
+- **A kit is whole or absent.** `addKitItem` removes the container (which
+  cascades) if any piece fails to land, and brings every line down to the
+  lowest quantity if stock clamps one. `updateItemQuantity` does the same for
+  kits: the container is never stock-tracked, so it is the pieces that clamp.
+- **The visible `Kit: K-XXXXX` code is load-bearing.** The Customer Account
+  API exposes no nesting, so `/account` (`components/account/order-items.tsx`)
+  groups an order's lines by it; the container is the line carrying `Fabric`.
+  Order line items load in a **separate, non-throwing** query
+  (`fetchOrderLineItems`) so a refused field costs the item list, not the
+  account page.
+- The drawer renders a kit through `KitCartLine`: no per-piece remove and no
+  size switcher (a nested line cannot be re-parented); "Edit" goes back to the
+  builder.
+- URL state (`?pieces=bathrobe,makeup-pouch&bathrobe=M&fabric=…&thread=…`)
+  uses the metaobject **handles** and is written with `replaceState`; the
+  page reads it on the server. Initials never enter the URL.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -158,6 +158,82 @@ export async function fetchCustomerAccount(accessToken: string) {
   return payload.data.customer;
 }
 
+export type OrderLineItem = {
+  id: string;
+  name: string;
+  variantTitle?: string | null;
+  quantity: number;
+  image?: { url: string; altText?: string | null } | null;
+  customAttributes: { key: string; value?: string | null }[];
+  totalPrice?: { amount: string; currencyCode: string } | null;
+};
+
+const ORDER_LINES_QUERY = /* GraphQL */ `
+  query CustomerOrderLines {
+    customer {
+      orders(first: 20, reverse: true) {
+        nodes {
+          id
+          lineItems(first: 30) {
+            nodes {
+              id
+              name
+              variantTitle
+              quantity
+              image { url altText }
+              customAttributes { key value }
+              totalPrice { amount currencyCode }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * What each order contained, by order id - for showing a custom kit (and
+ * everything else) in the account's order history.
+ *
+ * A separate query from `fetchCustomerAccount` on purpose, and it never
+ * throws: that one takes the page down on any error, and a field this one
+ * asks for being refused should cost the list of items, not the account.
+ */
+export async function fetchOrderLineItems(
+  accessToken: string
+): Promise<Record<string, OrderLineItem[]>> {
+  try {
+    const { graphql_api } = await getCustomerApiConfiguration();
+    const response = await fetch(graphql_api, {
+      method: "POST",
+      headers: { Authorization: accessToken, "Content-Type": "application/json" },
+      body: JSON.stringify({ query: ORDER_LINES_QUERY }),
+      cache: "no-store",
+    });
+    if (!response.ok) return {};
+    const payload = (await response.json()) as {
+      data?: {
+        customer?: {
+          orders: { nodes: { id: string; lineItems: { nodes: OrderLineItem[] } }[] };
+        };
+      };
+      errors?: Array<{ message: string }>;
+    };
+    if (payload.errors?.length) {
+      console.warn("Order line items unavailable:", payload.errors[0]?.message);
+    }
+    return Object.fromEntries(
+      (payload.data?.customer?.orders.nodes ?? []).map((order) => [
+        order.id,
+        order.lineItems?.nodes ?? [],
+      ])
+    );
+  } catch (error) {
+    console.warn("Order line items unavailable:", error);
+    return {};
+  }
+}
+
 export const customerCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",

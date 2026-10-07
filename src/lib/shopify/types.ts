@@ -337,6 +337,120 @@ export type ShopifyAddOnsOperation = {
   variables: { first: number };
 };
 
+/* ------------------------------------------------------- custom kit builder
+   docs/custom-kit-builder.md. Read through `getKitBuilder()`, which keeps only
+   entries that are active and complete. */
+
+export type KitVariant = {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  selectedOptions: { name: string; value: string }[];
+  price: Money;
+  image: Image | null;
+};
+
+export type KitPiece = {
+  /** Metaobject id - what the browser sends back to name a piece. */
+  id: string;
+  /** Metaobject handle - how the page URL names it (`?pieces=bathrobe`). */
+  handle: string;
+  title: string;
+  description: string | null;
+  /** Takes the initials when the kit is embroidered. */
+  embroiderable: boolean;
+  productTitle: string;
+  image: Image | null;
+  images: Image[];
+  variants: KitVariant[];
+  /** Option names other than Fabric, in the product's order - usually Size. */
+  sizeOptions: { name: string; values: string[] }[];
+};
+
+export type KitFabric = {
+  id: string;
+  handle: string;
+  title: string;
+  /** The Fabric option value this fabric selects on every piece. */
+  optionValue: string;
+  description: string | null;
+  swatch: Image | null;
+  isDefault: boolean;
+};
+
+export type KitThread = {
+  id: string;
+  handle: string;
+  title: string;
+  /** `#rrggbb`, or null when the entry has only a photo. */
+  colour: string | null;
+  swatch: Image | null;
+};
+
+export type KitBuilder = {
+  title: string;
+  containerVariantId: string;
+  containerAvailable: boolean;
+  currencyCode: string;
+  minPieces: number;
+  initialsMaxLength: number;
+  /** A charged initials line, when the merchant has set one. */
+  initialsVariantId: string | null;
+  initialsPrice: Money | null;
+  embroideryNote: string | null;
+  policyNote: string | null;
+  pieces: KitPiece[];
+  fabrics: KitFabric[];
+  threads: KitThread[];
+};
+
+type ShopifyKitField<R> = { key: string; value: string | null; reference: R | null };
+
+export type ShopifyKitBuilderOperation = {
+  data: {
+    settings: {
+      nodes: {
+        id: string;
+        handle: string;
+        fields: ShopifyKitField<{
+          id?: string;
+          availableForSale?: boolean;
+          price?: Money;
+        }>[];
+      }[];
+    } | null;
+    pieces: {
+      nodes: {
+        id: string;
+        handle: string;
+        fields: ShopifyKitField<{
+          id?: string;
+          handle?: string;
+          title?: string;
+          tags?: string[];
+          featuredImage?: Image | null;
+          images?: { nodes: Image[] };
+          variants?: { nodes: KitVariant[] };
+        }>[];
+      }[];
+    } | null;
+    fabrics: {
+      nodes: {
+        id: string;
+        handle: string;
+        fields: ShopifyKitField<{ image?: Image | null }>[];
+      }[];
+    } | null;
+    threads: {
+      nodes: {
+        id: string;
+        handle: string;
+        fields: ShopifyKitField<{ image?: Image | null }>[];
+      }[];
+    } | null;
+  };
+};
+
 export type CartItem = {
   id: string | undefined;
   /**

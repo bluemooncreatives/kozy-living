@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   ADDON_PRODUCT_TAG,
   HIDDEN_PRODUCT_TAG,
+  KIT_CONTAINER_TAG,
+  KIT_PIECE_TAG,
   SHOPIFY_GRAPHQL_API_ENDPOINT,
   TAGS,
 } from "../constants";
@@ -17,6 +19,8 @@ import {
   removeFromCartMutation,
 } from "./mutations/cart";
 import { getAddOnsQuery } from "./queries/add-ons";
+import { getKitBuilderQuery } from "./queries/kit-builder";
+import { FABRIC_OPTION, sameOption } from "../shop/kit";
 import { getCartQuery } from "./queries/cart";
 import {
   getCollectionProductsQuery,
@@ -49,6 +53,11 @@ import {
   Collection,
   Connection,
   Image,
+  KitBuilder,
+  KitFabric,
+  KitPiece,
+  KitThread,
+  KitVariant,
   Menu,
   Money,
   Page,
@@ -68,6 +77,7 @@ import {
   ShopifyCatalogProduct,
   ShopifyCollection,
   ShopifyColourPaletteOperation,
+  ShopifyKitBuilderOperation,
   ShopifyCollectionOrderOperation,
   ShopifyCollectionProductsOperation,
   ShopifyCollectionsOperation,
@@ -268,10 +278,14 @@ function reshapeProduct(
 ) {
   // An add-on is filtered even where hidden products are allowed through (the
   // product page passes `false`): it is a charge, not something to browse,
-  // and its page must 404 rather than render an orphan "Add to cart".
+  // and its page must 404 rather than render an orphan "Add to cart". A kit
+  // piece or container likewise: sold only through /kit-builder, which reads
+  // them through its own reshape, never this one.
   if (
     !product ||
     product.tags.includes(ADDON_PRODUCT_TAG) ||
+    product.tags.includes(KIT_PIECE_TAG) ||
+    product.tags.includes(KIT_CONTAINER_TAG) ||
     (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))
   ) {
     return undefined;
@@ -625,7 +639,9 @@ function reshapeCatalogProduct(
   if (
     !product ||
     product.tags?.includes(HIDDEN_PRODUCT_TAG) ||
-    product.tags?.includes(ADDON_PRODUCT_TAG)
+    product.tags?.includes(ADDON_PRODUCT_TAG) ||
+    product.tags?.includes(KIT_PIECE_TAG) ||
+    product.tags?.includes(KIT_CONTAINER_TAG)
   ) {
     return undefined;
   }
@@ -795,6 +811,222 @@ export const getAddOns = reactCache(async (): Promise<ProductAddOn[]> => {
 
     console.warn("Add-on metaobjects unavailable:", error);
     return [];
+  }
+});
+
+/* ------------------------------------------------------- custom kit builder
+
+   Four metaobject types the merchant edits in Admin - `kit_builder` (one entry
+   of settings), `kit_piece`, `kit_fabric` and `embroidery_thread` - each read
+   by key. See docs/custom-kit-builder.md, section 5. */
+
+type KitFields = { key: string; value: string | null; reference: unknown }[];
+
+function kitFieldReader<R>(fields: KitFields) {
+  const field = (key: string) => fields.find((f) => f.key === key);
+  // Admin text is pasted as often as typed; runs of whitespace (a stray tab
+  // from a copied table) collapse rather than reaching a shopper.
+  const text = (key: string) =>
+    field(key)?.value?.replace(/\s+/g, " ").trim() || null;
+  return {
+    text,
+    // Shopify serialises a boolean field as the string "true" or "false".
+    flag: (key: string) => field(key)?.value === "true",
+    int: (key: string) => {
+      const value = Number(field(key)?.value);
+      return Number.isInteger(value) ? value : null;
+    },
+    ref: (key: string) => (field(key)?.reference ?? null) as R | null,
+  };
+}
+
+/** Entries the merchant numbered come first, in their order; the rest after. */
+function bySortOrder<T>(entries: { sort: number | null; entry: T }[]): T[] {
+  return entries
+    .map((item, index) => ({ ...item, index }))
+    .sort(
+      (a, b) =>
+        (a.sort ?? Number.MAX_SAFE_INTEGER) - (b.sort ?? Number.MAX_SAFE_INTEGER) ||
+        a.index - b.index
+    )
+    .map(({ entry }) => entry);
+}
+
+function reshapeKitPiece(
+  node: NonNullable<ShopifyKitBuilderOperation["data"]["pieces"]>["nodes"][number]
+): { sort: number | null; entry: KitPiece } | undefined {
+  const { text, flag, int, ref } = kitFieldReader<{
+    title?: string;
+    featuredImage?: Image | null;
+    images?: { nodes: Image[] };
+    variants?: { nodes: KitVariant[] };
+  }>(node.fields);
+  const product = ref("product");
+
+  // Off in Admin, or its product is Draft/archived and no longer resolves.
+  // Deliberately NOT through `reshapeProduct`: that drops kit pieces by tag.
+  if (!flag("active") || !product?.variants?.nodes.length) return undefined;
+
+  const variants = product.variants.nodes;
+  const sizeOptions: KitPiece["sizeOptions"] = [];
+  for (const variant of variants) {
+    for (const option of variant.selectedOptions) {
+      if (sameOption(option.name, FABRIC_OPTION)) continue;
+      let entry = sizeOptions.find((o) => o.name === option.name);
+      if (!entry) sizeOptions.push((entry = { name: option.name, values: [] }));
+      if (!entry.values.includes(option.value)) entry.values.push(option.value);
+    }
+  }
+
+  const productTitle = houseSpelling(product.title ?? node.handle);
+
+  return {
+    sort: int("sort_order"),
+    entry: {
+      id: node.id,
+      handle: node.handle,
+      title: houseSpelling(text("title") ?? productTitle),
+      description: text("description"),
+      embroiderable: flag("embroiderable"),
+      productTitle,
+      image: product.featuredImage ?? null,
+      images: product.images?.nodes ?? [],
+      variants,
+      // A lone "Default Title" is not a size anyone picks.
+      sizeOptions: sizeOptions.filter(
+        (option) => !(option.values.length === 1 && option.values[0] === "Default Title")
+      ),
+    },
+  };
+}
+
+function reshapeKitFabric(
+  node: NonNullable<ShopifyKitBuilderOperation["data"]["fabrics"]>["nodes"][number]
+): { sort: number | null; entry: KitFabric } | undefined {
+  const { text, flag, int, ref } = kitFieldReader<{ image?: Image | null }>(
+    node.fields
+  );
+  const optionValue = text("option_value");
+  // With no option value there is no variant this fabric could select.
+  if (!flag("active") || !optionValue) return undefined;
+
+  return {
+    sort: int("sort_order"),
+    entry: {
+      id: node.id,
+      handle: node.handle,
+      title: text("title") ?? optionValue,
+      optionValue,
+      description: text("description"),
+      swatch: ref("swatch")?.image ?? null,
+      isDefault: flag("is_default"),
+    },
+  };
+}
+
+function reshapeKitThread(
+  node: NonNullable<ShopifyKitBuilderOperation["data"]["threads"]>["nodes"][number]
+): { sort: number | null; entry: KitThread } | undefined {
+  const { text, flag, int, ref } = kitFieldReader<{ image?: Image | null }>(
+    node.fields
+  );
+  const title = text("title");
+  const colour = text("colour");
+  const swatch = ref("swatch")?.image ?? null;
+  // A thread needs a name for the order and something to show.
+  if (!flag("active") || !title || (!colour && !swatch)) return undefined;
+
+  return {
+    sort: int("sort_order"),
+    entry: {
+      id: node.id,
+      handle: node.handle,
+      title,
+      colour: colour && /^#[0-9a-f]{6}$/i.test(colour) ? colour : null,
+      swatch,
+    },
+  };
+}
+
+/**
+ * The kit builder as the merchant has set it up, or `null` when it is
+ * switched off or cannot work: no settings entry, no container, fewer pieces
+ * than a kit needs, or no fabric to pick variants by.
+ *
+ * Memoised per request - the page and `addKitItem` both read it - on the
+ * standard TTL, so a price or a new thread colour is live within a minute in
+ * production. Degrades to `null` (the page then says it is resting).
+ */
+export const getKitBuilder = reactCache(async (): Promise<KitBuilder | null> => {
+  try {
+    const res = await shopifyFetch<ShopifyKitBuilderOperation>({
+      query: getKitBuilderQuery,
+      tags: [TAGS.products],
+    });
+    const data = res.body?.data;
+    const settings = data?.settings?.nodes[0];
+    if (!settings) return null;
+
+    const { text, flag, int, ref } = kitFieldReader<{
+      id?: string;
+      availableForSale?: boolean;
+      price?: Money;
+    }>(settings.fields);
+    const container = ref("container_variant");
+    if (!flag("active") || !container?.id) return null;
+
+    const pieces = bySortOrder(
+      (data?.pieces?.nodes ?? [])
+        .map(reshapeKitPiece)
+        .filter((piece): piece is NonNullable<typeof piece> => Boolean(piece))
+    );
+    const fabrics = bySortOrder(
+      (data?.fabrics?.nodes ?? [])
+        .map(reshapeKitFabric)
+        .filter((fabric): fabric is NonNullable<typeof fabric> => Boolean(fabric))
+    );
+    const threads = bySortOrder(
+      (data?.threads?.nodes ?? [])
+        .map(reshapeKitThread)
+        .filter((thread): thread is NonNullable<typeof thread> => Boolean(thread))
+    );
+
+    // The default fabric leads, whatever its sort order says: it is the one
+    // preselected, so it should also be the first card read.
+    const defaultIndex = fabrics.findIndex((fabric) => fabric.isDefault);
+    if (defaultIndex > 0) fabrics.unshift(...fabrics.splice(defaultIndex, 1));
+    if (defaultIndex === -1 && fabrics[0]) fabrics[0] = { ...fabrics[0], isDefault: true };
+
+    const minPieces = Math.max(1, int("min_pieces") ?? 2);
+    if (!fabrics.length || pieces.length < minPieces) return null;
+
+    const initials = ref("initials_variant");
+    const maxLength = int("initials_max_length");
+
+    return {
+      title: text("title") ?? "Custom Ritual Kit",
+      containerVariantId: container.id,
+      containerAvailable: container.availableForSale !== false,
+      currencyCode:
+        pieces[0]?.variants[0]?.price.currencyCode ??
+        container.price?.currencyCode ??
+        "INR",
+      minPieces,
+      initialsMaxLength:
+        maxLength && maxLength > 0 ? Math.min(maxLength, ADDON_TEXT_CEILING) : 2,
+      initialsVariantId: initials?.id ?? null,
+      initialsPrice: initials?.id ? (initials.price ?? null) : null,
+      embroideryNote: text("embroidery_note"),
+      policyNote: text("policy_note"),
+      pieces,
+      fabrics,
+      threads,
+    };
+  } catch (error) {
+    if (isFrameworkControlFlowError(error)) throw error;
+
+    console.warn("Kit builder metaobjects unavailable:", error);
+    return null;
   }
 });
 

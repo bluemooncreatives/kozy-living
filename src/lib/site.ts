@@ -1047,6 +1047,98 @@ export const addOns = {
   },
 } as const;
 
+/* -------------------------------------------------------- custom kit builder */
+
+/**
+ * `/kit-builder`: a ritual kit built from the base Kompanions, in one fabric,
+ * with optional initials. The pieces, fabrics, threads and prices are all
+ * merchant data in Admin (docs/custom-kit-builder.md); this is only the
+ * framing around them.
+ */
+export const kitBuilder = {
+  eyebrow: "Build your kit",
+  title: "A ritual kit, made your way",
+  circled: "your way",
+  intro:
+    "Choose the Kompanions you reach for, the fabric they are cut in, and the thread for your initials. One kit, put together for your own quiet hour.",
+  steps: {
+    pieces: {
+      title: "Choose your Kompanions",
+      hint: (min: number) =>
+        min > 1 ? `Pick at least ${min}.` : "Pick one or more.",
+    },
+    fabric: {
+      title: "Choose your fabric",
+      hint: "Every Kompanion in the kit is cut in the fabric you choose.",
+    },
+    thread: {
+      title: "Choose your thread",
+      hint: "For the initials stitched on your kit.",
+      none: "No embroidery",
+    },
+    initials: {
+      title: "Add your initials",
+      hint: (max: number) => `Up to ${max} letters, A to Z.`,
+      placeholder: "e.g. PD",
+      skipped: "Pick a thread above to add initials.",
+    },
+    review: { title: "Review your kit" },
+  },
+  fullKit: "The full ritual kit",
+  fullKitHint: (count: number) => `All ${count} Kompanions`,
+  chosen: "In your kit",
+  choose: "Add to kit",
+  from: "from",
+  unavailable: "Currently unavailable",
+  notInFabric: "Not in this fabric",
+  chooseSize: "Choose a size",
+  previewLabel: "Preview",
+  previewNote: "Letterforms are hand-embroidered and will vary.",
+  embroideredOn: "Stitched on",
+  included: "Included",
+  quantity: "Quantity",
+  total: "Total",
+  add: "Add kit to cart",
+  adding: "Adding your kit…",
+  added: "Your kit is in the cart.",
+  another: "Build another kit",
+  edit: "Edit",
+  empty: "Your Kompanions will appear here as you choose them.",
+  resting: {
+    title: "The kit builder is resting",
+    body: "We are preparing the next set of Kompanions. In the meantime, the collection is open.",
+    cta: "Explore the collection",
+  },
+  /** The drawer's label for a kit line. */
+  cartLabel: "Your kit",
+  /**
+   * Property names written onto the order. The workshop reads these in Admin
+   * and on the packing slip - change them with care. Initials share the
+   * add-ons' label so Flow and the packing slip treat both alike.
+   */
+  orderLabels: {
+    fabric: "Fabric",
+    thread: "Thread",
+    initials: "Initials",
+    embroiderOn: "Embroider on",
+  },
+  errors: {
+    resting: "The kit builder is not available right now. Please try again shortly.",
+    tooFew: (min: number) => `Choose at least ${min} Kompanions for your kit.`,
+    size: (piece: string) => `Choose a size for the ${piece}.`,
+    soldOut: (piece: string) =>
+      `The ${piece} has just sold out in that size and fabric. Please choose another.`,
+    fabric: "Please choose a fabric.",
+    thread: "Choose a thread colour, or No embroidery.",
+    initials: "Add your initials, or choose No embroidery.",
+    invalidInitials: "Initials can only be the letters A to Z.",
+    tooLong: (max: number) => `Initials can be at most ${max} letters.`,
+    noEmbroiderable: "None of the Kompanions in this kit take initials.",
+    busy: "Too many kits started just now. Please wait a moment and try again.",
+    failed: "We couldn't add your kit. Please try again.",
+  },
+} as const;
+
 /* ------------------------------------------------------------------ buy now */
 
 /**

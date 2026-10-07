@@ -22,6 +22,8 @@ import { EditItemQuantityButton } from "./edit-item-quantity-button";
 import type { CartItem } from "@/lib/shopify/types";
 import clsx from "clsx";
 import { fromMinor, lineTotalMinor, visibleAttributes } from "./cart-math";
+import { KitCartLine } from "./kit-line";
+import { isKitLine } from "@/lib/shop/kit";
 
 type MerchandiseSearchParams = {
   [key: string]: string;
@@ -223,6 +225,17 @@ export default function CartModal() {
                 <div className="flex h-full flex-col overflow-hidden">
                   <ul data-lenis-prevent className="flex-grow overflow-auto px-5">
                     {lines.map((item) => {
+                      if (isKitLine(item)) {
+                        return (
+                          <KitCartLine
+                            key={lineKey(item)}
+                            item={item}
+                            highlighted={item.merchandise.id === justAdded}
+                            onNavigate={closeCart}
+                          />
+                        );
+                      }
+
                       const merchandiseSearchParams =
                         {} as MerchandiseSearchParams;
 
