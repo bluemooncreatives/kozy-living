@@ -465,6 +465,21 @@ change its key. Get the **keys** exactly as below; the code reads them by key.
 | `sort_order` | Integer | |
 | `active` | True or false | |
 
+#### 4e. `kit_colour` — "Kit colour" (added 2026-10-08)
+
+The cloth colour, one per kit, chosen right after the fabric. Each colour
+belongs to one fabric, so Solid and Block printed have their own lists. It is
+written on the order as `Colour: …`; stock is NOT counted per colour.
+
+| Key | Type | Validation / notes |
+| --- | --- | --- |
+| `title` | Single line text | The colour's name, e.g. "Sage" (printed as `Colour: Sage`) |
+| `swatch` | File (image) | The studio photo of the cloth. This is what the shopper taps |
+| `fabric` | Metaobject reference → **Kit fabric** | **Required.** Which fabric offers this colour |
+| `colour` | Color | **Optional.** Fallback swatch when there is no photo |
+| `sort_order` | Integer | Order within its fabric |
+| `active` | True or false | |
+
 ### Step 5 — Create the entries
 
 *Content → Metaobjects*:
@@ -477,6 +492,8 @@ change its key. Get the **keys** exactly as below; the code reads them by key.
    Active. No prices here: they are on the product variants.
 4. **Embroidery thread** → one entry per colour the workshop actually
    stocks (§9 Q5) → Active.
+5. **Kit colour** → one entry per cloth colour, each with its photo and its
+   fabric (5 for Solid; Block printed colours to follow) → Active.
 
 ✅ *Check:* each entry shows **Active**, not Draft.
 

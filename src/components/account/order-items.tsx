@@ -65,6 +65,7 @@ export default function OrderItems({ lines }: { lines: OrderLineItem[] }) {
   if (!lines.length) return null;
   const shown = [
     kitCopy.orderLabels.fabric,
+    kitCopy.orderLabels.colour,
     kitCopy.orderLabels.thread,
     kitCopy.orderLabels.initials,
   ];

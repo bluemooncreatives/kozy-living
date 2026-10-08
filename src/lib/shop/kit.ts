@@ -96,6 +96,8 @@ export function pieceAvailable(piece: KitPiece, fabricValue: string) {
 export type KitRequest = {
   pieces: { pieceId: string; sizes: Record<string, string> }[];
   fabricId: string;
+  /** Required when the chosen fabric offers colours, refused otherwise. */
+  colourId?: string;
   /** Both or neither - a thread means nothing without letters. */
   threadId?: string;
   initials?: string;

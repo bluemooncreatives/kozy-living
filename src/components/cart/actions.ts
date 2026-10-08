@@ -482,6 +482,14 @@ async function resolveKit(
   const fabric = kit.fabrics.find((candidate) => candidate.id === payload.fabricId);
   if (!fabric) return { ok: false, message: errors.fabric };
 
+  // A colour belongs to one fabric: a Sage sent with Block printed chosen is
+  // refused, as is a fabric that offers colours with none picked.
+  const offered = kit.colours.filter((candidate) => candidate.fabricId === fabric.id);
+  const colour = offered.find((candidate) => candidate.id === payload.colourId);
+  if (offered.length ? !colour : payload.colourId) {
+    return { ok: false, message: errors.colour };
+  }
+
   const asked = Array.isArray(payload.pieces) ? payload.pieces : [];
   const pieceIds = asked.map((entry) => entry?.pieceId);
   if (
@@ -570,6 +578,7 @@ async function resolveKit(
     parentAttributes: [
       kitAttribute,
       { key: labels.fabric, value: fabric.title },
+      ...(colour ? [{ key: labels.colour, value: colour.title }] : []),
       ...(initials && thread
         ? [
             { key: labels.thread, value: thread.title },

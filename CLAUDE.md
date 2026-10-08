@@ -1137,8 +1137,15 @@ Research, the Admin setup and the edge cases are in
 - Four metaobject types drive it, all read by key in `getKitBuilder()`
   (`queries/kit-builder.ts`): `kit_builder` (one settings entry, incl.
   `container_variant`, `min_pieces`, `initials_max_length`, optional
-  `initials_variant`), `kit_piece`, `kit_fabric` (`option_value`) and
-  `embroidery_thread`. `null` means the builder rests.
+  `initials_variant`), `kit_piece`, `kit_fabric` (`option_value`),
+  `kit_colour` and `embroidery_thread`. `null` means the builder rests.
+- **Colour is one choice per kit, written on the order, not a variant**
+  (`Colour: Sage` on the container; owner's call 2026-10-08, "Option A").
+  Each `kit_colour` names its `kit_fabric` through a metaobject reference, so
+  Solid and Block printed offer their own lists; a fabric with none skips the
+  step, and switching fabric clears the colour. Stock is therefore per size +
+  fabric, NOT per colour. If stock per colour is ever needed, Colour becomes a
+  third variant option and `findKitVariant` must match it too.
 - `lib/shop/kit.ts` holds the rules both sides share - variant resolution by
   Fabric + Size, `isKitLine`, `KitRequest` - so the page and the server always
   pick the same variant.

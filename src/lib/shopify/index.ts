@@ -54,6 +54,7 @@ import {
   Connection,
   Image,
   KitBuilder,
+  KitColour,
   KitFabric,
   KitPiece,
   KitThread,
@@ -948,6 +949,34 @@ function reshapeKitThread(
   };
 }
 
+function reshapeKitColour(
+  node: NonNullable<ShopifyKitBuilderOperation["data"]["colours"]>["nodes"][number]
+): { sort: number | null; entry: KitColour } | undefined {
+  const { text, flag, int, ref } = kitFieldReader<{
+    image?: Image | null;
+    id?: string;
+  }>(node.fields);
+  const title = text("title");
+  const fabricId = ref("fabric")?.id;
+  const swatch = ref("swatch")?.image ?? null;
+  const colour = text("colour");
+  // Without a fabric the colour would be offered under neither; without a
+  // photo or a hex there is nothing to pick.
+  if (!flag("active") || !title || !fabricId || (!swatch && !colour)) return undefined;
+
+  return {
+    sort: int("sort_order"),
+    entry: {
+      id: node.id,
+      handle: node.handle,
+      title,
+      fabricId,
+      swatch,
+      colour: colour && /^#[0-9a-f]{6}$/i.test(colour) ? colour : null,
+    },
+  };
+}
+
 /**
  * The kit builder as the merchant has set it up, or `null` when it is
  * switched off or cannot work: no settings entry, no container, fewer pieces
@@ -985,6 +1014,11 @@ export const getKitBuilder = reactCache(async (): Promise<KitBuilder | null> => 
         .map(reshapeKitFabric)
         .filter((fabric): fabric is NonNullable<typeof fabric> => Boolean(fabric))
     );
+    const colours = bySortOrder(
+      (data?.colours?.nodes ?? [])
+        .map(reshapeKitColour)
+        .filter((colour): colour is NonNullable<typeof colour> => Boolean(colour))
+    ).filter((colour) => fabrics.some((fabric) => fabric.id === colour.fabricId));
     const threads = bySortOrder(
       (data?.threads?.nodes ?? [])
         .map(reshapeKitThread)
@@ -1020,6 +1054,7 @@ export const getKitBuilder = reactCache(async (): Promise<KitBuilder | null> => 
       policyNote: text("policy_note"),
       pieces,
       fabrics,
+      colours,
       threads,
     };
   } catch (error) {

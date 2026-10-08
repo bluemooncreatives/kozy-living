@@ -57,7 +57,17 @@ function initialSelection(kit: KitData, search: Search): KitSelection {
       return { id: piece.id, sizes };
     });
 
-  return { pieces, fabricId: fabric.id, threadId: thread?.id ?? null };
+  // Only a colour of the chosen fabric survives a shared link.
+  const colour = kit.colours.find(
+    (candidate) => candidate.handle === one(search.colour) && candidate.fabricId === fabric.id
+  );
+
+  return {
+    pieces,
+    fabricId: fabric.id,
+    colourId: colour?.id ?? null,
+    threadId: thread?.id ?? null,
+  };
 }
 
 function ringWord(line: string, phrase: string) {

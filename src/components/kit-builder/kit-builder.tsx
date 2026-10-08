@@ -44,6 +44,8 @@ export type KitSelection = {
   /** Chosen pieces in the order they were picked, with their sizes. */
   pieces: { id: string; sizes: Record<string, string> }[];
   fabricId: string;
+  /** The cloth colour, from the chosen fabric's own list. */
+  colourId: string | null;
   threadId: string | null;
 };
 
@@ -83,6 +85,8 @@ function urlFor(kit: KitData, selection: KitSelection) {
   }
   const fabric = kit.fabrics.find((candidate) => candidate.id === selection.fabricId);
   if (fabric && !fabric.isDefault) params.set("fabric", fabric.handle);
+  const colour = kit.colours.find((candidate) => candidate.id === selection.colourId);
+  if (colour) params.set("colour", colour.handle);
   const thread = kit.threads.find((candidate) => candidate.id === selection.threadId);
   if (thread) params.set("thread", thread.handle);
   const query = params.toString();
@@ -223,6 +227,10 @@ export default function KitBuilder({
     kit.fabrics.find((candidate) => candidate.id === selection.fabricId) ??
     kit.fabrics[0]!;
   const thread = kit.threads.find((candidate) => candidate.id === selection.threadId);
+  // Colours are per fabric: Solid and Block printed each offer their own, and
+  // a fabric with none simply skips the step.
+  const colours = kit.colours.filter((candidate) => candidate.fabricId === fabric.id);
+  const colour = colours.find((candidate) => candidate.id === selection.colourId);
   const chosen = selection.pieces
     .map((entry) => ({
       entry,
@@ -325,6 +333,7 @@ export default function KitBuilder({
     if (missing) return errors.size(missing.piece.title);
     const gone = lines.find((line) => line.soldOut);
     if (gone) return errors.soldOut(gone.piece.title);
+    if (colours.length && !colour) return errors.colour;
     if (thread && !initials) return errors.initials;
     if (thread && initials && !embroiderable.length) return errors.noEmbroiderable;
     return null;
@@ -334,6 +343,7 @@ export default function KitBuilder({
     setSelection({
       pieces: [],
       fabricId: kit.fabrics.find((candidate) => candidate.isDefault)?.id ?? kit.fabrics[0]!.id,
+      colourId: null,
       threadId: null,
     });
     setInitials("");
@@ -350,6 +360,7 @@ export default function KitBuilder({
     const request: KitRequest = {
       pieces: chosen.map(({ entry }) => ({ pieceId: entry.id, sizes: entry.sizes })),
       fabricId: fabric.id,
+      ...(colour ? { colourId: colour.id } : {}),
       ...(thread && initials ? { threadId: thread.id, initials } : {}),
       quantity,
     };
@@ -377,11 +388,23 @@ export default function KitBuilder({
     (lines[0] && pieceImage(lines[0].piece, fabric.optionValue)) ??
     (kit.pieces[0] ? pieceImage(kit.pieces[0], fabric.optionValue) : null);
   const pale = isPale(thread?.colour ?? null);
+  // Numbered as shown: the colour step exists only for a fabric that has
+  // colours, and the embroidery steps only when there are threads.
+  let counter = 0;
+  const stepNo = {
+    pieces: ++counter,
+    fabric: ++counter,
+    colour: colours.length ? ++counter : 0,
+    thread: kit.threads.length ? ++counter : 0,
+    initials: kit.threads.length ? ++counter : 0,
+    review: ++counter,
+  };
   const done = {
     pieces: chosen.length >= kit.minPieces && !lines.some((line) => line.needsSize || line.soldOut),
     // A fabric is always chosen (the default is preselected), and "No
     // embroidery" is a complete answer to the thread step.
     fabric: true,
+    colour: Boolean(colour),
     thread: true,
     initials: !thread || Boolean(initials),
   };
@@ -391,7 +414,7 @@ export default function KitBuilder({
       <div className="flex min-w-0 flex-col gap-5 lg:col-span-7">
         {/* ---------------------------------------------------- 1 · pieces */}
         <StepShell
-          number={1}
+          number={stepNo.pieces}
           title={copy.steps.pieces.title}
           hint={copy.steps.pieces.hint(kit.minPieces)}
           done={done.pieces}
@@ -519,7 +542,7 @@ export default function KitBuilder({
 
         {/* ---------------------------------------------------- 2 · fabric */}
         <StepShell
-          number={2}
+          number={stepNo.fabric}
           title={copy.steps.fabric.title}
           hint={copy.steps.fabric.hint}
           done={done.fabric}
@@ -531,7 +554,11 @@ export default function KitBuilder({
                 <button
                   key={candidate.id}
                   type="button"
-                  onClick={() => update({ fabricId: candidate.id })}
+                  onClick={() =>
+                    // A colour belongs to its fabric, so a switch clears it.
+                    candidate.id !== fabric.id &&
+                    update({ fabricId: candidate.id, colourId: null })
+                  }
                   aria-pressed={active}
                   className={clsx(
                     "flex items-start gap-4 rounded-plate border bg-paper p-3.5 text-left transition-colors",
@@ -574,10 +601,75 @@ export default function KitBuilder({
           </div>
         </StepShell>
 
-        {/* ---------------------------------------------------- 3 · thread */}
+        {/* ---------------------------------------------------- colour */}
+        {colours.length ? (
+          <StepShell
+            number={stepNo.colour}
+            title={copy.steps.colour.title}
+            hint={copy.steps.colour.hint(fabric.title)}
+            done={done.colour}
+          >
+            {/* The studio's own photographs of the cloth are the swatches:
+                a flat dot cannot show a crinkled gauze. */}
+            <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+              {colours.map((candidate) => {
+                const active = candidate.id === colour?.id;
+                return (
+                  <li key={candidate.id} className="relative">
+                    <div
+                      className={clsx(
+                        "rounded-plate transition-shadow",
+                        active
+                          ? "ring-2 ring-ink ring-offset-2 ring-offset-card"
+                          : "ring-1 ring-ink/10 hover:ring-ink/40"
+                      )}
+                    >
+                      {candidate.swatch?.url ? (
+                        <Plate
+                          src={candidate.swatch.url}
+                          alt={candidate.swatch.altText || candidate.title}
+                          aspect="2/3"
+                          sizes="(min-width: 1024px) 9vw, (min-width: 640px) 16vw, 30vw"
+                          placeholderText={candidate.title}
+                          reveal={false}
+                        />
+                      ) : (
+                        <span
+                          aria-hidden
+                          className="block aspect-[2/3] rounded-plate"
+                          style={{ backgroundColor: candidate.colour ?? undefined }}
+                        />
+                      )}
+                    </div>
+                    {active ? (
+                      <span className="pointer-events-none absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink text-sage">
+                        <CheckIcon className="h-3.5 w-3.5" aria-hidden />
+                      </span>
+                    ) : null}
+                    <p className="ui-mono mt-2 text-center">{candidate.title}</p>
+                    <button
+                      type="button"
+                      onClick={() => update({ colourId: candidate.id })}
+                      aria-pressed={active}
+                      aria-label={candidate.title}
+                      className="absolute inset-0 rounded-plate focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+            {attempted && !colour ? (
+              <p role="alert" className="spec-mono mt-3">
+                {copy.errors.colour}
+              </p>
+            ) : null}
+          </StepShell>
+        ) : null}
+
+        {/* ---------------------------------------------------- thread */}
         {kit.threads.length ? (
           <StepShell
-            number={3}
+            number={stepNo.thread}
             title={copy.steps.thread.title}
             hint={copy.steps.thread.hint}
             done={done.thread}
@@ -606,10 +698,10 @@ export default function KitBuilder({
           </StepShell>
         ) : null}
 
-        {/* -------------------------------------------------- 4 · initials */}
+        {/* -------------------------------------------------- initials */}
         {kit.threads.length ? (
           <StepShell
-            number={4}
+            number={stepNo.initials}
             title={copy.steps.initials.title}
             hint={copy.steps.initials.hint(kit.initialsMaxLength)}
             done={done.initials}
@@ -677,7 +769,7 @@ export default function KitBuilder({
         aria-labelledby="kit-review"
         className="panel p-5 sm:p-7 lg:sticky lg:top-28 lg:col-span-5"
       >
-        <p className="micro-mono text-muted">Step {kit.threads.length ? 5 : 3}</p>
+        <p className="micro-mono text-muted">Step {stepNo.review}</p>
         <h2 id="kit-review" className="serif mt-1 text-display-sm">
           {copy.steps.review.title}
         </h2>
@@ -690,7 +782,7 @@ export default function KitBuilder({
             sizes="(min-width: 1024px) 34vw, 92vw"
             placeholderText={kit.title}
             reveal={false}
-            tag={fabric.title}
+            tag={colour ? `${fabric.title} · ${colour.title}` : fabric.title}
           />
         </div>
 
@@ -706,6 +798,7 @@ export default function KitBuilder({
                   <span className="spec-mono block">
                     {[
                       fabric.title,
+                      colour?.title,
                       ...piece.sizeOptions.map((option) => entry.sizes[option.name]),
                     ]
                       .filter(Boolean)

@@ -387,6 +387,19 @@ export type KitThread = {
   swatch: Image | null;
 };
 
+/** A colour the kit's cloth comes in, offered under one fabric. */
+export type KitColour = {
+  id: string;
+  handle: string;
+  title: string;
+  /** The `kit_fabric` this colour belongs to. */
+  fabricId: string;
+  /** The studio's photograph of the cloth - what the shopper picks from. */
+  swatch: Image | null;
+  /** `#rrggbb` fallback when there is no photograph. */
+  colour: string | null;
+};
+
 export type KitBuilder = {
   title: string;
   containerVariantId: string;
@@ -401,6 +414,8 @@ export type KitBuilder = {
   policyNote: string | null;
   pieces: KitPiece[];
   fabrics: KitFabric[];
+  /** Every colour, for every fabric; filter by `fabricId`. */
+  colours: KitColour[];
   threads: KitThread[];
 };
 
@@ -446,6 +461,13 @@ export type ShopifyKitBuilderOperation = {
         id: string;
         handle: string;
         fields: ShopifyKitField<{ image?: Image | null }>[];
+      }[];
+    } | null;
+    colours: {
+      nodes: {
+        id: string;
+        handle: string;
+        fields: ShopifyKitField<{ image?: Image | null; id?: string }>[];
       }[];
     } | null;
   };

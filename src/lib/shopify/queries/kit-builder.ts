@@ -112,6 +112,28 @@ export const getKitBuilderQuery = /* GraphQL */ `
         }
       }
     }
+    # Fabric colours. Each names the kit_fabric it belongs to, so Solid and
+    # Block printed each offer their own; the swatch is the studio's photo.
+    colours: metaobjects(type: "kit_colour", first: 50) {
+      nodes {
+        id
+        handle
+        fields {
+          key
+          value
+          reference {
+            ... on MediaImage {
+              image {
+                ...image
+              }
+            }
+            ... on Metaobject {
+              id
+            }
+          }
+        }
+      }
+    }
   }
   ${imageFragment}
 `;

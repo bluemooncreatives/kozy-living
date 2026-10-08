@@ -1071,6 +1071,10 @@ export const kitBuilder = {
       title: "Choose your fabric",
       hint: "Every Kompanion in the kit is cut in the fabric you choose.",
     },
+    colour: {
+      title: "Choose your colour",
+      hint: (fabric: string) => `The ${fabric} cloth for every Kompanion in your kit.`,
+    },
     thread: {
       title: "Choose your thread",
       hint: "For the initials stitched on your kit.",
@@ -1117,6 +1121,7 @@ export const kitBuilder = {
    */
   orderLabels: {
     fabric: "Fabric",
+    colour: "Colour",
     thread: "Thread",
     initials: "Initials",
     embroiderOn: "Embroider on",
@@ -1128,6 +1133,7 @@ export const kitBuilder = {
     soldOut: (piece: string) =>
       `The ${piece} has just sold out in that size and fabric. Please choose another.`,
     fabric: "Please choose a fabric.",
+    colour: "Choose a colour for your kit.",
     thread: "Choose a thread colour, or No embroidery.",
     initials: "Add your initials, or choose No embroidery.",
     invalidInitials: "Initials can only be the letters A to Z.",
