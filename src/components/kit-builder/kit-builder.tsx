@@ -503,12 +503,12 @@ export default function KitBuilder({
             })}
           </ul>
 
-          {/* A lone value ("Free Size") is already chosen by `defaultSizes`;
-              a picker with one pill asks for a click that changes nothing. */}
-          {lines.some((line) => line.piece.sizeOptions.some((option) => option.values.length > 1)) ? (
+          {/* A lone value ("Free Size") is shown too, already chosen by
+              `defaultSizes` - the owner wants every piece to state its size. */}
+          {lines.some((line) => line.piece.sizeOptions.length) ? (
             <div className="rule-t mt-6 space-y-5 pt-5">
               {lines.map(({ piece, entry }) =>
-                piece.sizeOptions.filter((option) => option.values.length > 1).map((option) => (
+                piece.sizeOptions.map((option) => (
                   <fieldset key={`${piece.id}-${option.name}`}>
                     <legend className="eyebrow text-muted">
                       {piece.title} · {option.name}
