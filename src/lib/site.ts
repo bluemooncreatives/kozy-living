@@ -1103,7 +1103,6 @@ export const kitBuilder = {
   added: "Your kit is in the cart.",
   another: "Build another kit",
   edit: "Edit",
-  empty: "Your Kompanions will appear here as you choose them.",
   resting: {
     title: "The kit builder is resting",
     body: "We are preparing the next set of Kompanions. In the meantime, the collection is open.",

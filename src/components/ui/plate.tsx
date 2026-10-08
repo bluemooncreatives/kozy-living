@@ -117,7 +117,17 @@ export default function Plate({
   // the hover push and the fit stay identical whichever media the plate holds.
   const mediaClass = clsx(
     "absolute inset-0 h-full w-full transition-transform duration-700 ease-editorial group-hover:scale-[1.04]",
-    objectFit === "contain" ? "object-contain p-8" : "object-cover",
+    // Contain is for studio shots on white whose shape does not match the
+    // frame - a landscape pouch in a portrait tile lost both ends to cover.
+    // `darken`, not `multiply`: the kit shots' grounds measured #FDFCFA-
+    // #FEFAF5, all lighter than the ivory plate, so darken resolves every
+    // ground pixel to exactly #F6F4F0 and the box vanishes. Multiply left it
+    // ~3 levels darker - a faint rectangle round each piece. The cloth is
+    // darker than ivory in every channel, so darken leaves it as shot.
+    // Padding in % so a 160px tile and a large frame keep the same margin.
+    objectFit === "contain"
+      ? "object-contain p-[7%] mix-blend-darken"
+      : "object-cover",
   );
 
   // Four gradients built off oat milk, deliberately close together - the
@@ -150,7 +160,15 @@ export default function Plate({
           A mask applies to an element and all its descendants, which is why
           the arrow button is a sibling further down rather than a child: put
           it in here and the notch would erase the very button it is cut for. */}
-      <div className={clsx("plate absolute inset-0", arrow && "notch-tr")}>
+      <div
+        className={clsx(
+          "plate absolute inset-0",
+          // Ivory, not oat, under a contained photo: blended onto oat the
+          // cream highlights flatten to oat; ivory is within 1.03 of white.
+          objectFit === "contain" && "bg-card",
+          arrow && "notch-tr",
+        )}
+      >
         {/* `data-reveal-media`: when the motion layer reveals this plate - or
             the card or group it sits in - the photograph settles from a slight
             push-in to rest while the frame rises, so a plate arrives as a

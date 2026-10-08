@@ -1166,6 +1166,13 @@ Research, the Admin setup and the edge cases are in
   Order line items load in a **separate, non-throwing** query
   (`fetchOrderLineItems`) so a refused field costs the item list, not the
   account page.
+- **The piece tiles use `Plate`'s `objectFit="contain"`**, the only caller of
+  it. Three of the four studio shots are landscape (pouch and slippers 3:2,
+  mask 2:1) and `cover` cut both ends off in the portrait tile. Contain mode
+  puts the plate on ivory and blends the photo with `mix-blend-darken`: the
+  shots' near-white grounds (#FDFCFA-#FEFAF5, measured) resolve to exactly the
+  ivory, so there is no box round the piece. `multiply` left one ~3 levels
+  darker. A shot on a ground darker than ivory would show its box again.
 - The drawer renders a kit through `KitCartLine`: no per-piece remove and no
   size switcher (a nested line cannot be re-parented); "Edit" goes back to the
   builder.

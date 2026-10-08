@@ -423,7 +423,12 @@ export default function KitBuilder({
                   <div
                     className={clsx(
                       "rounded-plate transition-shadow",
-                      active ? "ring-2 ring-ink ring-offset-2 ring-offset-card" : "",
+                      // The contained shots sit on the same ivory as this
+                      // panel, so an unchosen tile needs its own hairline to
+                      // read as something to tap.
+                      active
+                        ? "ring-2 ring-ink ring-offset-2 ring-offset-card"
+                        : "ring-1 ring-ink/10 hover:ring-ink/40",
                       !available && !active && "opacity-50"
                     )}
                   >
@@ -434,6 +439,11 @@ export default function KitBuilder({
                       sizes="(min-width: 1024px) 14vw, (min-width: 640px) 22vw, 45vw"
                       placeholderText={piece.title}
                       tone={(index % 4) as 0 | 1 | 2 | 3}
+                      // Every tile fitted whole. The pieces' studio shots are
+                      // mostly landscape (pouch 3:2, mask 2:1, slippers 3:2)
+                      // and cover cut both ends off in a portrait tile; the
+                      // robe (2:3) follows so the four sit as one set.
+                      objectFit="contain"
                       reveal={false}
                     />
                   </div>
@@ -733,9 +743,7 @@ export default function KitBuilder({
               </li>
             ) : null}
           </ul>
-        ) : (
-          <p className="body-mono mt-5">{copy.empty}</p>
-        )}
+        ) : null}
 
         <div className="mt-5 flex items-center justify-between gap-4">
           <span className="spec-mono uppercase">{copy.quantity}</span>
