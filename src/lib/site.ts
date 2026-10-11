@@ -432,8 +432,8 @@ export const aboutStory = {
     {
       index: "01",
       kicker: "The cloth",
-      lede: { lead: "Natural fibres,", accent: "only" },
-      body: "Cotton waffle weave, slub cotton, percale, linen blends and wool - consciously sourced, including surplus fabric kept in use.",
+      lede: { lead: "Konsciousness is at the kore of", accent: "Kozy Living" },
+      body: "We kollaborate with craft clusters across India to bring uplifting crafts like Dabu hand block printing into modern homes through Recrafted by Kozy.",
       cta: "See the weaves",
       collection: "kessentials",
       href: "/about-us",
