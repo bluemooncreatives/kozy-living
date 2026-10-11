@@ -19,7 +19,10 @@ export type AddOnChoices = Record<string, AddOnChoice>;
  * them. It sits beside the add-to-cart form rather than inside it, so Enter in
  * the initials field does not submit a half-finished personalisation.
  *
- * Everything shown here - titles, prices, help text, the return note - is the
+ * The metaobject's help text is deliberately not shown (owner's call,
+ * 2026-10-11): the card is the title and price alone.
+ *
+ * Everything shown here - titles, prices, the return note - is the
  * merchant's, from the `product_add_on` metaobjects. Only the heading and the
  * field chrome are ours (`addOns` in site.ts).
  */
@@ -80,11 +83,6 @@ export function AddOnPicker({
                   <span className="ui-mono block font-semibold normal-case">
                     {addOn.title}
                   </span>
-                  {addOn.helpText ? (
-                    <span className="spec-mono mt-1 block text-muted">
-                      {addOn.helpText}
-                    </span>
-                  ) : null}
                   {!addOn.available ? (
                     <span className="micro-mono mt-1 block">
                       {copy.unavailable}

@@ -594,7 +594,7 @@ async function Bestsellers() {
     <section aria-labelledby="bestsellers" className="overflow-x-clip">
       <SectionHead
         eyebrow="Bestsellers"
-        title={<span id="bestsellers">Loved in real homes</span>}
+        title={<span id="bestsellers">Step into morning luxuries</span>}
         count={products.length}
         action="View all"
         actionHref="/search"
