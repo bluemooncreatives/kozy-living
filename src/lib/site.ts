@@ -508,8 +508,8 @@ export const aboutStory = {
     {
       index: "06",
       kicker: "The companions",
-      lede: { lead: "Together,", accent: "at home" },
-      body: "Carriers, seating and clothing for the companion who shares your slow hours.",
+      lede: { lead: "Shared Rituals,", accent: "on your coffee dates" },
+      body: "Karriers, furrie Klothing and shared accessories, so no outing is incomplete without your furrie Kompanion.",
       cta: "Meet the pet kollection",
       collection: "pet-collection",
       href: "/search",
@@ -1405,8 +1405,8 @@ export const aboutImages = {
  */
 export const heritage = {
   eyebrow: "What we make",
-  title: "Krafted to Give You Moments of Rest.",
-  body: "Kozy Living Textiles are your in-between Kompanions - designed in-house, made with craft clusters across India, and krafted to turn everyday moments into mindful daily rituals.",
+  title: "Where Kraft Meets Everyday Living.",
+  body: "Kozy Living reimagines Indian craft through contemporary textiles, playful prints and thoughtful essentials. Designed in-house and made with artisan communities across India, our pieces bring colour, comfort and creativity to your everyday rituals.",
   collections: [
     {
       index: "01",
