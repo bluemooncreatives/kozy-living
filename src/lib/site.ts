@@ -1870,6 +1870,8 @@ export const shopByMood = {
   metaDescription:
     "Start with the moment rather than the thing. Kompanions gathered around the small rituals of a day - a slow morning, the first cup, an evening of rest, a lounge shared with someone you love.",
   eyebrow: "Shop by mood",
+  /** The sage-deep line set above the headline, in the same face. */
+  kicker: "Slow rituals:",
   /** `ring` must appear in `headline` verbatim - it is the phrase CircledWord loops. */
   headline: "Begin with the moment",
   ring: "moment",
@@ -1878,14 +1880,33 @@ export const shopByMood = {
   comingSoon: "Coming soon",
   noMoods: "No moods are published yet.",
   browseAll: "Browse every Kompanion",
+  /** The open row of the mood list. */
+  index: {
+    /** On the row opened as an invitation, before anything is chosen. */
+    view: "View the Kompanions",
+    /** On the chosen row - its Kompanions are already on the page. */
+    showing: "See them below",
+    clear: "Clear",
+    /** Tags the photograph while the pointer rests on a mood that is not open. */
+    preview: "Preview",
+  },
   resting: {
     title: "Choose a moment to see what belongs to it",
     body: "Pick a mood above and the Kompanions made for it will gather here.",
+    back: "Back to the moods",
   },
   results: {
     eyebrow: "Mood",
     previous: "Previous mood",
     next: "Next mood",
     clear: "All moods",
+  },
+  /** The homepage's mood panels, the section after Shop by colour. */
+  home: {
+    eyebrow: "Shop by mood",
+    title: "Start with a moment",
+    action: "All moods",
+    /** The pill at the foot of each panel. */
+    explore: "Explore mood",
   },
 } as const;

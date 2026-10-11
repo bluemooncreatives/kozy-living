@@ -1,12 +1,14 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowUpIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Grid from "@/components/grid";
-import ProductGridItems from "@/components/layout/product-grid-items";
+import ProductCard from "@/components/product-card";
 import MoodIndex, { type IndexMood } from "@/components/shop/mood-index";
+import { splitText } from "@/components/motion/split-text";
 import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CircledWord from "@/components/ui/circled-word";
-import { Eyebrow, Headline } from "@/components/ui/section";
+import { displayFace } from "@/components/ui/section";
 import { toParamMap, type ShopSearchParams } from "@/lib/shop/filters";
 import {
   MOOD_PARAM,
@@ -23,12 +25,12 @@ import { shopByMood as copy } from "@/lib/site";
    The sibling of /shop-by-colour, built on the same contract - read the note
    at the top of that page first. In short:
 
-     Step 1   the index - the `shop_mood` metaobjects, one numbered row each
+     Step 1   the schedule - the `shop_mood` metaobjects as an accordion
      Step 2   the Kompanions tagged with the chosen mood, as cards
 
    ONE MOOD AT A TIME, every choice a plain link, the address is the state:
 
-     /shop-by-mood                          the index, nothing below it
+     /shop-by-mood                          the schedule, nothing below it
      /shop-by-mood?mood=caffeine-ritual     one mood's Kompanions
 
    Step two starts empty for the same reason colour's does: this page answers
@@ -36,8 +38,12 @@ import { shopByMood as copy } from "@/lib/site";
    question. Sort, facets and pagination live at /search, deliberately not here.
 
    Where colour draws a coil, a mood has only words - a name and a line the
-   merchant wrote - so the index is TYPOGRAPHIC: numbered Franxurter rows, with
-   the mood's own photography turning beside them. See `mood-index.tsx`.
+   merchant wrote - so the schedule is TYPOGRAPHIC, with the mood's own
+   photography wiping in beside it. See `mood-index.tsx`.
+
+   Everything in step two mounts after a click, so it enters on CSS
+   (`.mood-turn`, `.mood-card-in`), keyed on the mood so a turn replays it. A
+   `data-reveal` there would mount after its scroll trigger had fired.
 --------------------------------------------------------------------------- */
 
 /** Four columns at the widest - the same cell size as the shop grid. */
@@ -94,11 +100,11 @@ export default async function ShopByMoodPage({
     label: entry.label,
     description: entry.description,
     count: entry.count,
-    active: entry.key === selected?.key,
-    href: moodHref(entry.key === selected?.key ? null : entry.key),
-    image: entry.images[0]
-      ? { url: entry.images[0].url, altText: entry.images[0].altText }
-      : null,
+    href: moodHref(entry.key),
+    images: entry.images.map((image) => ({
+      url: image.url,
+      altText: image.altText,
+    })),
   }));
 
   const matched = selected
@@ -113,36 +119,63 @@ export default async function ShopByMoodPage({
   const next = at >= 0 && live.length > 1 ? live[(at + 1) % live.length] : null;
   const position = selected ? entries.indexOf(selected) + 1 : 0;
 
+  const intro = (
+    <>
+      <p data-reveal="" className="mood-badge">
+        <span className="mood-badge-num tabular-nums" aria-hidden>
+          {pad(entries.length)}
+        </span>
+        <span className="mood-badge-label">{copy.eyebrow}</span>
+      </p>
+
+      {/* Set by hand rather than through `Headline`: the kicker line and the
+          column it has to fit want their own size, and a size utility passed
+          alongside `text-display-xl` would race it in the stylesheet. */}
+      <h1 data-split="" className={`${displayFace} mood-title text-balance`}>
+        {/* Keyed: the splitter hands these two back as an array. */}
+        {splitText(
+          <>
+            <span key="kicker" className="block text-sage-deep">
+              {copy.kicker}
+            </span>
+            <span key="line">{ringWord(copy.headline, copy.ring)}</span>
+          </>,
+        )}
+      </h1>
+
+      <p data-reveal="" className="body-mono mt-5 max-w-[34rem] text-pretty md:mt-6">
+        {copy.lede}
+      </p>
+    </>
+  );
+
   return (
     <>
       <section
         id="moods"
-        className="shell scroll-mt-[var(--header-h)] pb-6 pt-8 md:pt-12"
+        className="shell scroll-mt-[var(--header-h)] pb-10 pt-8 md:pb-14 md:pt-12"
       >
-        <div className="grid gap-y-6 lg:grid-cols-12 lg:items-end lg:gap-x-10">
-          <div className="lg:col-span-8">
-            <Eyebrow align="left">{copy.eyebrow}</Eyebrow>
-            <Headline as="h1" className="mt-4">
-              {ringWord(copy.headline, copy.ring)}
-            </Headline>
-          </div>
-          <p
-            data-reveal=""
-            className="body-mono max-w-measure text-pretty lg:col-span-4 lg:pb-2"
-          >
-            {copy.lede}
-          </p>
-        </div>
-
-        <div className="mt-10 md:mt-16">
-          {index.length ? (
-            <MoodIndex
-              moods={index}
-              label={copy.indexLabel}
-              comingSoon={copy.comingSoon}
-            />
-          ) : (
-            <p className="ui-mono text-muted">
+        {index.length ? (
+          <MoodIndex
+            moods={index}
+            selectedKey={selected?.key ?? null}
+            clearHref={moodHref(null)}
+            resultsAnchor={MOOD_RESULTS_ANCHOR}
+            intro={intro}
+            copy={{
+              label: copy.indexLabel,
+              comingSoon: copy.comingSoon,
+              view: copy.index.view,
+              showing: copy.index.showing,
+              clear: copy.index.clear,
+              preview: copy.index.preview,
+              browseAll: copy.browseAll,
+            }}
+          />
+        ) : (
+          <>
+            {intro}
+            <p className="ui-mono mt-10 text-muted">
               {copy.noMoods}{" "}
               <Link
                 href="/search"
@@ -152,96 +185,117 @@ export default async function ShopByMoodPage({
               </Link>
               .
             </p>
-          )}
-        </div>
+          </>
+        )}
       </section>
 
       {/* Step two. `scroll-mt` clears the sticky header, so a mood's fragment
           lands on its masthead rather than under the navigation. */}
       <section
         id={MOOD_RESULTS_ANCHOR}
-        className="shell scroll-mt-[calc(var(--header-h)+0.75rem)] pb-14 pt-10 md:pb-20 md:pt-14"
+        className="shell scroll-mt-[calc(var(--header-h)+0.75rem)] pb-14 pt-6 md:pb-20 md:pt-8"
       >
         {selected ? (
           <>
             {/* Keyed on the mood so it re-mounts, and plays its CSS entrance,
-                on every turn. A `data-reveal` here would mount after its
-                scroll trigger had already fired and sit at opacity 0. */}
-            <header
-              key={selected.key}
-              className="mood-turn panel-ink relative overflow-hidden px-5 py-9 sm:px-8 md:px-12 md:py-14"
-            >
-              <span aria-hidden className="mood-ghost-num display-face">
-                {pad(position)}
-              </span>
-
-              <div className="relative grid gap-8 md:grid-cols-12 md:items-end">
-                <div className="md:col-span-8">
-                  <p className="eyebrow tabular-nums">
-                    {copy.results.eyebrow} {pad(position)}
-                    <span className="text-sage"> / {pad(entries.length)}</span>
-                  </p>
-                  <h2 className="display-face mt-4 text-display-xl text-balance text-oat">
-                    {selected.label}
-                    <sup className="count-sup text-sage" aria-hidden>
-                      {matched.length}
-                    </sup>
-                  </h2>
-                  {selected.description ? (
-                    <p className="mt-4 max-w-measure text-pretty text-body text-paper/75 md:text-lg">
-                      {selected.description}
-                    </p>
-                  ) : null}
-                </div>
-
-                <nav
-                  aria-label="Moods"
-                  className="flex flex-wrap items-center gap-3 md:col-span-4 md:justify-end"
-                >
-                  {previous ? (
-                    <Link
-                      href={moodHref(previous.key)}
-                      prefetch={false}
-                      className="mood-step"
-                      aria-label={`${copy.results.previous}: ${previous.label}`}
-                    >
-                      <ArrowUpRight className="-rotate-[135deg]" />
-                    </Link>
-                  ) : null}
-                  {next ? (
-                    <Link
-                      href={moodHref(next.key)}
-                      prefetch={false}
-                      className="mood-step"
-                      aria-label={`${copy.results.next}: ${next.label}`}
-                    >
-                      <ArrowUpRight className="rotate-45" />
-                    </Link>
-                  ) : null}
-                  <Link
-                    href={moodHref(null)}
-                    prefetch={false}
-                    className="mood-clear"
-                  >
-                    <XMarkIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
-                    {copy.results.clear}
-                  </Link>
-                </nav>
+                on every turn. */}
+            <header key={selected.key} className="mood-turn mood-results-head">
+              <div className="mood-results-badge">
+                <span className="mood-badge-num tabular-nums" aria-hidden>
+                  {pad(position)}
+                </span>
+                <span className="mood-badge-label tabular-nums">
+                  {copy.results.eyebrow} {pad(position)}
+                  <span className="text-muted"> / {pad(entries.length)}</span>
+                </span>
               </div>
+
+              <nav aria-label="Moods" className="mood-results-nav">
+                {previous ? (
+                  <Link
+                    href={moodHref(previous.key)}
+                    prefetch={false}
+                    className="mood-step"
+                    aria-label={`${copy.results.previous}: ${previous.label}`}
+                  >
+                    <ArrowUpRight className="-rotate-[135deg]" />
+                  </Link>
+                ) : null}
+                {next ? (
+                  <Link
+                    href={moodHref(next.key)}
+                    prefetch={false}
+                    className="mood-step"
+                    aria-label={`${copy.results.next}: ${next.label}`}
+                  >
+                    <ArrowUpRight className="rotate-45" />
+                  </Link>
+                ) : null}
+                <Link href={moodHref(null)} prefetch={false} className="mood-clear">
+                  <XMarkIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  {copy.results.clear}
+                </Link>
+              </nav>
+
+              <h2 className="mood-results-title display-face text-ink">
+                {splitText(selected.label)}
+                <sup className="count-sup text-sage-deep" aria-hidden>
+                  {matched.length}
+                </sup>
+              </h2>
+
+              {selected.description ? (
+                <p className="mood-results-desc body-mono text-pretty">
+                  {selected.description}
+                </p>
+              ) : null}
+
+              <span aria-hidden className="mood-results-rule" />
             </header>
 
-            <Grid className="mt-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <ProductGridItems products={matched} sizes={GRID_SIZES} />
+            <Grid
+              key={`grid-${selected.key}`}
+              className="mt-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:mt-8"
+            >
+              {matched.map((product, i) => (
+                <Grid.Item
+                  key={product.handle}
+                  className="mood-card-in"
+                  style={{ "--i": i } as CSSProperties}
+                >
+                  <ProductCard
+                    product={product}
+                    priority={i < 4}
+                    sizes={GRID_SIZES}
+                    reveal={false}
+                  />
+                </Grid.Item>
+              ))}
             </Grid>
           </>
         ) : (
-          <div className="rule-t pt-10 text-center">
-            <p className="serif text-display-md text-balance">
-              {copy.resting.title}
-            </p>
-            <p className="body-mono mx-auto mt-4 max-w-measure">
-              {copy.resting.body}
-            </p>
+          <div className="mood-rest">
+            {/* Where the cards will gather - four ghost cells breathing, so
+                the empty step reads as a place waiting rather than a gap. */}
+            <ul aria-hidden className="mood-rest-ghosts">
+              {[0, 1, 2, 3].map((cell) => (
+                <li key={cell} style={{ "--i": cell } as CSSProperties} />
+              ))}
+            </ul>
+
+            <div className="mood-rest-copy">
+              <div className="mood-rest-card">
+                <a href="#moods" className="mood-rest-up" aria-label={copy.resting.back}>
+                  <ArrowUpIcon className="h-4 w-4" strokeWidth={2} />
+                </a>
+                <p className="serif mt-5 text-display-md text-balance">
+                  {copy.resting.title}
+                </p>
+                <p className="body-mono mx-auto mt-3 max-w-measure">
+                  {copy.resting.body}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </section>

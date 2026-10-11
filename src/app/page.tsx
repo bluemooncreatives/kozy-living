@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import {
   getArticles,
+  getCatalog,
   getCollectionProducts,
   getCollections,
+  getMoods,
   getPrimaryMenu,
   getProduct,
   getProducts,
@@ -28,6 +30,8 @@ import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import { splitText } from "@/components/motion/split-text";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
+import MoodPanels, { type MoodPanel } from "@/components/home/mood-panels";
+import { moodEntries, moodHref, SHOP_BY_MOOD_PATH } from "@/lib/shop/moods";
 import { FaqFallback, HomeFaq } from "@/components/faq/faq-section";
 import LookbookDeck, {
   type LookbookCard,
@@ -54,6 +58,7 @@ import {
   heroFilms,
   lookbook,
   journalPosts,
+  shopByMood,
   site,
   testimonial,
 } from "@/lib/site";
@@ -103,6 +108,10 @@ export default function Home() {
 
       <Suspense fallback={null}>
         <ShopByColour />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ShopByMood />
       </Suspense>
 
       <StandardsTicker />
@@ -649,6 +658,61 @@ async function ShopByColour() {
       />
       <div className="shell pb-10 md:pb-14">
         <ColourRail colours={colours} showCounts={false} mobileGrid />
+      </div>
+    </section>
+  );
+}
+
+/** More than this and a closed panel is too narrow for its own title. */
+const MAX_MOOD_PANELS = 5;
+
+/**
+ * The second way in, beside colour: not "what shade" but "what moment".
+ *
+ * One tall photograph per live mood, and the one under the pointer opens wide
+ * - see `mood-panels.tsx`. Each is a link to /shop-by-mood with that mood
+ * already chosen, landing on its Kompanions. Moods with nothing in them yet
+ * are left out here: /shop-by-mood shows them as "coming soon", but a teaser
+ * that leads to an empty shelf is not one.
+ *
+ * Like the colour rail above it, nothing here is written down: the moods,
+ * their order and their lines are the `shop_mood` metaobjects in Shopify.
+ */
+async function ShopByMood() {
+  const [catalog, moods] = await Promise.all([getCatalog(), getMoods()]);
+  const live = moodEntries(moods, catalog)
+    .entries.filter((entry) => entry.count > 0)
+    .slice(0, MAX_MOOD_PANELS);
+
+  if (!live.length) return null;
+
+  const panels: MoodPanel[] = live.map((entry) => ({
+    key: entry.key,
+    label: entry.label,
+    description: entry.description,
+    count: entry.count,
+    href: moodHref(entry.key),
+    image: entry.images[0]
+      ? { url: entry.images[0].url, altText: entry.images[0].altText }
+      : null,
+  }));
+
+  const copy = shopByMood.home;
+
+  return (
+    <section aria-labelledby="shop-by-mood" className="overflow-x-clip">
+      <SectionHead
+        eyebrow={copy.eyebrow}
+        title={<span id="shop-by-mood">{copy.title}</span>}
+        action={copy.action}
+        actionHref={SHOP_BY_MOOD_PATH}
+      />
+      <div className="shell pb-10 md:pb-14">
+        <MoodPanels
+          moods={panels}
+          label={copy.eyebrow}
+          explore={copy.explore}
+        />
       </div>
     </section>
   );

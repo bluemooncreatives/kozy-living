@@ -242,6 +242,7 @@ CollectionFilters         ← Suspense   category pills, directly under the hero
 BoldStatement (+ staggered lookbook)  ← Suspense
 Bestsellers               ← Suspense
 ShopByColour              ← Suspense
+ShopByMood                ← Suspense   expanding mood panels
 StandardsTicker
 CuratedEdits              ← Suspense   ("New Kompanions")
 StandardsTicker (reverse)
@@ -516,11 +517,40 @@ only the page's framing is `shopByMood` in `site.ts`.
   `productCardFragment`, not inside `metafields`. `productColours()` takes the
   first `metafields` entry that has a value, so a mood placed there would be
   read as a colour on every product that has no colour.
-- The index (`components/shop/mood-index.tsx`) is a typographic list beside a
-  sticky preview photograph. Hover/focus only changes which photograph the
-  preview shows, which is display state, not shop state. The results masthead
-  and the preview caption mount after a click, so they use CSS entrances
-  (`.mood-turn`, `.mood-preview-caption`), not `data-reveal`.
+- The index (`components/shop/mood-index.tsx`) is a **schedule**: intro and a
+  large "stage" photograph down the left, the moods as an accordion down the
+  right (`.mood-sched` area map; the stage is `lg`+ only). **The open row is
+  the chosen mood**; with nothing chosen the first live mood stands open as
+  an invitation, and its button chooses it. Every row head is still a plain
+  `<Link>` to `?mood=<handle>#kompanions`, so it works with JS off.
+- The client holds display state only: `pending` (the clicked row opens at
+  once, valid only while the URL still shows the mood it was clicked from),
+  `hovered` (which mood the stage previews) and a delayed glide to the
+  results. ⚠️ **Lenis's `anchors` option smooth-scrolls on any same-path
+  `#hash` click, from a `window` listener.** Left alone it carried the page
+  away before the row had opened, so `choose()` stops the click's
+  propagation at React's root and scrolls itself ~620ms later. The route
+  hairline listens in the capture phase and is unaffected.
+- The stage wipes between moods with `Plate galleryTransition="wipe"`
+  (`.plate-wipe` in `globals.css`): the outgoing still is held for longer
+  than a wipe takes, so a pointer running down the list never exposes the
+  oat ground. Open-row height is `grid-template-rows: 0fr → 1fr`.
+- Everything that mounts after a click enters on keyed CSS (`.mood-turn`,
+  `.mood-card-in`, `.mood-stage-*`), not `data-reveal`.
+- **The homepage teases it** with `components/home/mood-panels.tsx`, after
+  Shop by colour: one tall photograph per LIVE mood (max 5), in **equal
+  shares at rest** (owner's call - nothing open, so no mood reads as the
+  pick). The one under the pointer or holding focus opens wide
+  (`flex-grow`); leaving the ROW (not a panel - the gaps are inside it)
+  settles it back. Below `lg` it is a snap rail. On a
+  touch screen at `lg`+ the first tap opens a panel and the second follows it
+  - read at `pointerdown`, because a tap focuses the link (which opens it)
+  before the click arrives. Titles are pinned to a CLOSED panel's width and
+  descriptions to an OPEN one's (`--unit`, from `100cqw` of `.mood-panels`),
+  so no text re-wraps mid-animation.
+- `moodEntries` claims lead photographs **scarcest first**: a mood with one
+  Kompanion picks before one with eleven. In index order, Rest as a Ritual
+  took Shared Lounging's only photograph and the two showed the same picture.
 - Moods are not a facet in the `/search` sidebar. Adding one means teaching
   `facets.ts` to read `product.moods` and reserving `mood` in `RESERVED_PARAMS`.
 

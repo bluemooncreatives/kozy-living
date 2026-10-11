@@ -17,6 +17,7 @@ export default function Plate({
   src,
   gallery,
   galleryIndex = 0,
+  galleryTransition = "fade",
   galleryAuto = false,
   galleryDelay,
   galleryInterval,
@@ -52,8 +53,15 @@ export default function Plate({
    * that on whatever control it likes without this file knowing about paging.
    */
   gallery?: readonly { url: string; altText?: string }[] | null;
-  /** Which of `gallery` is on top. Anything out of range shows the first. */
+  /** Which of `gallery` is on top. Out of range wraps round. */
   galleryIndex?: number;
+  /**
+   * How a hand-paged gallery turns. `fade` cross-fades; `wipe` draws the new
+   * still up over the old one and settles it from a push-in, for a large
+   * frame whose turn is the event (the shop-by-mood preview). Ignored when
+   * `galleryAuto` hands the gallery to the rotator.
+   */
+  galleryTransition?: "fade" | "wipe";
   /** Automatically cross-fade through a product gallery while visible. */
   galleryAuto?: boolean;
   /** Staggers automatic galleries when several plates share a section. */
@@ -112,6 +120,12 @@ export default function Plate({
   children?: React.ReactNode;
 }) {
   const ghost = placeholderText ?? title ?? tag ?? "kozy";
+
+  // Modulo rather than a clamp: paging past either end wraps, so the caller
+  // can just keep counting in one direction.
+  const shownIndex = gallery?.length
+    ? ((galleryIndex % gallery.length) + gallery.length) % gallery.length
+    : 0;
 
   // Shared by the still, the single clip and every layer of a rotating one, so
   // the hover push and the fit stay identical whichever media the plate holds.
@@ -195,6 +209,33 @@ export default function Plate({
               priority={priority}
               className={mediaClass}
             />
+          ) : gallery?.length && galleryTransition === "wipe" ? (
+            // Each still in two wrappers: the outer one owns the clip that
+            // wipes it in, the inner one the settle from a push-in. Neither
+            // may move to the <img>, which already owns the hover push, and
+            // two owners of one transform is how a hover dies. The timing
+            // lives in `.plate-wipe` in globals.css.
+            gallery.map((image, index) => (
+              <div
+                key={image.url}
+                className="plate-wipe"
+                data-on={index === shownIndex ? "" : undefined}
+              >
+                <div className="plate-wipe-settle">
+                  <Image
+                    src={image.url}
+                    alt={image.altText || alt}
+                    fill
+                    sizes={sizes}
+                    priority={priority && index === shownIndex}
+                    loading={
+                      priority && index === shownIndex ? undefined : "lazy"
+                    }
+                    className={mediaClass}
+                  />
+                </div>
+              </div>
+            ))
           ) : gallery?.length ? (
             gallery.map((image, index) => (
               <Image
@@ -210,13 +251,7 @@ export default function Plate({
                 className={clsx(
                   mediaClass,
                   "transition-opacity duration-500 ease-editorial",
-                  // Modulo rather than a clamp: paging past either end wraps,
-                  // so the caller can just keep counting in one direction.
-                  index ===
-                    ((galleryIndex % gallery.length) + gallery.length) %
-                      gallery.length
-                    ? "opacity-100"
-                    : "opacity-0",
+                  index === shownIndex ? "opacity-100" : "opacity-0",
                 )}
               />
             ))

@@ -176,21 +176,43 @@ export function moodEntries(
     ...[...carried.values()].filter((mood) => !listed.has(mood.key)),
   ]);
 
-  // Lead photographs are claimed in index order, so a Kompanion that sits in
-  // two moods - most of "Rest as a Ritual" is also "For You & Your Furry" -
-  // fronts the first and the second finds its own. Without this the preview
-  // would sit on one photograph while the cursor moved between them.
+  const shotsOf = new Map(
+    ordered.map((mood) => [
+      mood.key,
+      (byMood.get(mood.key) ?? [])
+        .map((product) => product.featuredImage ?? product.images[0] ?? null)
+        .filter((image): image is Image => Boolean(image?.url)),
+    ]),
+  );
+
+  // Lead photographs are claimed SCARCEST FIRST: the mood with the fewest
+  // distinct shots chooses before the moods that have alternatives. Claimed
+  // in index order, "Rest as a Ritual" (11 Kompanions) took the His & Hers
+  // shot that is the ONLY photograph "Shared Lounging" has, and the two sat
+  // side by side on one picture - in the stage and in the homepage panels.
+  // Ties keep index order, so a Kompanion that sits in two moods fronts the
+  // first and the second finds its own. A mood with no unclaimed shot still
+  // falls back to its best seller.
+  const distinct = (shots: Image[]) =>
+    new Set(shots.map((image) => imageKey(image.url))).size;
   const claimed = new Set<string>();
+  const leads = new Map<string, Image>();
+
+  ordered
+    .map((mood, index) => ({ mood, index, shots: shotsOf.get(mood.key) ?? [] }))
+    .sort((a, b) => distinct(a.shots) - distinct(b.shots) || a.index - b.index)
+    .forEach(({ mood, shots }) => {
+      const lead =
+        shots.find((image) => !claimed.has(imageKey(image.url))) ?? shots[0];
+      if (!lead) return;
+      claimed.add(imageKey(lead.url));
+      leads.set(mood.key, lead);
+    });
 
   const entries = ordered.map((mood) => {
     const members = byMood.get(mood.key) ?? [];
-    const shots = members
-      .map((product) => product.featuredImage ?? product.images[0] ?? null)
-      .filter((image): image is Image => Boolean(image?.url));
-
-    const lead =
-      shots.find((image) => !claimed.has(imageKey(image.url))) ?? shots[0];
-    if (lead) claimed.add(imageKey(lead.url));
+    const shots = shotsOf.get(mood.key) ?? [];
+    const lead = leads.get(mood.key);
 
     const images = lead
       ? [lead, ...shots.filter((image) => image !== lead)].slice(0, IMAGES_PER_MOOD)
