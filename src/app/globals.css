@@ -1417,7 +1417,7 @@
   .story-corner-tr .story-tag { max-width: calc(100% - 5.5rem); }
   .story-card-footer { position: relative; margin-top: auto; padding: 1.25rem; }
   .story-card-footer h3 { @apply font-sans text-display-sm font-semibold; color: inherit; text-wrap: balance; }
-  .story-card-footer p { @apply font-sans text-spec; margin-top: 0.75rem; }
+  .story-card-footer p { @apply font-sans text-spec; margin-top: 0.75rem; line-height: 1.65; }
   .story-card-small .story-card-footer { padding: 1rem; }
   .story-card-small .story-card-footer h3 { @apply text-ui font-semibold; }
   .story-card-small .story-card-footer p { display: none; }
@@ -1456,7 +1456,7 @@
     .story-intro { margin-top: 1.25rem; }
     .story-card-footer { padding: 0.875rem; }
     .story-card-footer h3 { font-size: 1rem; line-height: 1.25; }
-    .story-card-footer p { font-size: 0.75rem; line-height: 1.5; margin-top: 0.625rem; }
+    .story-card-footer p { font-size: 0.75rem; line-height: 1.6; margin-top: 0.625rem; }
     .story-card-small .story-card-footer { padding: 0.75rem; }
     .story-tag { left: 0.75rem; top: 0.875rem; padding: 0.3rem 0.45rem; }
   }

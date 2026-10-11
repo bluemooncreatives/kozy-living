@@ -479,16 +479,14 @@ export const aboutStory = {
     {
       index: "04",
       kicker: "The point",
-      lede: { lead: "Used,", accent: "not looked at" },
-      body: "Every Kompanion is built multipurpose and made to be leaned on daily - which is why we don't call them decor.",
+      lede: { lead: "The Kozy", accent: "Grounded Korner" },
+      body: "Sitting on the floor can help you feel grounded and reconnect with yourself. Make room for a simple everyday ritual that brings you back to the present, with comfort rooted in tradition.",
       cta: "Shop Kompanions",
       collection: "kozy-lounge",
       href: "/search",
       alt: "A floor lounge layered with biscuit pillows and a linen blend throw.",
       images: [
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1033.jpg?v=1788636330",
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0129.jpg?v=1788636349",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_0689_jpg.jpg?v=1791719891",
       ],
     },
     {
