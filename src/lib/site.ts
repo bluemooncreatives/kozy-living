@@ -447,8 +447,8 @@ export const aboutStory = {
     {
       index: "02",
       kicker: "The hands",
-      lede: { lead: "Made with", accent: "craft clusters" },
-      body: "Designed in-house by Khushi Faruqui, then made in collaboration with craft clusters across India - artisanal processes, not volume machinery.",
+      lede: { lead: "Hand block printed by the", accent: "Kraft Klusters of India" },
+      body: "Krafted by the Chippa community of Pipar City, each Kompanion celebrates generations of artisanal rituals & care through design.",
       cta: "Meet the collective",
       /* No handle: the makers are not a shelf. This card always goes to the
          story, and always uses the studio stills. */
