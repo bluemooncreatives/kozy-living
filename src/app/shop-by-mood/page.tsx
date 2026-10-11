@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import Grid from "@/components/grid";
 import ProductCard from "@/components/product-card";
 import MoodIndex, { type IndexMood } from "@/components/shop/mood-index";
+import PagedShelf from "@/components/shop/paged-shelf";
+import Pagination from "@/components/shop/pagination";
 import {
   MoodClear,
   MoodNext,
@@ -15,7 +18,15 @@ import {
 import { splitText } from "@/components/motion/split-text";
 import CircledWord from "@/components/ui/circled-word";
 import { displayFace } from "@/components/ui/section";
-import { toParamMap, type ShopSearchParams } from "@/lib/shop/filters";
+import {
+  paginate,
+  readPage,
+  SHELF_PER_PAGE,
+  SHELF_PER_PAGE_MOBILE,
+  toParamMap,
+  type ShopSearchParams,
+} from "@/lib/shop/filters";
+import { isMobileRequest } from "@/lib/shop/viewport";
 import {
   MOOD_PARAM,
   MOOD_RESULTS_ANCHOR,
@@ -23,7 +34,7 @@ import {
   moodHref,
 } from "@/lib/shop/moods";
 import { getCatalog, getMoods } from "@/lib/shopify";
-import { shopByMood as copy } from "@/lib/site";
+import { shelfPaging, shopByMood as copy } from "@/lib/site";
 
 /* ---------------------------------------------------------------------------
    Shop by mood
@@ -45,7 +56,10 @@ import { shopByMood as copy } from "@/lib/site";
 
    The page says its own two steps out loud - "1 Pick a mood" over the list,
    "2" over the shelf - and once a mood is chosen the shelf carries a sticky
-   chip rail for switching, and hands on to the next mood at its foot. The
+   chip rail for switching, pages 12 at a time (6 on a phone - see
+   `SHELF_PER_PAGE`), and on its last page hands on to the next mood.
+
+     /shop-by-mood?mood=caffeine-ritual&page=2    page 1 is never written The
    client half (`MoodShop`) only bridges the click and the server's answer;
    see `components/shop/mood-shop.tsx`.
 
@@ -118,6 +132,20 @@ export default async function ShopByMoodPage({
   const matched = selected
     ? catalog.filter((product) => membership.get(product.id)?.has(selected.key))
     : [];
+
+  const perPage = (await isMobileRequest(params))
+    ? SHELF_PER_PAGE_MOBILE
+    : SHELF_PER_PAGE;
+  const shelf = paginate(matched, readPage(params), perPage);
+
+  // One shelf page, one address - the shop's rule. `page=1`, `page=0`, a page
+  // past the end (a link shared from a phone, opened on a laptop, where the
+  // pages are twice the size), or a page with no mood chosen all redirect to
+  // the URL that page actually lives at.
+  const canonicalPage = selected && shelf.page > 1 ? String(shelf.page) : undefined;
+  if ((params.get("page") ?? undefined) !== canonicalPage) {
+    redirect(moodHref(selected?.key ?? null, shelf.page));
+  }
 
   // The next LIVE mood, wrapping, so the end of every shelf leads somewhere.
   const live = index.filter((entry) => entry.count > 0);
@@ -250,27 +278,47 @@ export default async function ShopByMoodPage({
                   <span aria-hidden className="mood-results-rule" />
                 </header>
 
-                <Grid
-                  key={`grid-${selected.key}`}
-                  className="mt-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:mt-8"
+                <PagedShelf
+                  page={shelf.page}
+                  anchor={MOOD_RESULTS_ANCHOR}
+                  turning={shelfPaging.turning}
                 >
-                  {matched.map((product, i) => (
-                    <Grid.Item
-                      key={product.handle}
-                      className="mood-card-in"
-                      style={{ "--i": i } as CSSProperties}
-                    >
-                      <ProductCard
-                        product={product}
-                        priority={i < 4}
-                        sizes={GRID_SIZES}
-                        reveal={false}
-                      />
-                    </Grid.Item>
-                  ))}
-                </Grid>
+                  {/* Keyed on the page too, so a turn replays the cards'
+                      entrance rather than swapping them in place. */}
+                  <Grid
+                    key={`grid-${selected.key}-${shelf.page}`}
+                    className="mt-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:mt-8"
+                  >
+                    {shelf.items.map((product, i) => (
+                      <Grid.Item
+                        key={product.handle}
+                        className="mood-card-in"
+                        style={{ "--i": i } as CSSProperties}
+                      >
+                        <ProductCard
+                          product={product}
+                          priority={i < 4}
+                          sizes={GRID_SIZES}
+                          reveal={false}
+                        />
+                      </Grid.Item>
+                    ))}
+                  </Grid>
 
-                {next ? (
+                  <Pagination
+                    page={shelf.page}
+                    totalPages={shelf.totalPages}
+                    hrefFor={(n) => moodHref(selected.key, n)}
+                    scroll={false}
+                    summary={`${shelfPaging.showing} ${shelf.from}–${shelf.to} ${shelfPaging.of} ${shelf.total} ${
+                      shelf.total === 1 ? shelfPaging.kompanion : shelfPaging.kompanions
+                    }`}
+                  />
+                </PagedShelf>
+
+                {/* The hand-on to the next mood belongs at the END of the
+                    shelf, not under page 1 of 3. */}
+                {next && shelf.page === shelf.totalPages ? (
                   <div key={`next-${selected.key}`} className="mood-card-in mt-10 md:mt-14">
                     <MoodNext
                       eyebrow={copy.results.next}

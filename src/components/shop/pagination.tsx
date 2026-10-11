@@ -44,10 +44,19 @@ export default function Pagination({
   page,
   totalPages,
   hrefFor,
+  summary,
+  scroll,
 }: {
   page: number;
   totalPages: number;
   hrefFor: (page: number) => string;
+  /** A line over the controls, e.g. "Showing 7-12 of 20 Kompanions". */
+  summary?: React.ReactNode;
+  /**
+   * Passed to every link. `false` where a wrapper makes the scroll itself -
+   * see `PagedShelf` - so Next's jump and the wrapper's glide do not race.
+   */
+  scroll?: boolean;
 }) {
   if (totalPages <= 1) return null;
 
@@ -56,12 +65,18 @@ export default function Pagination({
     "ui-mono inline-flex h-10 items-center gap-2 rounded-chip border px-4 transition-colors";
 
   return (
-    <nav aria-label="Pagination" className="rule-t mt-10 pt-6">
+    // `data-pagination` is how `PagedShelf` tells a page turn from any other
+    // link inside it.
+    <nav aria-label="Pagination" data-pagination="" className="rule-t mt-10 pt-6">
+      {summary ? (
+        <p className="spec-mono mb-4 text-center tabular-nums">{summary}</p>
+      ) : null}
       <ul className="flex flex-wrap items-center justify-center gap-1.5">
         <li className="mr-auto">
           {page > 1 ? (
             <Link
               href={hrefFor(page - 1)}
+              scroll={scroll}
               rel="prev"
               className={clsx(step, "border-ink/15 hover:border-ink hover:bg-ink hover:text-paper")}
             >
@@ -89,6 +104,7 @@ export default function Pagination({
             <li key={item}>
               <Link
                 href={hrefFor(item)}
+                scroll={scroll}
                 prefetch={false}
                 aria-label={`Page ${item}`}
                 aria-current={item === page ? "page" : undefined}
@@ -109,6 +125,7 @@ export default function Pagination({
           {page < totalPages ? (
             <Link
               href={hrefFor(page + 1)}
+              scroll={scroll}
               rel="next"
               className={clsx(step, "border-ink/15 hover:border-ink hover:bg-ink hover:text-paper")}
             >

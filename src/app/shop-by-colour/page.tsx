@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Grid from "@/components/grid";
 import ProductGridItems from "@/components/layout/product-grid-items";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import ColourSpiral from "@/components/shop/colour-spiral";
+import PagedShelf from "@/components/shop/paged-shelf";
+import Pagination from "@/components/shop/pagination";
 import { Eyebrow, Headline } from "@/components/ui/section";
 import { COLOUR_PARAM } from "@/lib/shop/colours";
 import {
@@ -11,8 +14,17 @@ import {
   colourEntries,
   colourHref,
 } from "@/lib/shop/palette";
-import { toParamMap, type ShopSearchParams } from "@/lib/shop/filters";
+import {
+  paginate,
+  readPage,
+  SHELF_PER_PAGE,
+  SHELF_PER_PAGE_MOBILE,
+  toParamMap,
+  type ShopSearchParams,
+} from "@/lib/shop/filters";
+import { isMobileRequest } from "@/lib/shop/viewport";
 import { getCatalog, getColourPalette } from "@/lib/shopify";
+import { shelfPaging } from "@/lib/site";
 
 /* ---------------------------------------------------------------------------
    Shop by colour
@@ -36,13 +48,15 @@ import { getCatalog, getColourPalette } from "@/lib/shopify";
 
    Step two starts EMPTY and stays empty until a colour is chosen. This is a way
    in through colour, not another shop grid with a colour filter bolted on; the
-   sidebar, sort, price band and pagination all live at /search, deliberately
-   not here.
+   sidebar, sort and price band all live at /search, deliberately not here.
+   The shelf does page - 12 at a time, 6 on a phone (`SHELF_PER_PAGE`) - so a
+   shade with twenty Kompanions is not one endless column on a phone.
 
    The address is the state, as everywhere else in this shop:
 
      /shop-by-colour                        the palette, nothing below it
      /shop-by-colour?colour=rose-pink       one colour's Kompanions
+     /shop-by-colour?colour=rose-pink&page=2    page 1 is never written
 
    Colour matching is not reimplemented here. `buildFacets` indexes every
    product by colour - see `lib/shop/colours.ts` for where the colours come
@@ -109,6 +123,19 @@ export default async function ShopByColourPage({
     ? catalog.filter((product) => membership.get(product.id)?.has(selected.key))
     : [];
 
+  const perPage = (await isMobileRequest(params))
+    ? SHELF_PER_PAGE_MOBILE
+    : SHELF_PER_PAGE;
+  const shelf = paginate(matched, readPage(params), perPage);
+
+  // One shelf page, one address - the shop's rule. `page=1`, `page=0`, a page
+  // past the end, or a page with no colour chosen all redirect to the URL
+  // that page actually lives at.
+  const canonicalPage = selected && shelf.page > 1 ? String(shelf.page) : undefined;
+  if ((params.get("page") ?? undefined) !== canonicalPage) {
+    redirect(colourHref(selected?.key ?? null, shelf.page));
+  }
+
   return (
     <>
       <section
@@ -151,9 +178,8 @@ export default async function ShopByColourPage({
         {selected ? (
           <>
             <Eyebrow align="left">Step 2 of 2</Eyebrow>
-            {/* The count rides on the heading as the house superscript rather
-                than as a second line of its own - there is no pagination here
-                for a "13-24 of 90" to belong to. */}
+            {/* The count rides on the heading as the house superscript; the
+                "Showing 7-12 of 20" line belongs to the pagination below. */}
             <div className="mt-4 flex items-center gap-4">
               <span aria-hidden className="h-11 w-11 shrink-0">
                 <ColourSpiral swatch={selected.swatch} size="compact" />
@@ -164,9 +190,29 @@ export default async function ShopByColourPage({
             </div>
 
             {matched.length ? (
-              <Grid className="mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <ProductGridItems products={matched} sizes={GRID_SIZES} />
-              </Grid>
+              <PagedShelf
+                page={shelf.page}
+                anchor={COLOUR_RESULTS_ANCHOR}
+                turning={shelfPaging.turning}
+              >
+                {/* Keyed on the page, so a turn fades the new cards in rather
+                    than swapping them in place. */}
+                <Grid
+                  key={`grid-${selected.key}-${shelf.page}`}
+                  className="mt-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                >
+                  <ProductGridItems products={shelf.items} sizes={GRID_SIZES} />
+                </Grid>
+                <Pagination
+                  page={shelf.page}
+                  totalPages={shelf.totalPages}
+                  hrefFor={(n) => colourHref(selected.key, n)}
+                  scroll={false}
+                  summary={`${shelfPaging.showing} ${shelf.from}–${shelf.to} ${shelfPaging.of} ${shelf.total} ${
+                    shelf.total === 1 ? shelfPaging.kompanion : shelfPaging.kompanions
+                  }`}
+                />
+              </PagedShelf>
             ) : (
               // Reachable from a shared link to a colour whose last product has
               // since sold out or been unpublished.

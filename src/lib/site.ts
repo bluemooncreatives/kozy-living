@@ -1859,6 +1859,19 @@ export const foundersNote = {
 } as const;
 
 /**
+ * The page turn on the curated shelves - shop by colour and shop by mood.
+ * The summary reads "Showing 7-12 of 20 Kompanions"; the chip while the next
+ * page loads reads "Turning to page 2…".
+ */
+export const shelfPaging = {
+  showing: "Showing",
+  of: "of",
+  kompanion: "Kompanion",
+  kompanions: "Kompanions",
+  turning: "Turning to page",
+} as const;
+
+/**
  * `/shop-by-mood` - the index of rituals and the Kompanions gathered under
  * each. The MOODS themselves (names, one-line descriptions, order) are not
  * here: they are the `shop_mood` metaobjects in Shopify Admin, so the brand

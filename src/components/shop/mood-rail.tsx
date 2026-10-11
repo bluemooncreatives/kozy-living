@@ -21,8 +21,8 @@ import { useMoodShop } from "./mood-shop";
  * Same contract as the list: every card is a plain link to its mood
  * (`?mood=<handle>#kompanions`), choosing goes through `useMoodShop`, and a
  * mood with nothing in it is shown, dimmed, and leads nowhere. The chosen
- * card is ringed and centres itself, so a shopper arriving from the homepage
- * on `?mood=` finds it in view rather than four swipes away.
+ * card is ringed and brings itself into view, so a shopper arriving from the
+ * homepage on `?mood=` finds it on screen rather than four swipes away.
  *
  * Native scrolling with snap, not a transform track: touch, trackpad and
  * keyboard all work for free, and Lenis is told to stay out of the way.
@@ -44,18 +44,25 @@ const pad = (value: number) => String(value).padStart(2, "0");
 const kompanions = (count: number) =>
   count === 1 ? "1 Kompanion" : `${count} Kompanions`;
 
-/** Puts a card in the middle of its rail. The rail is `position: relative`,
- *  so a card's `offsetLeft` is measured from the rail's own edge. */
-function center(
+/** Where a card snaps: its left edge on the page grid (the rail's
+ *  `scroll-padding`). The rail is `position: relative`, so `offsetLeft` is
+ *  measured from the rail's own edge. */
+const snapLeft = (rail: HTMLElement, card: HTMLElement) =>
+  card.offsetLeft - (parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0);
+
+/**
+ * Brings a card to its snap point. NOT to the middle: the rail snaps cards by
+ * their START edge, and on a tablet - two and a bit cards across - a centred
+ * position fell between two snap points and the browser snapped straight
+ * back to the first card, so the chosen mood never came into view.
+ */
+function align(
   rail: HTMLElement | null,
   card: HTMLElement | null,
   behavior: ScrollBehavior,
 ) {
   if (!rail || !card) return;
-  rail.scrollTo({
-    left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2,
-    behavior,
-  });
+  rail.scrollTo({ left: snapLeft(rail, card), behavior });
 }
 
 export default function MoodRail({
@@ -75,9 +82,11 @@ export default function MoodRail({
   const placed = useRef(false);
   const [at, setAt] = useState(0);
 
-  // Which card is in the middle - for the dots and the counter. Measured on
-  // scroll, once per frame, from the cards' own boxes rather than from an
-  // assumed width, so a resize or a font swap cannot put it out by one.
+  // Which card is at the snap point - for the dots and the counter. Measured
+  // on scroll, once per frame, from the cards' own boxes rather than from an
+  // assumed width, so a resize or a font swap cannot put it out by one. The
+  // last cards can never reach the snap point (the rail runs out first), so
+  // a rail scrolled to its end counts as being on its last card.
   useEffect(() => {
     const el = rail.current;
     if (!el) return;
@@ -85,12 +94,15 @@ export default function MoodRail({
 
     const measure = () => {
       frame = 0;
-      const middle = el.scrollLeft + el.clientWidth / 2;
+      const cards = Array.from(el.children) as HTMLElement[];
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 2) {
+        setAt(cards.length - 1);
+        return;
+      }
       let nearest = 0;
       let distance = Infinity;
-      Array.from(el.children).forEach((child, index) => {
-        const card = child as HTMLElement;
-        const gap = Math.abs(card.offsetLeft + card.offsetWidth / 2 - middle);
+      cards.forEach((card, index) => {
+        const gap = Math.abs(snapLeft(el, card) - el.scrollLeft);
         if (gap < distance) {
           distance = gap;
           nearest = index;
@@ -110,15 +122,15 @@ export default function MoodRail({
     };
   }, []);
 
-  // The chosen card comes to the middle: at once on arrival (no ride across
-  // the rail on page load), smoothly when the choice changes after that.
+  // The chosen card comes into view: at once on arrival (no ride across the
+  // rail on page load), smoothly when the choice changes after that.
   useEffect(() => {
     const el = rail.current;
     if (!el || !chosenKey) return;
     const card = el.querySelector<HTMLElement>(
       `[data-key="${CSS.escape(chosenKey)}"]`,
     );
-    center(el, card, placed.current ? "smooth" : "instant");
+    align(el, card, placed.current ? "smooth" : "instant");
     placed.current = true;
   }, [chosenKey]);
 
@@ -137,6 +149,12 @@ export default function MoodRail({
           const live = mood.count > 0;
           const isChosen = mood.key === chosenKey;
           const lead = mood.images[0] ?? null;
+          // Below `lg` this rail is the first fold and its photographs are
+          // the page's LCP. The FIRST card is always it: the jump to the
+          // chosen card is an effect, after first paint, so the browser has
+          // already measured the rail at scrollLeft 0. The chosen card is
+          // what stands there a frame later, so it is not left lazy either.
+          const opensOn = index === 0 || isChosen;
 
           const face = (
             <>
@@ -146,6 +164,7 @@ export default function MoodRail({
                 placeholderText={mood.label}
                 aspect={null}
                 reveal={false}
+                priority={opensOn}
                 className="h-full"
                 sizes="(min-width: 640px) 21rem, 80vw"
               />
@@ -259,7 +278,7 @@ export default function MoodRail({
                 mood.key === chosenKey && "is-chosen",
               )}
               onClick={() =>
-                center(
+                align(
                   rail.current,
                   rail.current?.children[index] as HTMLElement,
                   "smooth",

@@ -29,9 +29,10 @@ import Plate from "@/components/ui/plate";
      the results   say "Gathering…" over the old shelf instead of sitting on
                    it as if nothing had happened, then swap.
 
-   `pending` is valid only while the URL still shows the mood it was clicked
-   FROM; once the navigation commits the props agree and it drops out on its
-   own, with no effect to reset it.
+   `pending` is dropped the moment the URL's mood changes - the navigation
+   committed, or the back button moved it. Read only as "pending while the
+   URL still shows the mood it was clicked FROM", Back to that mood brought
+   it back to life: the clicked mood showed as chosen over the URL's own.
 
    Clicks stop propagating at React's root. Lenis's `anchors` option listens on
    `window` for same-page `#hash` clicks and starts its own scroll at once,
@@ -110,6 +111,14 @@ export function MoodShop({
     from: string | null;
   } | null>(null);
   const glide = useRef(0);
+
+  // React's "adjust state when a prop changes", during render, so no frame
+  // paints a choice the URL has already moved past.
+  const [seen, setSeen] = useState(selectedKey);
+  if (seen !== selectedKey) {
+    setSeen(selectedKey);
+    setPending(null);
+  }
 
   const inFlight = Boolean(pending && pending.from === selectedKey);
   const chosenKey = inFlight ? pending!.key : selectedKey;

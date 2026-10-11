@@ -4119,8 +4119,11 @@ html:has([data-loader]) body {
   }
 
   /* Zero-height and sticky, so the chip floats in view over the dimmed
-     shelf without pushing it down. */
-  .mood-gathering {
+     shelf without pushing it down. Shared with the page turn on both curated
+     shelves (`.shelf-turning`, `components/shop/paged-shelf.tsx`), so a
+     wait looks the same whatever caused it. */
+  .mood-gathering,
+  .shelf-turning {
     position: sticky;
     top: calc(var(--header-h) + 5rem);
     z-index: 30;
@@ -4130,7 +4133,8 @@ html:has([data-loader]) body {
     overflow: visible;
   }
 
-  .mood-gathering-pill {
+  .mood-gathering-pill,
+  .shelf-turning-pill {
     display: inline-flex;
     height: 2.75rem;
     align-items: center;
@@ -4145,7 +4149,8 @@ html:has([data-loader]) body {
     box-shadow: 0 20px 40px -20px rgba(35, 50, 75, 0.6);
   }
 
-  .mood-gathering-spin {
+  .mood-gathering-spin,
+  .shelf-turning-spin {
     height: 0.9rem;
     width: 0.9rem;
     border: 2px solid rgba(169, 189, 175, 0.35);
@@ -4153,13 +4158,19 @@ html:has([data-loader]) body {
     border-radius: 999px;
   }
 
-  .mood-results-body {
+  .paged-shelf {
+    position: relative;
+  }
+
+  .mood-results-body,
+  .paged-shelf-body {
     transition:
       opacity 0.35s ease,
       filter 0.35s ease;
   }
 
-  .mood-results[data-loading] .mood-results-body {
+  .mood-results[data-loading] .mood-results-body,
+  .paged-shelf[data-loading] .paged-shelf-body {
     opacity: 0.32;
     filter: saturate(0.6);
     pointer-events: none;
@@ -4663,11 +4674,13 @@ html:has([data-loader]) body {
     animation-delay: 0.24s;
   }
 
-  .mood-gathering-pill {
+  .mood-gathering-pill,
+  .shelf-turning-pill {
     animation: mood-fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
-  .mood-gathering-spin {
+  .mood-gathering-spin,
+  .shelf-turning-spin {
     animation: mood-spin 0.8s linear infinite;
   }
 

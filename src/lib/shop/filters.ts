@@ -29,6 +29,15 @@ import type { FacetGroup, FacetIndex, Facets, PriceBounds } from "./facets";
 export const PRODUCTS_PER_PAGE = 24;
 export const PRODUCTS_PER_PAGE_MOBILE = 10;
 
+/**
+ * The curated shelves - shop by colour, shop by mood - page smaller than the
+ * shop. Their sets run to ~20, so at 24 a page they would never turn at all.
+ * 12 fills whole rows at 2, 3 and 4 columns; 6 is six cards of one column on
+ * a phone, about three screens.
+ */
+export const SHELF_PER_PAGE = 12;
+export const SHELF_PER_PAGE_MOBILE = 6;
+
 export type ShopSearchParams = Record<string, string | string[] | undefined>;
 
 export type PriceSelection = { min: number | null; max: number | null };
@@ -162,6 +171,11 @@ function parsePrice(
   }
 
   return { min, max };
+}
+
+/** The requested page from a param map, 1-based. Not yet clamped. */
+export function readPage(params: Map<string, string>): number {
+  return parsePage(params.get("page"));
 }
 
 function parsePage(raw: string | undefined): number {

@@ -63,13 +63,18 @@ export const SHOP_BY_MOOD_PATH = "/shop-by-mood";
 /** The results section, so a mood link lands on its Kompanions. */
 export const MOOD_RESULTS_ANCHOR = "kompanions";
 
-/** The page showing one mood, or - with `null` - the index with nothing chosen. */
-export function moodHref(key: string | null): string {
+/**
+ * The page showing one mood, or - with `null` - the index with nothing
+ * chosen. `page` is written only from 2: page 1 is the bare address, so one
+ * shelf has one URL.
+ */
+export function moodHref(key: string | null, page = 1): string {
   if (!key) return SHOP_BY_MOOD_PATH;
 
+  const turn = page > 1 ? `&page=${page}` : "";
   return `${SHOP_BY_MOOD_PATH}?${MOOD_PARAM}=${encodeURIComponent(
     key
-  )}#${MOOD_RESULTS_ANCHOR}`;
+  )}${turn}#${MOOD_RESULTS_ANCHOR}`;
 }
 
 export type MoodValue = {

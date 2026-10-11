@@ -479,6 +479,30 @@ is a link, not a click handler. That is what makes the shop server-rendered,
 shareable, back-button-correct and functional without JS. Do not move shop
 state into React state.
 
+**Pagination** runs on three grids with one rule. Page size depends on the
+device, decided on the server by `isMobileRequest()`
+(`lib/shop/viewport.ts`: `?mobile=` override, then the `kozy_is_mobile`
+cookie, then the user agent):
+
+| | desktop | phone |
+| --- | --- | --- |
+| `/search` | 24 (`PRODUCTS_PER_PAGE`) | 10 |
+| `/shop-by-colour`, `/shop-by-mood` | 12 (`SHELF_PER_PAGE`) | 6 |
+
+The curated shelves page smaller because their sets run to ~20 and would
+never turn at 24; 12 fills whole rows at 2, 3 and 4 columns. Page 1 is never
+written, and a non-canonical `page` (1, 0, past the end, or set with nothing
+chosen) redirects. `colourHref(key, page)` / `moodHref(key, page)` build the
+shelf URLs. On the shelves, `PagedShelf` (`components/shop/paged-shelf.tsx`)
+wraps grid + `Pagination` (`scroll={false}`): it glides to the shelf top
+itself and dims the old page under a "Turning to page N…" chip.
+
+⚠️ **Pending UI state must be dropped when the URL value changes, not just
+compared against it.** `PagedShelf` and `MoodShop` both read "pending while
+the URL still shows the value it was clicked FROM", and Back returns to
+exactly that value: the chip came back and stuck, and a mood the shopper had
+left showed as chosen. Both now reset in render when the prop changes.
+
 ### Variants — the price follows the selection
 
 24 of the store's 92 products are priced per variant (a shirt runs ₹1,200 →
@@ -529,6 +553,17 @@ only the page's framing is `shopByMood` in `site.ts`.
   with nothing chosen it walks through the moods by itself (`CYCLE_MS`,
   desktop + fine pointer only, never under reduced motion, only on screen)
   and the row it shows draws a progress line.
+- **Below `lg` the list is replaced by a photo rail**
+  (`components/shop/mood-rail.tsx`): one swipeable card per mood with its
+  lead photograph, count, line and a "Shop this mood" pill, plus dots and an
+  "02 / 06" counter. Six text rows put ~1,100px between the headline and the
+  first Kompanion on a phone, and the stage (the only mood photography) is
+  desktop-only. The chosen card is RINGED, not flooded, and brings itself
+  into view on arrival. ⚠️ It aligns to the card's START edge (the snap
+  point), never the centre: on a tablet a centred position fell between two
+  snap points and the browser snapped back to the first card. On phones the
+  shelf's chrome (switcher chips, masthead, next-mood card) is trimmed in a
+  `max-width: 639px` block.
 - **The shelf**: a sticky chip switcher (`MoodSwitcher`, under the header)
   so moods can be changed from deep in the cards; a "Next mood" card at the
   foot (`MoodNext`); "Clear mood" in the masthead. The old prev/next arrows
@@ -536,7 +571,7 @@ only the page's framing is `shopByMood` in `site.ts`.
 - **Click state is shared** by `components/shop/mood-shop.tsx` (`MoodShop`
   provider around both sections): `pending` marks the clicked mood chosen at
   once (valid only while the URL still shows the mood it was clicked from)
-  and `MoodResults` dims the old shelf under a "Gathering <mood>…" chip until
+  and `MoodResults` dims the old shelf under a `Gathering <mood>…` chip until
   the server answers. ⚠️ **Lenis's `anchors` option smooth-scrolls on any
   same-path `#hash` click, from a `window` listener.** Left alone it carried
   the page away before the row had turned, so `choose()` stops the click's

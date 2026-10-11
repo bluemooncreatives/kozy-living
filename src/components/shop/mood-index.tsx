@@ -243,6 +243,10 @@ export default function MoodIndex({
             gallery={gallery.length ? gallery : null}
             galleryIndex={frame}
             galleryTransition="wipe"
+            // The stage is the page's first-fold photograph and its LCP.
+            // Plate's wipe hands the hint only to the frame on screen, so
+            // the other moods' stills stay lazy.
+            priority
             placeholderText="mood"
             aspect={null}
             arrow

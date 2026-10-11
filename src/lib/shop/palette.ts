@@ -39,12 +39,14 @@ export const COLOUR_RESULTS_ANCHOR = "kompanions";
  * with nothing chosen. Used by that page's own rail, for selecting and
  * clearing.
  */
-export function colourHref(key: string | null): string {
+export function colourHref(key: string | null, page = 1): string {
   if (!key) return SHOP_BY_COLOUR_PATH;
 
+  // Page 1 is the bare address, so one shelf has one URL.
+  const turn = page > 1 ? `&page=${page}` : "";
   return `${SHOP_BY_COLOUR_PATH}?${COLOUR_PARAM}=${encodeURIComponent(
     key
-  )}#${COLOUR_RESULTS_ANCHOR}`;
+  )}${turn}#${COLOUR_RESULTS_ANCHOR}`;
 }
 
 /**

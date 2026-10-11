@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
-import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Grid from "@/components/grid";
 import ProductGridItems from "@/components/layout/product-grid-items";
@@ -15,6 +14,7 @@ import {
 } from "@/lib/shopify";
 import type { CatalogProduct, Collection } from "@/lib/shopify/types";
 import { buildFacets } from "@/lib/shop/facets";
+import { isMobileRequest } from "@/lib/shop/viewport";
 import {
   applyFilters,
   clearFiltersUrl,
@@ -165,28 +165,9 @@ export default async function ShopView({
       ? orderBy(scope, (await getCollectionProductOrder(collectionHandle)) ?? [])
       : scope;
 
-  const [headerList, cookieStore] = await Promise.all([
-    headers(),
-    cookies(),
-  ]);
-
-  const chMobile = headerList.get("sec-ch-ua-mobile");
-  const ua = headerList.get("user-agent") || "";
-  const isMobileUA =
-    chMobile === "?1" ||
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
-
-  const cookieVal = cookieStore.get("kozy_is_mobile")?.value;
-  const isMobile =
-    params.get("mobile") === "1"
-      ? true
-      : params.get("mobile") === "0"
-      ? false
-      : cookieVal !== undefined
-      ? cookieVal === "1"
-      : isMobileUA;
-
-  const perPage = isMobile ? PRODUCTS_PER_PAGE_MOBILE : PRODUCTS_PER_PAGE;
+  const perPage = (await isMobileRequest(params))
+    ? PRODUCTS_PER_PAGE_MOBILE
+    : PRODUCTS_PER_PAGE;
 
   const filtered = applyFilters(ordered, index, state);
   const sorted = sortProducts(filtered, state.sort, rank);
