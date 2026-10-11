@@ -46,6 +46,9 @@ Read the VOICE note at the top of `src/lib/site.ts` before writing any copy.
   - The ordinary English word is still ordinary: "craft clusters",
     "craft-led", "handcrafted", "Craft Technique" are all correct as written.
     Only the standalone word *crafted* takes the K.
+  - One owner-requested exception: the "Handkrafted in India" flag
+    (`flag` / `flagMark` in `site.ts`) takes the K. Do not spread it to other
+    uses of "handcrafted".
 - Rest, ritual and intention. **Not** luxury, indulgence or "elevate".
 - **Never invent social proof, certifications or figures.** This has been a
   real problem here: earlier copy carried an invented "4.9 / 2,400+ homes
@@ -265,7 +268,7 @@ Do not de-duplicate them.
 below the hero's full-viewport frame; unwrapped, its Shopify lookups held the
 first byte of the whole page.
 
-### The paged lookbook (under "Do Less, With Intention")
+### The paged lookbook (under "The In-Between Luxury")
 
 `BoldStatement` resolves the data; `src/components/home/lookbook-deck.tsx`
 (client) renders it. The four staggered plates are **pages of `lookbook` in

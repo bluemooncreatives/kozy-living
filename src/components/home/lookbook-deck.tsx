@@ -63,7 +63,7 @@ export default function LookbookDeck({
     <div className="relative mt-8 md:mt-10 lg:mt-16">
       {/* On wide screens this drops into the notch the staggered plates
           leave open; below that it is simply the paragraph after the head. */}
-      <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[38%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[28rem]">
+      <p className="body-mono mb-6 max-w-measure lg:absolute lg:left-[34%] lg:top-0 lg:z-10 lg:mb-0 lg:max-w-[31rem]">
         {intro}
       </p>
 

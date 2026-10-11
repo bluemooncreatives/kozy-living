@@ -267,13 +267,15 @@ function Hero() {
                 label={hero.primary.label}
                 href={hero.primary.href}
                 icon="arrow"
-                variant="glass"
+                variant="solid"
+                className="action-btn-ivory-well"
               />
               <ActionButton
                 label={hero.secondary.label}
                 href={hero.secondary.href}
                 icon="down"
-                variant="glass"
+                variant="solid"
+                className="action-btn-ivory-well"
               />
             </div>
           </div>

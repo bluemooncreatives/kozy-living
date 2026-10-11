@@ -158,13 +158,13 @@ export const announcement = "Krafted to give you moments of rest";
  * instead.
  */
 export const hero = {
-  flag: "Handcrafted in India",
+  flag: "Handkrafted in India",
   /**
    * The same claim, split for the two-line origin mark on the hero plate.
    * Kept beside `flag` rather than derived from it: the social card (which
    * cannot read this layout) still wants the sentence whole.
    */
-  flagMark: { lead: "Handcrafted", place: "in India" },
+  flagMark: { lead: "Handkrafted", place: "in India" },
   blurb:
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
   /**
@@ -183,7 +183,7 @@ export const hero = {
   /** The two small plates that close the bento. */
   tiles: [
     {
-      tag: "#KRAFTEDBYHAND",
+      tag: "#KESSENTIALS",
       handle: "kessentials",
       images: [
         "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
@@ -192,7 +192,7 @@ export const hero = {
       ],
     },
     {
-      tag: "#MOMENTSOFREST",
+      tag: "#KRAFTEDKOMPANIONS",
       handle: "kozy-lounge",
       images: [
         "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/900E9CCD-5302-4863-A642-251A2207515C.jpg?v=1788636354",
@@ -243,8 +243,8 @@ export const heroFilms = [
 
 /** The oversized statement that opens the editorial half of the page. */
 export const boldStatement = {
-  title: ["Do Less,", "With Intention"],
-  body: "Rooted in Indian craft and expressed through a modern design language - colour, print and organic form that refresh your space and enhance daily living.",
+  title: ["The In-Between", "Luxury"],
+  body: "Between one routine and the next, there is a little space to breathe. Kreate your Kozy Korner and simply be. No new rituals - just five minutes of mindful rest, with your Kompanion beside you.",
 } as const;
 
 /**

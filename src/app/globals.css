@@ -750,6 +750,12 @@
     @apply bg-sage text-ink;
   }
 
+  /* The hero's pair: the solid pill with an ivory well instead of sage, so
+     the arrows read as the light inverse of the ground (indigo/ivory 11.73). */
+  .action-btn-solid.action-btn-ivory-well .action-btn-icon {
+    @apply bg-ivory text-ink;
+  }
+
   /* On photography. The card surface at 85%, over the image. */
   .action-btn-glass {
     @apply action-btn border-ivory/30 bg-ivory/85 text-ink backdrop-blur-md;
