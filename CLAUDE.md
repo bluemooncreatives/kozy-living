@@ -733,7 +733,7 @@ editorial column beside it. The verified range is **0.57–0.78** across
 `.story-copy` is `align-self: center` at `lg` for the same reason — anchoring
 it to the bottom put the entire surplus into one gap.
 
-The headline rings "quietest hour" with `CircledWord`. Building this band is
+The headline rings "shared rituals" with `CircledWord`. Building this band is
 what exposed the screen-space dash bug in that shared component (§7) — the
 hero's shorter "real rest" was only ~17% short and nobody had noticed.
 

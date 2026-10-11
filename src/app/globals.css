@@ -1307,7 +1307,7 @@
   .story-grid > * { min-width: 0; }
   .story-copy { grid-area: copy; padding-inline: 0.25rem; }
   .story-heading { max-width: 100%; }
-  .story-intro { @apply font-sans text-body text-muted; max-width: 28rem; margin-top: 1.5rem; }
+  .story-intro { @apply font-sans text-body text-muted; max-width: none; /* the copy fills its column; the band's grid sets the measure */ margin-top: 1.5rem; }
   .story-actions {
     grid-area: actions;
     display: grid;

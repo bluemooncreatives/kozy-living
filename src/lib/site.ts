@@ -413,10 +413,10 @@ export const aboutStory = {
    * simply rewraps and the hand-set rag stops meaning anything. The ellipse
    * loops the phrase below, so keep it verbatim and keep it on one line.
    */
-  title: ["Behind your", "quietest hour"],
+  title: ["Behind your", "shared rituals"],
   summary:
-    "Designed in-house and made with craft clusters across India. We bring natural fibres and thoughtful design to the little rituals that make you feel at home.",
-  circled: "quietest hour",
+    "To us, shared rituals go beyond our homes. They connect us to the hands and heritage behind what we bring into them. At Kozy Living, we share these rituals with Indian craftspeople, collaborating to bring uplifting crafts into modern homes and everyday living.",
+  circled: "shared rituals",
   body: "Kozy Living began with one idea: you don't need to add more to your day. Everything we make is designed in-house, worked in 100% natural fibres, and made with craft clusters across India - so the ten minutes you already take feel like a ritual rather than a gap.",
   /** Sits under the meter on wide screens, where the left column has room. */
   meterNote:
