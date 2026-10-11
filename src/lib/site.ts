@@ -464,8 +464,8 @@ export const aboutStory = {
     {
       index: "03",
       kicker: "The print",
-      lede: { lead: "Dabu,", accent: "block by block" },
-      body: "A mud-and-gum resist is stamped onto the cloth by hand before it ever meets the dye, so no two repeats are identical.",
+      lede: { lead: "Dabu", accent: "Handblock Printing" },
+      body: "Kozy Living's first Kraft Kapsule Kollection features Dabu printing, a traditional mud-resist dyeing technique rooted in Jodhpur, Rajasthan.",
       cta: "See Dabu pieces",
       collection: "dabu-printed-pillows",
       href: "/blogs",
