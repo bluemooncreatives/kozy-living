@@ -517,24 +517,36 @@ only the page's framing is `shopByMood` in `site.ts`.
   `productCardFragment`, not inside `metafields`. `productColours()` takes the
   first `metafields` entry that has a value, so a mood placed there would be
   read as a colour on every product that has no colour.
-- The index (`components/shop/mood-index.tsx`) is a **schedule**: intro and a
-  large "stage" photograph down the left, the moods as an accordion down the
-  right (`.mood-sched` area map; the stage is `lg`+ only). **The open row is
-  the chosen mood**; with nothing chosen the first live mood stands open as
-  an invitation, and its button chooses it. Every row head is still a plain
-  `<Link>` to `?mood=<handle>#kompanions`, so it works with JS off.
-- The client holds display state only: `pending` (the clicked row opens at
-  once, valid only while the URL still shows the mood it was clicked from),
-  `hovered` (which mood the stage previews) and a delayed glide to the
-  results. ⚠️ **Lenis's `anchors` option smooth-scrolls on any same-path
-  `#hash` click, from a `window` listener.** Left alone it carried the page
-  away before the row had opened, so `choose()` stops the click's
-  propagation at React's root and scrolls itself ~620ms later. The route
-  hairline listens in the capture phase and is unaffected.
+- **The page states its own two steps** (owner asked for it to be easy to
+  understand end to end): "1 Pick a mood" heads the list, "2" heads the
+  shelf. Keep both labels; a first visit should need no reading.
+- **The list** (`components/shop/mood-index.tsx`): every row shows number,
+  name, the merchant's line and count AT REST - nothing folded away, nothing
+  open until chosen. The chosen row floods indigo with a "Selected" flag and
+  unfolds a photo strip, "See them below" and "Clear". Every row head is a
+  plain `<Link>` to `?mood=<handle>#kompanions`, so it works with JS off.
+  Beside it (`lg`+) the stage photograph is tagged "Preview" or "Selected";
+  with nothing chosen it walks through the moods by itself (`CYCLE_MS`,
+  desktop + fine pointer only, never under reduced motion, only on screen)
+  and the row it shows draws a progress line.
+- **The shelf**: a sticky chip switcher (`MoodSwitcher`, under the header)
+  so moods can be changed from deep in the cards; a "Next mood" card at the
+  foot (`MoodNext`); "Clear mood" in the masthead. The old prev/next arrows
+  were replaced by the chips.
+- **Click state is shared** by `components/shop/mood-shop.tsx` (`MoodShop`
+  provider around both sections): `pending` marks the clicked mood chosen at
+  once (valid only while the URL still shows the mood it was clicked from)
+  and `MoodResults` dims the old shelf under a "Gathering <mood>…" chip until
+  the server answers. ⚠️ **Lenis's `anchors` option smooth-scrolls on any
+  same-path `#hash` click, from a `window` listener.** Left alone it carried
+  the page away before the row had turned, so `choose()` stops the click's
+  propagation at React's root and scrolls itself - 450ms later from the
+  list, at once from the chips. The route hairline listens in the capture
+  phase and is unaffected.
 - The stage wipes between moods with `Plate galleryTransition="wipe"`
   (`.plate-wipe` in `globals.css`): the outgoing still is held for longer
   than a wipe takes, so a pointer running down the list never exposes the
-  oat ground. Open-row height is `grid-template-rows: 0fr → 1fr`.
+  oat ground. The chosen row's height is `grid-template-rows: 0fr → 1fr`.
 - Everything that mounts after a click enters on keyed CSS (`.mood-turn`,
   `.mood-card-in`, `.mood-stage-*`), not `data-reveal`.
 - **The homepage teases it** with `components/home/mood-panels.tsx`, after

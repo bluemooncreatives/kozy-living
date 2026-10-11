@@ -1877,29 +1877,55 @@ export const shopByMood = {
   ring: "moment",
   lede: "Kompanions gathered around the small rituals of a day. Choose the moment you are making room for, and what was krafted for it gathers below.",
   indexLabel: "The moods",
+  /** The badge beside the eyebrow reads "6 moods". */
+  moodsWord: "moods",
   comingSoon: "Coming soon",
   noMoods: "No moods are published yet.",
   browseAll: "Browse every Kompanion",
-  /** The open row of the mood list. */
+  /** Step one - the list. */
   index: {
-    /** On the row opened as an invitation, before anything is chosen. */
-    view: "View the Kompanions",
+    step: "Pick a mood",
+    /** The hint beside the step: the swipe rail below `lg`, then one for a
+        mouse and one for a finger on the desktop list. */
+    hintRail: "Swipe to browse · tap to shop",
+    hintPointer: "Hover to preview · click to shop",
+    hintTouch: "Tap a mood to see its Kompanions",
+    /** The pill on each card of the phone rail. */
+    shop: "Shop this mood",
+    /** The rail's dots read "Go to Caffeine Ritual". */
+    goTo: "Go to",
+    /** Flags the chosen row and the photograph showing it. */
+    selected: "Selected",
+    /** Tags the photograph while it shows a mood that is not chosen. */
+    preview: "Preview",
+    /** The photograph's caption reads "Mood 03". */
+    moodWord: "Mood",
     /** On the chosen row - its Kompanions are already on the page. */
     showing: "See them below",
     clear: "Clear",
-    /** Tags the photograph while the pointer rests on a mood that is not open. */
-    preview: "Preview",
+    /** Leads into `browseAll` under the list. */
+    unsure: "Not sure where to start?",
   },
+  /** Step two before anything is chosen. */
   resting: {
+    step: "Browse its Kompanions",
     title: "Choose a moment to see what belongs to it",
     body: "Pick a mood above and the Kompanions made for it will gather here.",
-    back: "Back to the moods",
+    back: "Pick a mood",
   },
+  /** Step two once a mood is chosen. */
   results: {
+    /** "Mood 03 of 06". */
     eyebrow: "Mood",
-    previous: "Previous mood",
+    of: "of",
+    /** The sticky chip rail: its name, and the chip back up to the list. */
+    switcher: "Switch mood",
+    back: "All moods",
+    /** "Gathering Rest as a Ritual…" while the next shelf loads. */
+    gathering: "Gathering",
+    /** The card at the end of the shelf. */
     next: "Next mood",
-    clear: "All moods",
+    clear: "Clear mood",
   },
   /** The homepage's mood panels, the section after Shop by colour. */
   home: {

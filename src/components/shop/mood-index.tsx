@@ -1,49 +1,49 @@
 "use client";
 
 import clsx from "clsx";
-import { useLenis } from "lenis/react";
 import Link from "next/link";
 import {
   useEffect,
   useMemo,
   useRef,
   useState,
-  type MouseEvent,
+  useSyncExternalStore,
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { ChevronRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { splitText } from "@/components/motion/split-text";
 import ActionButton from "@/components/ui/action-button";
+import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import Plate from "@/components/ui/plate";
 import Image from "@/components/ui/shop-image";
+import MoodRail from "./mood-rail";
+import { useMoodShop } from "./mood-shop";
 
 /**
- * The ritual schedule: the moods as an accordion beside one large photograph.
+ * Step one of /shop-by-mood: the moods as a list beside one large photograph.
  *
  *   intro  | list        the intro (badge, headline, lede) is the server's,
  *   stage  | list        passed in whole; this file owns the stage and list
  *
- * THE OPEN ROW IS THE CHOSEN MOOD. Choosing is still a navigation - every
- * row is a plain link to `?mood=<handle>#kompanions`, so the list works with
- * JavaScript off, the back button is right and the address is the state.
- * Until something is chosen, the first live mood stands open as an
- * invitation, the way the reference opens on its first fixture; its button
- * chooses it. Nothing below the list renders until a mood is chosen.
+ * BUILT TO BE READ AT A GLANCE. Every row shows everything a shopper needs to
+ * choose - number, name, the merchant's one line, how many Kompanions - with
+ * nothing folded away, and nothing is open until something is chosen. The
+ * list is headed "1  Pick a mood" and the shelf below "2", so the page states
+ * its own two steps.
  *
- * Three pieces of client state, none of them shop state:
+ * THE CHOSEN ROW is unmistakable: it floods indigo, carries a "Selected"
+ * check and unfolds a strip of the mood's photographs with the way down to
+ * its Kompanions and the way to clear it. Choosing is still a navigation -
+ * every row is a plain link to `?mood=<handle>#kompanions` - and the state
+ * between the click and the server's answer is in `mood-shop.tsx`.
  *
- *   pending   the row clicked, opened at once rather than after the server
- *             answers, so the accordion turns under the finger. Valid only
- *             while the URL still shows the mood it was clicked FROM: once
- *             the navigation commits, the props agree and it drops out.
- *   hovered   which mood the stage previews. Fine pointers and focus only.
- *   scroll    the glide down to the Kompanions, held until the accordion
- *             has turned. Lenis's own anchor handling would start it on the
- *             click and carry the page away before the row had opened.
- *
- * The stage is desktop-only, as the preview always was: hover does not exist
- * on a phone, and the open row carries its own photograph instead.
+ * THE STAGE is labelled for what it is: "Preview" while it shows a mood the
+ * pointer rests on, "Selected" once it shows the chosen one. With nothing
+ * chosen and no pointer on the list it walks through the moods by itself
+ * (desktop only, never under reduced motion, only while on screen), and the
+ * row it is showing draws a progress line - so the photograph and the row it
+ * belongs to are visibly one thing.
  */
 
 export type IndexMood = {
@@ -60,11 +60,19 @@ export type IndexMood = {
 
 type Copy = {
   label: string;
+  step: string;
+  hintRail: string;
+  hintPointer: string;
+  hintTouch: string;
+  shop: string;
+  goTo: string;
   comingSoon: string;
-  view: string;
+  selected: string;
+  preview: string;
+  moodWord: string;
   showing: string;
   clear: string;
-  preview: string;
+  unsure: string;
   browseAll: string;
 };
 
@@ -77,54 +85,49 @@ const kompanions = (count: number) =>
 const HOVER_INTENT_MS = 90;
 
 /**
- * Click to glide: long enough for the row to open and the stage to wipe -
- * the accordion's own transition is 750ms, and most of its travel is in the
- * first half - but short enough to read as the click's answer.
+ * One mood's turn on the stage while it walks through them unattended.
+ * `.mood-row-progress` in globals.css draws over the same span - move both.
  */
-const GLIDE_AFTER_MS = 620;
+const CYCLE_MS = 4200;
 
-/** A click the browser should keep: new tab, new window, download. */
-const modified = (event: MouseEvent) =>
-  event.button !== 0 ||
-  event.metaKey ||
-  event.ctrlKey ||
-  event.shiftKey ||
-  event.altKey;
+function useMedia(query: string) {
+  return useSyncExternalStore(
+    (notify) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", notify);
+      return () => list.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
 
 export default function MoodIndex({
   moods,
-  selectedKey,
   clearHref,
-  resultsAnchor,
   intro,
   copy,
 }: {
   moods: IndexMood[];
-  /** The mood the URL names, or null for the resting page. */
-  selectedKey: string | null;
   /** The address with nothing chosen. */
   clearHref: string;
-  /** The id of the section the Kompanions gather in. */
-  resultsAnchor: string;
   /** Badge, headline and lede - server-rendered, set in the grid's corner. */
   intro: ReactNode;
   copy: Copy;
 }) {
-  const lenis = useLenis();
+  const { chosenKey, choose, clear, scrollToResults } = useMoodShop();
 
-  const [pending, setPending] = useState<{
-    key: string | null;
-    from: string | null;
-  } | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-
+  const [tick, setTick] = useState(0);
+  const [stageOnScreen, setStageOnScreen] = useState(false);
   const intent = useRef(0);
-  const glide = useRef<number | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
 
-  const chosen =
-    pending && pending.from === selectedKey ? pending.key : selectedKey;
-  const teaser = moods.find((mood) => mood.count > 0)?.key ?? null;
-  const openKey = chosen ?? teaser;
+  const finePointer = useMedia("(hover: hover) and (pointer: fine)");
+  const stillPlease = useMedia("(prefers-reduced-motion: reduce)");
+  const wide = useMedia("(min-width: 1024px)");
+
+  const live = useMemo(() => moods.filter((mood) => mood.count > 0), [moods]);
 
   // One frame per distinct photograph. Two moods CAN share a lead shot - the
   // server only avoids it where a mood has an alternative - and Plate keys
@@ -149,83 +152,49 @@ export default function MoodIndex({
     return { gallery: frames, frameOf };
   }, [moods]);
 
+  // The unattended walk. Only where there is a stage to watch and a pointer
+  // that could take over from it, and only while it is on screen.
+  const cycling =
+    !chosenKey &&
+    !hovered &&
+    wide &&
+    finePointer &&
+    !stillPlease &&
+    stageOnScreen &&
+    live.length > 1;
+
+  useEffect(() => {
+    const el = stage.current;
+    if (!el) return;
+    const watch = new IntersectionObserver(
+      ([entry]) => setStageOnScreen(Boolean(entry?.isIntersecting)),
+      { threshold: 0.35 },
+    );
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!cycling) return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setTick((value) => value + 1);
+    }, CYCLE_MS);
+    return () => window.clearInterval(timer);
+  }, [cycling]);
+
+  useEffect(() => () => window.clearTimeout(intent.current), []);
+
+  const walked = live.length ? live[tick % live.length]!.key : null;
+
   const staged =
     moods.find((mood) => mood.key === hovered && frameOf.has(mood.key)) ??
-    moods.find((mood) => mood.key === openKey) ??
+    moods.find((mood) => mood.key === chosenKey) ??
+    moods.find((mood) => mood.key === walked) ??
     moods[0] ??
     null;
   const stagedIndex = staged ? moods.indexOf(staged) : 0;
   const frame = frameOf.get(staged?.key ?? "") ?? 0;
-
-  const scrollToResults = () => {
-    const target = document.getElementById(resultsAnchor);
-    if (!target) return;
-    // Through Lenis when it is running: a native scroll under it is
-    // overwritten on its next frame. Both honour the section's scroll-margin,
-    // which is what clears the sticky header.
-    if (lenis) {
-      lenis.scrollTo(target, {
-        duration: 1.3,
-        easing: (t: number) => 1 - Math.pow(1 - t, 4),
-      });
-    } else {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  // The glide, once the chosen mood has committed. Measured from the click,
-  // so a slow server is not then made to wait a second time.
-  useEffect(() => {
-    const clickedAt = glide.current;
-    if (clickedAt === null || !selectedKey) return;
-
-    const wait = Math.max(
-      120,
-      GLIDE_AFTER_MS - (performance.now() - clickedAt),
-    );
-    const timer = window.setTimeout(() => {
-      glide.current = null;
-      scrollToResults();
-    }, wait);
-
-    return () => window.clearTimeout(timer);
-    // `scrollToResults` is rebuilt every render; the commit is the trigger.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedKey]);
-
-  useEffect(() => () => window.clearTimeout(intent.current), []);
-
-  /** Choosing a mood: from a row's head, its button, or the stage. */
-  const choose = (event: MouseEvent, key: string) => {
-    if (event.defaultPrevented || modified(event)) return;
-
-    // Lenis listens for same-page anchor clicks on `window` and would begin
-    // the scroll right now. Stopping the event at React's root keeps it from
-    // ever arriving; the route-progress hairline listens in the capture
-    // phase and still hears it.
-    event.stopPropagation();
-
-    if (key === selectedKey) {
-      // Already showing - nothing to fetch, only somewhere to go.
-      event.preventDefault();
-      setPending(null);
-      scrollToResults();
-      return;
-    }
-
-    setPending({ key, from: selectedKey });
-    // The stage follows the open row from here; a preview left over from
-    // the pointer or the focus would otherwise outlive the choice.
-    setHovered(null);
-    glide.current = performance.now();
-  };
-
-  const clear = (event: MouseEvent) => {
-    if (event.defaultPrevented || modified(event)) return;
-    setPending({ key: null, from: selectedKey });
-    setHovered(null);
-    glide.current = null;
-  };
+  const stagedIsChosen = Boolean(staged && staged.key === chosenKey);
 
   const preview = (key: string) => {
     window.clearTimeout(intent.current);
@@ -241,14 +210,11 @@ export default function MoodIndex({
   const release = () => {
     window.clearTimeout(intent.current);
     // A beat before letting go, so the pointer crossing the rule between
-    // two rows does not flick the stage back to the open mood and out again.
+    // two rows does not flick the stage away and back.
     intent.current = window.setTimeout(() => setHovered(null), 160);
   };
 
   if (!moods.length) return null;
-
-  const stageLive = Boolean(staged?.count);
-  const previewing = Boolean(hovered && staged && staged.key !== openKey);
 
   return (
     <div className="mood-sched">
@@ -257,20 +223,20 @@ export default function MoodIndex({
       {/* The stage. `aria-hidden` and out of the tab order: every mood it can
           show is already a link in the list, and a second stop for the same
           destination is noise to a keyboard or a screen reader. */}
-      <div className="mood-sched-stage">
+      <div ref={stage} className="mood-sched-stage">
         <Link
-          href={stageLive && staged ? staged.href : clearHref}
+          href={staged?.count ? staged.href : clearHref}
           tabIndex={-1}
           aria-hidden
           prefetch={false}
           scroll={false}
           onClick={(event) => {
-            if (stageLive && staged) choose(event, staged.key);
+            if (staged?.count) choose(event, staged.key, "soon");
             else event.preventDefault();
           }}
           className={clsx(
             "group block h-full",
-            !stageLive && "pointer-events-none",
+            !staged?.count && "pointer-events-none",
           )}
         >
           <Plate
@@ -280,41 +246,36 @@ export default function MoodIndex({
             placeholderText="mood"
             aspect={null}
             arrow
-            className="h-full min-h-[22rem]"
+            className="h-full min-h-[18rem]"
             sizes="(min-width: 1536px) 40rem, (min-width: 1024px) 42vw, 1px"
           >
-            {/* `notch-tr` again: Plate's children sit outside its masked
-                layer, so without it the top scrim washes across the cut and
-                greys the cream halo round the corner arrow. */}
+            {/* `notch-tr`, the same cut as the photograph's: Plate masks its
+                own media, not its children, and this scrim spans the whole
+                frame - unmasked, it laid a grey film over the cream the
+                notch exists to show, behind the corner arrow. */}
             <div className="notch-tr pointer-events-none absolute inset-0 overflow-hidden rounded-plate">
               <div className="mood-stage-scrim" />
 
               {staged ? (
                 <>
-                  <p className="mood-stage-num display-face">
-                    <span className="mood-stage-num-slot">
-                      <span
-                        key={`n-${staged.key}`}
-                        className="mood-stage-num-roll tabular-nums"
-                      >
-                        {pad(stagedIndex + 1)}
-                      </span>
-                    </span>
-                    <span className="mood-stage-total tabular-nums">
-                      / {pad(moods.length)}
-                    </span>
-                  </p>
+                  <span
+                    key={`t-${staged.key}-${stagedIsChosen}`}
+                    className="mood-stage-tag"
+                    data-tone={stagedIsChosen ? "selected" : "preview"}
+                  >
+                    {stagedIsChosen ? (
+                      <CheckIcon className="h-3 w-3" strokeWidth={3} />
+                    ) : (
+                      <span className="mood-stage-tag-dot" />
+                    )}
+                    {stagedIsChosen ? copy.selected : copy.preview}
+                  </span>
 
                   <div key={`c-${staged.key}`} className="mood-stage-caption">
-                    <p className="mood-stage-meta">
-                      {previewing ? (
-                        <span className="mood-stage-tag">{copy.preview}</span>
-                      ) : null}
-                      <span>
-                        {staged.count
-                          ? kompanions(staged.count)
-                          : copy.comingSoon}
-                      </span>
+                    <p className="mood-stage-meta tabular-nums">
+                      {copy.moodWord} {pad(stagedIndex + 1)}
+                      <span aria-hidden> · </span>
+                      {staged.count ? kompanions(staged.count) : copy.comingSoon}
                     </p>
                     <p className="mood-stage-title display-face">
                       {splitText(staged.label)}
@@ -328,10 +289,41 @@ export default function MoodIndex({
       </div>
 
       <div className="mood-sched-list">
+        <div className="mood-list-head">
+          <p className="mood-steplabel">
+            <span className="mood-step-num" aria-hidden>
+              1
+            </span>
+            {copy.step}
+          </p>
+          <p className="mood-list-hint">
+            <span className="mood-hint-rail">{copy.hintRail}</span>
+            <span className="mood-hint-pointer">{copy.hintPointer}</span>
+            <span className="mood-hint-touch">{copy.hintTouch}</span>
+          </p>
+        </div>
+
+        {/* Below `lg` the list below is hidden and this rail picks instead -
+            see `mood-rail.tsx` for why a phone gets photographs. */}
+        <MoodRail
+          moods={moods}
+          clearHref={clearHref}
+          label={copy.label}
+          copy={{
+            comingSoon: copy.comingSoon,
+            selected: copy.selected,
+            moodWord: copy.moodWord,
+            shop: copy.shop,
+            showing: copy.showing,
+            clear: copy.clear,
+            goTo: copy.goTo,
+          }}
+        />
+
         <ol
           aria-label={copy.label}
           data-reveal-group=""
-          className="mood-acc"
+          className="mood-rows"
           onPointerLeave={release}
           onBlur={(event) => {
             // Focus leaving the whole list, not moving between its rows.
@@ -341,25 +333,42 @@ export default function MoodIndex({
           }}
         >
           {moods.map((mood, index) => {
-            const open = mood.key === openKey;
-            const isChosen = mood.key === chosen;
-            const live = mood.count > 0;
-            // The second photograph where there is one: the stage beside the
-            // list is already showing the first.
-            const thumb = mood.images[1] ?? mood.images[0] ?? null;
+            const isChosen = mood.key === chosenKey;
+            const isWalked = cycling && mood.key === walked;
+            const isLive = mood.count > 0;
 
-            const head = (
+            const body = (
               <>
-                <span className="mood-acc-num tabular-nums">
-                  {pad(index + 1)}.
-                </span>
-                <span className="mood-acc-name">{mood.label}</span>
-                {live ? (
-                  <span className="mood-acc-chev" aria-hidden>
-                    <ChevronRightIcon className="h-4 w-4" strokeWidth={2} />
+                <span className="mood-row-num tabular-nums">{pad(index + 1)}</span>
+                <span className="mood-row-text">
+                  <span className="mood-row-name">
+                    {mood.label}
+                    {isChosen ? (
+                      <span className="mood-row-flag">
+                        <CheckIcon className="h-3 w-3" strokeWidth={3} aria-hidden />
+                        {copy.selected}
+                      </span>
+                    ) : null}
                   </span>
+                  {mood.description ? (
+                    <span className="mood-row-desc">{mood.description}</span>
+                  ) : null}
+                </span>
+                {isLive ? (
+                  <>
+                    <span className="mood-row-count tabular-nums">
+                      {kompanions(mood.count)}
+                    </span>
+                    <span className="mood-row-go" aria-hidden>
+                      {isChosen ? (
+                        <CheckIcon className="h-4 w-4" strokeWidth={2.5} />
+                      ) : (
+                        <ArrowUpRight className="h-4 w-4 rotate-45" />
+                      )}
+                    </span>
+                  </>
                 ) : (
-                  <span className="mood-acc-soon">{copy.comingSoon}</span>
+                  <span className="mood-row-soon">{copy.comingSoon}</span>
                 )}
               </>
             );
@@ -367,123 +376,96 @@ export default function MoodIndex({
             return (
               <li
                 key={mood.key}
-                className="mood-acc-item"
-                data-open={open ? "" : undefined}
-                data-dead={live ? undefined : ""}
+                className="mood-row"
+                data-chosen={isChosen ? "" : undefined}
+                data-dead={isLive ? undefined : ""}
               >
                 {/* In the set but not yet in the catalogue: shown, because a
                     mood is part of how the brand describes itself whether or
                     not stock has reached it; not a link, because it leads
                     nowhere. */}
-                {live ? (
+                {isLive ? (
                   <Link
                     href={mood.href}
                     scroll={false}
                     prefetch={false}
                     aria-current={isChosen ? "true" : undefined}
-                    className="mood-acc-head"
-                    onClick={(event) => choose(event, mood.key)}
+                    className="mood-row-head"
+                    onClick={(event) => choose(event, mood.key, "soon")}
                     onPointerEnter={(event) => point(event, mood.key)}
                     onFocus={() => setHovered(mood.key)}
                   >
-                    {head}
+                    {body}
                   </Link>
                 ) : (
                   <div
-                    className="mood-acc-head"
+                    className="mood-row-head"
                     onPointerEnter={(event) => point(event, mood.key)}
                   >
-                    {head}
+                    {body}
                   </div>
                 )}
 
-                {live ? (
-                  <div className="mood-acc-panel" inert={!open}>
-                    <div className="mood-acc-clip">
-                      <div className="mood-acc-body">
-                        {mood.description ? (
-                          <p className="mood-acc-desc">{mood.description}</p>
-                        ) : null}
-                        <p className="mood-acc-meta tabular-nums">
-                          {kompanions(mood.count)}
-                        </p>
-
-                        <div className="mood-acc-actions">
-                          {isChosen ? (
-                            <>
-                              {/* A button, not a link to the same address:
-                                  the Kompanions are already on the page, and
-                                  re-navigating would refetch it. */}
-                              <ActionButton
-                                label={copy.showing}
-                                icon="down"
-                                variant="solid"
-                                onClick={scrollToResults}
-                              />
-                              <Link
-                                href={clearHref}
-                                scroll={false}
-                                prefetch={false}
-                                className="mood-acc-clear"
-                                onClick={clear}
-                              >
-                                <XMarkIcon
-                                  className="h-3.5 w-3.5"
-                                  strokeWidth={2.25}
+                {isLive ? (
+                  <div className="mood-row-panel" inert={!isChosen}>
+                    <div className="mood-row-clip">
+                      <div className="mood-row-more">
+                        {mood.images.length ? (
+                          <span className="mood-row-thumbs" aria-hidden>
+                            {mood.images.slice(0, 3).map((image) => (
+                              <span key={image.url} className="mood-row-thumb">
+                                <Image
+                                  src={image.url}
+                                  alt=""
+                                  fill
+                                  sizes="5rem"
+                                  className="object-cover"
                                 />
-                                {copy.clear}
-                              </Link>
-                            </>
-                          ) : (
-                            // ActionButton keeps its own onClick for buttons,
-                            // so the choice is heard here as the click
-                            // bubbles out of its link.
-                            <span
-                              className="contents"
-                              onClick={(event) => choose(event, mood.key)}
-                            >
-                              <ActionButton
-                                label={copy.view}
-                                href={mood.href}
-                                icon="arrow"
-                                variant="solid"
-                                scroll={false}
-                                prefetch={false}
-                              />
-                            </span>
-                          )}
-                        </div>
-
-                        {thumb ? (
-                          <span className="mood-acc-thumb" aria-hidden>
-                            <Image
-                              src={thumb.url}
-                              alt=""
-                              fill
-                              sizes="(min-width: 1024px) 9rem, 6rem"
-                              className="object-cover"
-                            />
+                              </span>
+                            ))}
                           </span>
                         ) : null}
+
+                        <span className="mood-row-actions">
+                          {/* A button, not a link to the same address: the
+                              Kompanions are already on the page, and
+                              re-navigating would refetch it. */}
+                          <ActionButton
+                            label={copy.showing}
+                            icon="down"
+                            variant="outline"
+                            onClick={scrollToResults}
+                          />
+                          <Link
+                            href={clearHref}
+                            scroll={false}
+                            prefetch={false}
+                            className="mood-row-clear"
+                            onClick={clear}
+                          >
+                            {copy.clear}
+                          </Link>
+                        </span>
                       </div>
                     </div>
                   </div>
+                ) : null}
+
+                {isWalked ? (
+                  <span key={tick} aria-hidden className="mood-row-progress" />
                 ) : null}
               </li>
             );
           })}
         </ol>
 
-        {/* No `data-reveal`: on a laptop this sits on the fold's bottom edge,
-            below the reveal line, and stood missing until the first scroll. */}
-        <div className="mood-sched-foot">
-          <ActionButton
-            label={copy.browseAll}
-            href="/search"
-            icon="arrow"
-            variant="solid"
-          />
-        </div>
+        <p className="mood-sched-foot">
+          {copy.unsure}{" "}
+          <Link href="/search" className="mood-sched-foot-link">
+            {copy.browseAll}
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </p>
       </div>
     </div>
   );

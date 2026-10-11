@@ -3351,33 +3351,36 @@ html:has([data-loader]) body {
 }
 
 /* ---------------------------------------------------------------------------
-   Shop by mood (`/shop-by-mood`, `components/shop/mood-index.tsx`)
+   Shop by mood (`/shop-by-mood`; `components/shop/mood-index.tsx` and
+   `mood-shop.tsx`)
 
-   A schedule: the intro and a large photograph down the left, the moods as an
-   accordion down the right, on an explicit area map (the house rule for
-   layouts that reorder between breakpoints):
+   THE PAGE STATES ITS OWN TWO STEPS. "1  Pick a mood" heads the list and "2"
+   heads the shelf, each a small indigo numeral (`.mood-step-num`), so a first
+   visit needs no reading to know what to do and where the answer will be.
+
+   Step one is a list beside a photograph, on an explicit area map (the house
+   rule for layouts that reorder between breakpoints):
 
      phone / tablet   intro            desktop   intro | list
                       list                       stage | list
 
-   The stage is desktop-only - see the component for why. Its row is `1fr`, so
-   the photograph takes whatever height the list is taller than the intro and
-   the two columns finish on one line, as the reference's do.
+   The stage is desktop-only; its row is `1fr`, so the photograph takes
+   whatever height the list is taller than the intro and the two columns
+   finish on one line.
 
-   THE OPEN ROW. Its height is `grid-template-rows: 0fr -> 1fr`, which
-   animates to the content's own height with no measuring; the clip inside
-   carries `min-height: 0` so the 0fr track can really close. The card behind
-   it is a `::before`, ivory on cream (1.027 - a surface with no border), and
-   the rules above and below it step aside so it floats between them instead
-   of sitting on a line.
+   A ROW SHOWS EVERYTHING AT REST - number, name, the merchant's line, count -
+   so the list can be scanned without opening anything. The row area map:
 
-   The head is a stretched link: its `::after` covers the whole row, so the
-   description and the thumbnail choose the mood too. Anything else that must
-   take its own clicks (the buttons) sits above it on `z-index: 2`.
+     phone   num | text  | go        sm+   num | text | count | go
+             num | count | go
 
-   Type on the page is ink, muted (5.26) and sage-deep (4.77, ~4.6 on the
-   ivory card); on the stage's indigo scrim it is cream. Flat sage only ever
-   appears as a fill.
+   The chosen row floods indigo (`::before`, the same layer the ivory hover
+   fill uses) and unfolds a photo strip and its two actions with
+   `grid-template-rows: 0fr -> 1fr`. On indigo, type is oat (9.30) and sage
+   (6.50) - the only pairings the palette allows on the dark ground.
+
+   The head is a stretched link: its `::after` covers the row, so the line
+   and the count choose the mood too. The actions sit above it on z-index 2.
 --------------------------------------------------------------------------- */
 
 @layer components {
@@ -3387,7 +3390,7 @@ html:has([data-loader]) body {
     grid-template-areas:
       "intro"
       "list";
-    row-gap: 2.25rem;
+    row-gap: 2rem;
   }
 
   .mood-sched-intro {
@@ -3412,7 +3415,7 @@ html:has([data-loader]) body {
         "intro list"
         "stage list";
       column-gap: clamp(2.5rem, 5vw, 6rem);
-      row-gap: 2.5rem;
+      row-gap: 2rem;
     }
 
     .mood-sched-stage {
@@ -3420,151 +3423,249 @@ html:has([data-loader]) body {
     }
   }
 
-  .mood-sched-foot {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1.75rem;
-  }
-
   /* ---------------------------------------------------------------- intro */
 
-  /* The reference's "05 Schedule" chip: an indigo numeral socketed against a
-     soft pill. Oat on indigo (9.30); indigo on sage-wash (~9.9). */
-  .mood-badge,
-  .mood-results-badge {
+  .mood-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.75rem;
   }
 
-  .mood-badge-num {
-    display: inline-flex;
-    height: 2.5rem;
-    width: 2.5rem;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: var(--ink);
-    color: var(--oat);
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
+  /* Indigo on sage-wash, ~9.9. */
   .mood-badge-label {
     display: inline-flex;
-    height: 2.5rem;
+    height: 2.25rem;
     align-items: center;
     border-radius: 999px;
     background: var(--sage-wash);
-    padding: 0 1.1rem;
+    padding: 0 1rem;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink);
   }
 
-  /* Sized for its column rather than the page: at `display-xl` the kicker
-     broke to a word a line in the 5/11 column at 1024px. */
-  .mood-title {
-    margin-top: 1.5rem;
-    font-size: clamp(2.25rem, 4.6vw, 4.75rem);
-    line-height: 1.02;
-  }
-
-  /* ------------------------------------------------------------ accordion */
-
-  .mood-acc-item {
-    position: relative;
-    isolation: isolate;
-    padding-inline: 0.875rem;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  /* The card. */
-  .mood-acc-item::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: 1.5rem;
-    background: var(--card);
-    box-shadow:
-      0 1px 0 rgba(35, 50, 75, 0.04),
-      0 28px 48px -36px rgba(35, 50, 75, 0.45);
-    opacity: 0;
-  }
-
-  .mood-acc-item[data-open]::before {
-    opacity: 1;
-  }
-
-  .mood-acc-item[data-open],
-  .mood-acc-item:has(+ .mood-acc-item[data-open]) {
-    border-bottom-color: transparent;
-  }
-
-  /* The hover line, drawn along the row's own rule from the left. */
-  .mood-acc-item::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 1px;
-    background: var(--ink);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-  }
-
-  .mood-acc-head {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    padding-block: 1.25rem;
-    color: var(--ink);
-  }
-
-  .mood-acc-head::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    border-radius: 1.5rem;
-  }
-
-  /* The ring goes round the whole row, not round the inline head. */
-  .mood-acc-head:focus-visible {
-    box-shadow: none;
-  }
-
-  .mood-acc-head:focus-visible::after {
-    box-shadow: 0 0 0 2px var(--ink);
-  }
-
-  .mood-acc-num {
-    flex: none;
-    min-width: 2rem;
-    font-size: 0.875rem;
+  .mood-badge-meta {
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--muted);
   }
 
-  .mood-acc-name {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: clamp(1.25rem, 0.9rem + 1.05vw, 1.875rem);
-    font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+  /* Sized for its column, and so the intro and the stage fit one laptop
+     screen: at `display-xl` the headline alone took three 80px lines. */
+  .mood-title {
+    margin-top: 1.25rem;
+    font-size: clamp(2rem, 3.4vw, 3.75rem);
+    line-height: 1.02;
   }
 
-  .mood-acc-chev {
+  /* ----------------------------------------------------------- the steps */
+
+  .mood-steplabel,
+  .mood-results-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  /* Oat on indigo, 9.30. */
+  .mood-step-num {
+    display: inline-flex;
+    height: 1.75rem;
+    width: 1.75rem;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--oat);
+  }
+
+  .mood-list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.9rem;
+  }
+
+  .mood-list-hint {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  /* Below lg the rail picks, and its hint is about swiping. From lg the list
+     picks, and the DEVICE decides its hint, not the width: a tablet in
+     landscape is wide and still has no hover. */
+  .mood-hint-pointer,
+  .mood-hint-touch {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .mood-hint-rail {
+      display: none;
+    }
+
+    .mood-hint-pointer {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 1024px) and (hover: none), (min-width: 1024px) and (pointer: coarse) {
+    .mood-hint-pointer {
+      display: none;
+    }
+
+    .mood-hint-touch {
+      display: inline;
+    }
+  }
+
+  /* One picker per layout: the rail below lg, the list from it. */
+  .mood-rows {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .mood-rows {
+      display: block;
+    }
+
+    .mood-rail-wrap {
+      display: none;
+    }
+  }
+
+  /* ----------------------------------------------------------------- rows */
+
+  .mood-row {
+    position: relative;
+    isolation: isolate;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* The fill: ivory under a hovered row (1.027 on cream - a surface with no
+     border), indigo under the chosen one. */
+  .mood-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 1.25rem;
+    background: var(--card);
+    opacity: 0;
+  }
+
+  .mood-row[data-chosen]::before {
+    background: var(--ink);
+    opacity: 1;
+    box-shadow: 0 30px 50px -36px rgba(35, 50, 75, 0.7);
+  }
+
+  .mood-row[data-chosen],
+  .mood-row:has(+ .mood-row[data-chosen]) {
+    border-bottom-color: transparent;
+  }
+
+  .mood-row-head {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "num text  go"
+      "num count go";
+    align-items: center;
+    column-gap: 0.75rem;
+    row-gap: 0.5rem;
+    padding: 1.1rem 0.75rem;
+    color: var(--ink);
+  }
+
+  @media (min-width: 640px) {
+    .mood-row-head {
+      grid-template-columns: 2.25rem minmax(0, 1fr) auto auto;
+      grid-template-areas: "num text count go";
+      column-gap: 1rem;
+      padding: 1.15rem 0.875rem;
+    }
+  }
+
+  .mood-row-head::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 1.25rem;
+  }
+
+  /* The ring goes round the whole row, not round the inline head. */
+  .mood-row-head:focus-visible {
+    box-shadow: none;
+  }
+
+  .mood-row-head:focus-visible::after {
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+
+  .mood-row-num {
+    grid-area: num;
+    align-self: start;
+    padding-top: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .mood-row-text {
+    grid-area: text;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mood-row-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.6rem;
+    font-size: clamp(1.125rem, 0.95rem + 0.7vw, 1.625rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .mood-row-desc {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .mood-row-count {
+    grid-area: count;
+    justify-self: start;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--sage-deep);
+  }
+
+  .mood-row-go {
+    grid-area: go;
     display: inline-flex;
     height: 2.5rem;
     width: 2.5rem;
-    flex: none;
-    align-self: center;
     align-items: center;
     justify-content: center;
     border-radius: 999px;
@@ -3572,19 +3673,12 @@ html:has([data-loader]) body {
     color: var(--ink);
   }
 
-  /* Open, it turns to point down the page - at the Kompanions. Sage carrying
-     an indigo glyph (6.50), quieter than the solid button beneath it. */
-  .mood-acc-item[data-open] .mood-acc-chev {
-    background: var(--sage);
-    transform: rotate(90deg);
-  }
-
-  .mood-acc-soon {
-    flex: none;
-    align-self: center;
+  .mood-row-soon {
+    grid-area: count;
+    justify-self: start;
     border: 1px dashed rgba(35, 50, 75, 0.3);
     border-radius: 999px;
-    padding: 0.4rem 0.75rem;
+    padding: 0.35rem 0.7rem;
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -3593,118 +3687,368 @@ html:has([data-loader]) body {
     color: var(--muted);
   }
 
-  .mood-acc-item[data-dead] .mood-acc-num,
-  .mood-acc-item[data-dead] .mood-acc-name {
+  @media (min-width: 640px) {
+    .mood-row-soon {
+      grid-column: count / go;
+      justify-self: end;
+    }
+  }
+
+  .mood-row[data-dead] .mood-row-num,
+  .mood-row[data-dead] .mood-row-text {
     opacity: 0.45;
   }
 
-  .mood-acc-panel {
+  /* The chosen row. */
+  .mood-row[data-chosen] .mood-row-head {
+    color: var(--oat);
+  }
+
+  .mood-row[data-chosen] .mood-row-num,
+  .mood-row[data-chosen] .mood-row-count {
+    color: var(--sage);
+  }
+
+  .mood-row[data-chosen] .mood-row-desc {
+    color: rgba(255, 246, 235, 0.75);
+  }
+
+  .mood-row[data-chosen] .mood-row-go {
+    background: var(--sage);
+    color: var(--ink);
+  }
+
+  .mood-row-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 999px;
+    background: var(--sage);
+    padding: 0.2rem 0.55rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .mood-row-panel {
     display: grid;
     grid-template-rows: 0fr;
   }
 
-  .mood-acc-item[data-open] .mood-acc-panel {
+  .mood-row[data-chosen] .mood-row-panel {
     grid-template-rows: 1fr;
   }
 
-  .mood-acc-clip {
+  .mood-row-clip {
     min-height: 0;
     overflow: hidden;
   }
 
-  .mood-acc-body {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto 1fr;
-    grid-template-areas:
-      "desc thumb"
-      "meta thumb"
-      "acts thumb";
-    column-gap: 1.25rem;
-    /* Room inside the clip for the buttons' focus rings. */
-    padding: 0.125rem 0 1.25rem;
-  }
-
-  @media (min-width: 640px) {
-    .mood-acc-body {
-      /* Under the name, not the numeral: the numeral's 2rem and the gap. */
-      padding-left: 2.75rem;
-    }
-  }
-
-  .mood-acc-desc {
-    grid-area: desc;
-    max-width: 30rem;
-    font-size: 0.875rem;
-    line-height: 1.55;
-    color: var(--muted);
-    text-wrap: pretty;
-  }
-
-  .mood-acc-meta {
-    grid-area: meta;
-    margin-top: 0.6rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--sage-deep);
-  }
-
-  .mood-acc-actions {
-    grid-area: acts;
-    position: relative;
-    z-index: 2;
-    align-self: end;
+  .mood-row-more {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin-top: 1rem;
+    justify-content: space-between;
+    gap: 0.9rem 1rem;
+    padding: 0.15rem 0.75rem 1.15rem;
   }
 
-  .mood-acc-clear {
-    display: inline-flex;
-    height: 2.5rem;
-    align-items: center;
-    gap: 0.35rem;
-    border: 1px solid rgba(35, 50, 75, 0.18);
-    border-radius: 999px;
-    padding: 0 0.95rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--ink);
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease,
-      color 0.3s ease;
+  @media (min-width: 640px) {
+    .mood-row-more {
+      /* Under the name: the numeral's 2.25rem and the gap. */
+      padding-left: calc(0.875rem + 2.25rem + 1rem);
+      padding-right: 0.875rem;
+    }
   }
 
-  .mood-acc-clear:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--paper);
+  .mood-row-thumbs {
+    display: flex;
+    gap: 0.4rem;
   }
 
-  .mood-acc-thumb {
-    grid-area: thumb;
+  .mood-row-thumb {
     position: relative;
-    align-self: start;
-    /* Square, so the copy column beside it - a line, a count and the
-       button - fills the height and the button does not float in a gap. */
-    width: clamp(5.5rem, 20vw, 8.25rem);
-    aspect-ratio: 1;
+    height: 3.5rem;
+    width: 3.5rem;
     overflow: hidden;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     background: var(--oat);
   }
 
-  .mood-acc-body > * {
+  .mood-row-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* A ghost on indigo: cream type (12.05) inside a hairline. */
+  .mood-row-clear {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    border: 1px solid rgba(255, 246, 235, 0.3);
+    border-radius: 999px;
+    padding: 0 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--paper);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .mood-row-clear:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .mood-row-more > * {
     opacity: 0;
   }
 
-  .mood-acc-item[data-open] .mood-acc-body > * {
+  .mood-row[data-chosen] .mood-row-more > * {
     opacity: 1;
+  }
+
+  /* The unattended walk's progress, along the foot of the row on stage. */
+  .mood-row-progress {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--ink);
+    transform-origin: 0 50%;
+  }
+
+  .mood-row:has(> .mood-row-progress) .mood-row-go {
+    background: var(--sage);
+  }
+
+  .mood-sched-foot {
+    margin-top: 1.25rem;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  .mood-sched-foot-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  /* ------------------------------------------------- the rail (below lg)
+
+     One photograph per mood, swiped. Cream type on an indigo scrim that is
+     heaviest under the copy; the chips carry their own cream ground, since
+     several lead shots are studio stills on near-white. The chosen card is
+     ringed - a cream gap, then indigo - rather than flooded, so its
+     photograph still reads. */
+
+  .mood-rail-wrap {
+    margin-top: 1rem;
+  }
+
+  .mood-rail {
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    margin-inline: calc(var(--gutter) * -1);
+    /* Room above and below for the chosen card's ring, which a horizontal
+       scroller would otherwise clip. */
+    padding: 0.4rem var(--gutter) 0.6rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .mood-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mood-card {
+    position: relative;
+    flex: 0 0 min(80vw, 21rem);
+    scroll-snap-align: start;
+  }
+
+  .mood-card-link {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 1.5rem;
+  }
+
+  .mood-card[data-chosen] .mood-card-link {
+    box-shadow:
+      0 0 0 3px var(--paper),
+      0 0 0 5px var(--ink);
+  }
+
+  .mood-card[data-dead] .mood-card-link {
+    opacity: 0.55;
+  }
+
+  .mood-card-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, rgba(35, 50, 75, 0.92) 0%, rgba(35, 50, 75, 0.5) 42%, transparent 72%),
+      linear-gradient(to bottom, rgba(35, 50, 75, 0.25) 0%, transparent 22%);
+  }
+
+  .mood-card-chip {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    background: rgba(255, 246, 235, 0.92);
+    padding: 0.35rem 0.7rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .mood-card-chip[data-tone="selected"] {
+    background: var(--sage);
+  }
+
+  /* Indigo glass carrying cream (12.05 on solid indigo). */
+  .mood-card-clear {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    height: 2rem;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid rgba(255, 246, 235, 0.35);
+    border-radius: 999px;
+    background: rgba(35, 50, 75, 0.6);
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--paper);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .mood-card-copy {
+    position: absolute;
+    left: 1.1rem;
+    right: 1.1rem;
+    bottom: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .mood-card-count {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 246, 235, 0.8);
+  }
+
+  .mood-card-title {
+    font-size: clamp(1.5rem, 6.4vw, 1.875rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--paper);
+    text-wrap: balance;
+  }
+
+  .mood-card-desc {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: rgba(255, 246, 235, 0.82);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mood-card-cta {
+    margin-top: 0.55rem;
+  }
+
+  .mood-rail-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.9rem;
+  }
+
+  .mood-rail-dots {
+    display: flex;
+    align-items: center;
+  }
+
+  /* The button is the tap target; the dot is drawn inside it. */
+  .mood-rail-dot {
+    position: relative;
+    height: 1.75rem;
+    width: 1rem;
+  }
+
+  .mood-rail-dot::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 0.45rem;
+    width: 0.45rem;
+    border-radius: 999px;
+    background: rgba(35, 50, 75, 0.22);
+    transform: translate(-50%, -50%);
+  }
+
+  .mood-rail-dot.is-chosen::before {
+    background: var(--sage-deep);
+  }
+
+  .mood-rail-dot.is-at {
+    width: 1.75rem;
+  }
+
+  .mood-rail-dot.is-at::before {
+    width: 1.35rem;
+    background: var(--ink);
+  }
+
+  .mood-rail-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .mood-rail-count span {
+    color: var(--muted);
   }
 
   /* -------------------------------------------------------------- stage */
@@ -3713,41 +4057,38 @@ html:has([data-loader]) body {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, rgba(35, 50, 75, 0.82) 0%, rgba(35, 50, 75, 0.4) 32%, transparent 58%),
-      linear-gradient(to bottom, rgba(35, 50, 75, 0.38) 0%, transparent 30%);
+      linear-gradient(to top, rgba(35, 50, 75, 0.88) 0%, rgba(35, 50, 75, 0.55) 34%, transparent 62%),
+      linear-gradient(to bottom, rgba(35, 50, 75, 0.3) 0%, transparent 26%);
   }
 
-  .mood-stage-num {
+  /* What the photograph IS, before what it shows. Preview: cream carrying
+     indigo (12.05). Selected: sage carrying indigo (6.50). */
+  .mood-stage-tag {
     position: absolute;
-    left: 1.5rem;
+    left: 1.25rem;
     top: 1.25rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    color: rgba(255, 246, 235, 0.92);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    background: rgba(255, 246, 235, 0.92);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
-  /* The numeral rolls through this slot. A flex item, so clipping it does
-     not move a baseline. */
-  .mood-stage-num-slot {
-    display: block;
-    height: 0.9em;
-    overflow: hidden;
-    font-size: clamp(4rem, 6.5vw, 7rem);
-    line-height: 0.9;
-    letter-spacing: -0.03em;
+  .mood-stage-tag[data-tone="selected"] {
+    background: var(--sage);
   }
 
-  .mood-stage-num-roll {
-    display: block;
-  }
-
-  .mood-stage-total {
-    margin-top: 0.55rem;
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: rgba(255, 246, 235, 0.8);
+  .mood-stage-tag-dot {
+    height: 0.45rem;
+    width: 0.45rem;
+    border-radius: 999px;
+    background: var(--sage-deep);
   }
 
   .mood-stage-caption {
@@ -3758,27 +4099,13 @@ html:has([data-loader]) body {
   }
 
   .mood-stage-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     font-size: 0.75rem;
     font-weight: 600;
     color: rgba(255, 246, 235, 0.85);
   }
 
-  /* Sage carrying indigo (6.50), on the scrim. */
-  .mood-stage-tag {
-    border-radius: 999px;
-    background: var(--sage);
-    padding: 0.2rem 0.6rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-
   .mood-stage-title {
-    margin-top: 0.6rem;
+    margin-top: 0.5rem;
     font-size: clamp(1.75rem, 2.8vw, 3rem);
     line-height: 1.02;
     color: var(--paper);
@@ -3787,62 +4114,158 @@ html:has([data-loader]) body {
 
   /* ------------------------------------------------------------ results */
 
+  .mood-results {
+    position: relative;
+  }
+
+  /* Zero-height and sticky, so the chip floats in view over the dimmed
+     shelf without pushing it down. */
+  .mood-gathering {
+    position: sticky;
+    top: calc(var(--header-h) + 5rem);
+    z-index: 30;
+    display: flex;
+    height: 0;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .mood-gathering-pill {
+    display: inline-flex;
+    height: 2.75rem;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 999px;
+    background: var(--ink);
+    padding: 0 1.15rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--paper);
+    box-shadow: 0 20px 40px -20px rgba(35, 50, 75, 0.6);
+  }
+
+  .mood-gathering-spin {
+    height: 0.9rem;
+    width: 0.9rem;
+    border: 2px solid rgba(169, 189, 175, 0.35);
+    border-top-color: var(--sage);
+    border-radius: 999px;
+  }
+
+  .mood-results-body {
+    transition:
+      opacity 0.35s ease,
+      filter 0.35s ease;
+  }
+
+  .mood-results[data-loading] .mood-results-body {
+    opacity: 0.32;
+    filter: saturate(0.6);
+    pointer-events: none;
+  }
+
+  /* The switcher: stuck under the header while the shelf is on screen. */
+  .mood-switcher {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 40;
+    border-bottom: 1px solid var(--rule);
+    background: rgba(255, 246, 235, 0.9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .mood-switcher-rail {
+    display: flex;
+    max-width: 96rem;
+    margin-inline: auto;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.7rem var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .mood-switcher-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mood-chip {
+    display: inline-flex;
+    height: 2.5rem;
+    flex: none;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(35, 50, 75, 0.16);
+    border-radius: 999px;
+    background: var(--card);
+    padding: 0 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .mood-chip:hover {
+    border-color: var(--ink);
+  }
+
+  .mood-chip.is-on {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .mood-chip-count {
+    font-size: 0.6875rem;
+    color: var(--muted);
+  }
+
+  /* Sage on indigo, 6.50. */
+  .mood-chip.is-on .mood-chip-count {
+    color: var(--sage);
+  }
+
+  .mood-chip-back {
+    border-style: dashed;
+    background: transparent;
+  }
+
   .mood-results-head {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "badge"
-      "title"
-      "desc"
-      "nav";
+      "step  clear"
+      "title title"
+      "desc  desc";
+    align-items: center;
     row-gap: 1rem;
-    padding-bottom: 1.75rem;
-  }
-
-  @media (min-width: 768px) {
-    .mood-results-head {
-      grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas:
-        "badge nav"
-        "title title"
-        "desc desc";
-    }
+    padding: 2rem 0 1.75rem;
   }
 
   @media (min-width: 1024px) {
     .mood-results-head {
       grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       grid-template-areas:
-        "badge nav"
+        "step  clear"
         "title desc";
       align-items: end;
       column-gap: 3rem;
+      padding-top: 2.5rem;
     }
   }
 
-  .mood-results-badge {
-    grid-area: badge;
-    justify-self: start;
-  }
-
-  .mood-results-nav {
-    grid-area: nav;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .mood-results-nav {
-      justify-self: end;
-    }
+  .mood-results-step {
+    grid-area: step;
   }
 
   .mood-results-title {
     grid-area: title;
-    margin-top: 0.5rem;
     font-size: clamp(2.25rem, 5.5vw, 5rem);
     line-height: 1.02;
     letter-spacing: -0.015em;
@@ -3871,35 +4294,16 @@ html:has([data-loader]) body {
     transform-origin: 0 50%;
   }
 
-  .mood-step {
-    display: inline-flex;
-    height: 2.75rem;
-    width: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(35, 50, 75, 0.18);
-    border-radius: 999px;
-    color: var(--ink);
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease,
-      color 0.3s ease;
-  }
-
-  .mood-step:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--paper);
-  }
-
   .mood-clear {
+    grid-area: clear;
+    justify-self: end;
     display: inline-flex;
-    height: 2.75rem;
+    height: 2.5rem;
     align-items: center;
     gap: 0.4rem;
     border-radius: 999px;
     background: var(--sage-wash);
-    padding: 0 1.1rem;
+    padding: 0 1rem;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink);
@@ -3913,6 +4317,152 @@ html:has([data-loader]) body {
     color: var(--paper);
   }
 
+  /* The next mood, at the foot of the shelf. Cream type on an indigo scrim
+     that is heaviest under the copy. */
+  .mood-next {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    height: clamp(15rem, 26vw, 22rem);
+    overflow: hidden;
+    border-radius: 1.5rem;
+  }
+
+  .mood-next-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(35, 50, 75, 0.88) 0%,
+      rgba(35, 50, 75, 0.55) 45%,
+      rgba(35, 50, 75, 0.1) 80%
+    );
+  }
+
+  .mood-next-copy {
+    position: absolute;
+    left: 1.5rem;
+    right: 5.5rem;
+    bottom: 1.5rem;
+    display: flex;
+    max-width: 36rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .mood-next-copy {
+      left: 2.5rem;
+      bottom: 2.25rem;
+    }
+  }
+
+  .mood-next-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sage);
+  }
+
+  .mood-next-title {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 1;
+    color: var(--paper);
+  }
+
+  .mood-next-desc {
+    font-size: 0.875rem;
+    color: rgba(255, 246, 235, 0.8);
+  }
+
+  .mood-next-arrow {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    display: inline-flex;
+    height: 3.5rem;
+    width: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    transition:
+      background-color 0.3s ease,
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mood-next:hover .mood-next-arrow,
+  .mood-next:focus-visible .mood-next-arrow {
+    background: var(--sage);
+    transform: translateX(4px);
+  }
+
+  /* On a phone the shelf's chrome - the header, this switcher and the
+     masthead - stood ~560px tall before the first card. Each is trimmed
+     here; the switcher keeps its 2.25rem chips as tap targets. The next-mood
+     card's arrow moves to the top corner, where the wrapped line under the
+     title had run into it. */
+  @media (max-width: 639px) {
+    .mood-switcher-rail {
+      gap: 0.4rem;
+      padding-block: 0.5rem;
+    }
+
+    .mood-chip {
+      height: 2.25rem;
+      padding: 0 0.8rem;
+      font-size: 0.75rem;
+    }
+
+    .mood-results-head {
+      row-gap: 0.75rem;
+      padding: 1.25rem 0;
+    }
+
+    .mood-results-title {
+      font-size: clamp(2rem, 9.5vw, 2.75rem);
+    }
+
+    .mood-clear {
+      height: 2.25rem;
+      padding: 0 0.85rem;
+      font-size: 0.75rem;
+    }
+
+    .mood-next {
+      height: 21rem;
+    }
+
+    .mood-next-scrim {
+      background: linear-gradient(
+        to top,
+        rgba(35, 50, 75, 0.9) 0%,
+        rgba(35, 50, 75, 0.55) 45%,
+        rgba(35, 50, 75, 0.1) 80%
+      );
+    }
+
+    .mood-next-copy {
+      left: 1.25rem;
+      right: 1.25rem;
+      bottom: 1.25rem;
+    }
+
+    .mood-next-title {
+      font-size: clamp(2rem, 10vw, 2.75rem);
+    }
+
+    .mood-next-arrow {
+      top: 1.25rem;
+      right: 1.25rem;
+      bottom: auto;
+      height: 3rem;
+      width: 3rem;
+    }
+  }
+
   /* ------------------------------------------------------------- resting
 
      Four ghost cells where the cards will gather, with the prompt over them
@@ -3921,6 +4471,7 @@ html:has([data-loader]) body {
 
   .mood-rest {
     display: grid;
+    padding-top: 0.5rem;
   }
 
   .mood-rest > * {
@@ -3973,7 +4524,7 @@ html:has([data-loader]) body {
   .mood-rest-card {
     max-width: 32rem;
     border-radius: 1.5rem;
-    background: rgba(255, 246, 235, 0.88);
+    background: rgba(255, 246, 235, 0.9);
     padding: 2rem 1.5rem;
     text-align: center;
     box-shadow: 0 28px 60px -40px rgba(35, 50, 75, 0.5);
@@ -3984,13 +4535,18 @@ html:has([data-loader]) body {
   .mood-rest-up {
     display: inline-flex;
     height: 2.75rem;
-    width: 2.75rem;
     align-items: center;
-    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
     border-radius: 999px;
     background: var(--ink);
+    padding: 0 1.15rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: var(--paper);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 
   .mood-rest-up:hover {
@@ -4003,102 +4559,79 @@ html:has([data-loader]) body {
    Shop by mood - motion. Everything here is opt-in under `no-preference`, so
    a reduced-motion visitor gets every state change at once and no travel.
 
-   Durations are tuned against each other: the accordion turns in 750ms, the
-   stage wipes in 950ms, and the click-to-glide in the component waits 620ms -
-   most of both turns is in their first half (expo-like ease).
+   The chosen row turns in 700ms; the glide down to the shelf waits 450ms
+   (`GLIDE_FROM_LIST_MS` in mood-shop.tsx) - most of the turn is in its first
+   half, so the eye sees the row flood before the page moves. The walk's
+   progress line runs 4.2s, matching `CYCLE_MS` in mood-index.tsx.
 --------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  .mood-acc-item::before {
-    transform: scale(0.97, 0.9);
+  .mood-row::before {
+    transform: scale(0.985, 0.94);
     transition:
-      opacity 0.45s ease,
-      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.4s ease,
+      background-color 0.4s ease,
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .mood-acc-item[data-open]::before {
+  .mood-row[data-chosen]::before {
     transform: none;
   }
 
-  .mood-acc-item::after {
-    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .mood-acc-name {
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .mood-acc-num {
+  .mood-row-head,
+  .mood-row-num,
+  .mood-row-desc,
+  .mood-row-count {
     transition: color 0.4s ease;
   }
 
-  .mood-acc-chev {
+  .mood-row-name {
+    transition:
+      color 0.4s ease,
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mood-row-go {
     transition:
       background-color 0.35s ease,
       color 0.35s ease,
       transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .mood-acc-panel {
-    transition: grid-template-rows 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  .mood-row-flag {
+    animation: mood-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+  }
+
+  .mood-row-panel {
+    transition: grid-template-rows 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Closing: out fast and together. Opening: in after the row has started
-     to grow, one line at a time. */
-  .mood-acc-body > * {
-    transform: translateY(0.75rem);
+     to grow, one piece at a time. */
+  .mood-row-more > * {
+    transform: translateY(0.6rem);
     transition:
-      opacity 0.25s ease,
-      transform 0.25s ease;
+      opacity 0.2s ease,
+      transform 0.2s ease;
   }
 
-  .mood-acc-item[data-open] .mood-acc-body > * {
+  .mood-row[data-chosen] .mood-row-more > * {
     transform: none;
     transition:
-      opacity 0.6s ease,
-      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.5s ease 0.15s,
+      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
   }
 
-  .mood-acc-item[data-open] .mood-acc-desc {
-    transition-delay: 0.12s;
+  .mood-row[data-chosen] .mood-row-more > :nth-child(2) {
+    transition-delay: 0.25s;
   }
 
-  .mood-acc-item[data-open] .mood-acc-meta {
-    transition-delay: 0.18s;
+  .mood-row-progress {
+    animation: mood-progress 4.2s linear both;
   }
 
-  .mood-acc-item[data-open] .mood-acc-actions {
-    transition-delay: 0.24s;
-  }
-
-  /* The thumbnail wipes up rather than rising, and its photograph settles
-     from a push-in - the stage's own entrance, in miniature. */
-  .mood-acc-thumb {
-    opacity: 1;
-    transform: none;
-    clip-path: inset(100% 0 0 0 round 1rem);
-    transition: clip-path 0.3s ease;
-  }
-
-  .mood-acc-item[data-open] .mood-acc-thumb {
-    opacity: 1;
-    clip-path: inset(0 0 0 0 round 1rem);
-    transition: clip-path 1s cubic-bezier(0.76, 0, 0.24, 1) 0.1s;
-  }
-
-  .mood-acc-thumb img {
-    transform: scale(1.2);
-    transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
-  }
-
-  .mood-acc-item[data-open] .mood-acc-thumb img {
-    transform: none;
-  }
-
-  /* Stage: the numeral rolls up through its slot, the meta fades and the
-     name rises word by word. All keyed on the mood, so each turn replays. */
-  .mood-stage-num-roll {
-    animation: mood-roll 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  .mood-stage-tag {
+    animation: mood-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
   .mood-stage-meta {
@@ -4130,15 +4663,20 @@ html:has([data-loader]) body {
     animation-delay: 0.24s;
   }
 
+  .mood-gathering-pill {
+    animation: mood-fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .mood-gathering-spin {
+    animation: mood-spin 0.8s linear infinite;
+  }
+
   /* Results masthead and cards. `backwards`, never `both`: a fill that
      outlives the animation keeps a transform on the cell, and a transformed
      ancestor re-anchors any `position: fixed` inside a card. */
-  .mood-turn .mood-results-badge {
+  .mood-turn .mood-results-step,
+  .mood-turn .mood-clear {
     animation: mood-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  }
-
-  .mood-turn .mood-results-nav {
-    animation: mood-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
   }
 
   .mood-turn .mood-results-title .count-sup {
@@ -4158,56 +4696,55 @@ html:has([data-loader]) body {
     animation-delay: calc(min(var(--i, 0), 8) * 65ms + 120ms);
   }
 
+  .mood-rail-dot,
+  .mood-rail-dot::before {
+    transition:
+      width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.3s ease;
+  }
+
+  .mood-card-link {
+    transition: box-shadow 0.4s ease;
+  }
+
   .mood-rest-ghosts > li {
     animation: mood-breathe 3.6s ease-in-out infinite;
     animation-delay: calc(var(--i, 0) * 0.45s);
   }
-
-  .mood-rest-up {
-    animation: mood-bob 2.4s ease-in-out infinite;
-  }
 }
 
-/* Hover: the rule draws across, the name steps in and the chevron floods
+/* Hover: the row lifts onto ivory, the name steps in and the arrow floods
    indigo. Fine pointers only - on touch a hover state sticks after the tap
    and the row would look chosen. */
 @media (hover: hover) and (pointer: fine) {
-  .mood-acc-item:not([data-open]):not([data-dead]):hover::after {
-    transform: scaleX(1);
+  .mood-row:not([data-chosen]):not([data-dead]):hover::before {
+    opacity: 1;
+    transform: none;
   }
 
-  .mood-acc-item:not([data-open]):not([data-dead]):hover .mood-acc-num {
+  .mood-row:not([data-chosen]):not([data-dead]):hover .mood-row-num {
     color: var(--ink);
   }
 
-  .mood-acc-item:not([data-open]):not([data-dead]):hover .mood-acc-chev {
+  .mood-row:not([data-chosen]):not([data-dead]):hover .mood-row-go {
     background: var(--ink);
     color: var(--paper);
   }
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .mood-acc-item:not([data-open]):not([data-dead]):hover .mood-acc-name {
-    transform: translateX(0.5rem);
+  .mood-row:not([data-chosen]):not([data-dead]):hover .mood-row-name {
+    transform: translateX(0.35rem);
   }
 
-  .mood-acc-item:not([data-open]):not([data-dead]):hover .mood-acc-chev {
+  .mood-row:not([data-chosen]):not([data-dead]):hover .mood-row-go {
     transform: translateX(0.2rem);
   }
-
-  .mood-acc-item[data-open]:hover .mood-acc-thumb img {
-    transform: scale(1.06);
-  }
 }
 
-.mood-acc-item:not([data-open]):has(.mood-acc-head:focus-visible)::after {
-  transform: scaleX(1);
-}
-
-@keyframes mood-roll {
-  from {
-    transform: translateY(100%);
-  }
+.mood-row:not([data-chosen]):has(.mood-row-head:focus-visible)::before {
+  opacity: 1;
+  transform: none;
 }
 
 @keyframes mood-word {
@@ -4229,6 +4766,22 @@ html:has([data-loader]) body {
   }
 }
 
+@keyframes mood-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes mood-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 @keyframes mood-card {
   from {
     opacity: 0;
@@ -4244,17 +4797,6 @@ html:has([data-loader]) body {
 
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes mood-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
   }
 }
 

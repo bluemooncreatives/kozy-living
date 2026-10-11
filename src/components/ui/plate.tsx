@@ -117,6 +117,12 @@ export default function Plate({
   /** Opt out where the plate is inside an already-staggered group. */
   reveal?: boolean;
   className?: string;
+  /**
+   * Overlays, laid over the plate as siblings of the masked media - so with
+   * `arrow` the notch does NOT cut them. Anything that paints across the
+   * top-right corner (a scrim, a tint) must carry `notch-tr` itself, or it
+   * films over the page the notch is there to show.
+   */
   children?: React.ReactNode;
 }) {
   const ghost = placeholderText ?? title ?? tag ?? "kozy";
