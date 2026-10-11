@@ -7,6 +7,11 @@ import { brandIcons, type BrandIcon } from "@/components/ui/brand-icons";
  * twice so the -50% translation in `.marquee-track` loops without a seam, and
  * the duplicate is hidden from assistive tech.
  *
+ * Each half carries the glyphs three times over (`COPIES`). One pass of seven
+ * glyphs is narrower than a wide screen, and a half narrower than the viewport
+ * leaves the band empty at the edge as it loops. The duration is multiplied
+ * by the same factor so the speed does not change.
+ *
  * Each glyph carries its own scale from `brandIcons` - the artwork is not
  * drawn to a shared optical size, so one box alone would not hold them level.
  */
@@ -27,11 +32,11 @@ export default function IconMarquee({
       className="flex shrink-0 items-center"
       aria-hidden={ariaHidden || undefined}
     >
-      {icons.map((icon, i) => (
+      {Array.from({ length: COPIES }, () => icons).flat().map((icon, i) => (
         <div key={`${icon.alt}-${i}`} className="px-7 md:px-10">
           <Image
             src={icon.src}
-            alt={ariaHidden ? "" : icon.alt}
+            alt={ariaHidden || i >= icons.length ? "" : icon.alt}
             className={clsx(
               "h-14 w-14 shrink-0 object-contain sm:h-16 sm:w-16 md:h-20 md:w-20",
               icon.scale
@@ -45,7 +50,7 @@ export default function IconMarquee({
   return (
     <div
       className={clsx("overflow-hidden", className)}
-      style={{ "--marquee-duration": `${duration}s` } as React.CSSProperties}
+      style={{ "--marquee-duration": `${duration * COPIES}s` } as React.CSSProperties}
     >
       <div className={reverse ? "marquee-track-reverse" : "marquee-track"}>
         {run(false)}
@@ -54,6 +59,8 @@ export default function IconMarquee({
     </div>
   );
 }
+
+const COPIES = 3;
 
 /** Ordered so no two glyphs of similar shape sit next to each other. */
 const DEFAULT_RUN = [

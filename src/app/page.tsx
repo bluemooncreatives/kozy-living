@@ -118,14 +118,11 @@ export default function Home() {
         <StoryBand />
       </Suspense>
 
-      <Testimonial />
       <RestTicker />
 
       <Suspense fallback={null}>
         <Spotlight />
       </Suspense>
-
-      <Guides />
 
       <Suspense fallback={null}>
         <Journal />
@@ -690,47 +687,6 @@ function StandardsTicker({ reverse = false }: { reverse?: boolean }) {
     </section>
   );
 }
-
-/* ----------------------------------------------------------- testimonial */
-
-/** Portrait plate beside a black quote card - the reference's quiet moment. */
-function Testimonial() {
-  return (
-    <section
-      aria-label="What our customers say"
-      className="shell grid grid-cols-1 gap-3 py-10 md:py-14 lg:grid-cols-2"
-    >
-      <Plate
-        src={"image" in testimonial ? (testimonial.image as string) : undefined}
-        aspect="4/3"
-        tone={0}
-        placeholderText="kraft"
-        className="h-full min-h-[18rem]"
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        alt="Cloth on the studio table mid-way through a hand-block print run."
-      />
-
-      <figure className="panel-ink flex flex-col justify-center p-8 md:p-12">
-        <span
-          aria-hidden
-          className="serif text-[4rem] leading-[0.6] text-sage md:text-[5rem]"
-        >
-          &rdquo;
-        </span>
-        <blockquote className="mt-6">
-          <p className="serif text-display-md text-paper">
-            &ldquo;{testimonial.quote}&rdquo;
-          </p>
-        </blockquote>
-        <figcaption className="mt-8">
-          <p className="ui-mono font-semibold text-paper">{testimonial.name}</p>
-          <p className="spec-mono mt-1">{testimonial.role}</p>
-        </figcaption>
-      </figure>
-    </section>
-  );
-}
-
 /* ------------------------------------------------------------ rest ticker */
 
 /** Full-bleed ticker, each repeat punctuated by the sage asterisk. */
@@ -858,41 +814,6 @@ async function Spotlight() {
     </section>
   );
 }
-
-/* --------------------------------------------------------------- guides */
-
-function Guides() {
-  return (
-    <section
-      aria-labelledby="guides"
-      className="shell grid grid-cols-1 items-stretch gap-3 pb-10 md:pb-14 lg:grid-cols-2"
-    >
-      <div className="panel flex flex-col justify-center p-8 md:p-12">
-        <Eyebrow align="left">{guidesFeature.eyebrow}</Eyebrow>
-        <Headline id="guides" size="lg" className="mt-4">
-          {guidesFeature.title}
-        </Headline>
-        <p className="body-mono mt-5 max-w-measure">{guidesFeature.body}</p>
-        <Link href={guidesFeature.href} className="btn-solid mt-8 self-start">
-          {guidesFeature.cta}
-        </Link>
-      </div>
-      <Link href={guidesFeature.href} className="group block">
-        <Plate
-          src={"image" in guidesFeature ? (guidesFeature.image as string) : undefined}
-          aspect="4/3"
-          arrow
-          tone={1}
-          placeholderText="guides"
-          className="h-full min-h-[16rem]"
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          alt="Fibre swatches and print blocks laid out on the studio table."
-        />
-      </Link>
-    </section>
-  );
-}
-
 /* -------------------------------------------------------------- journal */
 
 async function Journal() {

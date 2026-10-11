@@ -246,10 +246,8 @@ StandardsTicker
 CuratedEdits              ← Suspense   ("New Kompanions")
 StandardsTicker (reverse)
 StoryBand  ("Our story")  ← Suspense
-Testimonial
 RestTicker
 Spotlight                 ← Suspense
-Guides
 Journal                   ← Suspense
 StandardsTicker
 ClosingBand
@@ -289,7 +287,7 @@ that list a multiple of four. The zigzag belongs to the four *slots*
   element mounted after its scroll trigger has passed would sit at opacity 0.
 
 The story band sits where it does on purpose: it says who works the fibres and
-why, and the quote that follows is the studio's own line. The icon ticker above
+why. The icon ticker above
 it (the page's second of three) replaced a static fibre strip; the band that
 used to sit before it, `ExperienceBand`, was removed.
 
