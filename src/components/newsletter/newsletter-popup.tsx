@@ -211,7 +211,7 @@ export default function NewsletterPopup() {
                     type="button"
                     onClick={dismiss}
                     aria-label="Close"
-                    className="absolute -right-2 -top-2 grid h-11 w-11 place-items-center rounded-full bg-[#fffaf1] text-[#163e79] shadow-chip transition-transform hover:scale-105 motion-reduce:transition-none"
+                    className="absolute -right-2 -top-2 grid h-11 w-11 place-items-center max-[600px]:-right-2.5 max-[600px]:-top-2.5 max-[600px]:h-9 max-[600px]:w-9 rounded-full bg-[#fffaf1] text-[#163e79] shadow-chip transition-transform hover:scale-105 motion-reduce:transition-none"
                   >
                     <XMarkIcon className="h-4 w-4" />
                   </button>

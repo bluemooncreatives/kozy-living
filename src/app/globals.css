@@ -2089,117 +2089,63 @@ html:has([data-loader]) body {
 
   /* ── Mobile ─────────────────────────────────────────────────────── */
   /*
-   * The same postcard stood on end: a 7 x 11 tile frame, the seal parked in
-   * the top-right corner of the field, the logo in the bottom-right. Every
-   * position is measured from the frame's inner edge (`--ritual-tile` plus
-   * `--ritual-inset`), never a bare percentage - percentages of the card are
-   * what put the seal and the logo on top of the right-hand column of tiles.
+   * The phone gets the SAME landscape postcard (13 x 9), scaled down. Every
+   * position and size above is in `cqw` of the card, so the composition
+   * shrinks as one piece; this block only adds floors where pure scaling
+   * would stop being usable. (It used to be a separate 7 x 11 portrait card;
+   * the owner wants one card everywhere.)
    *
-   * 7:11 is a whole number of tiles, so the frame lands exactly square. The
-   * card can still grow past it (a two-line error, a large text setting) and
-   * `round` re-fits the side columns when it does.
+   * - the field stays at 16px or iOS zooms the page into it on focus;
+   * - the body copy and the pill keep a readable floor - at 320px a cqw is
+   *   under 3px, which would set the copy at ~10px and the pill at ~7px;
+   * - the pill drops its 44px minimum to 30px, or it would be the tallest
+   *   thing on the card and push the logo off the frame.
    */
   @media (max-width: 600px) {
-    .newsletter-popup-panel {
-      /* Short phones: hold the whole card on screen rather than scroll it. */
-      max-width: max(16rem, calc((100svh - 2rem) * 7 / 11));
-    }
-
     .newsletter-popup-content {
       max-height: calc(100dvh - 2rem);
     }
 
-    .ritual-card {
-      --ritual-tile: calc(100cqw / 7);
-      --ritual-inset: 4.5cqw;
-      --ritual-seal: 23cqw;
-      --ritual-title: 9.4cqw;
-      aspect-ratio: 7 / 11;
-    }
-
-    /* The top padding sets the title's first line level with the foot of the
-       seal: "Shall we" sits beside it, "share a ritual" runs beneath it. */
+    /* The floors add height the pure scale did not budget for, and a taller
+       card makes `round` re-fit - and visibly stretch - the side columns of
+       Ks. The vertical air gives that height back so the card stays 13 x 9. */
     .ritual-content {
-      padding: calc(var(--ritual-tile) + 3cqw + var(--ritual-seal) - var(--ritual-title)) calc(var(--ritual-tile) + var(--ritual-inset)) calc(var(--ritual-tile) + 27cqw);
+      padding-top: 11.5%;
+      padding-bottom: 8.5%;
     }
 
-    /* Keeps the first line of whatever the title says - "Shall we", or
-       "Welcome" once subscribed - clear of the seal. A line too long to fit
-       beside it drops under it instead of running across it. */
-    .ritual-content::before {
-      content: "";
-      float: right;
-      width: calc(var(--ritual-seal) + 2cqw);
-      height: var(--ritual-title);
-    }
-
-    .ritual-title {
-      font-size: var(--ritual-title);
-      line-height: 1;
-    }
-
-    .ritual-seal {
-      top: calc(var(--ritual-tile) + 3cqw);
-      right: calc(var(--ritual-tile) + var(--ritual-inset));
-      width: var(--ritual-seal);
-    }
-
-    /* The desktop rag (two lines, broken by hand) cannot be kept at a size a
-       phone can read, and broken line by line it left "you" and "& then."
-       stranded. Here the lines run on as one paragraph, balanced. */
     .ritual-copy {
-      margin-top: 5.5cqw;
-      font-size: 5.3cqw;
-      line-height: 1.28;
-      text-wrap: balance;
-    }
-
-    .ritual-copy span {
-      display: inline;
-      white-space: normal;
-    }
-
-    .ritual-copy span + span::before {
-      content: " ";
+      margin-top: 2.6cqw;
+      font-size: max(11px, 3.4cqw);
+      line-height: 1.18;
     }
 
     .ritual-form {
-      margin-top: 7cqw;
-    }
-
-    .ritual-email-line {
-      width: 100%;
-      padding-bottom: 7px;
-      background-size: 26px 9px;
-    }
-
-    .ritual-field,
-    .ritual-email-label {
-      font-size: max(16px, 5.3cqw);
+      margin-top: 2.2cqw;
     }
 
     .ritual-field {
-      padding-bottom: 5px;
+      padding-bottom: 0;
     }
 
-    .ritual-error {
-      font-size: max(13px, 3.8cqw);
+    .ritual-email-line {
+      background-size: max(16px, 4cqw) max(5px, 1.1cqw);
     }
 
     .ritual-submit {
-      margin-top: 6cqw;
-      padding: 3cqw 4.6cqw;
-      font-size: 5cqw;
+      min-height: 30px;
+      margin-top: 2cqw;
+      padding-block: 0;
+      font-size: max(11px, 2.4cqw);
     }
 
-    .ritual-logo {
-      right: calc(var(--ritual-tile) + var(--ritual-inset));
-      bottom: calc(var(--ritual-tile) + 3cqw);
-      width: 30cqw;
+    .ritual-error {
+      margin-top: 4px;
+      font-size: 11px;
     }
 
     .ritual-logo span {
-      font-size: 1.9cqw;
+      font-size: max(5px, 0.72cqw);
     }
   }
 }

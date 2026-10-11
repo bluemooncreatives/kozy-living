@@ -958,22 +958,24 @@ agree:
 
 ### The card's layout
 
-A landscape postcard (13 x 9 tiles) above 600px and the same card stood on end
-(7 x 11) at or below it - same seal, title, copy, form and logo, placed from
-the frame's inner edge.
+One landscape postcard (13 x 9 tiles) at every width - the phone gets the
+desktop card scaled down (owner's call, 2026-10-11; it used to be a separate
+7 x 11 portrait card). Everything on the card is sized in `cqw` of the card,
+so it shrinks as one piece.
 
 - **The K frame is a `border-image`** of one 3x3 block
   (`public/newsletter/ritual-border-tile.svg`, `round`), one tile wide
   (`--ritual-tile`). It used to be a whole frame drawn as one SVG and stretched
-  `100% 100%`, which squashed every tile on the phone card. Do not go back to a
-  stretched frame: the card grows past its aspect when an error shows.
-- On a phone the seal and logo are positioned in `--ritual-tile` units, not
-  percentages of the card - percentages put both on the right column of tiles.
-  A floated `::before` keeps the title's first line ("Shall we", or "Welcome"
-  once subscribed) clear of the seal.
-- The desktop body copy is two hand-broken lines; on a phone they run on as one
-  balanced paragraph, because broken line by line they stranded "you" and
-  "& then.".
+  `100% 100%`, which squashed tiles whenever the card left its aspect. Do not
+  go back to a stretched frame: the card grows past its aspect when an error
+  shows.
+- The `max-width: 600px` block only adds **floors** where pure scaling stops
+  being usable: the field stays 16px (iOS zooms into anything smaller), copy
+  and pill stay at 11px+, the pill's minimum drops 44px → 30px. Those floors
+  add height, and a taller card makes `round` visibly stretch the side
+  columns of Ks, so the same block takes the height back out of the vertical
+  padding. Measured: exactly 13:9 from 360px up, 3px over at 320px. If you
+  raise a floor, re-measure the card's aspect.
 
 All three post to the same server action (`newsletter/actions.ts` → Shopify
 Admin `customerCreate`, falling through to `customerEmailMarketingConsentUpdate`
