@@ -8,10 +8,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { HiArrowLeft, HiArrowRight, HiArrowUpRight } from "react-icons/hi2";
 import Image from "@/components/ui/shop-image";
+import NextImage from "next/image";
+import giTagMark from "../../../public/icons/gi-tag-mark.png";
 import CircledWord from "@/components/ui/circled-word";
 import ActionButton from "@/components/ui/action-button";
 import { displayFace, Eyebrow } from "@/components/ui/section";
-import { aboutStory } from "@/lib/site";
+import { aboutStory, giTag } from "@/lib/site";
 
 gsap.registerPlugin(Flip);
 
@@ -212,7 +214,14 @@ export default function StoryBoard({ cards }: { cards: StoryCard[] }) {
           )}
         </div>
         <span className="story-card-shade" aria-hidden />
-        <span className="story-tag">{card.kicker}</span>
+        {/* The GI mark in place of the text kicker (owner's call). The trimmed
+            file, not gi-tag.png, which sits off-centre in its canvas. */}
+        <NextImage
+          src={giTagMark}
+          alt={giTag.alt}
+          sizes="56px"
+          className="story-tag story-gi"
+        />
         <div className="story-card-footer">
           <h3>
             {card.lede.lead} {card.lede.accent}

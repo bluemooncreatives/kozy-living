@@ -1407,6 +1407,13 @@
     background: rgb(35 50 75 / 85%);
     color: var(--paper);
   }
+  .story-tag.story-gi {
+    height: 2.5rem;
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+  }
   .story-corner-tr .story-tag { max-width: calc(100% - 5.5rem); }
   .story-card-footer { position: relative; margin-top: auto; padding: 1.25rem; }
   .story-card-footer h3 { @apply font-sans text-display-sm font-semibold; color: inherit; text-wrap: balance; }
