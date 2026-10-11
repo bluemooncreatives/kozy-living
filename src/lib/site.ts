@@ -421,7 +421,7 @@ export const aboutStory = {
   /** Sits under the meter on wide screens, where the left column has room. */
   meterNote:
     "Four things we don't compromise on - the cloth, the hands, the print, and what the Kompanion is actually for.",
-  primary: { label: "Read our story", href: "/about-us" },
+  primary: { label: "Read about our kraft", href: "/about-us" },
   secondary: { label: "Meet the Kompanions", href: "/search" },
   /** The panel that closes the rail - see the note in `story-board.tsx`. */
   closing: {
@@ -673,7 +673,7 @@ export const faq = {
           question: "Who makes them?",
           answer:
             "Every Kompanion is designed in-house and made in collaboration with craft clusters across India, using artisanal processes including traditional Dabu hand-block printing.",
-          link: { label: "Read our story", href: "/the-kozy-story" },
+          link: { label: "Read about our kraft", href: "/the-kozy-story" },
         },
         {
           id: "what-is-dabu",

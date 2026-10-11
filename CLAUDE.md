@@ -240,7 +240,6 @@ lookup will 404. Handles are renamed in Shopify Admin, with a redirect.
 Hero (bento + wordmark band)
 CollectionFilters         ← Suspense   category pills, directly under the hero
 BoldStatement (+ staggered lookbook)  ← Suspense
-CollectionShowcase        ← Suspense
 Bestsellers               ← Suspense
 ShopByColour              ← Suspense
 StandardsTicker

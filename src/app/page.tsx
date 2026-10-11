@@ -27,9 +27,6 @@ import { ArrowUpRight } from "@/components/ui/arrow-badge";
 import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import { splitText } from "@/components/motion/split-text";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
-import CollectionShowcase, {
-  CollectionShowcaseFallback,
-} from "@/components/home/collection-showcase";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
 import { FaqFallback, HomeFaq } from "@/components/faq/faq-section";
 import LookbookDeck, {
@@ -98,10 +95,6 @@ export default function Home() {
           holding the first byte of the whole page on its Shopify lookups. */}
       <Suspense fallback={<StatementFallback />}>
         <BoldStatement />
-      </Suspense>
-
-      <Suspense fallback={<CollectionShowcaseFallback />}>
-        <CollectionShowcase />
       </Suspense>
 
       <Suspense fallback={<RailFallback />}>
