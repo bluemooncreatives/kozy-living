@@ -1411,22 +1411,22 @@ export const heritage = {
     {
       index: "01",
       title: "The Kozy Lounge",
-      body: "Low seating built for the floor - mini soft floor lounge seating, structured biscuit floor pillows, and playful throw pillows and plush textile shapes that stand in for fragile ceramic decor.",
+      body: "Dabu-printed cushions, playful floor pillows and tactile home accents that bring traditional Indian craft into contemporary living. Designed to add colour, character and comfort to your favourite corners.",
     },
     {
       index: "02",
       title: "Kessentials & Morning Luxuries",
-      body: "A lifestyle vertical built around the first hour of the day: high-absorbency natural waffle weave robes, ritual kits and everyday loungewear.",
+      body: "Waffle-weave robes, comforting slippers and thoughtfully curated ritual kits, designed around the little moments that make your day feel special. Everyday comforts, elevated through texture, detail and mindful design.",
     },
     {
       index: "03",
       title: "Pet & Parent",
-      body: "Dabu-printed artisan pet carriers, pet clothing and matching parent accessories - the same fibres and prints, scaled for both ends of the leash.",
+      body: "Dabu-printed carriers, matching bandanas and thoughtfully krafted essentials for you and your Kozy Kompanion. Made for shared rituals, matching moments and little adventures together.",
     },
     {
       index: "04",
       title: "B2B & Private Label",
-      body: "Bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands.",
+      body: "From bespoke textile concepts to custom product development and bulk production, we collaborate with boutiques, interior studios and hospitality brands to bring distinctive, craft-led ideas to life.",
     },
   ],
 } as const;
@@ -1437,8 +1437,11 @@ export const heritage = {
  */
 export const whyKraft = {
   eyebrow: "Why kraft-led",
-  title: "Why slow, natural and made by hand?",
-  body: "Synthetic decor is made to be looked at and replaced. Natural fibres worked by hand are made to be used, and they get better at it.",
+  title: "Rooted in craft. Mindful by design.",
+  body: [
+    "We believe in creating with care. From Dabu hand-block printing in Rajasthan to natural cottons and thoughtfully chosen materials, our approach celebrates traditional skills, conscious material choices and the people behind every piece.",
+    "Designed in-house and made in collaboration with artisan communities across India, our collections bring together contemporary design, enduring craft and everyday rituals.",
+  ],
   stats: [
     {
       value: "100%",

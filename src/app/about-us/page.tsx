@@ -146,9 +146,14 @@ function WhyKraft() {
         <Headline id="why-kraft" size="lg" className="mt-4">
           {whyKraft.title}
         </Headline>
-        <p className="body-mono mt-5 max-w-measure text-pretty">
-          {whyKraft.body}
-        </p>
+        {whyKraft.body.map((paragraph, i) => (
+          <p
+            key={i}
+            className={`body-mono max-w-measure text-pretty ${i ? "mt-3" : "mt-5"}`}
+          >
+            {paragraph}
+          </p>
+        ))}
       </div>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
