@@ -494,8 +494,8 @@ export const aboutStory = {
     {
       index: "05",
       kicker: "The ritual",
-      lede: { lead: "Slow mornings,", accent: "soft layers" },
-      body: "Robes, slippers and thoughtful sets for the small moments of rest already in your day.",
+      lede: { lead: "Matching", accent: "Shared Rituals." },
+      body: "Matching ritual robes for the shared rituals, cosy mornings and the little moments that make life together feel a little more Kozy.",
       cta: "Explore ritual kits",
       collection: "ritual-kits",
       href: "/search",
