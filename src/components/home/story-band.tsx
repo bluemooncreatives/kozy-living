@@ -43,8 +43,10 @@ export default async function StoryBand() {
       const shot = galleryFor(products);
       // Two is the floor: one photograph does not rotate, and a single live
       // shot beside three styled stills is a worse card than the stills.
+      // A pinned card keeps its own stills even when the collection has shots.
+      const pinned = "pinImages" in pillar && pillar.pinImages;
       const images =
-        shot.length >= 2
+        !pinned && shot.length >= 2
           ? shot.map((image) => ({
               url: image.url,
               altText: image.altText || pillar.alt,

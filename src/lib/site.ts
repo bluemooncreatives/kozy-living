@@ -438,10 +438,10 @@ export const aboutStory = {
       collection: "kessentials",
       href: "/about-us",
       alt: "Waffle weave and slub cotton Kompanions folded on the studio table.",
+      /** Owner-chosen photograph: shown in place of the collection's shots. */
+      pinImages: true,
       images: [
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1675.jpg?v=1788636340",
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1695.png?v=1788636343",
-        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1694_d0fd0a48-49cb-46ac-a8ec-fbf065b857f6.jpg?v=1788636341",
+        "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/189666_jpg.jpg?v=1791720168",
       ],
     },
     {
