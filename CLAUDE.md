@@ -364,8 +364,10 @@ downstream as badges and labels, and they were missed on the first pass.
 - In `main-menu`, **Krafted by Kozy → Slippers** points at
   `/collections/crafted-by-kozy` (the parent) rather than at the slippers
   collection.
-- Collections `kozy-lounge` and `blend` do not exist; `popular` does not
-  exist. Code that references them already falls back — see below.
+- Collections `kozy-lounge` and `blend` do not exist. Code that references
+  them already falls back — see below. (The homepage Bestsellers rail used to
+  ask for a non-existent `popular`; it now reads the merchant's `bestsellers`
+  collection, in its Admin order.)
 
 ### Guard the handle, always
 
@@ -953,6 +955,25 @@ agree:
 | Arrival card | `newsletter/newsletter-popup.tsx` + `newsletter-postcard.tsx` | the full drawing, in a Headless UI `Dialog` |
 | Corner teaser | `newsletter/newsletter-teaser.tsx` | what the card collapses into once closed |
 | Footer form | `ui/newsletter.tsx` | a bare field and one pill |
+
+### The card's layout
+
+A landscape postcard (13 x 9 tiles) above 600px and the same card stood on end
+(7 x 11) at or below it - same seal, title, copy, form and logo, placed from
+the frame's inner edge.
+
+- **The K frame is a `border-image`** of one 3x3 block
+  (`public/newsletter/ritual-border-tile.svg`, `round`), one tile wide
+  (`--ritual-tile`). It used to be a whole frame drawn as one SVG and stretched
+  `100% 100%`, which squashed every tile on the phone card. Do not go back to a
+  stretched frame: the card grows past its aspect when an error shows.
+- On a phone the seal and logo are positioned in `--ritual-tile` units, not
+  percentages of the card - percentages put both on the right column of tiles.
+  A floated `::before` keeps the title's first line ("Shall we", or "Welcome"
+  once subscribed) clear of the seal.
+- The desktop body copy is two hand-broken lines; on a phone they run on as one
+  balanced paragraph, because broken line by line they stranded "you" and
+  "& then.".
 
 All three post to the same server action (`newsletter/actions.ts` → Shopify
 Admin `customerCreate`, falling through to `customerEmailMarketingConsentUpdate`

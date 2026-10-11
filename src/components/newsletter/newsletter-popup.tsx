@@ -182,7 +182,7 @@ export default function NewsletterPopup() {
             />
           </TransitionChild>
 
-          <div className="fixed inset-0 overflow-y-auto p-6">
+          <div className="fixed inset-0 overflow-y-auto p-6 max-[600px]:p-4">
             <div className="flex min-h-full items-center justify-center">
               <TransitionChild
                 as={Fragment}

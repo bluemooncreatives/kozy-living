@@ -589,12 +589,25 @@ async function CollectionFilters() {
 
 /* --------------------------------------------------------------- rails */
 
-async function Bestsellers() {
-  const products = (
-    await productsFrom("popular", { sortKey: "BEST_SELLING" })
-  ).slice(0, 12);
+const BESTSELLERS_COLLECTION_HANDLE = "bestsellers";
 
+async function Bestsellers() {
+  // The merchant's hand-picked "Bestsellers" collection, in its Admin order.
+  // It used to ask for `popular`, which never existed, so the rail silently
+  // fell through to the store-wide BEST_SELLING sort. That fallback stays for
+  // the day the collection is renamed or emptied, and "View all" follows the
+  // same guard rather than linking a handle that would 404.
+  const [products, collections] = await Promise.all([
+    productsFrom(BESTSELLERS_COLLECTION_HANDLE, { sortKey: "BEST_SELLING" }),
+    getCollections().catch(() => []),
+  ]);
   if (!products.length) return null;
+
+  const viewAllHref = collections.some(
+    (collection) => collection.handle === BESTSELLERS_COLLECTION_HANDLE,
+  )
+    ? `/search/${BESTSELLERS_COLLECTION_HANDLE}`
+    : "/search";
 
   return (
     <section aria-labelledby="bestsellers" className="overflow-x-clip">
@@ -603,7 +616,7 @@ async function Bestsellers() {
         title={<span id="bestsellers">Step into morning luxuries</span>}
         count={products.length}
         action="View all"
-        actionHref="/search"
+        actionHref={viewAllHref}
       />
       <Carousel label="Bestselling objects">
         {products.map((product, index) => (
