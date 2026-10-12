@@ -17,7 +17,7 @@
 export const productDiscovery = {
   title: "More of your kind.",
   browse: "Explore",
-  cardLabel: "The collection edit",
+  cardLabel: "The kollection edit",
   soldOut: "Sold out",
   from: "from",
 } as const;
@@ -45,7 +45,7 @@ export const site = {
     "You don't need to add more to your day. Just do what you do with more intention.",
   origin: "India",
   description:
-    "Craft-led, conscious textiles from India. Cotton waffle weaves, slub cottons, percale, linen blends and wool - designed in-house, made with craft clusters across the country, and finished with traditional Dabu hand-block printing.",
+    "Craft-led, konscious textiles from India. Cotton waffle weaves, slub cottons, percale, linen blends and wool - designed in-house, made with craft clusters across the country, and finished with traditional Dabu hand-block printing.",
   founder: "Khushi Faruqui",
   founderCredential: "Textile Design, NIFT Delhi",
   /** Khushi's own account - distinct from `instagram` below, which is the
@@ -302,7 +302,7 @@ export const lookbook: readonly LookbookEntry[] = [
   {
     tag: "pets",
     description:
-      "Carriers, seating and clothing for the companion who shares your slow hours.",
+      "Carriers, seating and clothing for the Kompanion who shares your slow hours.",
     title: "Pet Kollection",
     handle: "pet-collection",
     images: [],
@@ -341,7 +341,7 @@ export const lookbook: readonly LookbookEntry[] = [
   {
     tag: "dabu",
     description:
-      "Hand-block printed pillows that bring a quiet, artful mood to a corner.",
+      "Hand-block printed pillows that bring a quiet, artful mood to a korner.",
     title: "Dabu Pillows",
     handle: "dabu-printed-pillows",
     images: [],
@@ -371,7 +371,7 @@ export const lookbook: readonly LookbookEntry[] = [
   {
     tag: "pets",
     description:
-      "Low, soft seating so your companion has a corner of their own.",
+      "Low, soft seating so your Kompanion has a korner of their own.",
     title: "Pet Seating",
     handle: "pet-seating",
     images: [],
@@ -415,7 +415,7 @@ export const aboutStory = {
    */
   title: ["Behind your", "shared rituals"],
   summary:
-    "To us, shared rituals go beyond our homes. They connect us to the hands and heritage behind what we bring into them. At Kozy Living, we share these rituals with Indian craftspeople, collaborating to bring uplifting crafts into modern homes and everyday living.",
+    "To us, shared rituals go beyond our homes. They konnect us to the hands and heritage behind what we bring into them. At Kozy Living, we share these rituals with Indian craftspeople, collaborating to bring uplifting crafts into modern homes and everyday living.",
   circled: "shared rituals",
   body: "Kozy Living began with one idea: you don't need to add more to your day. Everything we make is designed in-house, worked in 100% natural fibres, and made with craft clusters across India - so the ten minutes you already take feel like a ritual rather than a gap.",
   /** Sits under the meter on wide screens, where the left column has room. */
@@ -480,7 +480,7 @@ export const aboutStory = {
       index: "04",
       kicker: "The point",
       lede: { lead: "The Kozy", accent: "Grounded Korner" },
-      body: "Sitting on the floor can help you feel grounded and reconnect with yourself. Make room for a simple everyday ritual that brings you back to the present, with comfort rooted in tradition.",
+      body: "Sitting on the floor can help you feel grounded and reconnect with yourself. Make room for a simple everyday ritual that brings you back to the present, with komfort rooted in tradition.",
       cta: "Shop Kompanions",
       collection: "kozy-lounge",
       href: "/search",
@@ -493,7 +493,7 @@ export const aboutStory = {
       index: "05",
       kicker: "The ritual",
       lede: { lead: "Matching", accent: "Shared Rituals." },
-      body: "Matching ritual robes for the shared rituals, cosy mornings and the little moments that make life together feel a little more Kozy.",
+      body: "Matching ritual robes for the shared rituals, kozy mornings and the little moments that make life together feel a little more Kozy.",
       cta: "Explore ritual kits",
       collection: "ritual-kits",
       href: "/search",
@@ -505,7 +505,7 @@ export const aboutStory = {
     },
     {
       index: "06",
-      kicker: "The companions",
+      kicker: "The Kompanions",
       lede: { lead: "Shared Rituals,", accent: "on your coffee dates" },
       body: "Karriers, furrie Klothing and shared accessories, so no outing is incomplete without your furrie Kompanion.",
       cta: "Meet the pet kollection",
@@ -673,7 +673,7 @@ export const faq = {
         id: "kraft-timeline",
         question: "What is your Kraft timeline?",
         answer:
-          "Ready-to-order Kompanions are dispatched within 5-7 business days, with delivery typically taking another 3-7 business days across India. Custom and bulk orders may take longer.",
+          "Ready-to-order Kompanions are dispatched within 5-7 business days, with delivery typically taking another 3-7 business days across India. Kustom and bulk orders may take longer.",
       },
     ],
   },
@@ -732,7 +732,7 @@ export const faq = {
           id: "made-from",
           question: "What are your textiles made from?",
           answer:
-            "100% natural fibres. Our material palette is cotton waffle weave, slub cotton, cotton percale, linen blends, wool and other premium natural Indian textiles. We use consciously sourced natural dyes and surplus fabric from the industry.",
+            "100% natural fibres. Our material palette is cotton waffle weave, slub cotton, cotton percale, linen blends, wool and other premium natural Indian textiles. We use konsciously sourced natural dyes and surplus fabric from the industry.",
         },
         {
           id: "care",
@@ -758,14 +758,14 @@ export const faq = {
           id: "sizing-help",
           question: "I'm between sizes. Can someone help me choose?",
           answer:
-            "Yes. Message the studio on Instagram with what you are choosing between and we will help you pick - the same goes for any customisation you have in mind.",
+            "Yes. Message the studio on Instagram with what you are choosing between and we will help you pick - the same goes for any kustomisation you have in mind.",
           link: { label: site.instagram, href: site.instagramUrl },
         },
         {
           id: "bulk",
           question: "Do you take bulk or private label orders?",
           answer:
-            "Yes. Alongside retail we run bespoke bulk production partnerships, tailoring custom textile concepts for luxury boutiques, interior studios and premium hospitality brands. Write to us with your brief to start a conversation.",
+            "Yes. Alongside retail we run bespoke bulk production partnerships, tailoring kustom textile concepts for luxury boutiques, interior studios and premium hospitality brands. Write to us with your brief to start a conversation.",
           link: { label: "Start a B2B enquiry", href: "/b2b-enquiries" },
         },
       ],
@@ -803,7 +803,7 @@ export const faq = {
           id: "robe-dye",
           question: "Will a naturally dyed robe change with washing?",
           answer:
-            "It will soften, and that is the point. Naturally dyed cloth settles with use and develops a character of its own wash by wash, and natural indigo is known for its colourfastness and breathability.",
+            "It will soften, and that is the point. Naturally dyed cloth settles with use and develops a character of its own wash by wash, and natural indigo is known for its kolourfastness and breathability.",
         },
       ],
     },
@@ -913,7 +913,7 @@ export const faq = {
           id: "pet-custom",
           question: "Can you make something to fit my pet?",
           answer:
-            "Message the studio on Instagram. Need help choosing a size, or want a customisation? Tell us about your furrie baby and we will take it from there.",
+            "Message the studio on Instagram. Need help choosing a size, or want a kustomisation? Tell us about your furrie baby and we will take it from there.",
           link: { label: site.instagram, href: site.instagramUrl },
         },
       ],
@@ -1107,7 +1107,7 @@ export const kitBuilder = {
       hint: "Every Kompanion in the kit is cut in the fabric you choose.",
     },
     colour: {
-      title: "Choose your colour",
+      title: "Choose your kolour",
       hint: (fabric: string) => `The ${fabric} cloth for every Kompanion in your kit.`,
     },
     thread: {
@@ -1144,8 +1144,8 @@ export const kitBuilder = {
   edit: "Edit",
   resting: {
     title: "The kit builder is resting",
-    body: "We are preparing the next set of Kompanions. In the meantime, the collection is open.",
-    cta: "Explore the collection",
+    body: "We are preparing the next set of Kompanions. In the meantime, the kollection is open.",
+    cta: "Explore the kollection",
   },
   /** The drawer's label for a kit line. */
   cartLabel: "Your kit",
@@ -1168,8 +1168,8 @@ export const kitBuilder = {
     soldOut: (piece: string) =>
       `The ${piece} has just sold out in that size and fabric. Please choose another.`,
     fabric: "Please choose a fabric.",
-    colour: "Choose a colour for your kit.",
-    thread: "Choose a thread colour, or No embroidery.",
+    colour: "Choose a kolour for your kit.",
+    thread: "Choose a thread kolour, or No embroidery.",
     initials: "Add your initials, or choose No embroidery.",
     invalidInitials: "Initials can only be the letters A to Z.",
     tooLong: (max: number) => `Initials can be at most ${max} letters.`,
@@ -1240,7 +1240,7 @@ export const contact = {
   eyebrow: "Get in touch",
   title: "Say hello to the studio",
   body: [
-    "Questions about a Kompanion, fabric and care, custom sizing, or a bulk and private label brief? The studio reads everything that comes in.",
+    "Questions about a Kompanion, fabric and care, kustom sizing, or a bulk and private label brief? The studio reads everything that comes in.",
     "Send the form below, write to us directly, or reach us on Instagram - whichever is easiest for you.",
   ],
   email: "care@kozyliving.com",
@@ -1327,11 +1327,11 @@ export const b2bEnquiry = {
       },
       {
         title: "We Kraft the direction",
-        body: "We look at materials, kraft, finishes, customisation & timelines to shape the right direction for your Kompanions",
+        body: "We look at materials, kraft, finishes, kustomisation & timelines to shape the right direction for your Kompanions",
       },
       {
         title: "Bring it to life",
-        body: "We come back with pricing, samples, colourways & next steps — including private label, where it fits",
+        body: "We come back with pricing, samples, kolourways & next steps — including private label, where it fits",
       },
     ],
   },
@@ -1357,17 +1357,17 @@ export const b2bEnquiry = {
     productsHint: "e.g. waffle bathrobes, slippers, Dabu-printed pillows, ritual kits",
     quantity: "Estimated quantity",
     quantityUnit: "units",
-    quantities: ["Below 100", "100–500", "500–1,000", "1,000+", "Customised"],
+    quantities: ["Below 100", "100–500", "500–1,000", "1,000+", "Kustomised"],
     /** Picking `option` opens a required number field under the pills.
         `option` must match one of `quantities` verbatim. */
     custom: {
-      option: "Customised",
+      option: "Kustomised",
       label: "Your quantity",
       placeholder: "e.g. 2500",
     },
     message: "Message / requirements",
     optional: "Optional",
-    messageHint: "Colours, sizes, branding or private label, timelines - anything that helps us quote.",
+    messageHint: "Kolours, sizes, branding or private label, timelines - anything that helps us quote.",
     submit: "Request a quote",
     sending: "Sending…",
     another: "Send another enquiry",
@@ -1441,17 +1441,17 @@ export const aboutImages = {
 export const heritage = {
   eyebrow: "What we make",
   title: "Where Kraft Meets Everyday Living.",
-  body: "Kozy Living reimagines Indian craft through contemporary textiles, playful prints and thoughtful essentials. Designed in-house and made with artisan communities across India, our pieces bring colour, comfort and creativity to your everyday rituals.",
+  body: "Kozy Living reimagines Indian craft through contemporary textiles, playful prints and thoughtful essentials. Designed in-house and made with artisan communities across India, our pieces bring kolour, komfort and creativity to your everyday rituals.",
   collections: [
     {
       index: "01",
       title: "The Kozy Lounge",
-      body: "Dabu-printed cushions, playful floor pillows and tactile home accents that bring traditional Indian craft into contemporary living. Designed to add colour, character and comfort to your favourite corners.",
+      body: "Dabu-printed cushions, playful floor pillows and tactile home accents that bring traditional Indian craft into contemporary living. Designed to add kolour, character and komfort to your favourite korners.",
     },
     {
       index: "02",
       title: "Kessentials & Morning Luxuries",
-      body: "Waffle-weave robes, comforting slippers and thoughtfully curated ritual kits, designed around the little moments that make your day feel special. Everyday comforts, elevated through texture, detail and mindful design.",
+      body: "Waffle-weave robes, komforting slippers and thoughtfully kurated ritual kits, designed around the little moments that make your day feel special. Everyday komforts, elevated through texture, detail and mindful design.",
     },
     {
       index: "03",
@@ -1461,7 +1461,7 @@ export const heritage = {
     {
       index: "04",
       title: "B2B & Private Label",
-      body: "From bespoke textile concepts to custom product development and bulk production, we collaborate with boutiques, interior studios and hospitality brands to bring distinctive, craft-led ideas to life.",
+      body: "From bespoke textile concepts to kustom product development and bulk production, we collaborate with boutiques, interior studios and hospitality brands to bring distinctive, craft-led ideas to life.",
     },
   ],
 } as const;
@@ -1474,8 +1474,8 @@ export const whyKraft = {
   eyebrow: "Why kraft-led",
   title: "Rooted in craft. Mindful by design.",
   body: [
-    "We believe in creating with care. From Dabu hand-block printing in Rajasthan to natural cottons and thoughtfully chosen materials, our approach celebrates traditional skills, conscious material choices and the people behind every piece.",
-    "Designed in-house and made in collaboration with artisan communities across India, our collections bring together contemporary design, enduring craft and everyday rituals.",
+    "We believe in creating with care. From Dabu hand-block printing in Rajasthan to natural cottons and thoughtfully chosen materials, our approach celebrates traditional skills, konscious material choices and the people behind every piece.",
+    "Designed in-house and made in collaboration with artisan communities across India, our kollections bring together contemporary design, enduring craft and everyday rituals.",
   ],
   stats: [
     {
@@ -1495,7 +1495,7 @@ export const whyKraft = {
     },
     {
       value: "Surplus",
-      label: "Consciously Sourced",
+      label: "Konsciously Sourced",
       note: "Natural dyes and surplus industry fabric",
     },
   ],
@@ -1513,7 +1513,7 @@ export const whyKraft = {
     {
       trait: "Sourcing",
       conventional: "Virgin fabric ordered in volume",
-      kozy: "Consciously sourced natural and surplus fabric",
+      kozy: "Konsciously sourced natural and surplus fabric",
     },
     {
       trait: "Purpose",
@@ -1539,7 +1539,7 @@ export const studioToEveryday = {
     },
     {
       title: "Natural Fibres Only",
-      body: "Cotton waffle weave, slub cotton, cotton percale, linen blends and wool - consciously sourced, including surplus fabric from the industry.",
+      body: "Cotton waffle weave, slub cotton, cotton percale, linen blends and wool - konsciously sourced, including surplus fabric from the industry.",
     },
     {
       title: "Made With Craft Clusters",
@@ -1557,9 +1557,9 @@ export const studioToEveryday = {
 } as const;
 
 export const sustainability = {
-  eyebrow: "Conscious by default",
+  eyebrow: "Konscious by default",
   title: ["Kraft that respects the hand", "and the material."],
-  body: "Being conscious is not a line on our packaging - it decides which fibre we buy, who makes the cloth, and how long the Kompanion is expected to last.",
+  body: "Being konscious is not a line on our packaging - it decides which fibre we buy, who makes the cloth, and how long the Kompanion is expected to last.",
   pillars: [
     {
       title: "Natural Fibres Only",
@@ -1567,7 +1567,7 @@ export const sustainability = {
     },
     {
       title: "Surplus & Natural Dyes",
-      body: "Consciously sourced natural dyes and surplus fabric from the industry, kept in use rather than discarded.",
+      body: "Konsciously sourced natural dyes and surplus fabric from the industry, kept in use rather than discarded.",
     },
     {
       title: "Craft Cluster Collaboration",
@@ -1606,7 +1606,7 @@ export const collective = {
       name: "The Studio",
       role: "Design & Development",
       credential: "In-house print and product design",
-      body: "Prints, organic forms and colour are developed in-house, then worked out on the cloth itself - so what ships is what the material actually wants to do.",
+      body: "Prints, organic forms and kolour are developed in-house, then worked out on the cloth itself - so what ships is what the material actually wants to do.",
     },
   ],
 } as const;
@@ -1622,7 +1622,7 @@ export const studioNote = {
   eyebrow: "A note from the studio",
   title: "Intention doesn't come from adding more.",
   body: [
-    "It comes from engaging deeply with the routines that already exist. The ten minutes on the floor before the day starts. The robe after a shower. The corner you keep coming back to.",
+    "It comes from engaging deeply with the routines that already exist. The ten minutes on the floor before the day starts. The robe after a shower. The korner you keep coming back to.",
     "We krafted Kozy Living Textiles to sit inside those moments rather than ask for new ones - your in-between Kompanions, made from natural fibres by hands we know.",
   ],
   signature: `The ${site.name} Studio`,
@@ -1835,7 +1835,7 @@ export const kozyStory = {
    */
   collage: {
     lead: "Kraft-led & Konscious",
-    ghosts: ["Natural fibres", "Dabu hand-block", "Colour & comfort"],
+    ghosts: ["Natural fibres", "Dabu hand-block", "Kolour & komfort"],
     note: "Four things the cloth carries before it ever reaches a room.",
     /** The lines switch the photographs; ghosted type does not say so alone. */
     hint: "Choose one to see it.",

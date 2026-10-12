@@ -136,7 +136,7 @@ export default function CategoryNav({
     >
       <Rail items={items} label="Categories" tone="primary" />
       {sub ? (
-        <Rail items={sub.items} label={`${sub.label} collections`} tone="secondary" />
+        <Rail items={sub.items} label={`${sub.label} kollections`} tone="secondary" />
       ) : null}
     </nav>
   );

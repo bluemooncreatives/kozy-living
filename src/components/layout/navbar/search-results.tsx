@@ -152,7 +152,7 @@ export default function SearchResults({
           {results.collections.length > 0 && (
             <>
               <li className={results.products.length > 0 ? "pb-2 pt-6" : "pb-2"}>
-                <span className="eyebrow">Collections</span>
+                <span className="eyebrow">Kollections</span>
               </li>
               {results.collections.map((col) => (
                 <li
@@ -168,7 +168,7 @@ export default function SearchResults({
                     className="flex w-full items-center justify-between gap-4 py-3 text-left transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                   >
                     <span className="body-mono">{col.title}</span>
-                    <span className="spec-mono shrink-0 text-muted">Collection →</span>
+                    <span className="spec-mono shrink-0 text-muted">Kollection →</span>
                   </button>
                 </li>
               ))}

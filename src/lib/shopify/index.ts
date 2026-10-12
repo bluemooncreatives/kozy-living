@@ -1038,7 +1038,7 @@ export const getKitBuilder = reactCache(async (): Promise<KitBuilder | null> => 
     const maxLength = int("initials_max_length");
 
     return {
-      title: text("title") ?? "Custom Ritual Kit",
+      title: text("title") ?? "Kustom Ritual Kit",
       containerVariantId: container.id,
       containerAvailable: container.availableForSale !== false,
       currencyCode:

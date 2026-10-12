@@ -42,7 +42,7 @@ export default function Newsletter({ className }: { className?: string }) {
       <p className={clsx("ui-mono", className)} role="status">
         {state.already
           ? state.message
-          : "Thank you - we'll write when the next collection lands."}
+          : "Thank you - we'll write when the next kollection lands."}
       </p>
     );
   }

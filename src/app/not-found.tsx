@@ -15,11 +15,11 @@ export default function NotFound() {
       </Headline>
       <p className="body-mono mt-8 max-w-measure">
         The page you are looking for has been moved or does not exist. The rest
-        of the collection is a click away.
+        of the kollection is a click away.
       </p>
       <div className="mt-10 flex flex-wrap gap-4">
         <Link href="/search" className="btn-solid">
-          Explore collection
+          Explore kollection
         </Link>
         <Link href="/" className="btn-outline">
           Back home

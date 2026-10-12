@@ -276,7 +276,7 @@ function SearchOverlayForm({
       {/* Browse-by-space pills - visible only when input is empty */}
       {showBrowse && (
         <div className="mt-10">
-          <p className="eyebrow mb-4 text-muted">Browse by collection</p>
+          <p className="eyebrow mb-4 text-muted">Browse by kollection</p>
           <ul className="flex flex-wrap gap-2">
             {browse.map((item, index) => (
               <li key={`${item.title}-${index}`}>

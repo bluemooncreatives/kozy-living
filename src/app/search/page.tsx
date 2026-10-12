@@ -2,9 +2,9 @@ import ShopView from "@/components/shop/shop-view";
 import { site } from "@/lib/site";
 
 export const metadata = {
-  title: "Shop Collection",
+  title: "Shop Kollection",
   description:
-    "Search craft-led, conscious textiles from Kozy Living - waffle weave, slub cotton, linen blends and Dabu hand-block prints.",
+    "Search craft-led, konscious textiles from Kozy Living - waffle weave, slub cotton, linen blends and Dabu hand-block prints.",
 };
 
 export default async function SearchPage({

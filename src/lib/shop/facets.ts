@@ -358,7 +358,7 @@ function buildColourGroup(products: CatalogProduct[]): {
   return {
     group: {
       param: COLOUR_PARAM,
-      label: "Colour",
+      label: "Kolour",
       values: orderColours([...values.values()]).map(({ order, ...value }) => value),
     },
     membership,

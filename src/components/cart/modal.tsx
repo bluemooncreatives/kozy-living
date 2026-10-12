@@ -218,7 +218,7 @@ export default function CartModal() {
                     Nothing here yet. Go meet your in-between Kompanions.
                   </p>
                   <Link href="/search" onClick={closeCart} className="btn-outline mt-8">
-                    Explore collection
+                    Explore kollection
                   </Link>
                 </div>
               ) : (

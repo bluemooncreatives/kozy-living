@@ -25,7 +25,7 @@ export async function generateMetadata({
   const { collection: handle } = await params;
   const collection = await findCollection(handle);
 
-  if (!collection) return { title: "Collection" };
+  if (!collection) return { title: "Kollection" };
 
   return {
     title: collection.seo?.title || collection.title,
@@ -57,7 +57,7 @@ export default async function CategoryPage({
     <ShopView
       basePath={collection.path}
       collectionHandle={collection.handle}
-      eyebrow="Collection"
+      eyebrow="Kollection"
       title={collection.title}
       description={collection.description || undefined}
       searchParams={(await searchParams) ?? {}}

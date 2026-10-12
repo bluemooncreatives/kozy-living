@@ -295,7 +295,7 @@ export default function FilterPanel({
   return (
     <div className="rule-t">
       {browse?.length ? (
-        <Section label="Collection">
+        <Section label="Kollection">
           <BrowseList items={browse} />
         </Section>
       ) : null}

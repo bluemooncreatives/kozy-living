@@ -530,8 +530,8 @@ export default async function ShopView({
                   {hasActiveFilters(state)
                     ? "Loosen one of the filters and the shelf fills back up."
                     : query
-                      ? "Try a broader term - a fibre or a collection, like 'waffle', 'linen' or 'Dabu'."
-                      : "Kompanions in this collection are on their way. Explore the rest of the catalogue."}
+                      ? "Try a broader term - a fibre or a kollection, like 'waffle', 'linen' or 'Dabu'."
+                      : "Kompanions in this kollection are on their way. Explore the rest of the catalogue."}
                 </p>
                 <Link
                   href={hasActiveFilters(state) ? clearHref : "/search"}

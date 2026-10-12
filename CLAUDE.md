@@ -49,6 +49,22 @@ Read the VOICE note at the top of `src/lib/site.ts` before writing any copy.
   - One owner-requested exception: the "Handkrafted in India" flag
     (`flag` / `flagMark` in `site.ts`) takes the K. Do not spread it to other
     uses of "handcrafted".
+- **The K brand words** (owner's call, 2026-10-13). In our own copy these
+  word families start with a K: kolour, komfort, kollection, kustom,
+  konscious, konnect, Kompanion, korner, kozy (for cosy), kurated, krafted.
+  Shop by kolour, Explore the kollection, Konsciously sourced.
+  - Only these words. Other C words stay as they are: cart, checkout,
+    close, choose, cotton, care, craft (the noun), clusters.
+  - **Our copy only, not Shopify data.** Product, collection and menu titles
+    are left as the merchant typed them (`house-spelling.ts` still makes
+    only its two narrow swaps). Handles, URLs (`/shop-by-colour`), query
+    params (`?colour=`), code names and product names quoted in copy
+    ("Ritual Companion Set") keep their C.
+  - **Order property names keep their C** (`kitBuilder.orderLabels.colour`
+    is `Colour`): past orders carry it, and `/account` and the workshop read
+    it.
+  - The founder's note (`foundersNote`) is kept verbatim. Her words are
+    hers to revise.
 - Rest, ritual and intention. **Not** luxury, indulgence or "elevate".
 - **Never invent social proof, certifications or figures.** This has been a
   real problem here: earlier copy carried an invented "4.9 / 2,400+ homes
@@ -216,9 +232,9 @@ means a separate `b2b_enquiry` definition. Do not add fields to
 - React 19 resets a form after its action runs. The B2B action echoes
   `values` back on failure, and the fields re-seed from them through
   `defaultValue` / `defaultChecked`.
-- Picking the **Customised** quantity opens a required `customQuantity`
+- Picking the **Kustomised** quantity opens a required `customQuantity`
   field; the action requires it only then and stores
-  `Customised - 2,500 units`. `form.custom.option` in `site.ts` must match
+  `Kustomised - 2,500 units`. `form.custom.option` in `site.ts` must match
   that entry in `quantities` verbatim, or the field never opens.
 - `/b2b-enquiries` shadows the empty Shopify page of the same handle, the
   same way `/founders-note` does. Its choice lists are in `b2bEnquiry` in

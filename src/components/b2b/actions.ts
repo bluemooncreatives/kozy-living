@@ -103,7 +103,7 @@ const B2BSchema = z.object({
     .trim()
     .max(4000, "Please keep it under 4000 characters."),
 }).superRefine((data, ctx) => {
-  // The field is only on screen once "Customised" is picked, so it is only
+  // The field is only on screen once "Kustomised" is picked, so it is only
   // required then. Checked here as well as by the browser's `required`,
   // which a script or a no-JS post never meets.
   if (data.quantity !== custom.option) return;
@@ -182,7 +182,7 @@ export async function submitB2BEnquiry(
   } = parsed.data;
 
   const { quantityUnit } = b2bEnquiry.form;
-  // "Customised - 2,500 units" keeps both the choice and the figure, so the
+  // "Kustomised - 2,500 units" keeps both the choice and the figure, so the
   // team can tell a stated custom volume from a picked band.
   const volume =
     quantity === custom.option

@@ -148,7 +148,7 @@ export default function B2BEnquiryForm({ className }: { className?: string }) {
             onSelect={setQuantity}
           />
 
-          {/* Rendered only while "Customised" is picked, so its `required`
+          {/* Rendered only while "Kustomised" is picked, so its `required`
               never blocks a form that chose a band. The action checks it
               again. Text with a numeric keypad rather than type=number:
               number inputs swallow "2,500" and step on the scroll wheel. */}

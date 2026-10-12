@@ -73,9 +73,9 @@ const GRID_SIZES =
   "(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw";
 
 export const metadata: Metadata = {
-  title: "Shop by Colour",
+  title: "Shop by Kolour",
   description:
-    "Start with a colour. Rose Pink, Indigo Blue, Tulsi Green, Oat Milk, White and Sage Green - pick the shade your home already lives in, and see the Kompanions krafted in it.",
+    "Start with a kolour. Rose Pink, Indigo Blue, Tulsi Green, Oat Milk, White and Sage Green - pick the shade your home already lives in, and see the Kompanions krafted in it.",
 };
 
 export default async function ShopByColourPage({
@@ -144,7 +144,7 @@ export default async function ShopByColourPage({
       >
         <div className="max-w-measure">
           <Eyebrow align="left">Step 1 of 2</Eyebrow>
-          <Headline className="mt-4">Shop by colour</Headline>
+          <Headline className="mt-4">Shop by kolour</Headline>
           <p className="body-mono mt-5 text-pretty">
             The house palette, one coil each. Choose the shade your home already
             lives in, and the Kompanions krafted in it appear below.
@@ -157,7 +157,7 @@ export default async function ShopByColourPage({
           </div>
         ) : (
           <p className="ui-mono mt-8 text-muted">
-            No colours are published yet.{" "}
+            No kolours are published yet.{" "}
             <Link
               href="/search"
               className="underline decoration-1 underline-offset-4 hover:text-ink"
@@ -235,7 +235,7 @@ export default async function ShopByColourPage({
           // and until a colour is chosen there is no question to answer.
           <div className="rule-t pt-10 text-center">
             <p className="serif text-display-md text-balance">
-              Pick a colour to see what we make in it
+              Pick a kolour to see what we make in it
             </p>
             <p className="body-mono mx-auto mt-4 max-w-measure">
               Choose a coil above and the Kompanions krafted in that shade will

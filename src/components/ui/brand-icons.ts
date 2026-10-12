@@ -34,12 +34,12 @@ export const brandIcons = {
   },
   eco: {
     src: ecoConsciousIcon,
-    alt: "Eco conscious",
+    alt: "Eco konscious",
     scale: "scale-[0.91]",
   },
   comfy: {
     src: comfyIcon,
-    alt: "Made for comfort",
+    alt: "Made for komfort",
     scale: "scale-[0.87]",
   },
   pet: {

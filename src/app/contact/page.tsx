@@ -6,7 +6,7 @@ import { contact, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: `Questions about our handcrafted objects, custom dimensions, or styling your space - write to ${site.name} at ${contact.email}.`,
+  description: `Questions about our handcrafted objects, kustom dimensions, or styling your space - write to ${site.name} at ${contact.email}.`,
   openGraph: { type: "website" },
 };
 

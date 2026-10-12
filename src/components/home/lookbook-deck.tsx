@@ -77,7 +77,7 @@ export default function LookbookDeck({
             className="ui-mono mr-1 tabular-nums text-muted"
           >
             <span className="sr-only">
-              Showing collections {first} to {last} of {cards.length}.{" "}
+              Showing kollections {first} to {last} of {cards.length}.{" "}
             </span>
             <span aria-hidden>
               <span className="text-ink">{String(page + 1).padStart(2, "0")}</span>
@@ -88,7 +88,7 @@ export default function LookbookDeck({
           <button
             type="button"
             onClick={() => go(-1)}
-            aria-label="Previous collections"
+            aria-label="Previous kollections"
             aria-controls="lookbook-cluster"
             className="arrow-btn border-ink/15 bg-card text-ink hover:border-ink hover:bg-ink hover:text-paper"
           >
@@ -97,7 +97,7 @@ export default function LookbookDeck({
           <button
             type="button"
             onClick={() => go(1)}
-            aria-label="Next collections"
+            aria-label="Next kollections"
             aria-controls="lookbook-cluster"
             className="arrow-btn"
           >
