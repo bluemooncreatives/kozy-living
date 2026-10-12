@@ -20,8 +20,8 @@ import FaqBoard, { HomeFaqBoard } from "./faq-board";
  * and the JSON-LD are static per request; only the open answer and, on product
  * pages, the selected topic are client state.
  *
- * Both callers stream it behind Suspense. The homepage reads live add-ons;
- * product pages also check live collection handles for their shop links.
+ * Both callers stream it behind Suspense. The homepage's list is fixed copy;
+ * product pages read live add-ons and check collection handles for links.
  */
 
 async function liveCollections() {
@@ -30,10 +30,8 @@ async function liveCollections() {
   );
 }
 
-export async function HomeFaq() {
-  const addOns = await getAddOns().catch(() => []);
-
-  return <FaqSection id="faq" data={homeFaqData({ addOns })} />;
+export function HomeFaq() {
+  return <FaqSection id="faq" data={homeFaqData()} />;
 }
 
 export async function ProductFaq({

@@ -281,38 +281,18 @@ const finish = (topics: FaqTopic[], live: Set<string>) =>
     }))
     .filter((topic) => topic.items.length);
 
-/** The homepage: one editorial list of the questions most visitors share. */
-export function homeFaqData({
-  addOns,
-}: {
-  addOns: ProductAddOn[];
-}): FaqBoardData {
-  const commonIds = [
-    "what-are-kompanions",
-    "made-from",
-    "who-makes-them",
-    "care",
-    "what-is-dabu",
-    "print-variation",
-    "personalise",
-    "gift",
-    "sizing-help",
-    "bulk",
-  ];
-  const items = sharedTopics(addOns).flatMap((topic) => topic.items);
-  const byId = new Map(items.map((item) => [item.id, item]));
+/** The homepage: the owner's five, as one editorial list. */
+export function homeFaqData(): FaqBoardData {
+  const { items, ...head } = faq.home;
 
   return {
-    ...faq.home,
+    ...head,
     topics: finish(
       [{
         key: "common",
         label: "Common questions",
         group: "topics",
-        items: commonIds.flatMap((id) => {
-          const item = byId.get(id);
-          return item ? [item] : [];
-        }),
+        items: copyItems(items),
       }],
       new Set(),
     ),

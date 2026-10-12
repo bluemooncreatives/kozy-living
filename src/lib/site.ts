@@ -621,15 +621,15 @@ type FaqEntry = {
  * The FAQ board - homepage (after the journal) and every product page (under
  * the buy panel). Built by `lib/shop/faq.ts`, drawn by `components/faq/`.
  *
- * Three shared topics, then one set per category. A product page leads with
- * its own category's set; the homepage draws its most common questions from
- * the shared topics as one list.
+ * Three shared topics, then one set per category, for product pages, which
+ * lead with their own category's set. The homepage shows its own five
+ * (`home.items`), written by the owner.
  *
  * EVERY ANSWER HERE IS A CLAIM THE BRAND ALREADY MAKES - in `site`, `heritage`,
  * the story chapters, or the product descriptions in Shopify (the karrier's
- * weight bands, the kit's box, the slipper's jute base). The store publishes
- * no shipping or refund policy, so there are deliberately no questions about
- * delivery times or returns. Add them when the policy exists, not before.
+ * weight bands, the kit's box, the slipper's jute base). The only delivery
+ * figure is the owner's dispatch window on the homepage; the store publishes
+ * no refund policy, so there are deliberately no questions about returns.
  *
  * The categories' Shopify collections live in `lib/shop/faq.ts`, not here:
  * a handle is an identifier, not copy.
@@ -639,6 +639,43 @@ export const faq = {
     eyebrow: "Questions, answered",
     title: "Ask the studio",
     lede: "From the cloth and the kraft to caring for what you take home. Here are the questions we hear most.",
+    /* The homepage's own five, in the owner's words (2026-10-13). Kept apart
+       from `topics` so the product pages' answers are not rewritten with
+       them. The timeline is the owner's stated dispatch window. */
+    items: [
+      {
+        id: "what-are-kompanions",
+        question: "What are Kompanions?",
+        answer:
+          "Kozy Kompanions are textiles designed to accompany you through your everyday rituals, bringing komfort, kolour and Indian craft into each one.",
+      },
+      {
+        id: "what-is-dabu",
+        question: "What is Dabu hand-block printing?",
+        answer:
+          "Dabu is a traditional resist-printing technique from Rajasthan. Artisans use a mud resist and natural dyes to kraft hand-printed patterns.",
+      },
+      {
+        id: "personalise",
+        question: "Can I personalise my Kompanion?",
+        answer:
+          "Absolutely! Selected Kompanions can be kustomised with initials, embroidery or sizing. Konnect with our studio to explore more possibilities.",
+        link: { label: site.instagram, href: site.instagramUrl },
+      },
+      {
+        id: "bulk",
+        question: "Do you take bulk or private-label orders?",
+        answer:
+          "Yes! We offer bespoke bulk production, private labelling and kustom textile development for brands, hospitality, gifting and interior projects.",
+        link: { label: "Start a B2B enquiry", href: "/b2b-enquiries" },
+      },
+      {
+        id: "kraft-timeline",
+        question: "What is your Kraft timeline?",
+        answer:
+          "Ready-to-order Kompanions are dispatched within 5-7 business days, with delivery typically taking another 3-7 business days across India. Custom and bulk orders may take longer.",
+      },
+    ],
   },
   /** The product page's head when the product fits no category. */
   product: {
