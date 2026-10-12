@@ -59,9 +59,11 @@ const EXIT_INTENT_CEILING = 0;
 /**
  * Pages where the popup stays shut. Someone writing an enquiry or signed into
  * their account is mid-task, and a card over that is an obstacle rather than an
- * offer. Prefix-matched, so nested routes are covered too.
+ * offer. Prefix-matched, so nested routes are covered too. The kit builder is
+ * a guided task too, and on a phone its own action bar holds the corner the
+ * teaser would park in.
  */
-const QUIET_PATHS = ["/contact", "/account"];
+const QUIET_PATHS = ["/contact", "/account", "/kit-builder"];
 
 export default function NewsletterPopup() {
   const [isOpen, setIsOpen] = useState(false);

@@ -5604,3 +5604,299 @@ html:has([data-loader]) body {
     transform: translate3d(0, 0.9rem, 0);
   }
 }
+
+/* ------------------------------------------------------------- kit builder
+
+   `/kit-builder` (components/kit-builder/). One step open at a time. A step
+   folds with `grid-template-rows: 0fr -> 1fr`, the same height animation as
+   the chosen mood row, so the panel's real content height is animated and
+   nothing is measured in JS. Everything here mounts after a click, so it
+   enters on keyed CSS, never `data-reveal` (CLAUDE.md §7). */
+@layer components {
+  .kit-step {
+    @apply rounded-plate bg-card;
+    /* The step head lands under the sticky header when the guide scrolls to
+       it, and when the browser does (focus, a hash). */
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+    transition: box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* The open step is the one thing on the page asking for attention: a lift
+     and an ink hairline, rather than a fifth colour. */
+  .kit-step[data-open="true"] {
+    box-shadow:
+      0 0 0 1px rgba(35, 50, 75, 0.14),
+      0 24px 60px -36px rgba(35, 50, 75, 0.45);
+  }
+
+  .kit-step-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .kit-step[data-open="true"] .kit-step-body {
+    grid-template-rows: 1fr;
+  }
+
+  /* overflow clips the fold; the inner padding keeps tile rings and focus
+     outlines (which sit outside their boxes) inside the clip. */
+  .kit-step-clip {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .kit-step-inner {
+    opacity: 0;
+    transform: translate3d(0, 0.6rem, 0);
+    transition:
+      opacity 260ms ease,
+      transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .kit-step[data-open="true"] .kit-step-inner {
+    opacity: 1;
+    transform: none;
+    transition-delay: 140ms;
+  }
+
+  /* The step number: ink on a todo step's ring, filled when open, a sage
+     tick on ink once done (sage type only ever on indigo, 6.50). */
+  .kit-step-num {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-sans text-spec font-semibold tabular-nums;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease,
+      border-color 300ms ease;
+  }
+
+  .kit-step-num[data-state="todo"] {
+    @apply border-ink/20 bg-transparent text-ink;
+  }
+
+  .kit-step-num[data-state="open"] {
+    @apply border-ink bg-ink text-oat;
+  }
+
+  .kit-step-num[data-state="done"] {
+    @apply border-ink bg-ink text-sage;
+  }
+
+  .kit-chevron {
+    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .kit-step[data-open="true"] .kit-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* A choosable tile: a hairline at rest (the contained shots sit on the
+     same ivory as the panel), lifted on hover, ringed in ink once chosen. */
+  .kit-tile {
+    @apply rounded-plate ring-1 ring-ink/10;
+    transition:
+      box-shadow 300ms ease,
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 300ms ease;
+  }
+
+  .kit-choice:hover .kit-tile {
+    @apply ring-ink/40;
+  }
+
+  .kit-choice[data-active="true"] .kit-tile {
+    @apply ring-2 ring-ink ring-offset-2 ring-offset-card;
+  }
+
+  .kit-choice[data-disabled="true"] .kit-tile {
+    opacity: 0.45;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .kit-choice:not([data-disabled="true"]):hover .kit-tile {
+      transform: translate3d(0, -3px, 0);
+    }
+  }
+
+  /* The corner mark on a tile: a plus waiting, a tick once chosen. */
+  .kit-mark {
+    @apply pointer-events-none absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 bg-card text-ink;
+    transition:
+      background-color 250ms ease,
+      color 250ms ease,
+      transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .kit-choice[data-active="true"] .kit-mark {
+    @apply border-ink bg-ink text-sage;
+    transform: scale(1.08);
+  }
+
+  /* The flat lay in the review: the chosen pieces on an oat ground, laid
+     out by how many there are. Ivory plates on oat, so contained studio
+     shots read as objects on a table rather than as boxes. */
+  .kit-collage {
+    @apply grid gap-2 rounded-plate bg-tint p-2;
+    aspect-ratio: 4 / 3;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .kit-collage > * {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .kit-collage[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .kit-collage[data-count="3"] {
+    grid-template-columns: 1.25fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .kit-collage[data-count="3"] > :first-child {
+    grid-row: span 2;
+  }
+
+  .kit-collage[data-count="4"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .kit-collage[data-count="many"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  /* Beside the steps the stage must fit a laptop screen under the header,
+     so the flat lay goes wide. */
+  @media (min-width: 1024px) {
+    .kit-collage {
+      aspect-ratio: 5 / 2;
+    }
+  }
+
+  /* A short laptop screen: the flat lay gives up height first, so the
+     lines under it still fit before anything has to scroll. */
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .kit-collage {
+      aspect-ratio: 3 / 1;
+    }
+  }
+
+  /* The review's middle (flat lay and lines) scrolls inside itself if a
+     tall kit outgrows the screen; its heading and footer never do. */
+  .kit-stage {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  /* Progress: one segment per step. */
+  .kit-seg {
+    @apply relative block h-1 overflow-hidden rounded-full bg-ink/10;
+  }
+
+  .kit-seg::after {
+    content: "";
+    @apply absolute inset-0 rounded-full bg-ink;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .kit-seg[data-state="open"]::after {
+    @apply bg-sage-deep;
+    transform: scaleX(0.35);
+  }
+
+  .kit-seg[data-state="done"]::after {
+    transform: scaleX(1);
+  }
+
+  /* The phone's action bar: the next thing to do, always under the thumb. */
+  .kit-bar {
+    @apply fixed inset-x-0 bottom-0 z-[890] border-t border-ink/10 bg-paper/95 backdrop-blur-md lg:hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+    transition: transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Over the cart bar when that is showing: both are fixed to this edge,
+     and the cart bar is the one the shopper already knows. */
+  .kit-bar[data-above-cart-bar] {
+    bottom: calc(4rem + 1px + env(safe-area-inset-bottom));
+    padding-bottom: 0;
+  }
+
+  .kit-bar[data-hidden="true"] {
+    transform: translate3d(0, calc(100% + 5rem), 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Anything a click mounts: size rows, collage pieces, the monogram. */
+  .kit-in {
+    animation: kit-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+
+  .kit-pop {
+    animation: kit-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* A price that has just changed settles in, so the eye sees it move. */
+  .kit-tick {
+    display: inline-block;
+    animation: kit-tick 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Where the guide sends the eye: a step that still needs an answer, or the
+     button once the kit is complete. Two sage-deep pulses, then still. */
+  .kit-flash {
+    animation: kit-flash 1.4s ease-out 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-step,
+  .kit-step-body,
+  .kit-step-inner,
+  .kit-tile,
+  .kit-mark,
+  .kit-seg::after,
+  .kit-bar,
+  .kit-chevron {
+    transition: none;
+  }
+}
+
+@keyframes kit-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0);
+  }
+}
+
+@keyframes kit-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@keyframes kit-tick {
+  from {
+    opacity: 0.2;
+    transform: translate3d(0, 0.35em, 0);
+  }
+}
+
+@keyframes kit-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(95, 113, 120, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(95, 113, 120, 0);
+  }
+}

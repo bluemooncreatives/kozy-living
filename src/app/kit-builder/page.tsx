@@ -83,24 +83,63 @@ function ringWord(line: string, phrase: string) {
   );
 }
 
+/** The steps this kit will ask, named up front so the shape of the task is
+    known before it starts. The builder decides the live list itself (a
+    fabric with no colours skips that step); this is the overview. */
+function stepNames(kit: KitData) {
+  const names: (string | null)[] = [
+    copy.steps.pieces.short,
+    kit.fabrics.length > 1 ? copy.steps.fabric.short : null,
+    kit.colours.length ? copy.steps.colour.short : null,
+    kit.threads.length ? copy.steps.embroidery.short : null,
+  ];
+  return names.filter((name): name is string => Boolean(name));
+}
+
 export default async function KitBuilderPage({
   searchParams,
 }: {
   searchParams: Promise<Search>;
 }) {
-  const [kit, search] = await Promise.all([getKitBuilder(), searchParams]);
+  const [data, search] = await Promise.all([getKitBuilder(), searchParams]);
+  // A kit the cart would refuse is not offered: `addKitItem` turns away a
+  // container that cannot be sold, and a kit with no pieces has nothing to
+  // build. Both rest, rather than letting a shopper build to a dead end.
+  const kit = data && data.containerAvailable && data.pieces.length ? data : null;
 
   return (
     <>
       <Breadcrumb current={copy.eyebrow} />
 
       <section aria-labelledby="kit-builder" className="shell pb-16 md:pb-24">
-        <div data-reveal-group className="max-w-3xl py-4 lg:py-8">
-          <Eyebrow align="left">{copy.eyebrow}</Eyebrow>
-          <Headline as="h1" id="kit-builder" className="mt-4">
-            {ringWord(copy.title, copy.circled)}
-          </Headline>
-          <p className="body-mono mt-5 max-w-measure text-pretty">{copy.intro}</p>
+        <div className="grid gap-6 py-4 lg:grid-cols-12 lg:items-end lg:gap-8 lg:py-8">
+          <div data-reveal-group className="lg:col-span-7">
+            <Eyebrow align="left">{copy.eyebrow}</Eyebrow>
+            <Headline as="h1" id="kit-builder" className="mt-4">
+              {ringWord(copy.title, copy.circled)}
+            </Headline>
+          </div>
+          <div data-reveal-group className="lg:col-span-5 lg:pb-2">
+            <p className="body-mono max-w-measure text-pretty">{copy.intro}</p>
+            {kit ? (
+              <>
+                <ol className="mt-5 flex flex-wrap items-center gap-2">
+                  {stepNames(kit).map((name, index) => (
+                    <li
+                      key={name}
+                      className="inline-flex items-center gap-2 rounded-chip border border-ink/15 py-1.5 pl-1.5 pr-3.5 font-sans text-spec font-semibold text-ink"
+                    >
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink font-sans text-[0.68rem] tabular-nums text-oat">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {name}
+                    </li>
+                  ))}
+                </ol>
+                <p className="spec-mono mt-3">{copy.promise}</p>
+              </>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-6 md:mt-8">

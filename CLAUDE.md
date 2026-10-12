@@ -1303,6 +1303,48 @@ Research, the Admin setup and the edge cases are in
   uses the metaobject **handles** and is written with `replaceState`; the
   page reads it on the server. Initials never enter the URL.
 
+### The guided flow (2026-10-13)
+
+`components/kit-builder/kit-builder.tsx` is an accordion with **one step open
+at a time**, a sticky review beside it (`lg`+), and a fixed action bar on
+phones (`.kit-bar`). CSS is the `kit builder` block at the end of
+`globals.css`.
+
+- Steps are **Kompanions → Fabric → Kolour → Initials**, built per render by
+  `derive()`: a single fabric drops its step, a fabric with no colours drops
+  Kolour, no threads drops Initials. Thread and letters are one step.
+- **Done = valid AND answered.** Fabric and embroidery are valid untouched
+  (a default fabric, no thread), so `confirmed` records the answer; without
+  it the guide ticks steps nobody looked at. Adding to the cart needs only
+  validity - a shopper who skips ahead is not stopped, the review offers
+  "Before you go: …" instead.
+- **Auto-advance** after a complete single answer (a fabric - including the
+  one already chosen, which is how the default is accepted - a kolour, or No
+  embroidery), `ADVANCE_MS` later. Multi-choice steps wait for Continue.
+  `derive()` is pure so the advance can compute the NEXT state's target
+  before React renders it.
+- Every CTA (each step's Continue, the review button, the phone bar) points
+  at the same place: the first unfinished step (`nextAfter`). Do not point
+  one of them at the step holding the error instead - they disagreed once
+  ("Next: Fabric" beside "Next: Kolour").
+- `goTo()` measures the DOM rather than reading state: it also runs from a
+  timer a render old. It scrolls through Lenis, aiming at where the step head
+  will be AFTER the open step above it folds (`foldShift`), and moves focus
+  to the new head, because the clicked control has just become `inert`.
+- A URL kit that is complete arrives with every step done and folded; a
+  partial one confirms only its pieces.
+- At `lg` the review is a flex column capped at the screen (`max-h`): the
+  heading and the footer (quantity, total, button) keep their height, and
+  only the middle (flat lay + lines, `data-lenis-prevent`) scrolls. Do not go
+  back to pinning the footer `sticky` over a scrolling panel - it covered the
+  quantity and total on a 768px-tall laptop. Under 820px tall the flat lay
+  goes 3:1 so it gives up height first. The steps column has a matching
+  `min-h` - a sticky element only sticks while its grid row has room.
+- `/kit-builder` is in the newsletter's `QUIET_PATHS`: mid-task, and the
+  teaser would sit where the phone bar is.
+- The page rests (no builder) when the container is unsellable or there are
+  no pieces - `addKitItem` would refuse either.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

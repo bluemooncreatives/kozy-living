@@ -1096,32 +1096,61 @@ export const kitBuilder = {
   circled: "your way",
   intro:
     "Choose the Kompanions you reach for, the fabric they are cut in, and the thread for your initials. One kit, put together for your own quiet hour.",
+  /** A line under the intro: the promise the builder keeps at every step. */
+  promise: "Every choice is priced as you make it.",
   steps: {
     pieces: {
       title: "Choose your Kompanions",
+      short: "Kompanions",
       hint: (min: number) =>
         min > 1 ? `Pick at least ${min}.` : "Pick one or more.",
+      sizes: "Then a size for each",
+      noneInFabric: (fabric: string) =>
+        `No Kompanions are available in ${fabric} right now.`,
+      tryFabric: (fabric: string) => `Try ${fabric}`,
     },
     fabric: {
       title: "Choose your fabric",
+      short: "Fabric",
       hint: "Every Kompanion in the kit is cut in the fabric you choose.",
+      kitPrice: "Your kit in this fabric",
     },
     colour: {
       title: "Choose your kolour",
+      short: "Kolour",
       hint: (fabric: string) => `The ${fabric} cloth for every Kompanion in your kit.`,
     },
-    thread: {
-      title: "Choose your thread",
-      hint: "For the initials stitched on your kit.",
-      none: "No embroidery",
-    },
-    initials: {
+    embroidery: {
       title: "Add your initials",
-      hint: (max: number) => `Up to ${max} letters, A to Z.`,
+      short: "Initials",
+      hint: "Pick a thread for your initials, or keep the kit plain.",
+      none: "No embroidery",
+      threadLabel: "Thread",
+      label: "Your initials",
+      lettersHint: (max: number) => `Up to ${max} letters, A to Z.`,
       placeholder: "e.g. PD",
-      skipped: "Pick a thread above to add initials.",
+      plainSummary: "No embroidery",
+      noneTakeInitials: "None of the Kompanions in this kit take initials.",
     },
     review: { title: "Review your kit" },
+  },
+  /** The guide: what tells the shopper where they are and what comes next. */
+  guide: {
+    stepOf: (n: number, total: number) => `Step ${n} of ${total}`,
+    progress: (done: number, total: number) => `${done} of ${total} chosen`,
+    next: (step: string) => `Next: ${step}`,
+    continue: "Continue",
+    change: "Change",
+    review: "Review kit",
+    ready: "Your kit is ready",
+    chosenCount: (count: number) =>
+      count === 1 ? "1 Kompanion chosen" : `${count} Kompanions chosen`,
+    beforeYouGo: (step: string) => `Before you go: ${step}`,
+    emptyTitle: "Your kit begins here",
+    emptyBody: "Choose your Kompanions and watch the kit come together.",
+    each: "each",
+    viewCart: "View cart",
+    jumpTo: (step: string) => `Go to ${step}`,
   },
   fullKit: "The full ritual kit",
   fullKitHint: (count: number) => `All ${count} Kompanions`,
@@ -1163,7 +1192,10 @@ export const kitBuilder = {
   },
   errors: {
     resting: "The kit builder is not available right now. Please try again shortly.",
-    tooFew: (min: number) => `Choose at least ${min} Kompanions for your kit.`,
+    tooFew: (min: number) =>
+      min > 1
+        ? `Choose at least ${min} Kompanions for your kit.`
+        : "Choose a Kompanion to start your kit.",
     size: (piece: string) => `Choose a size for the ${piece}.`,
     soldOut: (piece: string) =>
       `The ${piece} has just sold out in that size and fabric. Please choose another.`,
