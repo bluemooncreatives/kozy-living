@@ -1211,6 +1211,66 @@ export const kitBuilder = {
   },
 } as const;
 
+/* -------------------------------------------------------------- kit atelier */
+
+/**
+ * The homepage's own kit builder ("the atelier"): the whole kit, built and
+ * sent to the cart without leaving the homepage. It shares the rules, step
+ * names, errors and order labels of `kitBuilder` above; only its framing and
+ * its questions are its own, because it asks one question at a time.
+ */
+export const kitAtelier = {
+  eyebrow: "The Kustom kit",
+  title: "Lay out your ritual",
+  circled: "your ritual",
+  intro:
+    "Choose the Kompanions, the cloth they are cut in and the thread for your initials. The kit comes together on the table as you go, and goes to your cart from here.",
+  table: "The table",
+  tableHint: "Tap a Kompanion to lay it on the table.",
+  addPiece: (title: string) => `Lay the ${title} on the table`,
+  removePiece: (title: string) => `Take the ${title} off the table`,
+  notInFabric: "Not in this fabric",
+  tag: "Your kit",
+  questions: {
+    pieces: {
+      title: "Which Kompanions belong in your ritual?",
+      hint: (min: number) =>
+        min > 1
+          ? `Pick at least ${min}, then a size for each.`
+          : "Pick one or more, then a size for each.",
+    },
+    fabric: {
+      title: "What should they be cut in?",
+      hint: "One fabric for the whole kit. The price follows the cloth.",
+    },
+    colour: {
+      title: "Which kolour for the cloth?",
+      hint: (fabric: string) => `${fabric}, in the kolour you choose.`,
+    },
+    embroidery: {
+      title: "Shall we stitch your initials?",
+      hint: "Pick a thread, then type your letters. Or keep it plain.",
+    },
+    review: {
+      title: "Your kit, laid out.",
+      hint: "Look it over, then send it to your cart.",
+      empty: "The table is empty. Start with your Kompanions.",
+      start: "Choose Kompanions",
+    },
+  },
+  /** The track's name for the last chapter. */
+  reviewShort: "Your kit",
+  back: "Back",
+  sizeLabel: (title: string) => `${title} size`,
+  initialsLabel: "Your initials",
+  typeHere: "Type your letters",
+  fullBuilder: "Open in the full builder",
+  startOver: "Start over",
+  /** Read out when the chapter changes; the panel itself is not announced. */
+  announce: (n: number, total: number, question: string) =>
+    `Step ${n} of ${total}. ${question}`,
+} as const;
+
 /* ------------------------------------------------------------------ buy now */
 
 /**

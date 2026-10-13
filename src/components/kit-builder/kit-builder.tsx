@@ -7,16 +7,8 @@ import Price from "@/components/price";
 import Image from "@/components/ui/shop-image";
 import Plate from "@/components/ui/plate";
 import { cleanInitials } from "@/lib/shop/add-ons";
-import {
-  findKitVariant,
-  fromPrice,
-  isFabric,
-  pieceAvailable,
-  sizeAvailable,
-  type KitRequest,
-} from "@/lib/shop/kit";
+import { fromPrice, pieceAvailable, sizeAvailable } from "@/lib/shop/kit";
 import type {
-  Image as ShopifyImage,
   KitBuilder as KitData,
   KitPiece,
   KitThread,
@@ -32,6 +24,26 @@ import {
 import clsx from "clsx";
 import { useLenis } from "lenis/react";
 import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  ADVANCE_MS,
+  MAX_KIT_QUANTITY,
+  defaultSizes,
+  derive,
+  emptySelection,
+  headerOffset,
+  isDone,
+  isPale,
+  kitQuery,
+  kitRequest,
+  nextAfter,
+  pieceImage,
+  priceInFabric as priceKitIn,
+  reducedMotion,
+  resumed,
+  unitPrice,
+  type KitSelection,
+  type StepKey,
+} from "./kit-model";
 
 /* ---------------------------------------------------------------------------
    The custom kit builder, as a guided flow. docs/custom-kit-builder.md.
@@ -58,216 +70,12 @@ import { useEffect, useRef, useState, useTransition } from "react";
    computed here is ever trusted.
 --------------------------------------------------------------------------- */
 
-export type KitSelection = {
-  /** Chosen pieces in the order they were picked, with their sizes. */
-  pieces: { id: string; sizes: Record<string, string> }[];
-  fabricId: string;
-  /** The cloth colour, from the chosen fabric's own list. */
-  colourId: string | null;
-  threadId: string | null;
-};
+export type { KitSelection } from "./kit-model";
 
-type StepKey = "pieces" | "fabric" | "colour" | "embroidery";
 type Target = StepKey | "review";
-
-const MAX_KIT_QUANTITY = 10;
-
-/** Long enough to see the tick land on the choice before the step folds. */
-const ADVANCE_MS = 480;
 
 /** How long a pulse is left on before its class is dropped. */
 const FLASH_MS = 3000;
-
-/** The photograph of a piece in a fabric: a variant's own image if it has one. */
-function pieceImage(piece: KitPiece, fabricValue: string): ShopifyImage | null {
-  const variant = piece.variants.find(
-    (candidate) => isFabric(candidate, fabricValue) && candidate.image?.url,
-  );
-  return variant?.image ?? piece.image ?? piece.images[0] ?? null;
-}
-
-/**
- * Pale threads (silver, cream) vanish on the oat plate, so their preview sits
- * on indigo instead. Relative luminance, the WCAG formula.
- */
-function isPale(hex: string | null) {
-  if (!hex) return false;
-  const [r, g, b] = [1, 3, 5].map((at) => {
-    const channel = parseInt(hex.slice(at, at + 2), 16) / 255;
-    return channel <= 0.03928
-      ? channel / 12.92
-      : ((channel + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! > 0.45;
-}
-
-function urlFor(kit: KitData, selection: KitSelection) {
-  const params = new URLSearchParams();
-  const chosen = selection.pieces
-    .map((entry) => kit.pieces.find((piece) => piece.id === entry.id))
-    .filter((piece): piece is KitPiece => Boolean(piece));
-  if (chosen.length)
-    params.set("pieces", chosen.map((piece) => piece.handle).join(","));
-  for (const piece of chosen) {
-    const sizes = selection.pieces.find(
-      (entry) => entry.id === piece.id,
-    )!.sizes;
-    const values = piece.sizeOptions.map((option) => sizes[option.name] ?? "");
-    if (values.some(Boolean)) params.set(piece.handle, values.join("|"));
-  }
-  const fabric = kit.fabrics.find(
-    (candidate) => candidate.id === selection.fabricId,
-  );
-  if (fabric && !fabric.isDefault) params.set("fabric", fabric.handle);
-  const colour = kit.colours.find(
-    (candidate) => candidate.id === selection.colourId,
-  );
-  if (colour) params.set("colour", colour.handle);
-  const thread = kit.threads.find(
-    (candidate) => candidate.id === selection.threadId,
-  );
-  if (thread) params.set("thread", thread.handle);
-  const query = params.toString();
-  return `${window.location.pathname}${query ? `?${query}` : ""}`;
-}
-
-/** Sizes default to the only value there is; otherwise the shopper picks. */
-function defaultSizes(piece: KitPiece) {
-  return Object.fromEntries(
-    piece.sizeOptions
-      .filter((option) => option.values.length === 1)
-      .map((option) => [option.name, option.values[0]!]),
-  );
-}
-
-/**
- * Everything the page knows about a selection, as a pure function of it.
- * Pure on purpose: an auto-advance has to know where the guide goes NEXT,
- * which means reading the state a click is about to create, before React
- * has rendered it.
- */
-function derive(kit: KitData, selection: KitSelection, initials: string) {
-  const fabric =
-    kit.fabrics.find((candidate) => candidate.id === selection.fabricId) ??
-    kit.fabrics[0]!;
-  const thread =
-    kit.threads.find((candidate) => candidate.id === selection.threadId) ??
-    null;
-  // Colours are per fabric: Solid and Block printed each offer their own, and
-  // a fabric with none simply skips the step.
-  const colours = kit.colours.filter(
-    (candidate) => candidate.fabricId === fabric.id,
-  );
-  const colour =
-    colours.find((candidate) => candidate.id === selection.colourId) ?? null;
-
-  // Each chosen piece resolved against the chosen fabric. A size picked in
-  // Solid is kept across a switch to Block printed; when that size is sold
-  // out in the new fabric the line says so rather than silently moving it.
-  const lines = selection.pieces.flatMap((entry) => {
-    const piece = kit.pieces.find((candidate) => candidate.id === entry.id);
-    if (!piece) return [];
-    const needsSize = piece.sizeOptions.find(
-      (option) => !entry.sizes[option.name],
-    );
-    const variant = needsSize
-      ? undefined
-      : findKitVariant(piece, fabric.optionValue, entry.sizes);
-    return [
-      {
-        piece,
-        entry,
-        variant,
-        needsSize,
-        soldOut: !needsSize && !variant?.availableForSale,
-      },
-    ];
-  });
-  const embroiderable = lines.filter(({ piece }) => piece.embroiderable);
-
-  // A single fabric is a fact, not a question; no colours, no colour step;
-  // no threads, no embroidery step.
-  const steps: StepKey[] = ["pieces"];
-  if (kit.fabrics.length > 1) steps.push("fabric");
-  if (colours.length) steps.push("colour");
-  if (kit.threads.length) steps.push("embroidery");
-
-  // The same rules `addKitItem` enforces, filed under the step that answers
-  // them, so the guide can send the shopper to exactly that step.
-  const errors = copy.errors;
-  const minPieces = Math.max(1, kit.minPieces);
-  const missing = lines.find((line) => line.needsSize);
-  const gone = lines.find((line) => line.soldOut);
-  const stepIssue: Record<StepKey, string | null> = {
-    pieces:
-      lines.length < minPieces
-        ? errors.tooFew(minPieces)
-        : missing
-          ? errors.size(missing.piece.title)
-          : gone
-            ? errors.soldOut(gone.piece.title)
-            : null,
-    fabric: null,
-    colour: colours.length && !colour ? errors.colour : null,
-    embroidery:
-      thread && !initials
-        ? errors.initials
-        : thread && !embroiderable.length
-          ? errors.noEmbroiderable
-          : null,
-  };
-  const issueStep = steps.find((step) => stepIssue[step]) ?? null;
-
-  return {
-    fabric,
-    thread,
-    colours,
-    colour,
-    lines,
-    embroiderable,
-    steps,
-    stepIssue,
-    issue: issueStep
-      ? { step: issueStep, message: stepIssue[issueStep]! }
-      : null,
-  };
-}
-
-type Derived = ReturnType<typeof derive>;
-
-function isDone(d: Derived, confirmed: StepKey[], step: StepKey) {
-  return !d.stepIssue[step] && confirmed.includes(step);
-}
-
-/** The first unfinished step after `from`, wrapping round; null when all are done. */
-function nextAfter(d: Derived, confirmed: StepKey[], from: StepKey | null) {
-  const todo = d.steps.filter((step) => !isDone(d, confirmed, step));
-  const at = from ? d.steps.indexOf(from) : -1;
-  return (
-    d.steps.slice(at + 1).find((step) => todo.includes(step)) ?? todo[0] ?? null
-  );
-}
-
-/** The steps a selection read from the URL counts as already answered. */
-function resumed(kit: KitData, initial: KitSelection): StepKey[] {
-  if (!initial.pieces.length) return [];
-  const first = derive(kit, initial, "");
-  return first.issue ? ["pieces"] : first.steps;
-}
-
-/** `--header-h` is a rem estimate until `HeaderHeight` writes the measured px. */
-function headerOffset() {
-  const root = document.documentElement;
-  const raw = getComputedStyle(root).getPropertyValue("--header-h").trim();
-  const value = parseFloat(raw);
-  if (!Number.isFinite(value)) return 96;
-  return raw.endsWith("rem")
-    ? value * parseFloat(getComputedStyle(root).fontSize)
-    : value;
-}
-
-const reducedMotion = () =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ------------------------------------------------------------------ parts */
 
@@ -592,10 +400,11 @@ export default function KitBuilder({
   const doneCount = steps.filter((step) => isDone(d, confirmed, step)).length;
 
   useEffect(() => {
+    const query = kitQuery(kit, selection);
     window.history.replaceState(
       window.history.state,
       "",
-      urlFor(kit, selection),
+      `${window.location.pathname}${query ? `?${query}` : ""}`,
     );
   }, [kit, selection]);
 
@@ -841,38 +650,15 @@ export default function KitBuilder({
 
   /* ------------------------------------------------------------- prices */
 
-  const priceInFabric = (fabricValue: string) =>
-    lines.reduce((sum, { piece, entry }) => {
-      const variant = findKitVariant(piece, fabricValue, entry.sizes);
-      const price = variant
-        ? Number(variant.price.amount)
-        : fromPrice(piece, fabricValue);
-      return sum + toMinor(price ?? 0);
-    }, 0);
-
-  const initialsMinor =
-    thread && initials && kit.initialsPrice
-      ? toMinor(kit.initialsPrice.amount)
-      : 0;
-  const unitMinor =
-    lines.reduce(
-      (sum, line) => sum + toMinor(line.variant?.price.amount ?? 0),
-      0,
-    ) + initialsMinor;
+  const priceInFabric = (fabricValue: string) => priceKitIn(d, fabricValue);
+  const unitMinor = unitPrice(kit, d, initials);
   const totalMinor = unitMinor * quantity;
 
   /* ------------------------------------------------------------- submit */
 
   const reset = () => {
     window.clearTimeout(advanceTimer.current);
-    setSelection({
-      pieces: [],
-      fabricId:
-        kit.fabrics.find((candidate) => candidate.isDefault)?.id ??
-        kit.fabrics[0]!.id,
-      colourId: null,
-      threadId: null,
-    });
+    setSelection(emptySelection(kit));
     setInitials("");
     setQuantity(1);
     setConfirmed([]);
@@ -893,16 +679,7 @@ export default function KitBuilder({
       return;
     }
 
-    const request: KitRequest = {
-      pieces: lines.map(({ entry }) => ({
-        pieceId: entry.id,
-        sizes: entry.sizes,
-      })),
-      fabricId: fabric.id,
-      ...(colour ? { colourId: colour.id } : {}),
-      ...(thread && initials ? { threadId: thread.id, initials } : {}),
-      quantity,
-    };
+    const request = kitRequest(d, initials, quantity);
 
     setResult(null);
     startTransition(async () => {

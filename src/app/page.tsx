@@ -30,6 +30,9 @@ import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import { splitText } from "@/components/motion/split-text";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
+import KitAtelierSection, {
+  KitAtelierFallback,
+} from "@/components/home/kit-atelier-section";
 import MoodPanels, { type MoodPanel } from "@/components/home/mood-panels";
 import { moodEntries, moodHref, SHOP_BY_MOOD_PATH } from "@/lib/shop/moods";
 import { FaqFallback, HomeFaq } from "@/components/faq/faq-section";
@@ -115,6 +118,13 @@ export default function Home() {
       </Suspense>
 
       <StandardsTicker />
+
+      {/* The Kustom kit, built end to end without leaving the page: after
+          the shelves and moods have shown what the Kompanions are, the
+          place to make a set of them your own (owner's call, 2026-10-13). */}
+      <Suspense fallback={<KitAtelierFallback />}>
+        <KitAtelierSection />
+      </Suspense>
 
       <Suspense fallback={null}>
         <CuratedEdits />

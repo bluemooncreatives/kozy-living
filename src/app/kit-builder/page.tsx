@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import KitBuilder, { type KitSelection } from "@/components/kit-builder/kit-builder";
+import KitBuilder from "@/components/kit-builder/kit-builder";
+import type { KitSelection } from "@/components/kit-builder/kit-model";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import CircledWord from "@/components/ui/circled-word";
 import { Eyebrow, Headline } from "@/components/ui/section";

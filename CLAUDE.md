@@ -258,8 +258,9 @@ CollectionFilters         ← Suspense   category pills, directly under the hero
 BoldStatement (+ staggered lookbook)  ← Suspense
 Bestsellers               ← Suspense
 ShopByColour              ← Suspense
-ShopByMood                ← Suspense   expanding mood panels
+ShopByMood                ← Suspense   expanding mood panels ("Start with a moment")
 StandardsTicker
+KitAtelierSection         ← Suspense   the Kustom kit builder (§15)
 CuratedEdits              ← Suspense   ("New Kompanions")
 StandardsTicker (reverse)
 StoryBand  ("Our story")  ← Suspense
@@ -1303,6 +1304,15 @@ Research, the Admin setup and the edge cases are in
   uses the metaobject **handles** and is written with `replaceState`; the
   page reads it on the server. Initials never enter the URL.
 
+### The shared model
+
+The rules both kit surfaces must agree on - `derive()` (steps, issues per
+step), `nextAfter()`, pricing (`priceInFabric`, `unitPrice`), `kitRequest()`,
+`kitQuery()` and the selection helpers - live in
+`components/kit-builder/kit-model.ts`, pure and React-free. The page builder
+and the homepage atelier (§15) each keep their own UI state on top of it.
+Change a rule there, never in one of the two components.
+
 ### The guided flow (2026-10-13)
 
 `components/kit-builder/kit-builder.tsx` is an accordion with **one step open
@@ -1346,6 +1356,53 @@ phones (`.kit-bar`). CSS is the `kit builder` block at the end of
   no pieces - `addKitItem` would refuse either.
 
 <!-- BEGIN:nextjs-agent-rules -->
+
+## 15. The Kustom kit on the homepage — `KitAtelierSection`
+
+A second, complete kit builder on the homepage (owner's call, 2026-10-13):
+a shopper can build a kit and send it to the cart without leaving `/`. It
+sits after Shop by mood and the ticker under it (§5).
+
+| File | Role |
+| --- | --- |
+| `components/home/kit-atelier-section.tsx` | Server: reads `getKitBuilder()`, frames the section, renders **nothing** when the builder rests (no settings, unsellable container, no pieces) |
+| `components/home/kit-atelier.tsx` | Client: the track, the table and the one-question-at-a-time pane |
+| `kitAtelier` in `site.ts` | Its own framing and questions; errors, labels and step names are `kitBuilder`'s |
+| `kit atelier` block in `globals.css` | Table, places, props, chips, motion |
+
+- **On the page's cream**, not in a panel (owner's call; it was an indigo
+  room first). Ink type, muted for quiet lines; sage only as a fill (track
+  "done", success panel) or as a tick on ink. Accents that must be read are
+  `sage-deep`.
+- **The table is ivory, not oat.** The Kompanions are cream cloth and
+  washed into an oat ground. Every piece photograph sits in a
+  `mix-blend-darken` wrapper so the shots' near-white grounds resolve to
+  the ivory. The blend is on the ANIMATED WRAPPER (the element that makes
+  the stacking context), not the `<img>` - inside a transformed wrapper an
+  img blends against nothing and shows its white box.
+- **Every place on the table is a button**: tapping the ghosted piece lays
+  it down (`atelier-drop`), tapping again lifts it off. Laying a piece that
+  needs a size from another chapter turns back to the Kompanions chapter.
+- **The table's props live in their own top strip** (`atelier-props`):
+  fabric sample, embroidery hoop, price tag. Floating over the places they
+  hid the pieces (the tag covered the slippers on a phone). Do not put them
+  back over the grid. The tag shows "—", not "₹0.00", while a piece waits
+  for its size.
+- **Chapters** are the model's steps plus "Your kit". Fabric, kolour and
+  "No embroidery" turn the page by themselves (`ADVANCE_MS`); pieces and
+  letters wait for Next. Every primary button names its destination and
+  goes to the first unfinished chapter, as on `/kit-builder`.
+- **Nothing goes in the URL** (it is the homepage). "Open in the full
+  builder" hands the kit to `/kit-builder` as its query (`kitQuery`);
+  initials never travel.
+- **The newsletter card holds off while a kit is half built.** The atelier
+  sets `data-kozy-task` on `<html>` (`TASK_ATTRIBUTE` in
+  `newsletter-state.ts`) while it has pieces and has not added; the popup
+  re-arms its countdown instead of opening. Any future mid-task surface can
+  use the same attribute.
+- After a turn the new question (`h3`, `tabIndex=-1`) takes focus - the
+  pressed control unmounts with its pane - and a derived `aria-live` line
+  reads out "Step n of N" plus the question.
 
 # This is NOT the Next.js you know
 

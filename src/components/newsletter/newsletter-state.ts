@@ -37,6 +37,16 @@ const CHANGE_EVENT = "kozy:newsletter-change";
 /** How long a dismissal holds before the card may ask again. */
 export const SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
 
+/**
+ * Set on <html> while the visitor is in the middle of a task that a card
+ * over the page would break - building a kit on the homepage. The popup
+ * holds its fire while it is there and tries again later; a page that is
+ * a task end to end (`/contact`, `/kit-builder`) is in `QUIET_PATHS`
+ * instead. An attribute rather than shared state so the task does not
+ * have to know the popup exists, or the other way round.
+ */
+export const TASK_ATTRIBUTE = "data-kozy-task";
+
 export type NewsletterAnswer = "subscribed" | "dismissed";
 
 export type NewsletterRecord = { state: NewsletterAnswer; at: number };

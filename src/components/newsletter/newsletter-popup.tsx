@@ -14,6 +14,7 @@ import NewsletterTeaser from "./newsletter-teaser";
 import {
   closeTeaser,
   suppressed,
+  TASK_ATTRIBUTE,
   useNewsletterState,
   writeRecord,
 } from "./newsletter-state";
@@ -86,6 +87,13 @@ export default function NewsletterPopup() {
       // Re-checked at fire time: fifteen seconds is long enough for the visitor
       // to have subscribed from the footer form in another tab.
       if (suppressed()) return;
+      // Mid-task (a kit half built on the homepage): not now, and not never.
+      // The countdown starts over, so the card waits for a quiet moment.
+      if (document.documentElement.hasAttribute(TASK_ATTRIBUTE)) {
+        clearTimeout(timer);
+        timer = setTimeout(open, DELAY_MS);
+        return;
+      }
       spent = true;
       setIsOpen(true);
     };

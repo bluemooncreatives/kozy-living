@@ -5900,3 +5900,331 @@ html:has([data-loader]) body {
     box-shadow: 0 0 0 14px rgba(95, 113, 120, 0);
   }
 }
+
+/* ------------------------------------------------------------- kit atelier
+
+   The homepage kit builder (components/home/kit-atelier.tsx). On the page's
+   own cream (the owner's call - it was an indigo room first): an oat table
+   on the left, where the kit is laid out, and one question at a time on the
+   right. Everything below mounts after a click, so it enters on keyed CSS,
+   never `data-reveal` (CLAUDE.md §7).
+
+   Ink type throughout, muted for the quiet lines (5.26 on cream). Sage is a
+   fill here, never type or a hairline: flat sage on cream is 1.85, and on
+   the oat table it is 1.43. Where an accent has to be read, it is
+   sage-deep (4.77). */
+@layer components {
+  /* The table: ivory, a faint waffle weave, and a stitched hem. Ivory and
+     not oat: the Kompanions are cream cloth, and on oat they washed into the
+     ground (owner's note). The studio shots' near-white grounds resolve to
+     exactly this ivory under `darken` - as on the `/kit-builder` tiles - so
+     the cloth reads as photographed. The weave is two hairline grids in ink
+     at 3% - texture you feel more than see. The hairline and the long soft
+     shadow lift it off the cream page, which sits only 1.027 away. */
+  .atelier-table {
+    @apply relative rounded-plate border border-ink/[0.07] bg-card text-ink;
+    box-shadow: 0 40px 80px -56px rgba(35, 50, 75, 0.45);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(35, 50, 75, 0.03) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(90deg, rgba(35, 50, 75, 0.03) 0 1px, transparent 1px 7px);
+  }
+
+  .atelier-table::after {
+    content: "";
+    position: absolute;
+    inset: 0.65rem;
+    border: 1.5px dashed rgba(35, 50, 75, 0.14);
+    border-radius: calc(theme("borderRadius.plate") - 0.5rem);
+    pointer-events: none;
+  }
+
+  /* The pieces' places on the table. The first piece takes the large place;
+     the rest arrange round it. Composed by count so two pieces do not sit in
+     a layout drawn for four. */
+  .atelier-slots {
+    @apply grid aspect-square gap-2 p-5 pt-3 sm:aspect-[5/3] sm:gap-3 sm:p-7 sm:pt-4 lg:aspect-[5/4];
+    grid-template-columns: 1fr;
+  }
+
+  .atelier-slots > * {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .atelier-slots[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .atelier-slots[data-count="3"] {
+    grid-template-columns: 1.3fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .atelier-slots[data-count="3"] > :first-child {
+    grid-row: span 2;
+  }
+
+  /* Four: a large square, a small one beside it, a tall one down the
+     right and a wide one along the foot - a robe, slippers, a pouch and a
+     mask, but it reads as a composition for any four. */
+  .atelier-slots[data-count="4"] {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 0.8fr;
+    grid-template-areas:
+      "a a b"
+      "a a c"
+      "d d c";
+  }
+
+  .atelier-slots[data-count="4"] > :nth-child(1) {
+    grid-area: a;
+  }
+  .atelier-slots[data-count="4"] > :nth-child(2) {
+    grid-area: b;
+  }
+  .atelier-slots[data-count="4"] > :nth-child(3) {
+    grid-area: c;
+  }
+  .atelier-slots[data-count="4"] > :nth-child(4) {
+    grid-area: d;
+  }
+
+  .atelier-slots[data-count="many"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  /* An empty place: a dashed outline round the piece's own photograph,
+     printed faint - you see what goes there before you choose it. */
+  .atelier-slot {
+    @apply relative flex items-center justify-center rounded-[1.25rem];
+    transition: background-color 300ms ease;
+  }
+
+  .atelier-slot[data-chosen="false"] {
+    border: 1.5px dashed rgba(35, 50, 75, 0.22);
+  }
+
+  .atelier-slot[data-chosen="false"]:hover {
+    border-color: rgba(35, 50, 75, 0.5);
+    background-color: rgba(255, 246, 235, 0.35);
+  }
+
+  .atelier-ghost {
+    opacity: 0.22;
+    filter: grayscale(1);
+    transition: opacity 300ms ease;
+  }
+
+  .atelier-slot:hover .atelier-ghost {
+    opacity: 0.4;
+  }
+
+  /* The cloth label sewn on a chosen piece. */
+  /* Wraps rather than truncates: in the small places on a phone a one-line
+     label cut "Makeup Pouch" to "Makeup Po…". */
+  .atelier-label {
+    @apply pointer-events-none absolute bottom-1.5 left-1.5 z-[1] max-w-[calc(100%-0.75rem)] rounded-md bg-paper px-2 py-0.5 font-sans text-[0.68rem] font-semibold leading-snug text-ink shadow-chip;
+    transform: rotate(-2deg);
+  }
+
+  /* The table's top strip, where its props live - the fabric sample, the
+     hoop and the price tag. They sat over the pieces' places once and hid
+     them (the tag covered the slippers outright on a phone); a strip of
+     their own means nothing laid on the table is ever under them. */
+  .atelier-props {
+    @apply relative z-10 flex items-center justify-between gap-3 px-5 pt-5 sm:px-7 sm:pt-6;
+  }
+
+  /* The fabric sample, pinned on a little crooked. */
+  .atelier-pin {
+    @apply relative flex shrink-0 items-center gap-2.5 rounded-lg bg-paper p-1.5 pr-3 shadow-lift;
+    transform: rotate(-3deg);
+  }
+
+  /* The price tag: paper on oat, ink type, hung by a string from its hole
+     and swung from that end when the total changes. */
+  .atelier-tag {
+    @apply relative flex items-center;
+    transform-origin: 0 50%;
+  }
+
+  .atelier-tag-card {
+    @apply relative rounded-lg bg-paper py-2 pl-7 pr-4 shadow-lift;
+  }
+
+  .atelier-tag-card::before {
+    content: "";
+    @apply absolute left-2.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-card;
+    box-shadow: inset 0 0 0 1.5px rgba(35, 50, 75, 0.25);
+  }
+
+  /* The embroidery hoop: ink ring, the thread's colour inside. */
+  .atelier-hoop {
+    @apply relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-lift sm:h-16 sm:w-16;
+    border: 3px solid var(--ink);
+    outline: 1.5px dashed rgba(35, 50, 75, 0.35);
+    outline-offset: 2px;
+  }
+
+  /* The track: one chapter per question, the line under it filling. */
+  .atelier-track-line {
+    @apply relative h-px w-full bg-ink/10;
+  }
+
+  .atelier-track-fill {
+    @apply absolute inset-y-0 left-0 w-full origin-left bg-sage-deep;
+    height: 2px;
+    top: -0.5px;
+    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* A choice: an ivory card with a hairline at rest (ivory sits 1.027 off
+     cream - the sliver needs the line to read as something to press),
+     ringed in ink once made. */
+  .atelier-option {
+    @apply relative rounded-plate border border-ink/15 bg-card text-left text-ink transition-[border-color,box-shadow] duration-200;
+  }
+
+  .atelier-option:hover:not(:disabled) {
+    @apply border-ink/40;
+  }
+
+  .atelier-option[aria-pressed="true"] {
+    @apply border-ink;
+    box-shadow: 0 0 0 1px var(--ink);
+  }
+
+  .atelier-option:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+
+  .atelier-chip {
+    @apply inline-flex min-w-10 items-center justify-center rounded-chip border border-ink/15 bg-card px-3 py-1.5 font-sans text-spec font-semibold text-ink transition-colors;
+  }
+
+  .atelier-chip:hover:not(:disabled) {
+    @apply border-ink;
+  }
+
+  .atelier-chip[aria-pressed="true"] {
+    @apply border-ink bg-ink text-paper;
+  }
+
+  .atelier-chip:disabled {
+    @apply cursor-not-allowed text-muted line-through opacity-50;
+  }
+
+  /* The corner mark on an option: a ring waiting, a sage tick on ink once
+     chosen (sage on indigo, 6.50). */
+  .atelier-mark {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-ink/20 text-ink;
+    transition:
+      background-color 250ms ease,
+      border-color 250ms ease;
+  }
+
+  [aria-pressed="true"] > .atelier-mark,
+  [aria-pressed="true"] .atelier-mark {
+    @apply border-ink bg-ink text-sage;
+  }
+
+  /* The letters field: the initials typed large, in the UI face's real
+     italic (Franxurter has none). */
+  .atelier-letters {
+    @apply w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 pb-2 font-sans text-[2.75rem] font-semibold italic uppercase leading-none tracking-[0.18em] text-ink outline-none transition-colors placeholder:text-muted placeholder:not-italic placeholder:tracking-normal sm:text-[3.5rem];
+  }
+
+  .atelier-letters::placeholder {
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .atelier-letters:focus {
+    @apply border-ink;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A piece laid on the table: it comes down from above, a little turned,
+     and settles. */
+  .atelier-drop {
+    animation: atelier-drop 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* A question turning: the new pane comes in from the side the shopper is
+     travelling to (`--dir`: 1 forward, -1 back). */
+  .atelier-pane {
+    animation: atelier-pane 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .atelier-q {
+    animation: atelier-q 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* The tag swings when the total changes, like a tag knocked. */
+  .atelier-swing {
+    animation: atelier-swing 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .atelier-pin-in {
+    animation: atelier-pin 680ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .atelier-in {
+    animation: kit-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+
+@keyframes atelier-drop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -1.75rem, 0) rotate(-4deg) scale(1.08);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+@keyframes atelier-pane {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--dir, 1) * 2.5rem), 0, 0);
+  }
+}
+
+@keyframes atelier-q {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.9em, 0);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 -20% 0);
+  }
+}
+
+@keyframes atelier-swing {
+  0% {
+    transform: rotate(7deg);
+  }
+  35% {
+    transform: rotate(-4deg);
+  }
+  65% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes atelier-pin {
+  from {
+    opacity: 0;
+    transform: rotate(-14deg) scale(0.8);
+  }
+}
