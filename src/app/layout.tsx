@@ -88,10 +88,20 @@ export const metadata: Metadata = {
     template: `%s - ${site.name}`,
   },
   description: site.description,
+  // The puffed K (Shopify file IMG_6217.png), trimmed to the letter and
+  // squared in `public/favicon/`. The wide wordmark used to stand in here and
+  // shrank to an unreadable smudge at 16px. Transparent for the tab, so it
+  // sits on either browser theme; the touch icon is on cream because iOS
+  // paints transparency black.
   icons: {
-    icon: [{ url: "/logo/kozy-logo-web.png", type: "image/png" }],
-    shortcut: ["/logo/kozy-logo-web.png"],
-    apple: [{ url: "/logo/kozy-logo-web.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: ["/favicon/icon-32.png"],
+    apple: [
+      { url: "/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   manifest: "/manifest.webmanifest",
   openGraph: {

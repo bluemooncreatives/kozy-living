@@ -159,7 +159,7 @@
      wraps to two lines on a narrow screen, so the value differs by breakpoint.
      `HeaderHeight` replaces it with the measured pixel after hydration, and
      everything sticky - the hero, the filter bar, the buy panel - reads it. */
-  --header-h: 6.9rem;
+  --header-h: 6.25rem;
 
   /* The breathing gap between the header rule and the hero frame. Declared
      once because two things must agree on it: the section's top padding, and
@@ -176,9 +176,12 @@
   --scrollbar-track: transparent;
 }
 
-@media (min-width: 640px) {
+/* Measured: the announcement holds to one line from 320px up, so below lg
+   the header is the 4rem nav row plus the strip, 100px everywhere. The nav
+   row grows to 4.5rem at lg. */
+@media (min-width: 1024px) {
   :root {
-    --header-h: 5.75rem;
+    --header-h: 6.75rem;
   }
 }
 

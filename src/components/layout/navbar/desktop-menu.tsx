@@ -32,7 +32,7 @@ export default function DesktopMenu({ menu }: { menu: Menu[] }) {
   };
 
   return (
-    <ul className="ml-8 hidden items-center gap-5 lg:flex xl:gap-7">
+    <ul className="hidden items-center gap-5 lg:flex xl:gap-7">
       {menu.map((item) => {
         const hasChildren = Boolean(item.items?.length);
         const isOpen = openTitle === item.title;

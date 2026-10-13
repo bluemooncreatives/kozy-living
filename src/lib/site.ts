@@ -55,18 +55,22 @@ export const site = {
   instagram: "@kozyliving_",
   instagramUrl: "https://www.instagram.com/kozyliving_/",
   /**
-   * The header logo (`LogoSquare`). The file in Shopify is the 3836x2160,
-   * 3.2 MB master with its ink in the middle ~87% x 61% of the canvas, so the
-   * URL asks Shopify's CDN to crop to that ink box (`crop=region`); without
-   * it the mark renders small inside its own padding. `ShopImage` then adds
-   * the `width`, and the CDN serves a ~180px WebP of a few KB. `width` and
-   * `height` are the CROPPED box - they set the aspect ratio, not the bytes.
-   * Re-measure them if the artwork is replaced.
+   * The header logo (`LogoSquare`): KOZY, LIVING and "Rooted in Rituals".
+   * The file in Shopify is a 1774x887 canvas with its ink at (156,130)-
+   * (1651,808), so the URL asks Shopify's CDN to crop to that box plus a few
+   * pixels (`crop=region`); without it the mark renders small inside its own
+   * padding. `ShopImage` then adds the `width`. `width` and `height` are the
+   * CROPPED box - they set the aspect ratio, not the bytes.
+   *
+   * ⚠️ The crop is in the file's own pixels, so it is tied to this upload
+   * (`v=`). When the artwork is replaced in Shopify, re-measure the ink box
+   * and update all of it together - a crop measured on the previous file
+   * (3836x2160) ran off this canvas and cut the logo off.
    */
   logo: {
-    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Kozy_Logo.png?v=1791915740&crop=region&crop_left=240&crop_top=426&crop_width=3356&crop_height=1310",
-    width: 3356,
-    height: 1310,
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Kozy_Logo.png?v=1791920130&crop=region&crop_left=150&crop_top=124&crop_width=1508&crop_height=690",
+    width: 1508,
+    height: 690,
   },
 } as const;
 

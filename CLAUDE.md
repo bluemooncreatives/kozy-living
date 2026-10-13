@@ -509,17 +509,21 @@ first viewport — never hard-coded on every reel's first shot.
 `next/image` without `sizes` builds its srcset from the file's **intrinsic
 width**, so a 1303px icon painted at 80px requested 1920/3840px variants. The
 icons are now ≤256px, `gi-tag.png` is 189x320 (was 2528x4288, 7.8 MB), and the
-favicon/JSON-LD/manifest/postcard use `public/logo/kozy-logo-web.png` (720x405,
-56 KB). The 3.2 MB masters in `public/logo/` are untouched; do not point
+JSON-LD/manifest/postcard use `public/logo/kozy-logo-web.png` (720x405,
+56 KB). The favicon is `public/favicon/` - the puffed K from Shopify's
+`IMG_6217.png`, trimmed to the letter and squared (32 and 192 transparent;
+the 180 touch icon on cream, since iOS paints transparency black). The 3.2 MB masters in `public/logo/` are untouched; do not point
 anything that renders on every page at them.
 
 **The header logo is Shopify's file, not that one.** `LogoSquare` (header and
-phone drawer) renders `site.logo` - `Kozy_Logo.png`, also a 3836x2160, 3.2 MB
-master - through `ShopImage`, with `crop=region` in the URL so the CDN trims
-it to its ink box (3356x1310) before resizing. That is why the URL carries
-crop params and why `width`/`height` are the cropped box: drop the crop and
-the mark shrinks inside ~40% padding; drop `ShopImage` and the optimiser
-pulls the whole master. Replacing the artwork means re-measuring its ink box.
+phone drawer) renders `site.logo` - `Kozy_Logo.png` (1774x887: KOZY, LIVING,
+"Rooted in Rituals") - through `ShopImage`, with `crop=region` in the URL so
+the CDN trims it to its ink box (1508x690 with margin) before resizing. That
+is why the URL carries crop params and why `width`/`height` are the cropped
+box. ⚠️ The crop is in the file's own pixels, tied to that upload's `v=`:
+when the artwork was re-uploaded (it was 3836x2160 before), the old crop ran
+off the new canvas and cut the logo off. Replacing the artwork means
+re-measuring its ink box and updating the URL, `width` and `height` together.
 
 `public/kozy/` holds the two block-printed textile letters, and unlike
 `public/logo/` **no master is kept here** — both were delivered at 1254x1254

@@ -20,10 +20,9 @@ import HeaderHeight from "./header-height";
  *
  * LAYOUT NOTE: the mark is optically centred below `lg` and moves to the left
  * rail at `lg` and up. A seven-item menu with two flyouts simply does not fit
- * either side of a centred logo - at 1440px the items alone measure wider than
- * the space between the logo and the utilities - so on desktop the logo leads
- * the row and the menu runs from it. Phones keep the centred mark, where it
- * fits and reads best.
+ * either side of a centred logo, so on desktop the logo leads the row and the
+ * MENU is what is centred, between the logo and the utilities (see the grid
+ * on the row). Phones keep the centred mark, where it fits and reads best.
  */
 export async function Navbar() {
   const [menu, customerSession] = await Promise.all([
@@ -46,7 +45,13 @@ export async function Navbar() {
       </div>
 
       <nav className="rule-t rule-b" aria-label="Primary">
-        <div className="shell relative flex h-14 items-center gap-4">
+        {/* lg and up: logo | menu | utilities on a three-column grid whose
+            side columns grow EQUALLY (minmax(max-content, 1fr)), so the menu
+            sits at the true centre of the row whenever there is room. Where
+            there is not - seven items at 1024px - the sides shrink to their
+            content and the menu slides over rather than overlapping either
+            neighbour. Absolute centring overlapped the logo there. */}
+        <div className="shell relative flex h-16 items-center gap-4 lg:grid lg:h-[4.5rem] lg:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] lg:gap-8">
           {/* Below lg this is the only nav affordance; from lg it disappears
               and DesktopMenu takes over. */}
           <MobileMenu menu={menu} />
@@ -55,7 +60,7 @@ export async function Navbar() {
             href="/"
             prefetch
             aria-label={`${site.name} home`}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:static lg:translate-x-0 lg:translate-y-0"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:static lg:translate-x-0 lg:translate-y-0 lg:justify-self-start"
           >
             <LogoSquare />
           </Link>
