@@ -54,6 +54,20 @@ export const site = {
   founderInstagramUrl: "https://www.instagram.com/khushifaruqii/",
   instagram: "@kozyliving_",
   instagramUrl: "https://www.instagram.com/kozyliving_/",
+  /**
+   * The header logo (`LogoSquare`). The file in Shopify is the 3836x2160,
+   * 3.2 MB master with its ink in the middle ~87% x 61% of the canvas, so the
+   * URL asks Shopify's CDN to crop to that ink box (`crop=region`); without
+   * it the mark renders small inside its own padding. `ShopImage` then adds
+   * the `width`, and the CDN serves a ~180px WebP of a few KB. `width` and
+   * `height` are the CROPPED box - they set the aspect ratio, not the bytes.
+   * Re-measure them if the artwork is replaced.
+   */
+  logo: {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/Kozy_Logo.png?v=1791915740&crop=region&crop_left=240&crop_top=426&crop_width=3356&crop_height=1310",
+    width: 3356,
+    height: 1310,
+  },
 } as const;
 
 /**
