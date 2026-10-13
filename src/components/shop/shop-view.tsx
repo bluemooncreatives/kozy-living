@@ -423,7 +423,11 @@ export default async function ShopView({
           {title}
         </Headline>
         {description ? (
-          <p className="body-mono mt-5 max-w-measure text-pretty">
+          // Wider than the 34rem measure: the masthead spans the full shell,
+          // and at 34rem the intro ran to three short lines beside a page of
+          // empty width. At 52rem the store intro sets as two even lines on
+          // desktop; 46rem still left a two-word third line.
+          <p className="body-mono mt-5 max-w-[52rem] text-pretty">
             {description}
           </p>
         ) : null}
