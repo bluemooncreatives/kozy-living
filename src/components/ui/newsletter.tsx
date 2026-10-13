@@ -24,7 +24,14 @@ import { writeRecord } from "@/components/newsletter/newsletter-state";
  * the corner teaser behind it - from asking a visitor who has just subscribed
  * here for the address they gave thirty seconds ago.
  */
-export default function Newsletter({ className }: { className?: string }) {
+export default function Newsletter({
+  className,
+  buttonVariant = "solid",
+}: {
+  className?: string;
+  /** "outline" on an indigo ground, where the solid pill is indigo on indigo. */
+  buttonVariant?: "solid" | "outline";
+}) {
   const [state, formAction, isPending] = useActionState<
     NewsletterState,
     FormData
@@ -81,7 +88,7 @@ export default function Newsletter({ className }: { className?: string }) {
         <ActionButton
           label={isPending ? "Sending…" : "Subscribe"}
           type="submit"
-          variant="solid"
+          variant={buttonVariant}
           icon="arrow"
           disabled={isPending}
         />

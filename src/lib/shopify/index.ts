@@ -87,6 +87,8 @@ import {
   ShopifyMoodsOperation,
   ShopifyPageOperation,
   ShopifyPagesOperation,
+  ShopifyShopPoliciesOperation,
+  ShopPolicy,
   ShopifyProduct,
   ShopifyProductOperation,
   ShopifyProductRecommendationsOperation,
@@ -105,6 +107,10 @@ import { revalidateTag } from "next/cache";
 // was its own round trip.
 import { cache as reactCache } from "react";
 import { getPageQuery, getPagesQuery } from "./queries/page";
+import {
+  getShopPoliciesQuery,
+  getShopPolicyNamesQuery,
+} from "./queries/policies";
 import {
   getArticleQuery,
   getArticlesQuery,
@@ -413,23 +419,14 @@ export async function getMenu(handle: string): Promise<Menu[]> {
 }
 
 /**
- * The site navigation, resolved against the handles a Shopify store is likely
- * to use for it. `main-menu` is Shopify's default handle and is what this
- * store's "kozy-living-menu" actually resolves to - a menu's display name and
- * its handle drift apart the moment someone renames it in Admin, so both are
- * tried and the first that returns items wins.
- *
- * `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` takes priority when set, so a store that
- * uses a third handle needs an env var rather than a code change.
+ * The first of `handles` that names a menu with items. Shopify answers an
+ * unknown handle with a null menu rather than an error, so an empty result
+ * means "try the next one", and a failed call is logged and skipped rather
+ * than taking the page down with it.
  */
-export const getPrimaryMenu = reactCache(async (): Promise<Menu[]> => {
-  const handles = [
-    process.env.NEXT_PUBLIC_SHOPIFY_MENU_HANDLE,
-    "main-menu",
-    "kozy-living-menu",
-  ].filter((handle): handle is string => Boolean(handle));
-
+async function firstMenu(handles: (string | undefined)[]): Promise<Menu[]> {
   for (const handle of handles) {
+    if (!handle) continue;
     try {
       const menu = await getMenu(handle);
       if (menu.length) return menu;
@@ -440,7 +437,93 @@ export const getPrimaryMenu = reactCache(async (): Promise<Menu[]> => {
   }
 
   return [];
+}
+
+/**
+ * The site navigation, resolved against the handles a Shopify store is likely
+ * to use for it. `main-menu` is Shopify's default handle and is what this
+ * store's "kozy-living-menu" actually resolves to - a menu's display name and
+ * its handle drift apart the moment someone renames it in Admin, so both are
+ * tried and the first that returns items wins.
+ *
+ * `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` takes priority when set, so a store that
+ * uses a third handle needs an env var rather than a code change.
+ */
+export const getPrimaryMenu = reactCache(
+  async (): Promise<Menu[]> =>
+    firstMenu([
+      process.env.NEXT_PUBLIC_SHOPIFY_MENU_HANDLE,
+      "main-menu",
+      "kozy-living-menu",
+    ])
+);
+
+/**
+ * The footer's navigation: the `kozy-living-footer` menu in Admin, read the
+ * same way as the header's and on the same TTL. Its top-level items with
+ * children become the footer's columns; the ones without become its large
+ * standalone links (see `components/layout/footer.tsx`).
+ *
+ * Shopify's own default `footer` menu is deliberately NOT a candidate: on this
+ * store it holds a single "Search" link, and a footer of one link is worse
+ * than the fallback. If no footer menu resolves, the primary menu stands in -
+ * still the merchant's navigation, never a list hard-coded here.
+ */
+export const getFooterMenu = reactCache(async (): Promise<Menu[]> => {
+  const footer = await firstMenu([
+    process.env.SHOPIFY_FOOTER_MENU_HANDLE,
+    "kozy-living-footer",
+  ]);
+
+  return footer.length ? footer : getPrimaryMenu();
 });
+
+/* ------------------------------------------------------------- policies */
+
+const POLICY_SLOTS = [
+  "privacyPolicy",
+  "termsOfService",
+  "refundPolicy",
+  "shippingPolicy",
+] as const;
+
+function presentPolicies(
+  shop: ShopifyShopPoliciesOperation["data"]["shop"] | undefined
+): ShopPolicy[] {
+  return POLICY_SLOTS.flatMap((slot) => {
+    const policy = shop?.[slot];
+    return policy?.handle
+      ? [{ ...policy, title: houseSpelling(policy.title) }]
+      : [];
+  });
+}
+
+/**
+ * The shop policies the merchant has actually written, names only - the
+ * footer's legal row. Unwritten ones are absent, not linked to a 404.
+ */
+export const getShopPolicyNames = reactCache(
+  async (): Promise<ShopPolicy[]> => {
+    const res = await shopifyFetch<ShopifyShopPoliciesOperation>({
+      query: getShopPolicyNamesQuery,
+    });
+
+    return presentPolicies(res.body?.data?.shop);
+  }
+);
+
+/** One policy with its body, for `/policies/<handle>`. */
+export async function getShopPolicy(
+  handle: string
+): Promise<ShopPolicy | undefined> {
+  const res = await shopifyFetch<ShopifyShopPoliciesOperation>({
+    query: getShopPoliciesQuery,
+  });
+
+  return presentPolicies(res.body?.data?.shop).find(
+    (policy) => policy.handle === handle
+  );
+}
 
 export async function getProducts({
   query,

@@ -253,7 +253,13 @@ export default function MotionProvider() {
           armQueue.push(() =>
             ScrollTrigger.create({
               trigger: el,
-              start: "top 92%",
+              // `data-split-start` overrides, for a split that can never
+              // climb to 92%: the footer's wordmark is the last thing on every
+              // page, and on a phone its top tops out around 93%, so it stayed
+              // in its masks for good. NOT `clamp()` - that also clamps the
+              // start to 0, and a trigger starting at 0 never fires at scroll
+              // 0, which left the hero's first-fold headline hidden.
+              start: el.dataset.splitStart || "top 92%",
               once: true,
               onEnter: safe(() => {
                 gsap.to(pieces, {

@@ -7,10 +7,14 @@ import Seal from "./seal";
  * with an arrow in place of the asterisk. Reusing the mark rather than adding
  * a separate button is what makes it read as part of the system.
  */
-export default function BackToTop() {
+export default function BackToTop({
+  size = "md",
+}: {
+  size?: "sm" | "md";
+}) {
   return (
     <Seal
-      size="md"
+      size={size}
       text="back to top · back to top · "
       glyph="↑"
       label="Back to top"

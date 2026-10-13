@@ -633,6 +633,24 @@ export type ShopifyPageOperation = {
   variables: { handle: string };
 };
 
+/** A shop policy, served at `/policies/<handle>`. `body` is HTML. */
+export type ShopPolicy = {
+  handle: string;
+  title: string;
+  body?: string;
+};
+
+type ShopPolicySlots<T> = {
+  privacyPolicy: T | null;
+  termsOfService: T | null;
+  refundPolicy: T | null;
+  shippingPolicy: T | null;
+};
+
+export type ShopifyShopPoliciesOperation = {
+  data: { shop: ShopPolicySlots<ShopPolicy> };
+};
+
 export type ShopifyPagesOperation = {
   data: {
     pages: Connection<Page>;

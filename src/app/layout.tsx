@@ -5,6 +5,7 @@ import "./globals.css";
 import "lenis/dist/lenis.css";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import NewsletterBand from "@/components/layout/newsletter-band";
 import { CartProvider } from "@/components/cart/cart-context";
 import CartBar from "@/components/cart/cart-bar";
 import SmoothScrollProvider from "@/components/providers/smooth-scroll-provider";
@@ -180,6 +181,7 @@ export default async function RootLayout({
           <CartProvider cartPromise={cart}>
             <Navbar />
             <main className="flex-1">{children}</main>
+            <NewsletterBand />
             <Footer />
             {/* After the footer so its spacer extends the end of the page,
                 which is what lets the last of the content clear the bar. */}

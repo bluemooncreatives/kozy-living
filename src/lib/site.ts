@@ -971,48 +971,53 @@ export const faq = {
   >;
 } & Record<string, unknown>;
 
-export const footerColumns = [
-  {
-    title: "Shop",
-    links: [
-      { title: "Kozy Lounge", path: "/search/kozy-lounge" },
-      { title: "Kessentials", path: "/search/kessentials" },
-      { title: "Morning Luxuries", path: "/search/morning-luxuries" },
-      { title: "Pet & Parent", path: "/search/pet-parent" },
-    ],
+/**
+ * The footer's own words. Its LINKS are not here: every column and every large
+ * link is the `kozy-living-footer` menu in Shopify Admin, and the legal row is
+ * the shop policies the merchant has written - so a link is added, renamed or
+ * reordered in Admin, never in this file.
+ *
+ * It used to carry hand-written columns: collection handles the store never
+ * had, Pinterest and YouTube links to those sites' home pages (the brand has
+ * neither account), an unverified email shown as fact, and policy links that
+ * 404'd. Only Instagram is a confirmed channel, so it is the only one named.
+ */
+/**
+ * The newsletter band that stands above the footer (`NewsletterBand`), its
+ * own card rather than a row inside the footer panel. Same signup as the footer
+ * used to carry and the arrival card - one server action, one record.
+ */
+export const letterBand = {
+  label: "Letters from the studio",
+  heading: "A slower kind of inbox",
+  body: "Rituals worth keeping, notes from the studio, and a first look at every new Kompanion.",
+  note: "Unsubscribe whenever you like.",
+  /** The same still as `kozyStory`'s "Slow mornings" frame. */
+  image: {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1866.jpg?v=1788636345",
+    alt: "The Dabu Speckled Cushion beside a cup of coffee and an open book.",
   },
-  {
-    title: "Studio",
-    links: [
-      { title: "About", path: "/about-us" },
-      { title: "Kraft & Materials", path: "/about-us" },
-      { title: "Journal", path: "/blogs" },
-      { title: "B2B & Private Label", path: "/b2b-enquiries" },
-    ],
-  },
-  {
-    title: "Contact",
-    links: [
-      { title: site.instagram, path: site.instagramUrl },
-      { title: "care@kozyliving.com", path: "mailto:care@kozyliving.com" },
-      { title: "Get in touch", path: "/contact" },
-    ],
-  },
-  {
-    title: "Social Media",
-    links: [
-      { title: "Instagram", path: site.instagramUrl },
-      { title: "Pinterest", path: "https://pinterest.com" },
-      { title: "YouTube", path: "https://youtube.com" },
-    ],
-  },
-] as const;
+} as const;
 
-/** The two links that close the page, beside the copyright. */
-export const legalLinks = [
-  { title: "Terms & Condition", path: "/terms-of-service" },
-  { title: "Privacy Policy", path: "/privacy-policy" },
-] as const;
+export const footer = {
+  /** The brand block beside the menu columns. */
+  brand: {
+    heading: site.tagline,
+    body: site.statement,
+    follow: "Follow the studio",
+    handle: site.instagram,
+    href: site.instagramUrl,
+  },
+  /** Heads the column of the menu's standalone links (Home, Contact Us). */
+  more: site.name,
+  /** Leads a column's own page in the phone accordion: "Explore Kessentials". */
+  explore: "Explore",
+  /** The hero's origin flag itself, not a new use of the K spelling. */
+  stamp: hero.flag,
+  copyright: "All rights reserved.",
+  /** The closing mark. Its "o" is the block-printed textile letter. */
+  wordmark: "kozy living",
+} as const;
 
 /** The phone navigation drawer's own chrome - the links are Shopify's. */
 export const navDrawer = {

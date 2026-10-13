@@ -214,6 +214,52 @@ its first byte — warm TTFB measured 0.5–0.7s, now 0.01–0.05s. A menu edit 
 Admin now takes up to a minute to reach production. Do not put it back on
 `no-store`; if instant menu edits ever matter, revalidate a tag instead.
 
+### The footer — `kozy-living-footer`, same rule
+
+`components/layout/footer.tsx` reads the **`kozy-living-footer`** menu through
+`getFooterMenu()` (`SHOPIFY_FOOTER_MENU_HANDLE` overrides; if nothing resolves
+it falls back to the primary menu, never to a list in this repo). Shopify's
+default `footer` menu is deliberately not tried - here it holds one "Search"
+link. How the menu maps onto the panel:
+
+- top-level items **with children** → plain columns headed by their own
+  (linked) title; `--cols` holds them on one row from `xl`, `auto-fit`
+  below; a `<details name>` accordion below `md`;
+- top-level items **without children** (Home, Contact Us - and any group the
+  merchant empties, e.g. Kessentials as of 2026-10-14) → one last column
+  under the brand name (`footer.more`);
+- the legal row is **`getShopPolicyNames()`** - only policies the merchant
+  has written - with the small back-to-top seal at its end. Every
+  `/search/<handle>` and `/policies/<handle>` link is guarded against what
+  exists (the guard stands down if the lookup fails).
+
+Plain headings and sentence-case links are the owner's call (2026-10-14):
+pill-headed columns read as buttons, small tracked caps read slowly, and the
+standalone items as CTA pills looked like a second menu. A photo strip of
+studio stills was tried as a top row and removed.
+
+Copy is `footer` in `site.ts`. It names only Instagram: the old hand-written
+columns carried Pinterest/YouTube links to those sites' home pages and the
+unverified `care@` address. The footer is on the page's **cream** ground
+(owner's call, 2026-10-14 - it was an indigo panel for a while); indigo is
+reserved for the newsletter band above it. The closing wordmark ("kozy
+living", textile O, ink) deliberately echoes the hero's. It is an endless
+full-bleed ticker on `.marquee-track` (two runs of three `WordmarkBand`
+copies - each run must stay wider than the widest screen or the -50% loop
+shows a seam), shown whole above the legal row; it was once a single copy
+cut off by the page's end.
+
+**The newsletter is not in the footer.** It stands above it as its own card,
+`components/layout/newsletter-band.tsx` (rendered in `layout.tsx`, copy
+`letterBand`): a narrow `Plate` photograph (1/5, `md`+ only) beside an
+indigo panel (owner's call, 2026-10-14 - it was sage). Copy and form sit
+side by side from `lg` to keep the band short. The form's button is the
+`outline` (ivory) pill: the solid one is indigo on indigo.
+
+**Shop policies are not pages.** They live on `shop`, so `[page]` 404'd every
+policy link. `app/policies/[policy]` serves them at Shopify's own path, which
+is what a SHOP_POLICY menu item normalises to.
+
 ### Enquiry forms — both write `contact_message`
 
 The contact form (`components/contact/`) and the B2B form on `/b2b-enquiries`
@@ -473,7 +519,8 @@ and ~2.5 MB, and both were deleted once the shipped file was cut. Re-cutting
 either one means going back to the source artwork outside this repo.
 
 - `o.png` (474x512, 148 KB) is the wordmark's O — see §3.
-- `k.png` (178x192, 27 KB) is the category rail's separator
+- `k.png` (178x192, 27 KB) is the separator in the footer's wordmark
+  ticker (sized `0.4em`, so it scales with the ticker) and the category rail's separator
   (`.cat-pill-sep`, in place of the `✳` that was there). It is one `src`
   repeated ~40 times down the rail — the marquee carries several copies of the
   menu — so it is one request however long the menu gets.
@@ -639,11 +686,17 @@ data-parallax       drifts against scroll, for large photography
 
 **Split headlines.** `Headline` at `xl`/`lg` splits by default (`split={false}`
 opts out); the hero statements, the bold statement, `WordmarkBand`, the closing
-"shop now" and the footer heading are split by hand with `splitText()`. The
+"shop now" and the newsletter band heading are split by hand with `splitText()`. The
 split is emitted **in the render**, never done at runtime — a runtime splitter
 rewrites text nodes React owns. Components inside a split (e.g. `CircledWord`)
 travel whole as a `.split-unit`. Split by **word, never by glyph**: Franxurter
-has 2,104 kerning pairs and a glyph in its own box cannot be kerned. The mask is
+has 2,104 kerning pairs and a glyph in its own box cannot be kerned.
+A split near the very end of a page can never climb to the default
+`top 92%` start (the footer wordmark tops out at ~93% on a phone), so it
+sets its own with `data-split-start` (`WordmarkBand`'s `revealStart`).
+**Do not use `clamp()` for this** - it also clamps the start to 0, and a
+trigger starting at 0 never fired at scroll 0: the hero headline stayed
+hidden. The mask is
 a `clip-path` in `em` (see the comment in `globals.css`) — not
 `overflow: hidden`, which moves the baseline, and not percentages, which broke
 on `leading-[0.8]`.
@@ -971,7 +1024,7 @@ agree:
 | --- | --- | --- |
 | Arrival card | `newsletter/newsletter-popup.tsx` + `newsletter-postcard.tsx` | the full drawing, in a Headless UI `Dialog` |
 | Corner teaser | `newsletter/newsletter-teaser.tsx` | what the card collapses into once closed |
-| Footer form | `ui/newsletter.tsx` | a bare field and one pill |
+| Newsletter band | `ui/newsletter.tsx` in `layout/newsletter-band.tsx` | a bare field and one pill, on its own card above the footer |
 
 ### The card's layout
 

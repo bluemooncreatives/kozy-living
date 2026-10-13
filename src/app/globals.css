@@ -6228,3 +6228,352 @@ html:has([data-loader]) body {
     transform: rotate(-14deg) scale(0.8);
   }
 }
+
+/* ----------------------------------------------------------------- footer
+
+   The footer (`components/layout/footer.tsx`) sits on the page's cream
+   ground, like every section above it - the owner's call (2026-10-14); it
+   was an indigo panel. Read top to bottom: brand + menu, the wordmark
+   ticker, legal. Indigo is kept for the newsletter band above it, which is
+   what makes that band read as its own offer.
+
+   Pairs on cream: ink 12.05, muted 5.26. */
+@layer components {
+  .footer-panel {
+    position: relative;
+  }
+
+  /* -------------------------------------------------- the letter band
+
+     The newsletter's own card above the footer (`NewsletterBand`): a narrow
+     photograph - one fifth - beside an indigo panel, the hero's bento gap
+     between them. Inside the panel, copy and form run side by side from `lg`
+     so the band stays short. Phones drop the photograph. */
+  .letter-band {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .letter-band-photo {
+    display: none;
+  }
+
+  .letter-band-panel {
+    display: grid;
+    gap: 1.75rem;
+    padding: 2.25rem 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .letter-band {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+    }
+
+    /* Height comes from the panel; the photograph fills it. */
+    .letter-band-photo {
+      display: block;
+      height: 100%;
+    }
+
+    .letter-band-panel {
+      padding: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .letter-band-panel {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 3.5rem;
+      padding: 3rem 3.5rem;
+    }
+  }
+
+  /* --------------------------------------------------------------- main */
+
+  .footer-main {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: 2.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .footer-main {
+      grid-template-columns: minmax(0, 3.5fr) minmax(0, 8.5fr);
+      gap: 4rem;
+      padding-block: 3.5rem;
+    }
+  }
+
+  .footer-brand-heading {
+    @apply serif text-display-md;
+    max-width: 22rem;
+    text-wrap: balance;
+  }
+
+  .footer-social {
+    @apply inline-flex items-center gap-2 font-sans text-ui font-semibold text-ink;
+    margin-top: 1.5rem;
+  }
+
+  /* Block, so a linked head and a plain one sit on the same line box - the
+     inline link sat a few pixels off the paragraph beside it. */
+  .footer-col-head {
+    @apply font-sans text-ui font-bold;
+    display: block;
+    width: fit-content;
+    color: var(--ink);
+  }
+
+  .footer-col-head-link {
+    @apply transition-opacity hover:opacity-70;
+  }
+
+  /* md and up: every column open. auto-fit until there is room for them all
+     on one row, then `--cols` (the column count, max 6) holds them there. */
+  .footer-index {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .footer-index {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: 2.5rem 1.5rem;
+    }
+
+    .footer-folds {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .footer-index {
+      grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+    }
+  }
+
+  /* Phones: the same columns as an accordion. Five open columns of links
+     ran to well over a screen on a 390px phone. */
+  .footer-folds {
+    border-top: 1px solid var(--rule);
+    margin-bottom: -2.5rem;
+  }
+
+  /* Rules BETWEEN folds only: the legal row's own rule closes the last. */
+  .footer-fold + .footer-fold {
+    border-top: 1px solid var(--rule);
+  }
+
+  .footer-fold summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-block: 1rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .footer-fold summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A plus that folds into a minus: the upright bar lies down. */
+  .footer-fold-icon {
+    position: relative;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    transition:
+      background-color 300ms ease,
+      border-color 300ms ease;
+  }
+
+  .footer-fold-icon::before,
+  .footer-fold-icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.75rem;
+    height: 1.5px;
+    margin: -0.75px 0 0 -0.375rem;
+    background: var(--ink);
+    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .footer-fold-icon::after {
+    transform: rotate(90deg);
+  }
+
+  .footer-fold[open] .footer-fold-icon {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .footer-fold[open] .footer-fold-icon::before,
+  .footer-fold[open] .footer-fold-icon::after {
+    background: var(--paper);
+  }
+
+  .footer-fold[open] .footer-fold-icon::after {
+    transform: rotate(0deg);
+  }
+
+  /* The fold opens on a height transition where the engine can interpolate
+     to `auto`; elsewhere it simply opens. */
+  @supports (interpolate-size: allow-keywords) {
+    @media (prefers-reduced-motion: no-preference) {
+      .footer-fold {
+        interpolate-size: allow-keywords;
+      }
+
+      .footer-fold::details-content {
+        block-size: 0;
+        overflow: clip;
+        transition:
+          block-size 480ms cubic-bezier(0.16, 1, 0.3, 1),
+          content-visibility 480ms allow-discrete;
+      }
+
+      .footer-fold[open]::details-content {
+        block-size: auto;
+      }
+    }
+  }
+
+  /* -------------------------------------------------------------- links */
+
+  .footer-link {
+    @apply inline-flex font-sans text-ui transition-colors duration-300;
+    color: var(--muted);
+  }
+
+  .footer-link:hover,
+  .footer-link:focus-visible {
+    color: var(--ink);
+  }
+
+  .footer-link-lead {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .footer-link-sm {
+    @apply text-spec;
+  }
+
+  /* The label roll - `.action-btn-roll`'s gesture, for links. The copy
+     beneath is generated content with EMPTY alt text, or it would be folded
+     into the accessible name and every link announced twice. `inset-inline`
+     pins the copy to the original's width, so a title that wraps in a narrow
+     column wraps the same way underneath. */
+  .footer-roll {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+
+  .footer-roll > span {
+    position: relative;
+    display: inline-block;
+    transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .footer-roll > span::after {
+    content: attr(data-text);
+    content: attr(data-text) / "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    a:hover > .footer-roll > span {
+      transform: translateY(-100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a:focus-visible > .footer-roll > span {
+      transform: translateY(-100%);
+    }
+  }
+
+  /* -------------------------------------------------------------- legal
+
+     Phones: the lines stack on the left and the back-to-top seal stands
+     beside them on the right, so it never gets a row to itself. md and up:
+     one line, the seal at its far end. */
+  .footer-legal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding-block: 1.25rem;
+  }
+
+  .footer-legal > :not(.footer-top) {
+    grid-column: 1;
+  }
+
+  .footer-top {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  @media (min-width: 768px) {
+    .footer-legal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 2rem;
+    }
+
+    .footer-legal > .eyebrow {
+      margin-left: auto;
+    }
+  }
+
+  /* ----------------------------------------------------------- wordmark
+
+     An endless ticker of the mark (`.marquee-track`), full bleed and shown
+     whole - it used to be one copy cut off by the end of the page. The size
+     lives on the wrapper and the copies inherit it (`1em`), so the textile K
+     between them can be set as a fraction of the same em. Two runs of three copies keep
+     each run wider than a 2560px screen at the 13rem cap, which is what the
+     -50% loop needs to stay seamless. */
+  .footer-wordmark {
+    --marquee-duration: 70s;
+    overflow: hidden;
+    /* Both rules full bleed, like the footer's own top rule - the legal row
+       below carries none of its own. */
+    border-block: 1px solid var(--rule);
+    padding-block: 1.75rem 1.5rem;
+    font-size: clamp(4rem, 15vw, 13rem);
+  }
+
+  .footer-wordmark .wordmark {
+    font-size: 1em;
+  }
+
+  .footer-wordmark-sep {
+    display: flex;
+    flex: none;
+    align-items: center;
+    padding-inline: 0.28em;
+  }
+
+  /* The textile K between copies. Height in em, so it tracks the ticker at
+     every breakpoint; width auto, because the artwork is trimmed to its ink
+     box (178x192) and a fixed width would letterbox it. 0.4em keeps it an
+     accent between the words rather than a letter of them - at the cap
+     height it read as "kozy living k kozy living". */
+  .footer-wordmark-k {
+    height: 0.4em;
+    width: auto;
+  }
+}

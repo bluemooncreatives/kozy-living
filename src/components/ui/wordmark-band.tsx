@@ -50,9 +50,12 @@ const O_BEARING_EM = +((0.625 - O_WIDTH_EM) / 2).toFixed(4);
 
 export default function WordmarkBand({
   text,
+  revealStart,
   className,
 }: {
   text: string;
+  /** ScrollTrigger start for the entrance, when "top 92%" is unreachable. */
+  revealStart?: string;
   className?: string;
 }) {
   const at = text.toLowerCase().indexOf("o");
@@ -62,6 +65,7 @@ export default function WordmarkBand({
   return (
     <div
       data-split=""
+      data-split-start={revealStart}
       className={clsx(
         // `nowrap` because this is one line or nothing: a band that runs long
         // must bleed past the frame (the signature), never break - a flex row
