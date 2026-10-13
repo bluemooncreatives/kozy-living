@@ -2072,7 +2072,7 @@ export const shopByMood = {
   /** The homepage's mood panels, the section after Shop by colour. */
   home: {
     eyebrow: "Shop by mood",
-    title: "Start with a moment",
+    title: "Choose your Kozy Ritual",
     action: "All moods",
     /** The pill at the foot of each panel. */
     explore: "Explore mood",

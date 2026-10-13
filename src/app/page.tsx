@@ -675,7 +675,7 @@ async function ShopByColour() {
     <section aria-labelledby="shop-by-colour" className="overflow-x-clip">
       <SectionHead
         eyebrow="Shop by kolour"
-        title={<span id="shop-by-colour">Start with a shade</span>}
+        title={<span id="shop-by-colour">Choose your Kozy kolour</span>}
         action="All kolours"
         actionHref={SHOP_BY_COLOUR_PATH}
       />
