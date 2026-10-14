@@ -32,6 +32,7 @@ export default function Plate({
   aspect = "4/5",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
   priority,
+  eager = false,
   arrow,
   arrowTone = "card",
   tag,
@@ -96,6 +97,15 @@ export default function Plate({
   aspect?: string | null;
   sizes?: string;
   priority?: boolean;
+  /**
+   * Fetch without waiting for layout, but WITHOUT `priority`'s preload and
+   * high fetch priority (rendered as `loading="eager"` + `fetchPriority="low"`
+   * - see the note at the <Image>). For an image that is below the fold on most pages
+   * and in the first screen on a few (the newsletter band above the footer:
+   * on a short page such as /faq it was the LCP element, loading lazily).
+   * Single `src` only.
+   */
+  eager?: boolean;
   /** Draws the corner ↗ button and the notch that receives it. */
   arrow?: boolean;
   arrowTone?: "card" | "sage";
@@ -288,7 +298,12 @@ export default function Plate({
               fill
               sizes={sizes}
               priority={priority}
-              loading={priority ? undefined : "lazy"}
+              loading={priority ? undefined : eager ? "eager" : "lazy"}
+              // React 19's server renderer hoists a <link rel="preload"> for
+              // every <img> that is not lazy - unless it is marked low. Low
+              // here only means "no preload": the browser still fetches at
+              // once, and raises it itself if layout finds it on screen.
+              fetchPriority={eager && !priority ? "low" : undefined}
               className={mediaClass}
             />
           ) : (

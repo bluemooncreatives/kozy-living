@@ -27,6 +27,11 @@ export default function NewsletterBand() {
           alt={letterBand.image.alt}
           aspect={null}
           tone={2}
+          // Eager, not priority: below the fold on most pages, but the LCP
+          // element on short ones (/faq, /contact on a tall screen), where
+          // lazy made the page's largest paint wait on layout. Hidden below
+          // md, where `sizes` asks for the smallest file there is.
+          eager
           sizes="(min-width: 768px) 20vw, 1px"
           className="letter-band-photo"
         />
