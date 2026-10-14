@@ -72,6 +72,19 @@ export const site = {
     width: 1508,
     height: 690,
   },
+  /**
+   * The photograph on the social card (`components/opengraph-image.tsx`).
+   * A 4:5 portrait with its own type baked in ("Shared rituals with your
+   * furrie" at the top, a strapline at the foot), so the card shows it WHOLE
+   * down its left side rather than cropping it to the card's 1.91:1 - a crop
+   * that wide cuts off both lines of type. `?width=` is the card's own column
+   * (630 tall at 4:5), so the CDN sends exactly the pixels drawn.
+   */
+  socialImage: {
+    url: "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1187_7a482946-4a79-4607-9ac5-0203344c6e13_copy_2_jpg.jpg?v=1792003821",
+    width: 1200,
+    height: 1500,
+  },
 } as const;
 
 /**

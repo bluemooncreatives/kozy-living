@@ -50,6 +50,36 @@ function staticFont(...segments: string[]): Buffer | null {
   }
 }
 
+/** Card geometry. The photograph takes a column as tall as the card at its
+    own aspect, so nothing of it is cropped. */
+const CARD = { width: 1200, height: 630 };
+const PHOTO_WIDTH = Math.round(
+  (CARD.height * site.socialImage.width) / site.socialImage.height,
+);
+
+/**
+ * The card's photograph as a data URL, or null.
+ *
+ * Fetched here rather than handed to satori as a remote `src`: satori fetches
+ * a remote image itself, and a failed fetch there throws mid-stream, which
+ * surfaces as a 500 on the route (see `staticFont`). Fetched first, a CDN
+ * hiccup costs the photograph and the card still draws.
+ */
+async function socialPhoto(): Promise<string | null> {
+  try {
+    const url = new URL(site.socialImage.url);
+    url.searchParams.set("width", String(PHOTO_WIDTH));
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) return null;
+    const type = response.headers.get("content-type") ?? "image/jpeg";
+    if (!type.startsWith("image/")) return null;
+    const bytes = Buffer.from(await response.arrayBuffer());
+    return `data:${type};base64,${bytes.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * The social card - the only piece of this design system that renders outside
  * a browser, and the one most people see first.
@@ -71,6 +101,9 @@ function staticFont(...segments: string[]): Buffer | null {
  * on this card - see `staticFont` - so the whole thing is set in the display
  * face, which suits a poster and matches the wordmark bands on the site. If
  * the file is missing the card still draws in the renderer default.
+ *
+ * The left of the card is `site.socialImage`, whole; the indigo panel takes
+ * the rest. Without the photograph the panel fills the card as it used to.
  */
 export default async function OpengraphImage(
   props?: Props,
@@ -80,7 +113,10 @@ export default async function OpengraphImage(
      more. A page passes its own title and this default never applies. */
   const { title } = { ...{ title: site.tagline }, ...props };
 
-  const display = staticFont("font", "Franxurter.ttf");
+  const [display, photo] = [
+    staticFont("font", "Franxurter.ttf"),
+    await socialPhoto(),
+  ];
 
   const fonts = (
     display
@@ -98,10 +134,27 @@ export default async function OpengraphImage(
   return new ImageResponse(
     (
       <div
-        tw="flex h-full w-full flex-col justify-between p-20"
+        tw="flex h-full w-full"
         style={{ backgroundColor: "#23324B", fontFamily: "Franxurter" }}
       >
-        {/* The wordmark, SET rather than placed.
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- satori, not the DOM
+          <img
+            src={photo}
+            alt=""
+            width={PHOTO_WIDTH}
+            height={CARD.height}
+            style={{
+              width: PHOTO_WIDTH,
+              height: CARD.height,
+              objectFit: "cover",
+            }}
+          />
+        ) : null}
+        <div
+          tw={`flex h-full flex-1 flex-col justify-between ${photo ? "p-16" : "p-20"}`}
+        >
+          {/* The wordmark, SET rather than placed.
 
             It used to be `public/logo/Kozy Logo.png` - a 3.18 MB, 3836x2160
             raster read off disk and base64'd into the markup on every single
@@ -109,38 +162,44 @@ export default async function OpengraphImage(
             so on indigo it came out muddy. The site's own `.wordmark` is
             lowercase Franxurter and nothing else, which is exactly what this
             is: crisp at any size, correct on the palette, and free. */}
-        <div tw="flex items-center">
-          <p tw="text-4xl" style={{ color: "#FFF6EB", letterSpacing: "-0.02em" }}>
-            {`${site.name.toLowerCase()}`}
+          <div tw="flex items-center">
+            <p
+              tw="text-4xl"
+              style={{ color: "#FFF6EB", letterSpacing: "-0.02em" }}
+            >
+              {`${site.name.toLowerCase()}`}
+            </p>
+            <p
+              tw="ml-6 text-2xl"
+              style={{ color: "#A9BDAF", letterSpacing: 0 }}
+            >
+              {hero.flag.toUpperCase()}
+            </p>
+          </div>
+
+          <p
+            tw={photo ? "text-7xl" : "text-8xl"}
+            style={{
+              color: "#E8D9C4",
+              fontFamily: "Franxurter",
+              lineHeight: 1.02,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {title}
           </p>
-          <p tw="ml-6 text-2xl" style={{ color: "#A9BDAF", letterSpacing: 0 }}>
-            {hero.flag.toUpperCase()}
+
+          <p
+            tw="text-2xl"
+            style={{ color: "#FFF6EB", opacity: 0.7, letterSpacing: 0 }}
+          >
+            {site.instagram.toUpperCase()}
           </p>
         </div>
-
-        <p
-          tw="text-8xl"
-          style={{
-            color: "#E8D9C4",
-            fontFamily: "Franxurter",
-            lineHeight: 1.02,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {title}
-        </p>
-
-        <p
-          tw="text-2xl"
-          style={{ color: "#FFF6EB", opacity: 0.7, letterSpacing: 0 }}
-        >
-          {site.instagram.toUpperCase()}
-        </p>
       </div>
     ),
     {
-      width: 1200,
-      height: 630,
+      ...CARD,
       ...(fonts?.length ? { fonts } : {}),
     },
   );
