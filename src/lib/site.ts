@@ -1244,10 +1244,10 @@ export const kitBuilder = {
  */
 export const kitAtelier = {
   eyebrow: "The Kustom kit",
-  title: "Lay out your ritual",
-  circled: "your ritual",
+  title: "Build your own Kozy ritual.",
+  circled: "Kozy ritual",
   intro:
-    "Choose the Kompanions, the cloth they are cut in and the thread for your initials. The kit comes together on the table as you go, and goes to your cart from here.",
+    "Pick your favourite Kompanions, choose your Komfort print/fabric, add your initials thread & build your own Kustom Ritual Kit.",
   table: "The table",
   tableHint: "Tap a Kompanion to lay it on the table.",
   addPiece: (title: string) => `Lay the ${title} on the table`,
