@@ -1256,27 +1256,27 @@ export const kitAtelier = {
   tag: "Your kit",
   questions: {
     pieces: {
-      title: "Which Kompanions belong in your ritual?",
+      title: "Pick your Kompanions",
       hint: (min: number) =>
         min > 1
-          ? `Pick at least ${min}, then a size for each.`
-          : "Pick one or more, then a size for each.",
+          ? `Choose your favourite Kompanions for your ritual kit - at least ${min}.`
+          : "Choose your favourite Kompanions for your ritual kit.",
     },
     fabric: {
-      title: "What should they be cut in?",
-      hint: "One fabric for the whole kit. The price follows the cloth.",
+      title: "Choose your Komfort print",
+      hint: "Choose between solid or block Dabu prints for your Kompanions.",
     },
     colour: {
       title: "Which kolour for the cloth?",
       hint: (fabric: string) => `${fabric}, in the kolour you choose.`,
     },
     embroidery: {
-      title: "Shall we stitch your initials?",
-      hint: "Pick a thread, then type your letters. Or keep it plain.",
+      title: "Add your initials",
+      hint: "Choose the thread kolour and name for the initials.",
     },
     review: {
-      title: "Your kit, laid out.",
-      hint: "Look it over, then send it to your cart.",
+      title: "Make it yours",
+      hint: "Bring all your picks together to create your Kozy Kustom Ritual Kit.",
       empty: "The table is empty. Start with your Kompanions.",
       start: "Choose Kompanions",
     },
