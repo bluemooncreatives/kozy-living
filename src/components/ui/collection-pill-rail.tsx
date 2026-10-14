@@ -2,16 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import type { IconType } from "react-icons";
-import {
-  GiHearts,
-  GiIncense,
-  GiPalette,
-  GiPawPrint,
-  GiPillow,
-  GiRobe,
-  GiSlippers,
-  GiSparkles,
-} from "react-icons/gi";
+import { GiPawPrint, GiSparkles } from "react-icons/gi";
 import type { Menu } from "@/lib/shopify/types";
 
 /**
@@ -39,27 +30,74 @@ import type { Menu } from "@/lib/shopify/types";
  * their own tweens is a poor trade for a strip, and CSS keeps it working
  * before hydration.
  */
-function categoryIcon(title: string, path: string, lead: boolean): IconType {
-  if (lead) return GiHearts;
+/**
+ * The brand's own illustrated icons (`public/icons/categories/`), picked by
+ * matching the menu item's title AND path, so a pill keeps its picture when
+ * the merchant renames it but not when it is pointed somewhere else.
+ *
+ * They are cut from the Shopify uploads (`bathrobes.png` and the rest):
+ * trimmed to the ink box, because the originals carry up to 80% transparent
+ * margin and the well is only 36px; and capped at 128px, because the
+ * originals are ~2 MB each for a 36px paint. `slippers.png` was delivered
+ * with a grey checkerboard painted INTO its pixels (no alpha at all) - it was
+ * flood-filled out from the edges here. Re-cutting any of these means going
+ * back to the Shopify file.
+ *
+ * Order matters: "Ritual Kits" also says "ritual", and the kit bag (which
+ * reads "Kustom & Kits") is the picture for every kit. An item nothing
+ * matches gets a react-icons glyph in the same transparent well.
+ */
+type CategoryIcon =
+  | { src: string; width: number; height: number; scale?: number }
+  | { glyph: IconType };
+
+/* `scale` is optical, not geometric. Drawn to the same box, a solid disc
+   (the spiral) and a solid square (the pillow) weigh far more than the
+   open line art of the kit bag, so the two heavy ones are drawn smaller to
+   read the same size along the rail. */
+const ICONS = {
+  all: { src: "/icons/categories/all.png", width: 128, height: 104 },
+  bathrobes: {
+    src: "/icons/categories/bathrobes.png",
+    width: 101,
+    height: 128,
+  },
+  kit: { src: "/icons/categories/kit.png", width: 128, height: 107 },
+  pillows: {
+    src: "/icons/categories/pillows.png",
+    width: 128,
+    height: 116,
+    scale: 0.92,
+  },
+  colour: {
+    src: "/icons/categories/colour.png",
+    width: 124,
+    height: 128,
+    scale: 0.86,
+  },
+  mood: { src: "/icons/categories/mood.png", width: 128, height: 109 },
+  slippers: { src: "/icons/categories/slippers.png", width: 128, height: 106 },
+} satisfies Record<string, CategoryIcon>;
+
+function categoryIcon(
+  title: string,
+  path: string,
+  lead: boolean,
+): CategoryIcon {
+  if (lead) return ICONS.all;
 
   const category = `${title} ${path}`.toLowerCase();
+  const has = (...words: string[]) => words.some((w) => category.includes(w));
 
-  if (category.includes("robe")) return GiRobe;
-  if (category.includes("pillow")) return GiPillow;
-  if (category.includes("slipper")) return GiSlippers;
-  if (category.includes("ritual")) return GiIncense;
-  if (category.includes("colour") || category.includes("color")) {
-    return GiPalette;
-  }
-  if (
-    category.includes("pet") ||
-    category.includes("karrier") ||
-    category.includes("carrier")
-  ) {
-    return GiPawPrint;
-  }
+  if (has("kit")) return ICONS.kit;
+  if (has("robe")) return ICONS.bathrobes;
+  if (has("pillow")) return ICONS.pillows;
+  if (has("slipper")) return ICONS.slippers;
+  if (has("colour", "color", "kolour")) return ICONS.colour;
+  if (has("mood")) return ICONS.mood;
+  if (has("pet", "karrier", "carrier")) return { glyph: GiPawPrint };
 
-  return GiSparkles;
+  return { glyph: GiSparkles };
 }
 
 export default function CollectionPillRail({
@@ -101,7 +139,7 @@ export default function CollectionPillRail({
           data-dup={live ? undefined : ""}
         >
           {pills.map((pill, index) => {
-            const Icon = categoryIcon(pill.title, pill.path, pill.lead);
+            const icon = categoryIcon(pill.title, pill.path, pill.lead);
 
             return (
               <li
@@ -116,7 +154,29 @@ export default function CollectionPillRail({
                 >
                   <span className="cat-pill-label">{pill.title}</span>
                   <span aria-hidden className="cat-pill-icon">
-                    <Icon className="cat-pill-glyph" />
+                    {"src" in icon ? (
+                      // Unoptimized: the files are already 17-43 KB at
+                      // 128px, and the optimiser's srcset for a 32px paint
+                      // was serving the 40px variant to 2x screens - the
+                      // drawings came out soft.
+                      <Image
+                        src={icon.src}
+                        alt=""
+                        width={icon.width}
+                        height={icon.height}
+                        unoptimized
+                        className="cat-pill-art"
+                        style={
+                          "scale" in icon && icon.scale
+                            ? ({
+                                "--art-scale": icon.scale,
+                              } as React.CSSProperties)
+                            : undefined
+                        }
+                      />
+                    ) : (
+                      <icon.glyph className="cat-pill-glyph" />
+                    )}
                   </span>
                 </Link>
                 <span aria-hidden className="cat-pill-sep">

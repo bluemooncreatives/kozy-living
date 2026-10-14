@@ -158,6 +158,14 @@ accent) with the title set in a generic `serif` this brand does not own.
 `.serif` here is the UI face at bold, not a serif, which is very likely how
 that got in. It is now indigo / oat / sage, set in Franxurter.
 
+Its left column is a photograph, `site.socialImage` (owner's pick,
+2026-10-15): a 4:5 portrait with its own type baked in, so it is shown
+**whole** at the card's height (504x630), never cropped to 1.91:1 - a crop
+that wide cuts off both of its lines of type. The file is fetched and inlined
+before satori sees it, so a CDN failure drops the photograph (the panel then
+fills the card) instead of 500ing the route. Replacing the photo means
+updating its `width`/`height` too - the column is derived from them.
+
 **`next/og` cannot use Plus Jakarta Sans.** It rasterises through satori,
 which parses fonts with opentype and does not handle **variable** fonts -
 handing it one fails deep in the parser and, because the image is streamed,
@@ -524,6 +532,19 @@ box. ⚠️ The crop is in the file's own pixels, tied to that upload's `v=`:
 when the artwork was re-uploaded (it was 3836x2160 before), the old crop ran
 off the new canvas and cut the logo off. Replacing the artwork means
 re-measuring its ink box and updating the URL, `width` and `height` together.
+
+`public/icons/categories/` holds the category rail's illustrated icons
+(owner's set, 2026-10-15), cut from the Shopify uploads: trimmed to the ink
+box and capped at 128px (the originals are ~2 MB each). `slippers.png`
+arrived with a grey checkerboard painted into its pixels and no alpha; it
+was flood-filled out. `categoryIcon()` in `collection-pill-rail.tsx` picks
+one by matching the menu item's title and path ("kit" first, so Ritual Kits
+and Custom Kit share the kit bag); anything unmatched falls back to a
+react-icons glyph. The drawing's box is centred on the pill's end cap (28px
+in the 44px pill, 32px in the 48px one) so its corners clear the curve; a
+bigger box runs into the border. The well has no ground, and on the indigo states the
+drawing gets a cream hairline (`drop-shadow`) because its deep green
+vanishes on indigo.
 
 `public/kozy/` holds the two block-printed textile letters, and unlike
 `public/logo/` **no master is kept here** — both were delivered at 1254x1254

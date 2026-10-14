@@ -853,12 +853,16 @@
      icon well socketed into the end - so the strip reads as a row of the
      site's own CTAs rather than as generic filter chips.
 
-     Ivory pill / indigo well at rest; on hover the pill floods indigo and
-     the well turns sage and gently lifts the icon (sage/indigo
-     6.50). The lead "All Kompanions" pill starts in that solid state, which
-     is what marks where the loop begins. */
+     Ivory pill at rest; on hover the pill floods indigo and the icon gently
+     lifts. The lead "All Kompanions" pill starts in that solid state, which
+     is what marks where the loop begins.
+
+     The well has NO ground (owner's call, 2026-10-15): the icons are the
+     brand's own green illustrations, which carry their own fills. A glyph
+     fallback (a menu item no illustration matches) is ink at rest and paper
+     on indigo, in the same empty well. */
   .cat-pill {
-    @apply inline-flex h-11 shrink-0 items-center justify-between gap-3 rounded-chip border border-ink/15 bg-card pl-5 pr-1 font-sans text-ui font-semibold leading-none text-ink md:h-12 md:gap-4 md:pl-6 md:pr-1.5;
+    @apply inline-flex h-11 shrink-0 items-center justify-between gap-3 rounded-chip border border-ink/15 bg-card pl-5 pr-[7px] font-sans text-ui font-semibold leading-none text-ink md:h-12 md:gap-3.5 md:pl-6;
     transition:
       background-color 220ms ease,
       border-color 220ms ease,
@@ -869,16 +873,32 @@
     @apply whitespace-nowrap leading-none;
   }
 
+  /* CONCENTRIC with the pill's end cap. A drawing's box is square and the
+     cap is a semicircle, so the box only clears the curve when it is
+     centred on the cap's own centre and its half-diagonal is under the
+     radius: 28px in a 44px pill (r 22, half-diagonal 19.8) and 32px in a
+     48px one (r 24, 22.6), each 8px from the outer edge - 7px of padding
+     plus the 1px border. The 40px box
+     this replaced sat 7px from the edge and its corners ran into the
+     border - the pillow touched it. Change the pill's height and these
+     move with it. */
   .cat-pill-icon {
-    @apply flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-ink text-paper md:h-9 md:w-9;
+    @apply flex h-7 w-7 shrink-0 items-center justify-center self-center text-ink md:h-8 md:w-8;
     transition:
-      background-color 220ms ease,
       color 220ms ease,
       transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .cat-pill-glyph {
-    @apply block h-[1.05rem] w-[1.05rem] shrink-0;
+    @apply block h-[1.15rem] w-[1.15rem] shrink-0;
+  }
+
+  /* Contain, not cover: the files are trimmed to their ink box, so this is
+     the whole drawing at the well's size whatever its aspect. */
+  .cat-pill-art {
+    @apply block h-full w-full object-contain;
+    transform: scale(var(--art-scale, 1));
+    transition: filter 220ms ease;
   }
 
   .cat-pill:hover,
@@ -890,12 +910,23 @@
   .cat-pill:hover .cat-pill-icon,
   .cat-pill:focus-visible .cat-pill-icon,
   .cat-pill-lead .cat-pill-icon {
-    @apply bg-sage text-ink;
+    @apply text-paper;
+  }
+
+  /* On indigo the drawings' deep green all but disappears (the kit bag is
+     line art with an open body, the spiral's gaps are open too), so the
+     solid states trace them in a hairline of cream - a die-cut edge, still
+     no ground behind them. Four zero-blur shadows, one per side. */
+  .cat-pill:hover .cat-pill-art,
+  .cat-pill:focus-visible .cat-pill-art,
+  .cat-pill-lead .cat-pill-art {
+    filter: drop-shadow(1px 0 0 #fff6eb) drop-shadow(-1px 0 0 #fff6eb)
+      drop-shadow(0 1px 0 #fff6eb) drop-shadow(0 -1px 0 #fff6eb);
   }
 
   .cat-pill:hover .cat-pill-icon,
   .cat-pill:focus-visible .cat-pill-icon {
-    transform: translateY(-1px) scale(1.06);
+    transform: translateY(-1px) rotate(-6deg) scale(1.08);
   }
 
   /* The lead pill is already solid, so its hover answers by lifting the
