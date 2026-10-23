@@ -19,9 +19,11 @@ where the move stands.
 | Date | Step | State | Notes |
 | --- | --- | --- | --- |
 | 2026-10-23 | 1.3 Headless channel + storefront | Done | Storefront named **Kozy Living Headless**. Its Customer Account API endpoints carry shop id `97867235641`, the live store's (the same id as live's `/account`), so it is on live, not dev. |
-| 2026-10-23 | 1.4 Storefront API permissions | Done | Every scope on (see 1.4). Tokens not yet copied into Vercel. |
+| 2026-10-23 | 1.4 Storefront API permissions | Done | Every scope on (see 1.4). |
+| 2026-10-24 | 1.4 Storefront API tokens | Copied, verified | Public and private tokens both answer on `4nr8xa-3x` (shop `Kozy Living`, primary domain `kozyliving.in`). Staged **commented out** at the foot of local `.env`; dev stays active there until Phase 11. **Not yet in Vercel.** |
+| 2026-10-24 | 1.5 Channel publishing | Looks done, confirm | The live token already returns **90 products and 26 collections**, and the API returns only what is published to *Kozy Living Headless*. Check in Admin that nothing was missed (89 products were counted on 2026-10-15). |
 | 2026-10-23 | 1.6 Customer Account API permissions | Done | Every scope on. **Application setup (callback, origin, logout) still empty**: next step. |
-| — | 1.2 Backup, 1.5 channel publishing, 1.7 Admin apps, 1.8 freeze | Open | |
+| — | 1.2 Backup, 1.7 Admin apps, 1.8 freeze | Open | |
 
 ---
 
@@ -211,11 +213,17 @@ those permissions.
    | `unauthenticated_read_customers`, `unauthenticated_write_customers`, `unauthenticated_read_customer_tags` | No. Login goes through the Customer Account API (1.6) and the newsletter through the Admin API (1.7). Harmless; untick them if you want the token to carry only what the site uses. |
    | `unauthenticated_read_product_pickup_locations`, `unauthenticated_read_bundles`, `unauthenticated_read_bulk_operations`, `unauthenticated_write_bulk_operations`, `unauthenticated_read_shop_pay_installments_pricing` | No. Harmless. |
 
-3. Copy the **public access token**. It becomes
+3. [x] Copy the **public access token**. It becomes
    `SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
-4. Copy the **private access token**. It becomes
+4. [x] Copy the **private access token** (`shpat_…`). It becomes
    `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN`. Nothing reads it today; keep
-   it in Vercel anyway, never in a `NEXT_PUBLIC_` variable.
+   it in Vercel anyway, never in a `NEXT_PUBLIC_` variable. It is **not**
+   an Admin token: `admin.ts` never falls back to it (an old `.env` comment
+   said it did), so the contact forms and newsletter still need 1.7.
+5. [x] Both copied 2026-10-24 and checked against the live API (public in
+   `X-Shopify-Storefront-Access-Token`, private in
+   `Shopify-Storefront-Private-Token`). They sit commented out at the foot
+   of local `.env` until Phase 11 switches it over. Vercel: not yet (11.1).
 
 ### 1.5 Make products and collections available to the Headless channel
 

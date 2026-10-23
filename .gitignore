@@ -30,6 +30,10 @@ yarn-error.log*
 .env*.local
 .env.local
 .env.development
+# scratch copies of .env values (live tokens, old dev set) - push protection
+# rejected a commit carrying them on 2026-10-24
+docs/env-data.txt
+docs/old-env.txt
 
 # vercel
 .vercel
