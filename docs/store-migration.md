@@ -11,6 +11,18 @@ domain over without the shop going dark.
 > public `products.json` / `collections.json`). If you pick this up much
 > later, re-measure before trusting a number.
 
+## Progress
+
+Tick steps off here as they are done, so whoever picks this up next knows
+where the move stands.
+
+| Date | Step | State | Notes |
+| --- | --- | --- | --- |
+| 2026-10-23 | 1.3 Headless channel + storefront | Done | Storefront named **Kozy Living Headless**. Its Customer Account API endpoints carry shop id `97867235641`, the live store's (the same id as live's `/account`), so it is on live, not dev. |
+| 2026-10-23 | 1.4 Storefront API permissions | Done | Every scope on (see 1.4). Tokens not yet copied into Vercel. |
+| 2026-10-23 | 1.6 Customer Account API permissions | Done | Every scope on. **Application setup (callback, origin, logout) still empty**: next step. |
+| — | 1.2 Backup, 1.5 channel publishing, 1.7 Admin apps, 1.8 freeze | Open | |
+
 ---
 
 ## Contents
@@ -176,21 +188,29 @@ those permissions.
 
 ### 1.3 Install the Headless channel
 
-1. Admin → **Sales channels → +** (or the Shopify App Store) → install
+1. [x] Admin → **Sales channels → +** (or the Shopify App Store) → install
    **Headless** (by Shopify).
-2. **Headless → Create storefront.** Name it `Kozy Living (Next.js)`.
+2. [x] **Headless → Create storefront.** Named `Kozy Living Headless`
+   (2026-10-23). The name only labels it in Admin; nothing in code reads it.
 
 ### 1.4 Storefront API token and permissions
 
-1. Headless → *Kozy Living (Next.js)* → **Storefront API → Manage**.
-2. **Permissions → Edit**. Turn on everything the site reads:
-   - product listings, product inventory, product tags
-   - collection listings
-   - content (menus, pages, blogs and articles)
-   - **metaobjects**
-   - checkouts / cart (read and write)
-   - selling plans (harmless if unused)
-   - Save.
+1. Headless → *Kozy Living Headless* → **Storefront API → Manage**.
+2. [x] **Permissions → Edit**. Done 2026-10-23 with every scope on. Shopify
+   notes these are **shared across all Headless storefronts** on the store.
+
+   | Scope | Read by the site |
+   | --- | --- |
+   | `unauthenticated_read_product_listings` (products, variants **and collections**) | Yes. There is no separate collection scope any more. |
+   | `unauthenticated_read_product_inventory` | Yes: sold-out states, stock clamps. |
+   | `unauthenticated_read_product_tags` | Yes: the `kozy-addon` / `kozy-kit*` filters. |
+   | `unauthenticated_read_content` | Yes: menus, pages, blog, policies. |
+   | `unauthenticated_read_metaobjects` | Yes: colour, mood, add-ons, kit builder. |
+   | `unauthenticated_read_checkouts`, `unauthenticated_write_checkouts` | Yes: the cart and Buy now. |
+   | `unauthenticated_read_selling_plans` | Not today. Keep it: a pre-order app may need it (Phase 14). |
+   | `unauthenticated_read_customers`, `unauthenticated_write_customers`, `unauthenticated_read_customer_tags` | No. Login goes through the Customer Account API (1.6) and the newsletter through the Admin API (1.7). Harmless; untick them if you want the token to carry only what the site uses. |
+   | `unauthenticated_read_product_pickup_locations`, `unauthenticated_read_bundles`, `unauthenticated_read_bulk_operations`, `unauthenticated_write_bulk_operations`, `unauthenticated_read_shop_pay_installments_pricing` | No. Harmless. |
+
 3. Copy the **public access token**. It becomes
    `SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
 4. Copy the **private access token**. It becomes
@@ -204,7 +224,7 @@ The Storefront API returns only what is published to the storefront the
 token belongs to.
 
 - [ ] **Products** → select all (89) → **⋯ → Include in sales channel(s)**
-      → *Kozy Living (Next.js)*.
+      → *Kozy Living Headless*.
 - [ ] **Collections** → select all (26) → same.
 - [ ] Note for the future: every **new** product or collection must also
       be included in this channel, or it will not appear on the site.
@@ -214,18 +234,37 @@ should return 89 products and 26 collections.
 
 ### 1.6 Customer Account API (login and orders)
 
-1. Headless → *Kozy Living (Next.js)* → **Customer Account API → Application setup**.
+1. Headless → *Kozy Living Headless* → **Customer Account API**.
 2. Copy the **Client ID**. It becomes `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID`.
-3. Client type: **Public**. The site uses PKCE; see
-   `docs/CUSTOMER_AUTH_SETUP.md`.
-4. Add the **staging** URLs now:
-   - Callback: `https://kozy-living.vercel.app/api/auth/callback`
-   - JavaScript origin: `https://kozy-living.vercel.app`
-   - Logout: `https://kozy-living.vercel.app/`
+3. Client type: **Public**. The site uses PKCE and has no client secret;
+   see `docs/CUSTOMER_AUTH_SETUP.md`.
+4. [x] **Permissions**: done 2026-10-23 with every scope on (customers,
+   orders, draft orders, store credit, markets, companies, subscription
+   contracts, metaobjects; shared across all Headless storefronts). The
+   site reads the profile, addresses and orders, and logs in with
+   `openid email customer-account-api:full`.
+5. **Application endpoints: nothing to copy.** The authorize, token and
+   logout URLs shown there are discovered at runtime from
+   `https://<SHOPIFY_STORE_DOMAIN>/.well-known/openid-configuration`
+   (`src/lib/customer-account.ts`). Pointing `SHOPIFY_STORE_DOMAIN` at
+   live is all it takes.
+6. [ ] **Application setup → Edit.** Every entry must match what the code
+   sends, character for character:
+
+   | Field | Value | Why exactly this |
+   | --- | --- | --- |
+   | Callback URI | `https://kozy-living.vercel.app/api/auth/callback` | `redirect_uri` is `${NEXT_PUBLIC_SITE_URL}/api/auth/callback`. |
+   | JavaScript origin | `https://kozy-living.vercel.app` | No path, no trailing slash. |
+   | Logout URI | `https://kozy-living.vercel.app/` | **With** the trailing slash: the logout route sends `${NEXT_PUBLIC_SITE_URL}/`, and Shopify matches it exactly. |
+
+   Then add the **staging branch alias** as a second entry in each of the
+   three lists, once the `live-store` branch has deployed (Phase 12.1).
+   Vercel names it `kozy-living-git-live-store-<team>.vercel.app`; copy
+   the exact host from the deployment's *Domains*. That alias is what the
+   staging test signs in on.
 
    `kozyliving.in` is added at cutover (Phase 13.3, step 6).
-5. Permissions: customer profile, addresses, orders.
-6. **Settings → Customer accounts** is already on the new customer
+7. **Settings → Customer accounts** is already on the new customer
    accounts (verified). Leave it.
 
 ### 1.7 Admin API app (forms and newsletter at runtime, plus the migration)
@@ -361,7 +400,7 @@ The `custom-ritual-kit` / `KOZY-KIT` pair is also referenced by name in
   - The headless site still reaches them, because it loads them through
     metaobject references, which is one of the three ways Shopify returns
     an Unlisted product.
-- [ ] **Sales channels** for all 9: include *Kozy Living (Next.js)*. For
+- [ ] **Sales channels** for all 9: include *Kozy Living Headless*. For
       the 7 Unlisted ones, also untick Online Store, Shop, Google &
       YouTube and Facebook & Instagram.
 - [ ] **Inventory** (CSV location names do not match across stores):
@@ -655,7 +694,7 @@ Live-only collections need nothing and stay reachable at
   `neelu-indigo-ritual-kit`, `tulsi-ritual-kit`, `tulsi`, `neelu`.
 - ⚠️ Dev's collection holds kits as well as robes. It is kept as decided;
   flag it to the owner.
-- Include it in the *Kozy Living (Next.js)* channel.
+- Include it in the *Kozy Living Headless* channel.
 
 ### 7.4 Bestsellers
 
@@ -666,7 +705,7 @@ Live-only collections need nothing and stay reachable at
 ### 7.5 Channel
 
 - [ ] Every collection the site links to must be included in the
-      *Kozy Living (Next.js)* channel (Phase 1.5). The site **404s an
+      *Kozy Living Headless* channel (Phase 1.5). The site **404s an
       unknown or unpublished collection** on purpose.
 
 ---
@@ -902,7 +941,7 @@ first, Production at cutover. Mirror them in local `.env`.
 | `SHOPIFY_ADMIN_CLIENT_ID` / `SHOPIFY_ADMIN_CLIENT_SECRET` | runtime app (1.7) | Or `SHOPIFY_ADMIN_ACCESS_TOKEN`. |
 | `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` | `kozy-headless-menu` | 9.3 |
 | `SHOPIFY_REVALIDATION_SECRET` | a new long random string | Used in the webhook URL (13.3). It is empty today. |
-| `NEXT_PUBLIC_SITE_URL` | Preview: `https://kozy-living.vercel.app` · Production: `https://kozyliving.in` | Must match the Customer Account API URLs exactly. |
+| `NEXT_PUBLIC_SITE_URL` | Preview (`live-store` branch only): `https://kozy-living-git-live-store-<team>.vercel.app` · Production: `https://kozyliving.in` | Must match the Customer Account API URLs exactly. Not `kozy-living.vercel.app` on the preview: that host is production, still on dev until cutover, so a sign-in started on the preview would land there and fail its state check. |
 | `TWITTER_SITE` | `https://kozyliving.in` | It is `https://kozyliving.com` today. |
 | `SHOPIFY_STOREFRONT_PUBLIC_TOKEN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | delete or set to live values | Aliases. A stale dev value is a trap. |
 
@@ -1021,10 +1060,14 @@ Update in the same change:
 
 ### 12.1 Point a preview at live
 
-1. Vercel **Preview** environment variables = the live values from 11.1.
+1. Vercel **Preview** environment variables = the live values from 11.1,
+   scoped to the `live-store` branch so other previews stay on dev.
 2. Deploy the `live-store` branch.
-3. Check that the preview URL's callback is in the Customer Account API
-   settings (1.6).
+3. Take its branch alias (`kozy-living-git-live-store-<team>.vercel.app`),
+   set `NEXT_PUBLIC_SITE_URL` to it, and redeploy.
+4. Add the alias's callback, origin and logout URI to the Customer Account
+   API settings (1.6 step 6). Test sign-in on the alias, not on a
+   per-deployment `*.vercel.app` URL.
 
 ### 12.2 The test
 
