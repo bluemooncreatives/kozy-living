@@ -6,10 +6,13 @@ a Shopify theme. This file is the end-to-end runbook for that move: what
 exists where, what has to be rebuilt, in what order, and how to switch the
 domain over without the shop going dark.
 
-> Every count, handle and value below was measured on **2026-10-15**
-> against both stores (dev through the Storefront API, live through its
-> public `products.json` / `collections.json`). If you pick this up much
-> later, re-measure before trusting a number.
+> The plan below was measured on **2026-10-15** against both stores (dev
+> through the Storefront API, live through its public `products.json` /
+> `collections.json`). Live was **re-measured on 2026-10-25** through the
+> *Kozy Living Headless* token, and by then the owner had rebuilt live on
+> **dev's** structure rather than mapping onto live's old collections. Where
+> the two disagree, [Where live stands](#where-live-stands-2026-10-25) wins.
+> If you pick this up much later, re-measure before trusting a number.
 
 ## Progress
 
@@ -21,9 +24,97 @@ where the move stands.
 | 2026-10-23 | 1.3 Headless channel + storefront | Done | Storefront named **Kozy Living Headless**. Its Customer Account API endpoints carry shop id `97867235641`, the live store's (the same id as live's `/account`), so it is on live, not dev. |
 | 2026-10-23 | 1.4 Storefront API permissions | Done | Every scope on (see 1.4). |
 | 2026-10-24 | 1.4 Storefront API tokens | Copied, verified | Public and private tokens both answer on `4nr8xa-3x` (shop `Kozy Living`, primary domain `kozyliving.in`). Staged **commented out** at the foot of local `.env`; dev stays active there until Phase 11. **Not yet in Vercel.** |
-| 2026-10-24 | 1.5 Channel publishing | Looks done, confirm | The live token already returns **90 products and 26 collections**, and the API returns only what is published to *Kozy Living Headless*. Check in Admin that nothing was missed (89 products were counted on 2026-10-15). |
+| 2026-10-25 | 1.5 Channel publishing | Done | The live token returns **93 products and 20 collections**: everything listed on kozyliving.in, plus `pink-robe` and the mini sofa, which are on Headless only. |
 | 2026-10-23 | 1.6 Customer Account API permissions | Done | Every scope on. **Application setup (callback, origin, logout) still empty**: next step. |
-| — | 1.2 Backup, 1.7 Admin apps, 1.8 freeze | Open | |
+| 2026-10-25 | Local `.env` | On live | `SHOPIFY_STORE_DOMAIN` and both Storefront tokens are now live's, uncommented; dev's values are gone from it. The `SHOPIFY_ADMIN_CLIENT_*` pair is still **dev's** app: live answers `app_not_installed`, so the contact, B2B and newsletter forms fail locally until 1.7. |
+| 2026-10-25 | 2 Files | Partly | 30 of the 43 images (D.1 + D.3) are already in live Files under the same name. Missing: see [the open list](#still-open). Videos not checked (their URLs do not name a store). |
+| 2026-10-25 | 3 Products | Done except the 4 kit pieces | All 91 listed dev products, `custom-ritual-kit` and both add-ons are on live. `bathrobe`, `slipper`, `makeup-pouch` and `eye-mask` are not yet. Add-on fix-ups open. |
+| 2026-10-25 | 4-5 Metaobjects | Entries in, references open | All 30 entries exist with dev's values. No entry references a product, variant or file yet. |
+| 2026-10-25 | 6 Colour and mood | Open | 0 of 93 products carry `custom.shop_colors` or `custom.shop_mood`. |
+| 2026-10-25 | 7 Collections | Done, a different way | Live now has **dev's 20 collections**; 14 keep dev's handle, 6 were renamed. Live's old collections are gone, and their URLs 404 on kozyliving.in **today**. |
+| 2026-10-25 | 8.1 Pages | Done | Dev's 8 pages, same handles. |
+| 2026-10-25 | 9 Menus | Done, a different way | Built straight into live's `main-menu` and `kozy-living-footer`, not a separate `kozy-headless-menu`. |
+| — | 1.2 Backup, 1.7 Admin apps, 1.8 freeze, 8.2 journal, 10 | Open | |
+
+### Where live stands (2026-10-25)
+
+Measured through the Headless Storefront token, live's public
+`products.json` / `collections.json`, and dev's published site
+(`kozy-living.vercel.app`) for dev's collection members.
+
+**The approach changed.** The plan below maps dev onto live's existing
+collections and builds a separate headless menu, so the Pitch theme stays
+untouched. Instead, live was rebuilt to look like dev: dev's collections
+(mostly under dev's handles), dev's pages, and dev's menus in live's own
+`main-menu`. Three consequences:
+
+- **The code needs far fewer handle changes** (11.2 is rewritten for it).
+  `bestsellers`, `pet-collection`, `slippers` and `pet-carrier` stay as
+  they are.
+- **The Pitch theme already shows the new structure.** Its menu links to
+  the 8 empty pages (`/pages/kit-builder` and the rest render blank on the
+  theme), and the two add-ons are published to the Online Store.
+- **Live's old collection URLs are dead now, not at cutover.**
+  `/collections/best-sellers`, `kloud-slippers`, `krafted`,
+  `small-paws-klub`, `the-kozy-lounge` and `morning-luxuries-with-kozy`
+  all 404 on kozyliving.in, and the theme's homepage still links to the
+  last two. See [7.3](#73-old-live-collection-urls).
+
+What matches dev:
+
+| | State |
+| --- | --- |
+| Products | All 91 products dev lists, same handles. Plus `custom-ritual-kit` (Unlisted, SKU `KOZY-KIT`, ₹0) and both add-ons (SKUs and ₹499 / ₹999 correct). `pink-robe` and the mini sofa carry dev's variants and prices. |
+| Collections | 20, one per dev collection except `frontpage`. Members equal dev's in 14; the 6 differences are in [7.2](#72-membership-differences). |
+| Pages | `contact`, `faq`, `kit-builder`, `b2b-enquiries`, `founders-note`, `the-kozy-story`, `shop-by-colour`, `shop-by-mood`. Bodies empty, as in dev. |
+| Menus | `main-menu` and `kozy-living-footer` carry dev's tree, with **Krafted by Kozy → Slippers fixed**. Titles now read "Kustom Kit", "Shop by Colour" and "Contact" (dev: "Custom Kit", "Shop by Colours", "Contact Us"); the footer adds a Refund Policy item. |
+| Metaobjects | `shop_color` 6, `shop_mood` 6, `kit_fabric` 2, `kit_colour` 3 (each pointing at `solid`), `embroidery_thread` 6, `kit_piece` 4, `product_add_on` 2, `kit_builder` 1. Dev's handles, except `kit_piece` `eye-mask` (dev: `mask-eye-mask`). |
+| Policies | Privacy, refund, shipping. No terms of service. |
+
+#### Still open
+
+Live store:
+
+- [ ] **Create the 4 kit pieces** (3.1): `bathrobe`, `slipper`,
+      `makeup-pouch`, `eye-mask`, Unlisted, tag `kozy-kit-piece`.
+- [ ] **Add-ons** `personalized-initials` and `kozy-gift-box`: set
+      **Unlisted** (they are Active and list on the theme's
+      `/collections/all` and in the headless catalogue today), and change
+      their vendor from `Kozy Living Dev`.
+- [ ] **Metaobject references** (Appendix A). The Storefront API returns
+      none of these on live:
+  - [ ] `kit_piece.product` × 4, once the pieces exist.
+  - [ ] `product_add_on.variant` × 2. Until then the site offers no
+        initials and no gift box.
+  - [ ] `kit_builder.container_variant` → `custom-ritual-kit`. Until then
+        `/kit-builder` and the homepage atelier rest.
+  - [ ] `kit_fabric.swatch` × 2 and `kit_colour.swatch` × 3, after the
+        swatches are uploaded.
+- [ ] **Metaobject values that differ from dev**:
+  - `kit_fabric` `block-printed` has `is_default` **true**; dev has false.
+    Two defaults: set it false.
+  - `shop_color` `rose-pink` `name` is `" Rose Pink"`, with a leading
+    space. Trim it.
+- [ ] **Colour and mood on products** (Phase 6, Appendix B): not started.
+- [ ] **Collection members** that differ from dev (7.2).
+- [ ] **Redirects** for live's old collection URLs (7.3). This one affects
+      the live shop now.
+- [ ] **Files** missing on live (Phase 2): `Kozy_Logo.png`, the social card
+      `IMG_1187_7a482946-…_copy_2_jpg.jpg`, `IMG_1171_43dfc109-…`,
+      `IMG_6338_eea1aae1-…`, `IMG_2755_9be99538-…`, `IMG_6412_d18c7de3-…`,
+      `189666_jpg.jpg`, `IMG_0689_jpg.jpg`, and all 5 swatches (D.3). The
+      7 videos still need re-hosting.
+- [ ] **Journal** (8.2): live's `news` blog (titled *KOZY KORNER*) still has
+      only its own 3 articles; dev's 4 are not there.
+- [ ] Install the **runtime Admin app** on live (1.7).
+- [ ] Customer Account API **application setup** (1.6 step 6).
+- [ ] Backup (1.2), Flow, packing slip, notifications, discounts (Phase 10).
+
+Not checked (the Storefront API cannot see them): inventory tracking on
+`custom-ritual-kit` (must be off), product status beyond listed / not
+listed, collection sort order, shipping and tax settings, and whether the
+metafield definitions exist with Storefronts access. An Admin token on
+live (1.7) answers all of them.
 
 ---
 
@@ -93,8 +184,9 @@ file gets a **new ID** in the live store, and anything that holds a
 1. **Additive until cutover.** Phases 1-10 only *add* things to the live
    store, and the Pitch theme does not show any of them. The live shop
    keeps selling the whole time. Only Phase 13 changes what customers see.
-2. **Do not edit the live store's `main-menu` before cutover.** The Pitch
-   theme renders it. The headless site gets its own menu (Phase 9).
+2. ~~**Do not edit the live store's `main-menu` before cutover.**~~
+   Overtaken (2026-10-25): live's `main-menu` now *is* the headless menu,
+   and the Pitch theme renders it (Phase 9).
 3. **Match by handle, SKU or title, never by ID.**
 4. **Freeze the dev store.** From the moment Phase 1 starts, nobody edits
    dev's Admin. If something must change, change it in **both** stores.
@@ -107,31 +199,31 @@ file gets a **new ID** in the live store, and anything that holds a
 
 | Question | Decision |
 | --- | --- |
-| Which collection feeds the homepage Bestsellers rail? | The live store's existing **`best-sellers`** ("Best Sellers", 22 products), in its Admin order. Not `best-sellers-1` ("Best Sellers!", 12) and not dev's `bestsellers`. If the other one was meant, it is a one-line change (Phase 11.2). |
+| Which collection feeds the homepage Bestsellers rail? | ~~Live's `best-sellers` (22).~~ **Overtaken 2026-10-25:** live now has dev's `bestsellers` (6, the same members), and `best-sellers` is gone. The code keeps `bestsellers`. |
 | What comes over from dev? | **Everything**: the 2 dev-only products, the 7 add-on/kit products, every metaobject and entry, every colour and mood assignment, dev-only collection members, dev's 4 journal articles, both menus, Flow, the packing slip. |
-| Dev collection vs. a live collection doing the same job | The code moves to the **live** handle; no duplicate collection is created. Dev's extra members are added to the live one. Only one dev collection has no live twin and gets created (Phase 7). |
-| Live-only data | Stays: live-only collections, the extra members live collections already have, live's 3 journal articles, live's policies. |
+| Dev collection vs. a live collection doing the same job | ~~The code moves to the live handle.~~ **Overtaken 2026-10-25:** live was rebuilt on dev's 20 collections. 14 keep dev's handle; 6 got a cleaner one, and the code follows those 6 (11.2). |
+| Live-only data | Live's 3 journal articles and its policies stay. ~~Live-only collections~~: they no longer exist on live (7.3). |
 | Checkout subdomain | `shop.kozyliving.in` (placeholder until the owner confirms). |
 
 ---
 
 ## 1. The two stores, side by side
 
-| Thing | Dev | Live | Action |
+| Thing | Dev | Live, 2026-10-15 | Live, 2026-10-25 |
 | --- | --- | --- | --- |
-| Products (published) | 93 | 89 | 89 shared, same handles and titles. Bring over 9 (Phase 3). |
-| Collections | 21 | 26 | Different structure. Map 18, create 1 (Phase 7). |
-| Metaobject definitions used by the site | 9 | 0 | Phase 4 |
-| Metaobject entries | 30 (+ contact messages) | 0 | Phase 5 |
-| Products with `custom.shop_colors` | 57 | 0 | Phase 6 |
-| Products with `custom.shop_mood` | 33 | 0 | Phase 6 |
-| Menus read by the site | `main-menu`, `kozy-living-footer` | Pitch's `main-menu` only | New menus on live (Phase 9) |
-| Pages | 8, all with empty bodies | `contact` | Phase 8 |
-| Journal (`news`) | 4 articles | 3 different articles | Copy dev's 4 (Phase 8) |
-| Policies | privacy | privacy, refund, shipping | Nothing; live is ahead |
+| Products (published) | 93 | 89 | 93 on Headless: all of dev's except the 4 Unlisted kit pieces (Phase 3) |
+| Collections | 21 | 26 | 20, dev's structure (Phase 7) |
+| Metaobject definitions used by the site | 9 | 0 | 8 readable on Storefront; `contact_message` is private and not checked |
+| Metaobject entries | 30 (+ contact messages) | 0 | 30; references not set (Phase 5) |
+| Products with `custom.shop_colors` | 57 | 0 | 0 (Phase 6) |
+| Products with `custom.shop_mood` | 33 | 0 | 0 (Phase 6) |
+| Menus read by the site | `main-menu`, `kozy-living-footer` | Pitch's `main-menu` only | Both, built from dev's (Phase 9) |
+| Pages | 8, all with empty bodies | `contact` | Dev's 8 |
+| Journal (`news`) | 4 articles | 3 different articles | Unchanged: copy dev's 4 (Phase 8) |
+| Policies | privacy | privacy, refund, shipping | Same; live is ahead |
 | Customer accounts | new accounts | new accounts (`/account` → `shopify.com/97867235641/account`) | Nothing to switch |
 | Theme apps | none | 10 app embeds | Phase 14 |
-| Hard-coded media in `site.ts` | 38 images + 7 videos on dev's CDN | none | Phase 2 + 11 |
+| Hard-coded media in `site.ts` | 38 images + 7 videos on dev's CDN | none | 30 of 43 images present by name (Phase 2) |
 
 ---
 
@@ -355,6 +447,13 @@ Steps:
 ## Phase 3 - Products
 
 ### 3.1 The nine products
+
+> **2026-10-25:** five of the nine are on live. `custom-ritual-kit` is
+> Unlisted; `personalized-initials` and `kozy-gift-box` are still **Active**
+> with vendor `Kozy Living Dev` (3.3, 3.5 not done for them); `pink-robe`
+> and the mini sofa are published to Headless but not the Online Store.
+> **The four kit pieces are still to come**, so steps 3.2-3.6 now apply
+> to those four only, plus the add-on fix-ups.
 
 | Handle | Title (dev) | Tags | Options → variants @ price (₹) | SKU | Status on live |
 | --- | --- | --- | --- | --- | --- |
@@ -584,16 +683,23 @@ Shopify generates a handle from the display name. Open the entry's handle
 field and correct it before saving, e.g. `mask-eye-mask` and
 `add-your-initials`.
 
-Order, and what each depends on:
+Order, and what each depends on. As of 2026-10-25 every entry exists;
+the open part is the reference fields.
 
-1. [ ] `shop_color` × 6
-2. [ ] `shop_mood` × 6
-3. [ ] `kit_fabric` × 2: needs the swatches (Phase 2)
-4. [ ] `kit_colour` × 3: needs `kit_fabric` → `solid`
-5. [ ] `embroidery_thread` × 6
-6. [ ] `kit_piece` × 4: needs the Unlisted pieces (Phase 3)
-7. [ ] `product_add_on` × 2: needs the add-on variants (Phase 3)
-8. [ ] `kit_builder` × 1: needs `custom-ritual-kit`'s variant (Phase 3)
+1. [x] `shop_color` × 6. Trim `rose-pink`'s name (`" Rose Pink"`).
+2. [x] `shop_mood` × 6
+3. [~] `kit_fabric` × 2: entries in, **swatch** empty (needs Phase 2).
+   `block-printed` has `is_default` true; set it **false**.
+4. [~] `kit_colour` × 3: entries in, `fabric` → `solid` set, **swatch** empty.
+5. [x] `embroidery_thread` × 6
+6. [~] `kit_piece` × 4: entries in, **`product` empty** (the pieces are not
+   on live yet). The eye mask entry's handle is `eye-mask`, not dev's
+   `mask-eye-mask`; keep it, it only changes the `?pieces=` value in kit
+   links shared from dev.
+7. [~] `product_add_on` × 2: entries in, **`variant` empty**. Point them at
+   `KOZY-ADDON-INITIALS` and `KOZY-ADDON-GIFTBOX`.
+8. [~] `kit_builder` × 1: entry in, **`container_variant` empty**. Point it
+   at `custom-ritual-kit`'s variant (`KOZY-KIT`).
 
 Data defects to fix rather than copy:
 
@@ -624,6 +730,9 @@ code reads first (`src/lib/shop/colours.ts`). Do not "correct" it.
 
 ### 6.2 Values
 
+> **2026-10-25:** not started. No product on live returns either field
+> through the Storefront API.
+
 58 products. The full list is in [Appendix B](#appendix-b---colour-and-mood-on-products).
 
 - **By hand:** each product → *Metafields* → Shop colours / Shop mood →
@@ -640,81 +749,127 @@ code reads first (`src/lib/shop/colours.ts`). Do not "correct" it.
 
 ## Phase 7 - Collections
 
+> **Rewritten 2026-10-25.** The plan here used to map dev's collections
+> onto live's 26 existing ones (`kloud-slippers`, `krafted`,
+> `small-paws-klub`, …). Live was instead rebuilt on dev's structure, and
+> those 26 are gone. This is the state as measured.
+
 ### 7.1 The mapping
 
-The code moves to the live handle on the right (Phase 11.2). The
-"missing on live" column lists products that are in the dev collection
-but not the live one. Add them, so nothing from dev is lost.
+Live has one collection per dev collection, except Shopify's unused
+`frontpage`. 14 keep dev's handle; 6 were given a clean one, and the code
+follows those 6 (11.2).
 
-| Dev collection | Live collection | Dev / live count | Missing on live (add these) | Already on live only (keep) |
-| --- | --- | --- | --- | --- |
-| `bathrobes` | `bathrobes` | 11 / 5 | `hoodie-robe`, `mint-green-robe`, `masala-chai-robe`, `filter-coffee-robe`, `waffle-kessentials-robe`, `rose-tea-ritual-robe-kit` | — |
-| `ritual-kits` | `ritual-kits` | 9 / 4 | `waffle-kessentials-kit`, `rose-tea-ritual-robe-kit`, `morning-luxuries-ritual-kit-milk-froth`, `milk-froth-kit-ritual-kit`, `milk-froth-kessentials-kit` | — |
-| `slippers` | `kloud-slippers` | 11 / 9 (11 in Admin) | `white-cloud-wavy-slipper`, `green-tea-puffer-slipper` (may be unpublished on live; check) | — |
-| `dabu-printed-pillows` | `decorative-throw-pillows` | 10 / 10 | — | — |
-| `decorative-pillows` | `decorative-shaped-pillows` | 3 / 3 | — | — |
-| `pet-carrier` | `pet-karrier` | 7 / 7 | — | — |
-| `pet-seating` | `pet-seating` | 6 / 6 | — | — |
-| `pet-parent` | `pet-parent` | 7 / 7 | `scalloped-twin-set-toffee-modal-silk` | `silk-modal-leash-puffer-cover` |
-| `pet-clothing` | `pet-clothing` | 6 / 6 | — | — |
-| `crafted-by-kozy` | `krafted` | 14 / 14 | — | — |
-| `kessentials` | `kessentials` | 15 / 15 | — | — |
-| `pet-collection` | `small-paws-klub` | 20 / 25 | — | 5 pet pieces |
-| `kessentials-bathrobes` | `kessentials-bathrobes` | 6 / 6 | — | — |
-| `slippers-copy` (Kessentials Slippers) | `kessential-slippers` | 3 / 4 | `milk-froth-kloud-slipper` | `white-cloud-wavy-slipper`, `green-tea-puffer-slipper` |
-| `slippers-copy-1` (Krafted by kozy Slippers) | `krafted-slippers` | 8 / 5 | `white-cloud-wavy-slipper`, `green-tea-puffer-slipper`, `sunshine-oversized-polka-kloud` | — |
-| `krafted-rituals-kit` | `krafted-kits` | 3 / 2 | `neelu-tulsi-his-hers-ritual-kit`, `neelu-indigo-ritual-kit`, `tulsi-ritual-kit` | `kloud-komfort-kit`, `kloud-pouch-mask` |
-| `kessentials-ritual-kit` | `kessentials-ritual-kit` | 6 / 6 | — | — |
-| `bestsellers` | **`best-sellers`** (decision) | 6 / 22 | none: live's list is used as it is | — |
-| `kozy-by-crafted-bathrobes` | **none, create `krafted-bathrobes`** | 5 / — | see 7.3 | — |
-| `shop-by-colour` | not migrated | 17 / — | Unused by the code; Shop by colour reads metaobjects. | — |
-| `frontpage` | not migrated | 0 / — | Shopify's default, unused. | — |
+| Dev handle | Live handle | Live title | Members (dev / live) |
+| --- | --- | --- | --- |
+| `bathrobes` | `bathrobes` | Bathrobes | 11 / 11 |
+| `bestsellers` | `bestsellers` | Bestsellers | 6 / 6 |
+| `ritual-kits` | `ritual-kits` | Ritual Kits | 9 / 9 |
+| `slippers` | `slippers` | Slippers | 11 / 12, see 7.2 |
+| `kessentials` | `kessentials` | Kessentials | 15 / 16, see 7.2 |
+| `kessentials-bathrobes` | `kessentials-bathrobes` | Kessentials Bathrobes | 6 / 6 |
+| `kessentials-ritual-kit` | `kessentials-ritual-kit` | Kessentials Ritual Kit | 6 / 6 |
+| `krafted-rituals-kit` | `krafted-rituals-kit` | Krafted Rituals Kit | 3 / 3 |
+| `pet-collection` | `pet-collection` | Pet Collection | 20 / 21, see 7.2 |
+| `pet-carrier` | `pet-carrier` | Pet Carrier | 7 / 7 |
+| `pet-seating` | `pet-seating` | Pet Seating | 6 / 7, see 7.2 |
+| `pet-parent` | `pet-parent` | Pet & Parent | 7 / 7 |
+| `pet-clothing` | `pet-clothing` | Pet Clothing | 6 / 6 |
+| `shop-by-colour` | `shop-by-colour` | Shop By Colour | 17 / 17 (unused by the code) |
+| `crafted-by-kozy` | **`krafted-by-kozy`** | Krafted By Kozy | 14 / 16, see 7.2 |
+| `dabu-printed-pillows` | **`decorative-throw-pillows`** | Decorative Throw Pillows | 10 / 10 |
+| `decorative-pillows` | **`decorative-shaped-pillows`** | Decorative Shaped Pillows | 3 / 3 |
+| `slippers-copy` | **`kessentials-slippers`** | Kessentials Slippers | 3 / 3 |
+| `slippers-copy-1` | **`krafted-by-kozy-slippers`** | Krafted By Kozy Slippers | 8 / 8 |
+| `kozy-by-crafted-bathrobes` | **`krafted-by-kozy-bathrobes`** | Krafted By Kozy Bathrobes | 5 / 5 |
+| `frontpage` | not migrated | — | Shopify's default, unused. |
 
-Live-only collections need nothing and stay reachable at
-`/search/<handle>`:
+The renames also fix two of CLAUDE.md §6's data defects: the scrambled
+`kozy-by-crafted-bathrobes` handle, and `Krafted by  kozy Slippers`
+(double space, lowercase k), now `Krafted By Kozy Slippers`.
 
-- `best-sellers-1`
-- `floor-sitting`
-- `his-and-hers-kit-1`
-- `kessentials-kit`
-- `pillows`
-- `mini-sofas`
-- `morning-luxuries-with-kozy`
+Every collection is published to *Kozy Living Headless* (the token
+returns all 20), so 7.5 is done.
 
-### 7.2 Adding the missing members
+### 7.2 Membership differences
 
-- [ ] Open each live collection above and **add products**.
-- [ ] If the live collection is **automated** (smart), products cannot
-      be added by hand. Either adjust its conditions, or tag the products
-      so the conditions pick them up. Check the result count against the
-      dev number.
-- [ ] Counts from `collections.json` include only products published to
-      the Online Store. If a product in the list above is already in the
-      collection in Admin, it is just unpublished there. Leave it.
-- [ ] These additions show on the **Pitch theme too**, immediately. That
-      is harmless (more products listed), but tell the owner.
+Dev's members were read from dev's published site; live's from the
+Headless token. Everywhere else the two sets are identical. **Owner's
+call** on each: either make live match dev, or accept live as the newer
+intent.
 
-### 7.3 Create `krafted-bathrobes`
+| Live collection | On live, not in dev | In dev, not on live |
+| --- | --- | --- |
+| `slippers` | `masala-chai-waffle-slipper`, `puffer-sunshine-slipper` | `milk-froth-kloud-slipper` |
+| `kessentials` | `milk-froth-kloud-slipper` | — |
+| `krafted-by-kozy` | `neelu-indigo-ritual-kit`, `mini-soft-sofa-natural-yellow-dyed` | — |
+| `pet-collection` | `mini-soft-sofa-natural-yellow-dyed` | — |
+| `pet-seating` | `mini-soft-sofa-natural-yellow-dyed` | — |
 
-- Title: `Krafted by Kozy Bathrobes`. Handle: **`krafted-bathrobes`**.
-- Manual collection. Sort: manual, in dev's order.
-- Members, as in dev: `neelu-tulsi-his-hers-ritual-kit`,
-  `neelu-indigo-ritual-kit`, `tulsi-ritual-kit`, `tulsi`, `neelu`.
-- ⚠️ Dev's collection holds kits as well as robes. It is kept as decided;
-  flag it to the owner.
-- Include it in the *Kozy Living Headless* channel.
+The mini sofa is in three live collections but published only to
+Headless, so the theme does not show it there; the new site will.
+
+**Sort order was not compared.** The Storefront API gives a collection's
+own order and dev's site sorts its own way, so the two lists cannot be
+lined up. Check `bestsellers` especially: the homepage rail reads it in
+its Admin order.
+
+### 7.3 Old live collection URLs
+
+Live's previous collections no longer resolve. On 2026-10-25 each of
+these returned **404 on kozyliving.in**, and the Pitch homepage still
+links to the last two:
+
+`best-sellers`, `kloud-slippers`, `krafted`, `small-paws-klub`,
+`the-kozy-lounge`, `morning-luxuries-with-kozy`
+
+The other old handles (from the 2026-10-15 measurement) are almost
+certainly gone too: `best-sellers-1`, `pet-karrier`, `kessential-slippers`,
+`krafted-slippers`, `krafted-kits`, `floor-sitting`, `his-and-hers-kit-1`,
+`kessentials-kit`, `pillows`, `mini-sofas`.
+
+Two places need redirects, because the theme serves kozyliving.in until
+cutover and this app after it:
+
+- [ ] **Now, in Shopify:** Online Store → Navigation → **URL Redirects**,
+      `/collections/<old>` → `/collections/<new>`. Fixes the live shop and
+      Google's index today.
+- [ ] **At cutover, in `next.config.js`** (11.4): the same pairs as
+      `/collections/<old>` → `/search/<new>`, placed **before** the
+      generic `/collections/:handle` rule, which would otherwise send them
+      to a 404 on the new site.
+
+Suggested targets. Those marked *owner* have no obvious successor:
+
+| Old live handle | New live handle |
+| --- | --- |
+| `best-sellers`, `best-sellers-1` | `bestsellers` |
+| `kloud-slippers` | `slippers` |
+| `krafted` | `krafted-by-kozy` |
+| `small-paws-klub` | `pet-collection` |
+| `pet-karrier` | `pet-carrier` |
+| `kessential-slippers` | `kessentials-slippers` |
+| `krafted-slippers` | `krafted-by-kozy-slippers` |
+| `krafted-kits` | `krafted-rituals-kit` |
+| `kessentials-kit` | `kessentials-ritual-kit` |
+| `pillows` | `decorative-throw-pillows` |
+| `floor-sitting`, `mini-sofas` | `pet-seating` (*owner*) |
+| `the-kozy-lounge`, `morning-luxuries-with-kozy` | *owner* (perhaps `bathrobes` or `/search`) |
+| `his-and-hers-kit-1` | `/products/neelu-tulsi-his-hers-ritual-kit` (*owner*) |
+
+Also fix the theme homepage's two dead links, or let the redirects carry
+them.
 
 ### 7.4 Bestsellers
 
-- `best-sellers` is read **in its Admin order**. Open it and set **Sort:
-  Manually**, then order the 22 products as the owner wants them on the
-  homepage rail.
+- `bestsellers` is read **in its Admin order**. Open it and confirm
+  **Sort: Manually**, in the order the owner wants on the homepage rail.
 
 ### 7.5 Channel
 
-- [ ] Every collection the site links to must be included in the
-      *Kozy Living Headless* channel (Phase 1.5). The site **404s an
-      unknown or unpublished collection** on purpose.
+- [x] Every collection is in the *Kozy Living Headless* channel
+      (2026-10-25). Keep including new ones: the site **404s an unknown
+      or unpublished collection** on purpose.
 
 ---
 
@@ -723,15 +878,22 @@ Live-only collections need nothing and stay reachable at
 ### 8.1 Pages
 
 The site has its own routes for most pages, and those routes shadow
-Shopify pages of the same handle. So live needs only these:
+Shopify pages of the same handle.
 
-| Handle | On live? | Action |
+**Done 2026-10-25:** live has all 8 of dev's pages, under the same
+handles. The menus link to them as *Page* items, which the site rewrites
+from `/pages/x` to `/x`, so the code routes still answer.
+
+| Handle | On live? | Note |
 | --- | --- | --- |
-| `contact` | yes | none |
-| `faq` | no | Create `faq` (title `FAQ`). ⚠️ Dev's `faq` page has an **empty body**, so `/faq` renders an empty page in dev too. Either write the FAQ in it, or drop the footer's FAQ link (Phase 9.2). |
-| `shop-by-colour`, `shop-by-mood`, `the-kozy-story`, `founders-note`, `b2b-enquiries`, `kit-builder` | no | Not needed. These are code routes; the menus link to them by web address (Phase 9). Creating them would only add blank pages to the Pitch theme. |
+| `contact` | yes | |
+| `faq` | yes | ⚠️ **Empty body**, as in dev, so `/faq` renders an empty page. Write the FAQ in it, or drop the footer's FAQ item (Phase 9). |
+| `shop-by-colour`, `shop-by-mood`, `the-kozy-story`, `founders-note`, `b2b-enquiries`, `kit-builder` | yes | Empty bodies; the site's own routes shadow them. ⚠️ The Pitch theme's menu links to them, so **they render blank on kozyliving.in until cutover**. |
 
 ### 8.2 Journal
+
+> **2026-10-25:** not done. Live's `news` blog (titled *KOZY KORNER*)
+> still lists only its own 3 articles.
 
 Dev's blog `news` has 4 articles that live does not have:
 
@@ -782,61 +944,56 @@ used it:
 
 ## Phase 9 - Menus
 
-The site reads menus through the Storefront API. Build **new menus** on
-live, so the Pitch theme's `main-menu` is untouched until cutover.
+> **Rewritten 2026-10-25.** The plan was a separate `kozy-headless-menu`,
+> leaving the theme's `main-menu` alone. Instead dev's menu was built
+> straight into live's **`main-menu`**, which the site reads by default,
+> and the Pitch theme renders it too. This is what live holds.
 
-Live Admin → **Content → Menus → Create menu**. Check the **handle**
-under the title before saving.
+The site reads menus through the Storefront API and rewrites Shopify
+links: `/collections/x` → `/search/x`, `/products/x` → `/product/x`,
+`/pages/x` → `/x`. The menu titles are the merchant's text and appear as
+typed; the house spelling changes only "Crafted" → "Krafted" and "Pet
+Collection" → "Pet Kollection".
 
-- **"Web address" links** use a relative path (`/kit-builder`), exactly
-  as dev's Custom Kit item does.
-- **Collection, product and page links** are rewritten by the site:
-  `/collections/x` → `/search/x`, `/products/x` → `/product/x`,
-  `/pages/x` → `/x`.
-
-### 9.1 Main menu → handle `kozy-headless-menu`
-
-Title: `Kozy headless menu`. This is dev's `main-menu`, re-pointed at the
-live handles. **Krafted by Kozy → Slippers is fixed**: in dev it pointed
-at the parent collection (CLAUDE.md §6).
+### 9.1 Main menu → `main-menu` (done)
 
 | Item | Link type | Target on live |
 | --- | --- | --- |
 | **Home** | Home page | — |
-| **Shop** | Collection | All products (`/collections/all`) |
-|   Shop by Colours | Web address | `/shop-by-colour` |
-|   Shop by Mood | Web address | `/shop-by-mood` |
+| **Shop** | Catalog | `/collections/all` |
+|   Shop by Colour | Page | `shop-by-colour` |
+|   Shop by Mood | Page | `shop-by-mood` |
 |   Bathrobes | Collection | `bathrobes` |
 |   Pillows | Collection | `decorative-throw-pillows` |
-|   Slippers | Collection | `kloud-slippers` |
+|   Slippers | Collection | `slippers` |
 |   Ritual Kits | Collection | `ritual-kits` |
-|   Custom Kit | Web address | `/kit-builder` |
-| **Krafted by Kozy** | Collection | `krafted` |
-|   Bathrobes | Collection | `krafted-bathrobes` |
-|   Slippers | Collection | `krafted-slippers` |
+|   Kustom Kit | Page | `kit-builder` |
+| **Krafted by Kozy** | Collection | `krafted-by-kozy` |
+|   Bathrobes | Collection | `krafted-by-kozy-bathrobes` |
+|   Slippers | Collection | `krafted-by-kozy-slippers` (dev pointed at the parent; fixed) |
 |   Pillows | Collection | `decorative-throw-pillows` |
-|   Ritual Kits | Collection | `krafted-kits` |
-|   His and Her ritual kit | Product | `neelu-tulsi-his-hers-ritual-kit` |
+|   Ritual Kits | Collection | `krafted-rituals-kit` |
+|   His and Her Ritual Kit | Product | `neelu-tulsi-his-hers-ritual-kit` |
 | **Kessentials** | Collection | `kessentials` |
 |   Bathrobes | Collection | `kessentials-bathrobes` |
 |   Ritual Kits | Collection | `kessentials-ritual-kit` |
-|   Slippers | Collection | `kessential-slippers` |
-| **Pet Kollection** | Collection | `small-paws-klub` |
-|   Pet Karrier | Collection | `pet-karrier` |
+|   Slippers | Collection | `kessentials-slippers` |
+| **Pet Kollection** | Collection | `pet-collection` |
+|   Pet Karrier | Collection | `pet-carrier` |
 |   Pet Seating | Collection | `pet-seating` |
 |   Pet Klothing | Collection | `pet-clothing` |
 |   Pet & Parent | Collection | `pet-parent` |
-| **The Kozy Story** | Web address | `/the-kozy-story` |
-|   Founders Note | Web address | `/founders-note` |
-|   B2B Enquiries | Web address | `/b2b-enquiries` |
-|   Blogs | Blog | `News` |
-| **Contact Us** | Page | `Contact` |
+| **The Kozy Story** | Page | `the-kozy-story` |
+|   Founders Note | Page | `founders-note` |
+|   B2B Enquiries | Page | `b2b-enquiries` |
+|   Blogs | Blog | `news` |
+| **Contact** | Page | `contact` |
 
-The menu titles are the merchant's text and appear as typed. The site's
-house spelling changes only "Crafted" → "Krafted" and "Pet Collection" →
-"Pet Kollection".
+Against dev's menu: "Custom Kit" → "Kustom Kit", "Shop by Colours" →
+"Shop by Colour", "Contact Us" → "Contact", and page links where dev used
+web addresses. All of these resolve on the site.
 
-### 9.2 Footer → handle `kozy-living-footer`
+### 9.2 Footer → `kozy-living-footer` (done)
 
 The footer menu turns parents with children into columns, and puts items
 without children in a last column (CLAUDE.md §4).
@@ -844,39 +1001,32 @@ without children in a last column (CLAUDE.md §4).
 | Item | Link type | Target on live |
 | --- | --- | --- |
 | **Home** | Home page | — |
-| **Shop** | Collection | All products |
-|   Shop by Colours | Web address | `/shop-by-colour` |
-|   Shop by Mood | Web address | `/shop-by-mood` |
-|   Bathrobes | Collection | `bathrobes` |
-|   Pillows | Collection | `decorative-throw-pillows` |
-|   Slippers | Collection | `kloud-slippers` |
-|   Ritual Kits | Collection | `ritual-kits` |
-|   Custom Kit | Web address | `/kit-builder` |
-| **Krafted by Kozy** | Collection | `krafted` |
-|   Ritual Kits | Collection | `krafted-kits` |
-|   His and Her ritual kit | Product | `neelu-tulsi-his-hers-ritual-kit` |
-| **Kessentials** | Collection | `kessentials` |
-| **Pet Kollection** | Collection | `small-paws-klub` |
-|   Pet Karrier | Collection | `pet-karrier` |
-|   Pet Seating | Collection | `pet-seating` |
-|   Pet Klothing | Collection | `pet-clothing` |
-|   Pet & Parent | Collection | `pet-parent` |
-| **The Kozy Story** | Web address | `/the-kozy-story` |
-|   Founders Note | Web address | `/founders-note` |
-|   B2B Enquiries | Web address | `/b2b-enquiries` |
-|   FAQ | Page | `FAQ` (only if 8.1 created it with content) |
-|   Privacy Policy | Shop policy | Privacy policy |
-|   Blogs | Blog | `News` |
-| **Contact Us** | Page | `Contact` |
+| **Shop** | Catalog | as in 9.1, all seven children |
+| **Krafted by Kozy** | Collection | `krafted-by-kozy` |
+|   Ritual Kits | Collection | `krafted-rituals-kit` |
+|   His and Her Ritual Kit | Product | `neelu-tulsi-his-hers-ritual-kit` |
+| **Kessentials** | Collection | `kessentials` (no children) |
+| **Pet Kollection** | Collection | `pet-collection`, with the four pet collections |
+| **The Kozy Story** | Page | `the-kozy-story` |
+|   Founders Note | Page | `founders-note` |
+|   B2B Enquiries | Page | `b2b-enquiries` |
+|   Blogs | Blog | `news` |
+|   FAQ | Page | `faq` (⚠️ empty body, 8.1) |
+|   Privacy Policy | Shop policy | `privacy-policy` |
+|   Refund Policy | Shop policy | `refund-policy` |
+| **Contact** | Page | `contact` |
 
-Live also has refund and shipping policies. The footer's legal row lists
-them automatically from `getShopPolicyNames()`; no menu item is needed.
+The footer's legal row lists the shop's policies on its own
+(`getShopPolicyNames()`), so the two policy items appear twice on the
+page. Harmless; drop them from the menu if the owner prefers.
+
+Live's Shopify-default `footer` menu (one "Search" link) is not read.
 
 ### 9.3 Environment
 
-- `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE=kozy-headless-menu`. Without it the
-  site falls back to `main-menu`, which is the Pitch theme's menu.
-- The footer handle is the code's default, so no variable is needed.
+- **No menu variable is needed.** The site tries `main-menu` and
+  `kozy-living-footer` by default. Leave
+  `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` unset.
 
 ---
 
@@ -947,7 +1097,7 @@ first, Production at cutover. Mirror them in local `.env`.
 | `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` | private token (1.4) | Server only. |
 | `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID` | from 1.6 | |
 | `SHOPIFY_ADMIN_CLIENT_ID` / `SHOPIFY_ADMIN_CLIENT_SECRET` | runtime app (1.7) | Or `SHOPIFY_ADMIN_ACCESS_TOKEN`. |
-| `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` | `kozy-headless-menu` | 9.3 |
+| `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` | leave unset | Live's `main-menu` is the headless menu (9.3). |
 | `SHOPIFY_REVALIDATION_SECRET` | a new long random string | Used in the webhook URL (13.3). It is empty today. |
 | `NEXT_PUBLIC_SITE_URL` | Preview (`live-store` branch only): `https://kozy-living-git-live-store-<team>.vercel.app` · Production: `https://kozyliving.in` | Must match the Customer Account API URLs exactly. Not `kozy-living.vercel.app` on the preview: that host is production, still on dev until cutover, so a sign-in started on the preview would land there and fail its state check. |
 | `TWITTER_SITE` | `https://kozyliving.in` | It is `https://kozyliving.com` today. |
@@ -958,36 +1108,38 @@ preview cannot quietly read the wrong store.
 
 ### 11.2 Collection handles in code
 
-Line numbers are as of commit `d56418b`. Search for the old handle if
-they have moved.
+**Rewritten 2026-10-25** for the live store as rebuilt (7.1). Only the
+six renamed collections move; line numbers are as of commit `b9118f0`.
+Search for the old handle if they have moved.
 
 | File | Where | Old | New |
 | --- | --- | --- | --- |
-| `src/app/page.tsx` | `BESTSELLERS_COLLECTION_HANDLE` (~602) | `bestsellers` | `best-sellers` |
-| `src/components/product/product-description.tsx` | `PET_COLLECTION_HANDLE` (~15) | `pet-collection` | `small-paws-klub` |
-| `src/components/product/product-description.tsx` | `KRAFTED_BY_KOZY_COLLECTION_HANDLE` (~17) | `crafted-by-kozy` | `krafted` |
-| `src/lib/site.ts` | `hero` (~227) | `kozy-lounge` | `the-kozy-lounge` (it now resolves; it never existed in dev) |
-| `src/lib/site.ts` | `lookbook` (~318) | `crafted-by-kozy` | `krafted` |
-| `src/lib/site.ts` | `lookbook` (~338) | `pet-collection` | `small-paws-klub` |
+| `src/components/product/product-description.tsx` | `KRAFTED_BY_KOZY_COLLECTION_HANDLE` (~17) | `crafted-by-kozy` | `krafted-by-kozy` |
+| `src/lib/site.ts` | `lookbook` (~318) | `crafted-by-kozy` | `krafted-by-kozy` |
 | `src/lib/site.ts` | `lookbook` (~377) | `dabu-printed-pillows` | `decorative-throw-pillows` |
-| `src/lib/site.ts` | `lookbook` (~384) | `slippers` | `kloud-slippers` |
-| `src/lib/site.ts` | `lookbook` (~399) | `pet-carrier` | `pet-karrier` |
 | `src/lib/site.ts` | `aboutStory` (~501) | `dabu-printed-pillows` | `decorative-throw-pillows` |
-| `src/lib/site.ts` | `aboutStory` (~516) | `kozy-lounge` | `the-kozy-lounge` |
-| `src/lib/site.ts` | `aboutStory` (~543) | `pet-collection` | `small-paws-klub` |
+| `src/lib/shop/faq.ts` | bathrobes (~56) | `kozy-by-crafted-bathrobes` | `krafted-by-kozy-bathrobes` |
+| `src/lib/shop/faq.ts` | slippers (~63) | `slippers-copy`, `slippers-copy-1` | `kessentials-slippers`, `krafted-by-kozy-slippers` |
+| `src/lib/shop/faq.ts` | pillows (~70, ~72 `shelf`) | `dabu-printed-pillows`, `decorative-pillows` | `decorative-throw-pillows`, `decorative-shaped-pillows` |
 
-**Unchanged** (same handle on both stores): `kessentials`, `ritual-kits`,
-`pet-parent`, `bathrobes`, `pet-seating`, `pet-clothing`, and the product
-handles `neelu-tulsi-his-hers-ritual-kit`, `hoodie-robe` and
+**Unchanged** (same handle on both stores): `bestsellers`
+(`BESTSELLERS_COLLECTION_HANDLE` in `page.tsx`), `pet-collection`
+(`PET_COLLECTION_HANDLE`, the lookbook, `aboutStory`, `faq.ts`),
+`slippers`, `pet-carrier`, `pet-seating`, `pet-clothing`, `pet-parent`,
+`ritual-kits`, `kessentials`, `kessentials-bathrobes`,
+`kessentials-ritual-kit`, `krafted-rituals-kit`, and the product handles
+`neelu-tulsi-his-hers-ritual-kit`, `hoodie-robe` and
 `biscuits-floor-pillow-with-gusset`.
 
-`page.tsx` `CuratedEdits` asks for `blend`, which exists in neither store.
-It already falls back (CLAUDE.md §6) and is left alone.
+`kozy-lounge` (`site.ts` hero ~227, `aboutStory` ~516) and `blend`
+(`page.tsx` `CuratedEdits`) exist in neither store and already fall back
+(CLAUDE.md §6). The earlier advice to point `kozy-lounge` at live's
+`the-kozy-lounge` is void: that collection is gone.
 
 Check after editing (should print nothing):
 
 ```sh
-grep -rnE "\"(bestsellers|crafted-by-kozy|pet-collection|dabu-printed-pillows|slippers|pet-carrier|kozy-lounge|slippers-copy(-1)?|kozy-by-crafted-bathrobes|krafted-rituals-kit|decorative-pillows)\"" src
+grep -rnE "\"(crafted-by-kozy|dabu-printed-pillows|decorative-pillows|slippers-copy(-1)?|kozy-by-crafted-bathrobes)\"" src
 ```
 
 ### 11.3 Media URLs
@@ -1019,6 +1171,12 @@ before the collection one.
 { source: "/collections/:collection/products/:handle", destination: "/product/:handle", permanent: true },
 { source: "/collections", destination: "/search", permanent: true },
 { source: "/collections/all", destination: "/search", permanent: true },
+// Live's pre-2026-10-25 collection handles (7.3), before the generic rule.
+{ source: "/collections/best-sellers", destination: "/search/bestsellers", permanent: true },
+{ source: "/collections/kloud-slippers", destination: "/search/slippers", permanent: true },
+{ source: "/collections/krafted", destination: "/search/krafted-by-kozy", permanent: true },
+{ source: "/collections/small-paws-klub", destination: "/search/pet-collection", permanent: true },
+// …one line per row of the table in 7.3, with the owner's picks filled in.
 { source: "/collections/:handle", destination: "/search/:handle", permanent: true },
 { source: "/pages/:handle", destination: "/:handle", permanent: true },
 { source: "/cart", destination: "/", permanent: false },
@@ -1049,17 +1207,23 @@ app.
 - `src/lib/site.ts` `email: "care@kozyliving.com"` is `TODO(brand)` and
   on the `.com` domain. Confirm the real address with the owner; it stays
   marked TODO until then.
-- `.env.sample`: add `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE`.
+- ~~`.env.sample`: add `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE`.~~ Not needed
+  since the menu went into `main-menu` (9.3).
 
 ### 11.7 Documentation
 
 Update in the same change:
 
-- `CLAUDE.md` §4 (menu handle), §6 "Known Shopify data defects":
-  - `crafted-by-kozy` is now `krafted` on live
-  - the slippers menu link is fixed
-  - `slippers-copy-1` and `kozy-by-crafted-bathrobes` are no longer used
-  - `kozy-lounge` now exists as `the-kozy-lounge`
+- `CLAUDE.md` §6 "Known Shopify data defects":
+  - `crafted-by-kozy` is now `krafted-by-kozy` on live, so
+    `KRAFTED_BY_KOZY_COLLECTION_HANDLE` follows it
+  - `kozy-by-crafted-bathrobes` is now `krafted-by-kozy-bathrobes`
+  - `slippers-copy-1` is now `krafted-by-kozy-slippers`, titled
+    `Krafted By Kozy Slippers` (no double space)
+  - the Krafted by Kozy → Slippers menu link is fixed
+  - `kozy-lounge` still exists nowhere
+- `CLAUDE.md` §4: the menu is still `main-menu` (no change to the handle
+  order), and the footer is still `kozy-living-footer`.
 - `docs/CUSTOMER_AUTH_SETUP.md`: production URLs → `https://kozyliving.in`.
 
 ---
@@ -1084,11 +1248,13 @@ curtain, the newsletter popup, the viewport cookie.
 
 **Catalogue**
 - [ ] Homepage: every section renders, in order. The list is in CLAUDE.md §5.
-  - Bestsellers shows `best-sellers` in Admin order.
+  - Bestsellers shows `bestsellers` in Admin order.
   - The lookbook pages turn.
   - The story band's links resolve.
 - [ ] Every menu and footer link opens a page. **No 404s.**
-- [ ] `/search`, every mapped collection, and `/search/krafted-bathrobes`.
+- [ ] `/search` and all 20 collections in 7.1, including the six renamed
+      ones (`/search/krafted-by-kozy-bathrobes` and the rest).
+- [ ] The old handles in 7.3 redirect (once 11.4 has them).
 - [ ] A multi-variant product: the price follows the size; sold-out
       variants are handled.
 - [ ] `/product/pink-robe`, `/product/mini-soft-sofa-natural-yellow-dyed`.
@@ -1229,8 +1395,11 @@ longer reaches Shopify.
 
 ### 13.6 Rollback, if something is badly wrong
 
-Phases 1-10 are invisible to the theme, so a rollback is DNS plus one
-theme switch:
+A rollback is DNS plus one theme switch. ⚠️ Phases 1-10 were meant to be
+invisible to the theme, but since 2026-10-25 they are not: the theme
+already renders the rebuilt collections, menu and pages (see
+[Where live stands](#where-live-stands-2026-10-25)). Rolling back returns
+the theme as it is then, not as it was on 2026-10-15.
 
 1. Shopify → Domains → connect `kozyliving.in` again and **set it
    primary**.
@@ -1473,24 +1642,17 @@ may want `rose-pink` added. Optional.
 
 ## Appendix C - Collection membership gaps
 
-These are the "Missing on live" lists from [Phase 7.1](#71-the-mapping),
-gathered here as one checklist:
+**Rewritten 2026-10-25.** The old list added dev's members to live's old
+collections, which no longer exist. What remains is 7.2, as one checklist
+(owner's call on each: match dev, or keep live's):
 
-- [ ] `bathrobes` + `hoodie-robe`, `mint-green-robe`, `masala-chai-robe`,
-      `filter-coffee-robe`, `waffle-kessentials-robe`, `rose-tea-ritual-robe-kit`
-- [ ] `ritual-kits` + `waffle-kessentials-kit`, `rose-tea-ritual-robe-kit`,
-      `morning-luxuries-ritual-kit-milk-froth`, `milk-froth-kit-ritual-kit`,
-      `milk-froth-kessentials-kit`
-- [ ] `kloud-slippers` + `white-cloud-wavy-slipper`, `green-tea-puffer-slipper`
-      (check first; Admin may already hold them)
-- [ ] `pet-parent` + `scalloped-twin-set-toffee-modal-silk`
-- [ ] `kessential-slippers` + `milk-froth-kloud-slipper`
-- [ ] `krafted-slippers` + `white-cloud-wavy-slipper`, `green-tea-puffer-slipper`,
-      `sunshine-oversized-polka-kloud`
-- [ ] `krafted-kits` + `neelu-tulsi-his-hers-ritual-kit`, `neelu-indigo-ritual-kit`,
-      `tulsi-ritual-kit`
-- [ ] **new** `krafted-bathrobes` = `neelu-tulsi-his-hers-ritual-kit`,
-      `neelu-indigo-ritual-kit`, `tulsi-ritual-kit`, `tulsi`, `neelu`
+- [ ] `slippers`: dev has `milk-froth-kloud-slipper`; live has
+      `masala-chai-waffle-slipper` and `puffer-sunshine-slipper` instead
+- [ ] `kessentials`: live adds `milk-froth-kloud-slipper`
+- [ ] `krafted-by-kozy`: live adds `neelu-indigo-ritual-kit` and
+      `mini-soft-sofa-natural-yellow-dyed`
+- [ ] `pet-collection`: live adds `mini-soft-sofa-natural-yellow-dyed`
+- [ ] `pet-seating`: live adds `mini-soft-sofa-natural-yellow-dyed`
 
 ---
 
@@ -1577,16 +1739,26 @@ question "will the site see it?" directly.
 curl -s https://4nr8xa-3x.myshopify.com/api/2026-07/graphql.json \
   -H "Content-Type: application/json" \
   -H "X-Shopify-Storefront-Access-Token: $SHOPIFY_STOREFRONT_ACCESS_TOKEN" \
-  -d '{"query":"{ products(first:250){nodes{handle}} collections(first:250){nodes{handle}} c:metaobjects(type:\"shop_color\",first:50){nodes{handle}} m:metaobjects(type:\"shop_mood\",first:50){nodes{handle}} f:metaobjects(type:\"kit_fabric\",first:50){nodes{handle}} b:metaobjects(type:\"kit_builder\",first:5){nodes{handle}} p:metaobjects(type:\"kit_piece\",first:50){nodes{handle}} a:metaobjects(type:\"product_add_on\",first:50){nodes{handle}} k:metaobjects(type:\"kit_colour\",first:50){nodes{handle}} t:metaobjects(type:\"embroidery_thread\",first:50){nodes{handle}} menu(handle:\"kozy-headless-menu\"){items{title}} }"}'
+  -d '{"query":"{ products(first:250){nodes{handle}} collections(first:250){nodes{handle}} c:metaobjects(type:\"shop_color\",first:50){nodes{handle}} m:metaobjects(type:\"shop_mood\",first:50){nodes{handle}} f:metaobjects(type:\"kit_fabric\",first:50){nodes{handle}} b:metaobjects(type:\"kit_builder\",first:5){nodes{handle}} p:metaobjects(type:\"kit_piece\",first:50){nodes{handle}} a:metaobjects(type:\"product_add_on\",first:50){nodes{handle}} k:metaobjects(type:\"kit_colour\",first:50){nodes{handle}} t:metaobjects(type:\"embroidery_thread\",first:50){nodes{handle}} menu(handle:\"main-menu\"){items{title}} }"}'
 ```
 
-Expected:
+Expected once Phases 3-9 are done:
 
-- 91 products: 89 + the 2 Active dev-only products. The 7 Unlisted ones
-  do **not** list; that is correct.
-- 27 collections.
-- Metaobject counts 6 / 6 / 2 / 1 / 4 / 2 / 3 / 6.
-- The menu's 7 top-level items.
+- 91 products: all of dev's listed products. The 7 Unlisted ones
+  (4 pieces, the kit, 2 add-ons) do **not** list; that is correct.
+  On 2026-10-25 this returned **93**, because both add-ons were still
+  Active.
+- 20 collections (7.1).
+- Metaobject counts 6 / 6 / 2 / 1 / 4 / 2 / 3 / 6 (true on 2026-10-25).
+- The menu's 7 top-level items (true on 2026-10-25).
+
+Counts alone do not show the reference fields. To see which are still
+empty, ask for them: an unset field is simply missing from `fields`.
+
+```graphql
+{ metaobjects(type: "product_add_on", first: 10) { nodes { handle
+    fields { key value reference { __typename } } } } }
+```
 
 ### E.2 The scripted route for Phases 4-6
 
