@@ -416,17 +416,26 @@ used it:
 
 ### 7.1 Shopify Flow
 
-1. [ ] Install **Shopify Flow** on live, if it is not installed.
-2. [ ] In dev's Flow, open each workflow → **⋯ → Export** (`.flow` file):
-   - add-ons: order tags `personalised` and `gift-box`
-     (`docs/personalisation-add-ons.md` §4 Step 5)
-   - kit: order tags `custom-kit` and `block-print`
-     (`docs/custom-kit-builder.md` §5 Step 7)
-   - any newsletter automation (`docs/NEWSLETTER_SETUP.md` §4)
-3. [ ] In live's Flow, **Import** each one. Check that the conditions
-       still read `KOZY-ADDON-INITIALS`, `KOZY-ADDON-GIFTBOX` and
-       `KOZY-KIT`, then **turn it on**.
-4. [ ] **Delete live's old workflows.** Only dev's come over.
+1. [x] Shopify Flow is installed on live.
+2. [x] **Add-ons workflow** (2026-10-26, from a screenshot; Flow is not
+       visible to the Storefront API). *Order created* → SKU
+       `KOZY-ADDON-INITIALS` → tag `personalised`; SKU
+       `KOZY-ADDON-GIFTBOX` → tag `gift-box`. Active. Still named "New
+       Workflow"; rename it (e.g. "Tag personalised orders") so it is
+       findable. Both conditions must use **at least one of** the line
+       items (`docs/personalisation-add-ons.md` §4 Step 5).
+3. [ ] **Kit branches**, in the same workflow (Edit → add two conditions
+       on the *Order created* trigger), per `docs/custom-kit-builder.md`
+       §5 Step 7:
+   - *Line items → SKU*, **at least one**, *is equal to* `KOZY-KIT` →
+     *Add order tags* `custom-kit`.
+   - *Line items → Variant title*, **at least one**, *contains*
+     `Block printed` → *Add order tags* `block-print`.
+4. [ ] Any newsletter automation dev has (`docs/NEWSLETTER_SETUP.md` §4).
+5. [ ] **Delete live's old workflows.** Only these come over.
+
+The real test is the test order in Step 11.2: the order must carry
+`personalised`, `gift-box` and `custom-kit`.
 
 ### 7.2 Packing slip
 
