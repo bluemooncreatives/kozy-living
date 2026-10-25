@@ -33,20 +33,20 @@ stray visitors to the new site.
 | --- | --- | --- |
 | 2026-10-23 | Headless channel, storefront **Kozy Living Headless** | On live (shop id `97867235641`). |
 | 2026-10-23 | Storefront API permissions | Every scope on. |
-| 2026-10-24 | Storefront API tokens | Public and private both answer on `4nr8xa-3x`. In local `.env`; **not yet in Vercel** (Step 13). |
+| 2026-10-24 | Storefront API tokens | Public and private both answer on `4nr8xa-3x`. In local `.env`; **not yet in Vercel** (Step 12). |
 | 2026-10-25 | Channel publishing | The token returns 93 products and 20 collections. |
-| 2026-10-23 | Customer Account API permissions | Every scope on. Application setup is Step 12. |
-| 2026-10-25 | Products | All 91 products dev lists, plus `custom-ritual-kit` and both add-ons. Only the 4 kit pieces are missing (Step 6). |
-| 2026-10-25 | Metaobject definitions and entries | All 30 entries, with dev's values. Their reference fields are Step 7. |
+| 2026-10-23 | Customer Account API permissions | Every scope on. Application setup is Step 11. |
+| 2026-10-25 | Products | All 91 products dev lists, plus `custom-ritual-kit` and both add-ons. Only the 4 kit pieces are missing (Step 5). |
+| 2026-10-25 | Metaobject definitions and entries | All 30 entries, with dev's values. Their reference fields are Step 6. |
 | 2026-10-25 | Collections | Live rebuilt on **dev's 20 collections** (table below). Live's old collections are gone. |
 | 2026-10-25 | Pages | Dev's 8 pages, same handles, empty bodies as in dev. |
 | 2026-10-25 | Menus | Dev's tree built into live's **`main-menu`** and **`kozy-living-footer`**, which the site reads by default. Krafted by Kozy → Slippers fixed. |
-| 2026-10-25 | Local `.env` | Points at live. Its `SHOPIFY_ADMIN_CLIENT_*` pair is still dev's app, so the forms fail locally until Step 4. |
+| 2026-10-25 | Local `.env` | Points at live. Its `SHOPIFY_ADMIN_CLIENT_*` pair is still dev's app, so the forms fail locally until Step 3. |
 
 ### How live's collections map to dev's
 
 14 collections kept dev's handle. These 6 were renamed, and the code
-follows them (Step 13.2):
+follows them (Step 12.2):
 
 | Dev handle | Live handle |
 | --- | --- |
@@ -75,7 +75,7 @@ brought over (unused).
    metaobject and file has a new ID on live.
 3. **Freeze the dev store.** From now on nobody edits dev's Admin. If
    something must change, change it in **both** stores. Do not delete or
-   close dev until Step 17: the 4 kit pieces import their images from its
+   close dev until Step 16: the 4 kit pieces import their images from its
    CDN, and it is the reference for every value here.
 4. **Go in order.** Metaobject references need the products and files to
    exist first.
@@ -96,39 +96,26 @@ brought over (unused).
 
 | Step | What | Who | Shows on kozyliving.in? |
 | --- | --- | --- | --- |
-| 1 | Back up the live store | Owner | No |
-| 2 | **Redirect live's old collection URLs** (urgent) | Owner | Yes: fixes 404s |
-| 3 | Decide the collection member differences | Owner | Yes |
-| 4 | Admin API apps | Owner + dev | No |
-| 5 | Upload the missing files | Admin | No |
-| 6 | The 4 kit pieces, and fix the add-ons | Admin | Add-ons leave the theme |
-| 7 | Metaobject references and fixes | Admin or script | No |
-| 8 | Colour and mood on products | Admin or script | No |
-| 9 | Journal, FAQ, policies, customer data | Admin | Journal gains 4 articles |
-| 10 | Flow, packing slip, notifications, discounts | Admin | No |
-| 11 | Theme apps: decide what replaces each | Owner + dev | Not until cutover |
-| 12 | Customer Account API application setup | Dev | No |
-| 13 | Code changes | Dev | No |
-| 14 | Staging test against live | Dev + owner | No |
-| 15 | Before the cutover day | Dev + owner | No |
-| 16 | **Cutover** | Dev + owner | **Yes, this is the launch** |
-| 17 | After launch | Dev | No |
+| 1 | **Redirect live's old collection URLs** (urgent) | Owner | Yes: fixes 404s |
+| 2 | Decide the collection member differences | Owner | Yes |
+| 3 | Admin API apps | Owner + dev | No |
+| 4 | Upload the missing files | Admin | No |
+| 5 | The 4 kit pieces, and fix the add-ons | Admin | Add-ons leave the theme |
+| 6 | Metaobject references and fixes | Admin or script | No |
+| 7 | Colour and mood on products | Admin or script | No |
+| 8 | Journal, FAQ, policies, customer data | Admin | Journal gains 4 articles |
+| 9 | Flow, packing slip, notifications, discounts | Admin | No |
+| 10 | Theme apps: decide what replaces each | Owner + dev | Not until cutover |
+| 11 | Customer Account API application setup | Dev | No |
+| 12 | Code changes | Dev | No |
+| 13 | Staging test against live | Dev + owner | No |
+| 14 | Before the cutover day | Dev + owner | No |
+| 15 | **Cutover** | Dev + owner | **Yes, this is the launch** |
+| 16 | After launch | Dev | No |
 
 ---
 
-## Step 1 - Back up the live store
-
-Do this before any further edit to live.
-
-- [ ] **Products → Export → All products → CSV**. Keep the file.
-- [ ] **Online Store → Themes → Pitch → ⋯ → Duplicate.** This copy is
-      the rollback theme (Step 16).
-- [ ] Screenshot **Content → Menus → Main menu**, plus the homepage and a
-      product page, so "before" is on record.
-
----
-
-## Step 2 - Redirect live's old collection URLs (urgent)
+## Step 1 - Redirect live's old collection URLs (urgent)
 
 Live's previous collections no longer exist, so their URLs are dead **on
 the live shop today**. On 2026-10-25 each of these returned **404 on
@@ -164,7 +151,7 @@ Google's index, Instagram posts and old emails still point at them.
 | `his-and-hers-kit-1` | `/products/neelu-tulsi-his-hers-ritual-kit` (*owner*) |
 
 Shopify's redirects only work while Shopify serves kozyliving.in. The same
-pairs go into `next.config.js` for after cutover (Step 13.4); keep this
+pairs go into `next.config.js` for after cutover (Step 12.4); keep this
 table as the source for both.
 
 While here: the theme's menu now links to the site's code pages
@@ -176,7 +163,7 @@ Do **not** remove them from `main-menu`: the site reads that menu.
 
 ---
 
-## Step 3 - Decide the collection member differences
+## Step 2 - Decide the collection member differences
 
 Dev's members were read from dev's published site, live's from the
 Headless token. Everywhere else the two sets are identical. For each row,
@@ -204,7 +191,7 @@ Also:
 
 ---
 
-## Step 4 - Admin API apps
+## Step 3 - Admin API apps
 
 Three features write through the Admin API:
 
@@ -219,7 +206,7 @@ migration scopes do not stay live.
 | App | Scopes | Lifetime |
 | --- | --- | --- |
 | `Kozy storefront` (runtime) | `read_metaobjects`, `write_metaobjects`, `read_customers`, `write_customers` | Permanent |
-| `Kozy migration` (for Steps 7-8 by script, and to check what the Storefront API cannot see) | `read_products`, `write_products`, `read_metaobject_definitions`, `write_metaobject_definitions`, `read_metaobjects`, `write_metaobjects`, `read_files`, `write_files`, `read_online_store_navigation`, `write_online_store_navigation`, `read_content`, `write_content` | Uninstall in Step 17 |
+| `Kozy migration` (for Steps 6-7 by script, and to check what the Storefront API cannot see) | `read_products`, `write_products`, `read_metaobject_definitions`, `write_metaobject_definitions`, `read_metaobjects`, `write_metaobjects`, `read_files`, `write_files`, `read_online_store_navigation`, `write_online_store_navigation`, `read_content`, `write_content` | Uninstall in Step 16 |
 
 Shopify no longer issues permanent `shpat_` tokens for apps created after
 January 2026 (see `docs/NEWSLETTER_SETUP.md`).
@@ -261,7 +248,7 @@ With the migration app in place, the open questions in the
 
 ---
 
-## Step 5 - Upload the missing files
+## Step 4 - Upload the missing files
 
 These live only in **dev's** storage. A dev URL works only while dev
 exists, so each one is re-hosted on live. The other 30 images in
@@ -307,7 +294,7 @@ Steps:
 3. [ ] Record each new URL (file → *Copy link*) in a two-column sheet,
        `old URL → new URL`. Videos get a new
        `cdn.shopify.com/videos/c/o/v/<id>.mp4`; copy it from the file's
-       details. Step 13.3 uses this sheet.
+       details. Step 12.3 uses this sheet.
 4. [ ] **`Kozy_Logo.png`: upload the exact same file, unedited.** Its URL
        carries a crop in the file's own pixels
        (`crop_left=150&crop_top=124&crop_width=1508&crop_height=690`).
@@ -319,9 +306,9 @@ Steps:
 
 ---
 
-## Step 6 - The 4 kit pieces, and fix the add-ons
+## Step 5 - The 4 kit pieces, and fix the add-ons
 
-### 6.1 The kit pieces
+### 5.1 The kit pieces
 
 | Handle | Title | Tag | Options → variants @ price (₹) |
 | --- | --- | --- | --- |
@@ -356,7 +343,7 @@ products, and the kit URL state uses them.
      as plain text. That is fine: `kit_fabric.option_value` is matched
      forgivingly (`Block Printed` = `Block printed`).
 
-### 6.2 The add-ons and the kit container
+### 5.2 The add-ons and the kit container
 
 - [ ] `personalized-initials` and `kozy-gift-box`: **Status → Unlisted**.
       They are Active today, so they list on the theme's
@@ -375,7 +362,7 @@ products, and the kit URL state uses them.
       only. Ask the owner whether either should also be on the Online
       Store.
 
-### 6.3 Check
+### 5.3 Check
 
 - `/collections/all` on the theme lists **none** of the 4 pieces, the kit
   or the add-ons.
@@ -383,14 +370,14 @@ products, and the kit URL state uses them.
 
 ---
 
-## Step 7 - Metaobject references and fixes
+## Step 6 - Metaobject references and fixes
 
 Every entry exists, but **none references a product, variant or file**.
 Until they do, the site offers no initials or gift box, and
 `/kit-builder` and the homepage atelier rest. Live Admin → **Content →
 Metaobjects →** *the definition* → open the entry.
 
-Order matters: the products (Step 6) and swatches (Step 5) must exist.
+Order matters: the products (Step 5) and swatches (Step 4) must exist.
 
 1. [ ] `product_add_on` `add-your-initials` → **variant** =
        `personalized-initials` (`KOZY-ADDON-INITIALS`).
@@ -428,11 +415,11 @@ unset field is missing from `fields`.
 
 ---
 
-## Step 8 - Colour and mood on products
+## Step 7 - Colour and mood on products
 
 Not started: no live product returns either field.
 
-### 8.1 Definitions
+### 7.1 Definitions
 
 Live Admin → **Settings → Custom data → Products**. If these are not
 there, add them:
@@ -445,7 +432,7 @@ there, add them:
 The key is `shop_colors` with the US spelling. That is what the code reads
 first (`src/lib/shop/colours.ts`). Do not "correct" it.
 
-### 8.2 Values
+### 7.2 Values
 
 58 products, listed in [Appendix B](#appendix-b---colour-and-mood-on-products).
 
@@ -463,9 +450,9 @@ Check: `/shop-by-colour` shows 6 colours with counts and `/shop-by-mood`
 
 ---
 
-## Step 9 - Journal, FAQ, policies, customer data
+## Step 8 - Journal, FAQ, policies, customer data
 
-### 9.1 Journal
+### 8.1 Journal
 
 Live's `news` blog (titled *KOZY KORNER*) has only its own 3 articles.
 Recreate dev's 4 in live **Content → Blog posts**, blog `news`, with the
@@ -483,21 +470,21 @@ cutover if the owner prefers.
 Live's own `brand-manifesto`, `founders-note` and
 `private-label-b2b-partnerships` stay. Decide with the owner whether the
 `founders-note` article redirects to the site's `/founders-note` page, so
-the letter does not appear twice (the line is in Step 13.4, commented
+the letter does not appear twice (the line is in Step 12.4, commented
 out).
 
-### 9.2 FAQ page
+### 8.2 FAQ page
 
 - [ ] The `faq` page has an **empty body** (as in dev), and the footer
       links to it. Write the FAQ in it, or remove the FAQ item from
       `kozy-living-footer`.
 
-### 9.3 Policies
+### 8.3 Policies
 
 - [ ] Recommended: write a **Terms of service** (Settings → Policies).
       Neither store has one. The site lists only the policies that exist.
 
-### 9.4 Customer data that may only exist in dev
+### 8.4 Customer data that may only exist in dev
 
 If the staging site was ever shared beyond the team, real people may have
 used it:
@@ -511,9 +498,9 @@ used it:
 
 ---
 
-## Step 10 - Flow, packing slip, notifications, discounts
+## Step 9 - Flow, packing slip, notifications, discounts
 
-### 10.1 Shopify Flow
+### 9.1 Shopify Flow
 
 1. [ ] Install **Shopify Flow** on live, if it is not installed.
 2. [ ] In dev's Flow, open each workflow → **⋯ → Export** (`.flow` file):
@@ -528,38 +515,38 @@ used it:
 4. [ ] Look at live's existing workflows too. Do not duplicate one that
        already tags these orders.
 
-### 10.2 Packing slip
+### 9.2 Packing slip
 
 - [ ] Settings → Shipping and delivery → **Packing slips → Edit**. Bring
       dev's changes across: initials under the line (add-ons doc §4 Step
       6) and kit grouping (kit doc §5 Step 8). **Merge, do not paste
       over**: copy live's current template somewhere first.
 
-### 10.3 Notifications
+### 9.3 Notifications
 
 - [ ] If dev's **order confirmation** (or other) templates were changed
       for kits and initials (kit doc §5 Step 8), make the same change on
       live, merged with live's own edits.
 
-### 10.4 Discounts
+### 9.4 Discounts
 
 - [ ] Re-run the checks in add-ons doc §4 Step 7 and kit doc §5 Step 9
       against **live's** discount codes, which dev never saw. Decide per
       code whether it may discount add-ons and kits.
 
-### 10.5 Newsletter
+### 9.5 Newsletter
 
 - [ ] Follow `docs/NEWSLETTER_SETUP.md` §4-5 on live: the marketing
       surface that actually emails subscribers, and double opt-in.
 
-### 10.6 Shipping, payments, markets
+### 9.6 Shipping, payments, markets
 
 - [ ] These already work on live. Confirm only that the new products sit
       in a shipping profile that ships them (the default profile does).
 
 ---
 
-## Step 11 - Theme apps: decide what replaces each
+## Step 10 - Theme apps: decide what replaces each
 
 The Pitch theme loads these app embeds. **A headless storefront does not
 run theme app embeds**, so each one disappears at cutover unless it is
@@ -574,7 +561,7 @@ replaced. Go through the list with the owner **before** cutover.
 | Whatmore Live | Shoppable video | Gone. | Drop, or ask the vendor for a headless embed. |
 | MP size chart | Size guide on product pages | Gone. | Move the charts into product descriptions or a metafield the product page reads. |
 | Fav urgency stock labels | "Only n left" | Gone. | The site already shows stock clamps in the cart. Drop. |
-| PageFly | Landing pages built in PageFly | **Those pages 404.** | List PageFly pages. Rebuild the ones that matter, and redirect the rest (Step 13.4). |
+| PageFly | Landing pages built in PageFly | **Those pages 404.** | List PageFly pages. Rebuild the ones that matter, and redirect the rest (Step 12.4). |
 | SEOwill page speed | Theme speed tweaks | Irrelevant. | Uninstall after cutover. |
 | GSC affiliate external links | Affiliate tracking links | Gone. | Ask the owner whether affiliates still run. If yes, the tracking needs rebuilding. |
 
@@ -591,12 +578,12 @@ Also:
 
 ---
 
-## Step 12 - Customer Account API application setup
+## Step 11 - Customer Account API application setup
 
 Headless → *Kozy Living Headless* → **Customer Account API**.
 
 1. [ ] Copy the **Client ID** into `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID`
-       (local `.env` now, Vercel in Step 13.1). Client type: **Public**;
+       (local `.env` now, Vercel in Step 12.1). Client type: **Public**;
        the site uses PKCE and has no client secret
        (`docs/CUSTOMER_AUTH_SETUP.md`).
 2. The authorize, token and logout URLs are discovered at runtime from
@@ -611,23 +598,23 @@ Headless → *Kozy Living Headless* → **Customer Account API**.
    | JavaScript origin | `https://kozy-living.vercel.app` | No path, no trailing slash. |
    | Logout URI | `https://kozy-living.vercel.app/` | **With** the trailing slash: the logout route sends `${NEXT_PUBLIC_SITE_URL}/`, and Shopify matches it exactly. |
 
-4. [ ] Once the `live-store` branch has deployed (Step 14.1), add its
+4. [ ] Once the `live-store` branch has deployed (Step 13.1), add its
        **branch alias** as a second entry in each list. Vercel names it
        `kozy-living-git-live-store-<team>.vercel.app`; copy the exact host
        from the deployment's *Domains*.
-5. `kozyliving.in` is added at cutover (Step 16, step 6).
+5. `kozyliving.in` is added at cutover (Step 15, step 6).
 
 **Settings → Customer accounts** is already on the new customer accounts.
 Leave it.
 
 ---
 
-## Step 13 - Code changes
+## Step 12 - Code changes
 
 Do these on a branch (e.g. `live-store`). Nothing here merges to `main`
-until Step 14 passes.
+until Step 13 passes.
 
-### 13.1 Environment variables
+### 12.1 Environment variables
 
 Set these in **Vercel → Settings → Environment Variables**: Preview
 first, Production at cutover. Local `.env` already has the store domain
@@ -638,10 +625,10 @@ and both Storefront tokens.
 | `SHOPIFY_STORE_DOMAIN` | `4nr8xa-3x.myshopify.com` | Always the myshopify domain, never `kozyliving.in`. |
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | live's public token | |
 | `SHOPIFY_STOREFRONT_PRIVATE_ACCESS_TOKEN` | live's private token | Server only. Nothing reads it today; it is **not** an Admin token. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID` | Step 12 | |
-| `SHOPIFY_ADMIN_CLIENT_ID` / `SHOPIFY_ADMIN_CLIENT_SECRET` | runtime app (Step 4) | Or `SHOPIFY_ADMIN_ACCESS_TOKEN`. |
+| `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID` | Step 11 | |
+| `SHOPIFY_ADMIN_CLIENT_ID` / `SHOPIFY_ADMIN_CLIENT_SECRET` | runtime app (Step 3) | Or `SHOPIFY_ADMIN_ACCESS_TOKEN`. |
 | `NEXT_PUBLIC_SHOPIFY_MENU_HANDLE` | leave unset | The site reads `main-menu` by default. |
-| `SHOPIFY_REVALIDATION_SECRET` | a new long random string | Used in the webhook URL (Step 16). Empty today. |
+| `SHOPIFY_REVALIDATION_SECRET` | a new long random string | Used in the webhook URL (Step 15). Empty today. |
 | `NEXT_PUBLIC_SITE_URL` | Preview (`live-store` branch only): `https://kozy-living-git-live-store-<team>.vercel.app` · Production: `https://kozyliving.in` | Must match the Customer Account API URLs exactly. Not `kozy-living.vercel.app` on the preview: that host is production, still on dev until cutover, so a sign-in started on the preview would land there and fail its state check. |
 | `TWITTER_SITE` | `https://kozyliving.in` | It is `https://kozyliving.com` today. |
 | `SHOPIFY_STOREFRONT_PUBLIC_TOKEN`, `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | delete or set to live values | Aliases. A stale dev value is a trap. |
@@ -649,7 +636,7 @@ and both Storefront tokens.
 Also delete the old **dev** values from every Vercel environment at
 cutover, so a preview cannot quietly read the wrong store.
 
-### 13.2 Collection handles in code
+### 12.2 Collection handles in code
 
 Only the six renamed collections move. Line numbers are as of commit
 `b9118f0`; search for the old handle if they have moved.
@@ -675,14 +662,14 @@ Check after editing (should print nothing):
 grep -rnE "\"(crafted-by-kozy|dabu-printed-pillows|decorative-pillows|slippers-copy(-1)?|kozy-by-crafted-bathrobes)\"" src
 ```
 
-### 13.3 Media URLs
+### 12.3 Media URLs
 
-- [ ] Replace the 8 image and 7 video URLs from Step 5 in
-      `src/lib/site.ts` with their live URLs, using the Step 5 sheet.
+- [ ] Replace the 8 image and 7 video URLs from Step 4 in
+      `src/lib/site.ts` with their live URLs, using the Step 4 sheet.
 - [ ] Point the other 30 images (Appendix C) at live's copies: Content →
       Files → search the name → *Copy link*.
 - [ ] The logo keeps its `&crop=region&crop_left=150&crop_top=124&crop_width=1508&crop_height=690`
-      suffix, **only if** the file was uploaded unchanged (Step 5).
+      suffix, **only if** the file was uploaded unchanged (Step 4).
 - [ ] `socialImage` keeps `width: 1200, height: 1500` if the file is
       unchanged.
 - [ ] Check that both of these print `0`:
@@ -692,12 +679,12 @@ grep -c "0700/6476/7047" src/lib/site.ts
 grep -c "cdn.shopify.com/videos/c/o/v/\(806a1252\|3329bb66\|65fa358e\|e78b76a0\|d761713a\|75445088\|4c106e13\)" src/lib/site.ts
 ```
 
-### 13.4 Redirects for the theme's old URLs
+### 12.4 Redirects for the theme's old URLs
 
 Google, Instagram, old order emails and the Pitch theme's own links all
 point at Shopify-style paths. Add these to `redirects()` in
 `next.config.js`. **Order matters**: the nested product path before the
-collection one, and the old collection handles (Step 2) before the
+collection one, and the old collection handles (Step 1) before the
 generic collection rule.
 
 ```js
@@ -707,23 +694,23 @@ generic collection rule.
 { source: "/collections/:collection/products/:handle", destination: "/product/:handle", permanent: true },
 { source: "/collections", destination: "/search", permanent: true },
 { source: "/collections/all", destination: "/search", permanent: true },
-// Live's collection handles from before 2026-10-25 (Step 2).
+// Live's collection handles from before 2026-10-25 (Step 1).
 { source: "/collections/best-sellers", destination: "/search/bestsellers", permanent: true },
 { source: "/collections/kloud-slippers", destination: "/search/slippers", permanent: true },
 { source: "/collections/krafted", destination: "/search/krafted-by-kozy", permanent: true },
 { source: "/collections/small-paws-klub", destination: "/search/pet-collection", permanent: true },
-// …one line per row of the Step 2 table, with the owner's picks filled in.
+// …one line per row of the Step 1 table, with the owner's picks filled in.
 { source: "/collections/:handle", destination: "/search/:handle", permanent: true },
 { source: "/pages/:handle", destination: "/:handle", permanent: true },
 { source: "/cart", destination: "/", permanent: false },
 { source: "/account/:path+", destination: "/account", permanent: false },
-// { source: "/blogs/news/founders-note", destination: "/founders-note", permanent: true }, // owner's call, 9.1
+// { source: "/blogs/news/founders-note", destination: "/founders-note", permanent: true }, // owner's call, 8.1
 ```
 
 `/search?q=…`, `/blogs/…` and `/policies/…` already match routes in this
 app.
 
-### 13.5 Sitemap and robots: both are wrong today
+### 12.5 Sitemap and robots: both are wrong today
 
 - `src/app/sitemap.ts` hard-codes
   `const baseUrl = "https://demo-next-store.pages.dev/"`. **Every URL in
@@ -731,7 +718,7 @@ app.
 - `src/app/robots.ts` builds the sitemap link from `NEXT_PUBLIC_VERCEL_URL`,
   the per-deployment `*.vercel.app` host. Use `NEXT_PUBLIC_SITE_URL`.
 
-### 13.6 Smaller references
+### 12.6 Smaller references
 
 - `env.ts`: the `SHOPIFY_STORE_DOMAIN` default is `kozyliving-2.myshopify.com`
   (neither store), and the `TWITTER_SITE` default is `.com`. Update both,
@@ -743,7 +730,7 @@ app.
   the `.com` domain. Confirm the real address with the owner; it stays
   marked TODO until then.
 
-### 13.7 Documentation
+### 12.7 Documentation
 
 Update in the same change:
 
@@ -758,20 +745,20 @@ Update in the same change:
 
 ---
 
-## Step 14 - Staging test against the live store
+## Step 13 - Staging test against the live store
 
-### 14.1 Point a preview at live
+### 13.1 Point a preview at live
 
-1. Vercel **Preview** environment variables = the live values from 13.1,
+1. Vercel **Preview** environment variables = the live values from 12.1,
    scoped to the `live-store` branch so other previews stay on dev.
 2. Deploy the `live-store` branch.
 3. Take its branch alias (`kozy-living-git-live-store-<team>.vercel.app`),
    set `NEXT_PUBLIC_SITE_URL` to it, and redeploy.
 4. Add the alias's callback, origin and logout URI to the Customer Account
-   API (Step 12, item 4). Test sign-in on the alias, not on a
+   API (Step 11, item 4). Test sign-in on the alias, not on a
    per-deployment `*.vercel.app` URL.
 
-### 14.2 The test
+### 13.2 The test
 
 Follow CLAUDE.md §9 for using Playwright against this site: the loading
 curtain, the newsletter popup, the viewport cookie.
@@ -784,7 +771,7 @@ curtain, the newsletter popup, the viewport cookie.
   - The story band's links resolve.
 - [ ] Every menu and footer link opens a page. **No 404s.**
 - [ ] `/search` and all 20 collections, including the six renamed ones.
-- [ ] The old handles from Step 2 redirect.
+- [ ] The old handles from Step 1 redirect.
 - [ ] A multi-variant product: the price follows the size; sold-out
       variants are handled.
 - [ ] `/product/pink-robe`, `/product/mini-soft-sofa-natural-yellow-dyed`.
@@ -833,7 +820,7 @@ Only move on when every box is ticked.
 
 ---
 
-## Step 15 - Before the cutover day (T-2 days)
+## Step 14 - Before the cutover day (T-2 days)
 
 - [ ] **Find where kozyliving.in's DNS lives.**
   - **Bought through Shopify:** DNS is in Shopify Admin → Settings →
@@ -867,11 +854,11 @@ longer reaches Shopify.
 
 ---
 
-## Step 16 - Cutover
+## Step 15 - Cutover
 
-### 16.1 The steps (T = 0)
+### 15.1 The steps (T = 0)
 
-1. [ ] **Vercel production env** → the live values (13.1), with
+1. [ ] **Vercel production env** → the live values (12.1), with
        `NEXT_PUBLIC_SITE_URL=https://kozyliving.in`. Redeploy.
        `kozy-living.vercel.app` now serves the live store. Smoke-test it.
 2. [ ] **Vercel → Domains:** add `kozyliving.in` and `www.kozyliving.in`
@@ -885,7 +872,7 @@ longer reaches Shopify.
 4. [ ] **Online Store → Themes:** publish `Pitch - redirect to headless`.
 5. [ ] **DNS:** point `@` (kozyliving.in) and `www` at Vercel, using the
        records Vercel showed in item 2.
-6. [ ] **Customer Account API** (Step 12): add
+6. [ ] **Customer Account API** (Step 11): add
        - Callback: `https://kozyliving.in/api/auth/callback`
        - JavaScript origin: `https://kozyliving.in`
        - Logout: `https://kozyliving.in/`
@@ -901,7 +888,7 @@ longer reaches Shopify.
        - Metaobject edits are not offered here. They reach the site within
          the 60-second cache TTL anyway.
 
-### 16.2 Smoke test (straight after)
+### 15.2 Smoke test (straight after)
 
 - [ ] `https://kozyliving.in` serves the new site, with a valid
       certificate, on mobile data as well as Wi-Fi.
@@ -917,11 +904,11 @@ longer reaches Shopify.
 - [ ] Order confirmation email: "View order" and "Visit our store" links
       end up on kozyliving.in.
 
-### 16.3 SEO and channels
+### 15.3 SEO and channels
 
 - [ ] **Google Search Console:** verify `kozyliving.in` (Domain property
       via DNS, if not already). Submit `https://kozyliving.in/sitemap.xml`
-      (after 13.5 is fixed). Inspect a few `/product/…` URLs.
+      (after 12.5 is fixed). Inspect a few `/product/…` URLs.
 - [ ] **Google & YouTube / Facebook & Instagram channels:** the product
       feeds link to the primary domain (`shop.kozyliving.in/products/…`),
       which now forwards to the new site. Watch **Merchant Center →
@@ -929,7 +916,7 @@ longer reaches Shopify.
       as a landing-page mismatch. If it is, the feed URLs need overriding
       to `https://kozyliving.in/product/<handle>`.
 
-### 16.4 Rollback, if something is badly wrong
+### 15.4 Rollback, if something is badly wrong
 
 DNS plus one theme switch:
 
@@ -945,20 +932,20 @@ as it was before 2026-10-25.
 
 ---
 
-## Step 17 - After launch
+## Step 16 - After launch
 
 - [ ] For 48 hours, watch Vercel's logs for:
   - `Shopify Admin is not configured`
   - Admin `403` (a missing scope)
   - Storefront errors
   - 404s on paths that used to exist on the theme (add redirects for them)
-- [ ] Uninstall the **`Kozy migration`** app (Step 4).
+- [ ] Uninstall the **`Kozy migration`** app (Step 3).
 - [ ] Rotate any token that was pasted into chat, email or a document
       during the move.
 - [ ] Keep the **dev store** as a staging store. Do not delete it: it is
       the only place to try Admin changes without touching the shop. Its
       data will drift from live, so re-sync before relying on it.
-- [ ] Update `CLAUDE.md` with the live store's facts (13.7), and mark this
+- [ ] Update `CLAUDE.md` with the live store's facts (12.7), and mark this
       runbook **done**, with the cutover date.
 
 ---
@@ -969,15 +956,15 @@ The 2026-10-25 measurement used the Storefront API, which cannot see:
 inventory tracking on `custom-ritual-kit` (must be off), product status
 beyond listed / not listed, collection sort order, shipping and tax
 settings, whether the product metafield definitions exist, and the private
-`contact_message` definition. The migration app (Step 4) answers all of
+`contact_message` definition. The migration app (Step 3) answers all of
 them.
 
 ---
 
 ## Appendix A - Metaobject values on dev
 
-For reference while doing Step 7. Live already holds every value below
-except the reference fields and the two fixes listed in Step 7.
+For reference while doing Step 6. Live already holds every value below
+except the reference fields and the two fixes listed in Step 6.
 
 | Definition | Entries (handle: key values) |
 | --- | --- |
@@ -1065,10 +1052,10 @@ may want `rose-pink` added. Optional.
 
 ## Appendix C - Files already on live
 
-Present in live's Files under the same name on 2026-10-25, so Step 5
-skips them; Step 13.3 still repoints their URLs. Every image in
+Present in live's Files under the same name on 2026-10-25, so Step 4
+skips them; Step 12.3 still repoints their URLs. Every image in
 `src/lib/site.ts` on dev's path (`0700/6476/7047`) **except** the 8 listed
-in Step 5. To list them:
+in Step 4. To list them:
 
 ```sh
 grep -oE "0700/6476/7047/files/[^?\"]+" src/lib/site.ts | sort -u
@@ -1090,7 +1077,7 @@ curl -s https://4nr8xa-3x.myshopify.com/api/2026-07/graphql.json \
   -d '{"query":"{ products(first:250){nodes{handle}} collections(first:250){nodes{handle}} c:metaobjects(type:\"shop_color\",first:50){nodes{handle}} m:metaobjects(type:\"shop_mood\",first:50){nodes{handle}} f:metaobjects(type:\"kit_fabric\",first:50){nodes{handle}} b:metaobjects(type:\"kit_builder\",first:5){nodes{handle}} p:metaobjects(type:\"kit_piece\",first:50){nodes{handle}} a:metaobjects(type:\"product_add_on\",first:50){nodes{handle}} k:metaobjects(type:\"kit_colour\",first:50){nodes{handle}} t:metaobjects(type:\"embroidery_thread\",first:50){nodes{handle}} menu(handle:\"main-menu\"){items{title}} }"}'
 ```
 
-Expected once Step 6 is done:
+Expected once Step 5 is done:
 
 - 91 products. The 7 Unlisted ones (4 pieces, the kit, 2 add-ons) do
   **not** list. On 2026-10-25 this returned 93, because both add-ons were
@@ -1107,16 +1094,16 @@ ask for them: an unset field is simply missing from `fields`.
     fields { key value reference { __typename } } } } }
 ```
 
-### D.2 The scripted route for Steps 7-8
+### D.2 The scripted route for Steps 6-7
 
-With the `Kozy migration` app (Step 4), a Node script can read dev through
+With the `Kozy migration` app (Step 3), a Node script can read dev through
 its Storefront token and write live through the Admin API, matching by
 handle and SKU:
 
 | Step | Mutation | Notes |
 | --- | --- | --- |
 | Entries | `metaobjectUpsert(handle: { type, handle }, metaobject: { fields: [{ key, value }] })` | Safe to re-run. Reference fields take the **live** gid: look products up with `productByHandle` / `productVariants(query: "sku:KOZY-KIT")`, and files with `files(query: "filename:…")`. |
-| Product metafield definitions | `metafieldDefinitionCreate(definition: { name, namespace: "custom", key, ownerType: PRODUCT, type: "list.metaobject_reference", validations: [{ name: "metaobject_definition_id", value: <gid> }], access: { storefront: PUBLIC_READ } })` | Only if 8.1 finds them missing. |
+| Product metafield definitions | `metafieldDefinitionCreate(definition: { name, namespace: "custom", key, ownerType: PRODUCT, type: "list.metaobject_reference", validations: [{ name: "metaobject_definition_id", value: <gid> }], access: { storefront: PUBLIC_READ } })` | Only if 7.1 finds them missing. |
 | Product values | `metafieldsSet(metafields: [{ ownerId, namespace: "custom", key, type: "list.metaobject_reference", value: "[\"gid://shopify/Metaobject/…\"]" }])` | Up to 25 per call. Keep the order from Appendix B. |
 
 Run it once with a dry-run flag that only prints what it would write,
@@ -1126,7 +1113,7 @@ read the output, then run it for real.
 
 ## Appendix E - Theme redirect snippet
 
-Goes into the **duplicate** Pitch theme (Step 15). Create
+Goes into the **duplicate** Pitch theme (Step 14). Create
 `snippets/headless-redirect.liquid`:
 
 ```liquid
