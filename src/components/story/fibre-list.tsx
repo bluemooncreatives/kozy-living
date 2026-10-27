@@ -3,7 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "@/components/ui/shop-image";
 import { Eyebrow, Headline } from "@/components/ui/section";
 import { kozyStory } from "@/lib/site";
@@ -16,6 +16,41 @@ export type FibreKompanion = {
   handle: string;
   image: { url: string; alt: string };
 };
+
+/** A weave's own clip, from `kozyStory.fibres[].video`. */
+const fibreVideo = (fibre: (typeof kozyStory.fibres)[number]) =>
+  "video" in fibre ? fibre.video : undefined;
+
+/**
+ * A weave's clip. Every card layer is mounted at once and only the live one
+ * is opaque, so this plays only while `playing` - a hidden loop would decode
+ * for nothing - and holds its frame under reduced motion.
+ */
+function FibreFilm({ src, playing }: { src: string; playing: boolean }) {
+  const video = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = video.current;
+    if (!el) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Autoplay can be refused (data saver); the first frame then stays.
+    if (playing && !still) el.play().catch(() => {});
+    else el.pause();
+  }, [playing]);
+
+  return (
+    <video
+      ref={video}
+      src={src}
+      aria-hidden
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="absolute inset-0 h-full w-full object-cover"
+    />
+  );
+}
 
 /**
  * The material palette as a list that answers back: the live row fills
@@ -169,6 +204,10 @@ export default function FibreList({
                         className="object-cover"
                       />
                     </span>
+                  ) : fibreVideo(fibre) ? (
+                    <span className="fibre-thumb lg:hidden">
+                      <FibreFilm src={fibreVideo(fibre)!} playing />
+                    </span>
                   ) : null}
                 </button>
               </li>
@@ -194,6 +233,8 @@ export default function FibreList({
                       sizes="22rem"
                       className="object-cover"
                     />
+                  ) : fibreVideo(fibre) ? (
+                    <FibreFilm src={fibreVideo(fibre)!} playing={i === active} />
                   ) : (
                     <span className="fibre-float-empty">{fibre.name}</span>
                   )}

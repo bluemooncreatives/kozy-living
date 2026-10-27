@@ -1952,10 +1952,19 @@ export const kozyStory = {
      * rather than a borrowed photograph of some other cloth - that mismatch
      * is exactly what this list used to show. Add the handle here when one
      * ships. A handle that stops resolving falls back to the same panel.
+     *
+     * `video` is a clip of the cloth itself (owner's pick, 2026-10-28), shown
+     * on the card in place of the panel. 720x830, 10s - near the card's 1:1,
+     * so it is cover-cropped. A Kompanion's photograph still wins over it.
      */
     { index: "01", name: "Cotton waffle weave", note: "Textured and highly absorbent", product: "hoodie-robe" },
     { index: "02", name: "Slub cotton", note: "Irregular slub, woven in", product: "biscuits-floor-pillow-with-gusset" },
-    { index: "03", name: "Cotton percale", note: "Plain weave, crisp and closed" },
+    {
+      index: "03",
+      name: "Cotton percale",
+      note: "Plain weave, crisp and closed",
+      video: "https://cdn.shopify.com/videos/c/o/v/215cdb8de5e94b01b457f71f11d381f4.mp4",
+    },
     { index: "04", name: "Linen blends", note: "Linen worked with natural fibres" },
     { index: "05", name: "Wool", note: "Naturally insulating" },
   ],

@@ -5,13 +5,12 @@ import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * The closing band's films. The clips are 9:16 Reels and the band is 2:1, so
- * a cover crop keeps only the middle ~28% of their height - measured, it cut
- * the heads off one shot and the cushions off the next. Each clip is shown
- * WHOLE as a portrait strip at the band's height instead, over a blurred,
- * dimmed copy of itself that fills the rest of the frame. Both layers of a
- * clip are one file (the second is served from cache) and are driven
- * together so the fill never drifts from the strip.
+ * The closing band's films, cover-cropped to fill the band (owner's call,
+ * 2026-10-28). The clips are 9:16 Reels and the band is 2:1, so only a
+ * horizontal slice of each survives; it is held a little above centre, where
+ * the faces and hands sit. They used to be shown whole as a portrait strip
+ * over a blurred copy of themselves, which left two-thirds of the band as
+ * blur.
  *
  * A playlist, crossfaded on `ended` like the hero's: the native `loop`
  * attribute is never set, because it suppresses that event.
@@ -23,8 +22,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 export default function ClosingFilm({ clips }: { clips: readonly string[] }) {
   const frame = useRef<HTMLDivElement>(null);
-  const strips = useRef<(HTMLVideoElement | null)[]>([]);
-  const fills = useRef<(HTMLVideoElement | null)[]>([]);
+  const videos = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
   const visible = useRef(false);
@@ -32,19 +30,17 @@ export default function ClosingFilm({ clips }: { clips: readonly string[] }) {
   const held = useRef(false);
   const reduced = useRef(false);
 
-  const pair = (index: number) => [strips.current[index], fills.current[index]];
-
   const play = useCallback((index: number) => {
     // Autoplay can still be refused (low power mode, data saver); the frame
     // then simply stays put.
-    Promise.all(pair(index).map((v) => v?.play())).then(
+    Promise.resolve(videos.current[index]?.play()).then(
       () => setPlaying(true),
       () => setPlaying(false),
     );
   }, []);
 
   const stop = useCallback((index: number) => {
-    pair(index).forEach((v) => v?.pause());
+    videos.current[index]?.pause();
     setPlaying(false);
   }, []);
 
@@ -78,9 +74,8 @@ export default function ClosingFilm({ clips }: { clips: readonly string[] }) {
 
   const advanceFrom = (index: number) => {
     const next = (index + 1) % clips.length;
-    pair(next).forEach((v) => {
-      if (v) v.currentTime = 0;
-    });
+    const video = videos.current[next];
+    if (video) video.currentTime = 0;
     // One clip: restart it in place - `active` would not change, so the
     // effect above would not run to play it again.
     if (next === index) play(index);
@@ -99,37 +94,22 @@ export default function ClosingFilm({ clips }: { clips: readonly string[] }) {
       className="absolute inset-0 overflow-hidden rounded-plate bg-ink"
     >
       {clips.map((src, index) => (
-        <div
+        <video
           key={src}
+          ref={(el) => {
+            videos.current[index] = el;
+          }}
+          src={src}
+          aria-hidden
+          muted
+          playsInline
+          preload="metadata"
+          onEnded={index === active ? () => advanceFrom(index) : undefined}
           className={clsx(
-            "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+            "absolute inset-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-1000 ease-in-out",
             index === active ? "opacity-100" : "opacity-0",
           )}
-        >
-          <video
-            ref={(el) => {
-              fills.current[index] = el;
-            }}
-            src={src}
-            aria-hidden
-            muted
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
-          />
-          <video
-            ref={(el) => {
-              strips.current[index] = el;
-            }}
-            src={src}
-            aria-hidden
-            muted
-            playsInline
-            preload="metadata"
-            onEnded={index === active ? () => advanceFrom(index) : undefined}
-            className="absolute inset-y-0 left-1/2 aspect-[9/16] h-full -translate-x-1/2 object-cover shadow-[0_0_3rem_rgba(35,50,75,0.35)]"
-          />
-        </div>
+        />
       ))}
       <button
         type="button"
