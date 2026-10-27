@@ -587,6 +587,14 @@ export const ctaBand = {
   seal: "krafted for moments of rest · ",
   image:
     "https://cdn.shopify.com/s/files/1/0700/6476/7047/files/IMG_1876_d3c112d9-c774-458b-b8a9-fd12fc7e056e.jpg?v=1788636349",
+  /**
+   * Played in turn over `image` by `ClosingFilm`. Both are 720x1280 Reels
+   * (7.8s, 16.5s) - portrait, so they are shown whole, never cover-cropped.
+   */
+  videos: [
+    "https://cdn.shopify.com/videos/c/o/v/60506f057262408bb2c031bf02906384.mp4",
+    "https://cdn.shopify.com/videos/c/o/v/07ea0efa4b784c2d94223580e7bbb60d.mp4",
+  ],
 } as const;
 
 /** Journal teaser - copy left, image right. */

@@ -30,6 +30,7 @@ import CollectionPillRail from "@/components/ui/collection-pill-rail";
 import { splitText } from "@/components/motion/split-text";
 import ColourRail, { type RailColour } from "@/components/shop/colour-rail";
 import StoryBand, { StoryBandFallback } from "@/components/home/story-band";
+import ClosingFilm from "@/components/home/closing-film";
 import KitAtelierSection, {
   KitAtelierFallback,
 } from "@/components/home/kit-atelier-section";
@@ -962,6 +963,8 @@ function ClosingBand() {
           sizes="100vw"
           alt="A lived-in floor lounge: biscuit pillows, a waffle throw and an unhurried morning."
         >
+          {/* Over the still, which stays as the fallback if the film fails. */}
+          <ClosingFilm clips={ctaBand.videos} />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-10 rounded-plate bg-gradient-to-b from-black/55 via-black/20 to-transparent"
