@@ -522,13 +522,14 @@ the 180 touch icon on cream, since iOS paints transparency black). The 3.2 MB ma
 anything that renders on every page at them.
 
 **The header logo is Shopify's file, not that one.** `LogoSquare` (header and
-phone drawer) renders `site.logo` - `Kozy_Logo.png` (1774x887: KOZY, LIVING,
-"Rooted in Rituals") - through `ShopImage`, with `crop=region` in the URL so
-the CDN trims it to its ink box (1508x690 with margin) before resizing. That
+phone drawer) renders `site.logo` - `Untitled_design_20261019_144701_0000.png`
+(3375x4219 portrait canvas: puffed KOZY, LIVING, "Rooted in Rituals"; swapped
+in 2026-10-28) - through `ShopImage`, with `crop=region` in the URL so the
+CDN trims it to its ink box (2156x1022 with margin) before resizing. That
 is why the URL carries crop params and why `width`/`height` are the cropped
 box. ⚠️ The crop is in the file's own pixels, tied to that upload's `v=`:
-when the artwork was re-uploaded (it was 3836x2160 before), the old crop ran
-off the new canvas and cut the logo off. Replacing the artwork means
+when the artwork was re-uploaded once before, the old crop ran off the new
+canvas and cut the logo off. Replacing the artwork means
 re-measuring its ink box and updating the URL, `width` and `height` together.
 
 `public/icons/categories/` holds the category rail's illustrated icons
