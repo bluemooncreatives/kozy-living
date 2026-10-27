@@ -53,23 +53,23 @@ const CATEGORIES: readonly Category[] = [
   },
   {
     key: "bathrobes",
-    collections: ["bathrobes", "kessentials-bathrobes", "kozy-by-crafted-bathrobes"],
+    collections: ["bathrobes", "kessentials-bathrobes", "krafted-by-kozy-bathrobes"],
     words: /\brobes?\b/i,
     shelf: "bathrobes",
     swaps: { sizes: "robe-sizes", sleeves: "robe-sleeves" },
   },
   {
     key: "slippers",
-    collections: ["slippers", "slippers-copy", "slippers-copy-1"],
+    collections: ["slippers", "kessentials-slippers", "krafted-by-kozy-slippers"],
     words: /\bslippers?\b/i,
     shelf: "slippers",
     swaps: { sizes: "slipper-sizes" },
   },
   {
     key: "pillows",
-    collections: ["dabu-printed-pillows", "decorative-pillows"],
+    collections: ["decorative-throw-pillows", "decorative-shaped-pillows"],
     words: /\b(pillows?|cushions?)\b/i,
-    shelf: "dabu-printed-pillows",
+    shelf: "decorative-throw-pillows",
     swaps: { filler: "pillow-filler" },
   },
 ];

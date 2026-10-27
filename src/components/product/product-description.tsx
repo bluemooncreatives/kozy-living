@@ -14,7 +14,7 @@ const PET_PARENT_COLLECTION_HANDLE = "pet-parent";
 /** Collection handle marking pet-only products (no matching parent piece). */
 const PET_COLLECTION_HANDLE = "pet-collection";
 /** Collection handle for the in-house craft line. */
-const KRAFTED_BY_KOZY_COLLECTION_HANDLE = "crafted-by-kozy";
+const KRAFTED_BY_KOZY_COLLECTION_HANDLE = "krafted-by-kozy";
 
 
 /**

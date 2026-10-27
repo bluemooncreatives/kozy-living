@@ -413,7 +413,7 @@ Pet Collection → Pet Kollection  (only after "Pet", only as whole words)
 
 untouched: handcrafted · hand-crafted · craft · craft clusters ·
            Craft Technique · "this collection is empty" · carpet collection ·
-           Pet Collections · handles like crafted-by-kozy and pet-collection
+           Pet Collections · handles like krafted-by-kozy and pet-collection
 ```
 
 The bare noun is never touched. "Kollection" is the name of one shelf, not a
@@ -425,16 +425,14 @@ downstream as badges and labels, and they were missed on the first pass.
 
 ### Known Shopify data defects (fix in Admin, not in code)
 
-- Handles still read `crafted-by-kozy` and `kozy-by-crafted-bathrobes` — these
-  show in the address bar. The second is also scrambled (`kozy-by-crafted`
-  rather than `krafted-by-kozy`). Renaming needs a Shopify redirect, and
-  `KRAFTED_BY_KOZY_COLLECTION_HANDLE` in
-  `src/components/product/product-description.tsx` must be updated to match.
-- Collection `slippers-copy-1` is titled `Krafted by  kozy Slippers` — double
-  space, lowercase k.
-- In `main-menu`, **Krafted by Kozy → Slippers** points at
-  `/collections/crafted-by-kozy` (the parent) rather than at the slippers
-  collection.
+- The live store (2026-10) renamed six handles, and the code follows them
+  (`docs/store-migration.md` §10.2): `krafted-by-kozy`,
+  `krafted-by-kozy-bathrobes`, `krafted-by-kozy-slippers`,
+  `kessentials-slippers`, `decorative-throw-pillows` (was
+  `dabu-printed-pillows`) and `decorative-shaped-pillows`. A stale handle
+  fails silently: the guard below turns the link into `/search` and a
+  lookbook plate with no stills renders its blank oat placeholder (that is
+  how "Krafted by Kozy" and "Dabu Pillows" went photo-less on the homepage).
 - Collections `kozy-lounge` and `blend` do not exist. Code that references
   them already falls back — see below. (The homepage Bestsellers rail used to
   ask for a non-existent `popular`; it now reads the merchant's `bestsellers`

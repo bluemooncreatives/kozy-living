@@ -315,7 +315,7 @@ export const lookbook: readonly LookbookEntry[] = [
     description:
       "Our Dabu hand-block printed line - robes, slippers, pillows and kits.",
     title: "Krafted by Kozy",
-    handle: "crafted-by-kozy",
+    handle: "krafted-by-kozy",
     images: [],
   },
   {
@@ -374,7 +374,7 @@ export const lookbook: readonly LookbookEntry[] = [
     description:
       "Hand-block printed pillows that bring a quiet, artful mood to a korner.",
     title: "Dabu Pillows",
-    handle: "dabu-printed-pillows",
+    handle: "decorative-throw-pillows",
     images: [],
   },
   {
@@ -498,7 +498,7 @@ export const aboutStory = {
       lede: { lead: "Dabu", accent: "Handblock Printing" },
       body: "Kozy Living's first Kraft Kapsule Kollection features Dabu printing, a traditional mud-resist dyeing technique rooted in Jodhpur, Rajasthan.",
       cta: "See Dabu pieces",
-      collection: "dabu-printed-pillows",
+      collection: "decorative-throw-pillows",
       href: "/blogs",
       alt: "A Dabu hand-block print in indigo, close on the weave.",
       images: [

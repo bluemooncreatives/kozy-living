@@ -768,7 +768,7 @@ function StandardsTicker({ reverse = false }: { reverse?: boolean }) {
   return (
     <section
       aria-label="What every Kompanion carries"
-      className="rule-y overflow-x-clip bg-paper py-6 md:py-8"
+      className="overflow-x-clip bg-paper py-6 md:py-8"
     >
       <IconMarquee reverse={reverse} />
     </section>
