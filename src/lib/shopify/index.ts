@@ -33,6 +33,15 @@ import {
 } from "./queries/catalog";
 import { getColourPaletteQuery } from "./queries/colours";
 import { getMoodsQuery } from "./queries/moods";
+import { getProductSizeChartQuery } from "./queries/size-chart";
+import {
+  parseMeasurements,
+  pickSizeChart,
+  SIZE_CHART_METAOBJECT_TYPE,
+  type ProductSizeChart,
+  type RichTextNode,
+  type SizeChart,
+} from "../shop/size-chart";
 import { getMenuQuery } from "./queries/menu";
 import {
   getProductQuery,
@@ -897,6 +906,96 @@ export const getAddOns = reactCache(async (): Promise<ProductAddOn[]> => {
     return [];
   }
 });
+
+/* -------------------------------------------------------------- size charts
+
+   `size_chart` metaobjects, referenced by `custom.size_chart` on a product or
+   a collection. The rules - parsing, matching, which chart wins - are in
+   `lib/shop/size-chart.ts`; this only turns the API shape into a chart. */
+
+type SizeChartRef = {
+  reference: {
+    handle: string;
+    type: string;
+    fields: {
+      key: string;
+      value: string | null;
+      reference: { image?: Image } | null;
+    }[];
+  } | null;
+} | null;
+
+function reshapeSizeChart(ref: SizeChartRef): SizeChart | null {
+  const node = ref?.reference;
+  if (!node || node.type !== SIZE_CHART_METAOBJECT_TYPE) return null;
+  const field = (key: string) => node.fields.find((f) => f.key === key);
+  const text = (key: string) => field(key)?.value?.trim() || null;
+
+  const table = parseMeasurements(text("measurements"));
+  if (!table) return null;
+
+  let howToMeasure: RichTextNode | null = null;
+  try {
+    const raw = text("how_to_measure");
+    howToMeasure = raw ? (JSON.parse(raw) as RichTextNode) : null;
+  } catch {
+    // A malformed rich text value drops the steps, not the chart.
+  }
+
+  const image = field("guide_image")?.reference?.image;
+  return {
+    handle: node.handle,
+    name: text("name") ?? node.handle,
+    unit: text("unit")?.toLowerCase() === "cm" ? "cm" : "in",
+    ...table,
+    fitNote: text("fit_note"),
+    howToMeasure,
+    guideImage: image?.url
+      ? { url: image.url, altText: image.altText, width: image.width, height: image.height }
+      : null,
+  };
+}
+
+/**
+ * The chart for one product page, or null. Never throws: a guide that fails
+ * to load is a missing link, not a broken product page.
+ */
+export const getProductSizeChart = reactCache(
+  async (handle: string): Promise<ProductSizeChart | null> => {
+    try {
+      const res = await shopifyFetch<{
+        data: {
+          product: {
+            options: { name: string; values: string[] }[];
+            sizeChart: SizeChartRef;
+            collections: { nodes: { sizeChart: SizeChartRef }[] };
+          } | null;
+        };
+        variables: { handle: string };
+      }>({
+        query: getProductSizeChartQuery,
+        tags: [TAGS.products, TAGS.collections],
+        variables: { handle },
+      });
+
+      const product = res.body?.data?.product;
+      if (!product) return null;
+
+      return pickSizeChart(
+        reshapeSizeChart(product.sizeChart),
+        product.collections.nodes
+          .map((collection) => reshapeSizeChart(collection.sizeChart))
+          .filter((chart): chart is SizeChart => Boolean(chart)),
+        product.options
+      );
+    } catch (error) {
+      if (isFrameworkControlFlowError(error)) throw error;
+
+      console.warn("Size chart unavailable:", error);
+      return null;
+    }
+  }
+);
 
 /* ------------------------------------------------------- custom kit builder
 

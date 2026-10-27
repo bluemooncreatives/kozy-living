@@ -3,6 +3,8 @@
 import { ProductOption, ProductVariant } from "@/lib/shopify/types";
 import { useProduct, useUpdateURL } from "./product-context";
 import clsx from "clsx";
+import type { ProductSizeChart } from "@/lib/shop/size-chart";
+import { SizeGuide } from "./size-guide";
 
 type Combination = {
   id: string;
@@ -27,9 +29,12 @@ type Combination = {
 export default function VariantSelector({
   options,
   variants,
+  sizeChart,
 }: {
   options: ProductOption[];
   variants: ProductVariant[];
+  /** Puts "Size guide" beside the option the chart sizes. */
+  sizeChart?: ProductSizeChart | null;
 }) {
   const { state, updateOption } = useProduct();
   const updateURL = useUpdateURL();
@@ -58,7 +63,23 @@ export default function VariantSelector({
       {options.map((option) => (
         <form key={option.id} className="mb-6">
           <fieldset>
-            <legend className="eyebrow text-muted">{option.name}</legend>
+            {/* With a size guide, the visible label and the link share one
+                flex row and the legend stays for screen readers. Pinning
+                the link absolutely against the fieldset ran it into the
+                first row of pills at every width below desktop. */}
+            {sizeChart?.optionName === option.name ? (
+              <>
+                <legend className="sr-only">{option.name}</legend>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span aria-hidden className="eyebrow text-muted">
+                    {option.name}
+                  </span>
+                  <SizeGuide sizeChart={sizeChart} />
+                </div>
+              </>
+            ) : (
+              <legend className="eyebrow text-muted">{option.name}</legend>
+            )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {option.values.map((value) => {
                 const optionNameLowerCase = option.name.toLowerCase();

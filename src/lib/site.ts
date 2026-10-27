@@ -22,6 +22,21 @@ export const productDiscovery = {
   from: "from",
 } as const;
 
+/**
+ * The size guide on the product page. The table, fit note and measuring
+ * steps are the merchant's (`size_chart` metaobjects in Admin); this is only
+ * the frame around them.
+ */
+export const sizeGuide = {
+  open: "Size guide",
+  title: "Find your fit",
+  close: "Close size guide",
+  units: "Units",
+  unitLabels: { in: "in", cm: "cm" },
+  yourSize: "Your pick",
+  howToMeasure: "How to measure",
+} as const;
+
 export const productStudio = {
   eyebrow: "A note from the studio",
   title: "Small rituals. Thoughtful beginnings.",

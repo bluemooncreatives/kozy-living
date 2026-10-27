@@ -3,6 +3,7 @@ import { brandIcons } from "@/components/ui/brand-icons";
 import { giTag } from "@/lib/site";
 import giTagMark from "../../../public/icons/gi-tag-mark.png";
 import { Product, ProductAddOn } from "@/lib/shopify/types";
+import type { ProductSizeChart } from "@/lib/shop/size-chart";
 import { ProductPrice } from "./product-price";
 import VariantSelector from "./variant-selector";
 import Prose from "../prose";
@@ -83,10 +84,13 @@ function specsFor(product: Product) {
 export function ProductDescription({
   product,
   addOns = [],
+  sizeChart = null,
 }: {
   product: Product;
   /** Personalisation add-ons offered on this Kompanion. */
   addOns?: ProductAddOn[];
+  /** The merchant's size chart, when one covers this Kompanion's sizes. */
+  sizeChart?: ProductSizeChart | null;
 }) {
   const specs = specsFor(product);
   const handles = new Set(
@@ -204,7 +208,11 @@ export function ProductDescription({
       </div>
 
       <div className="mt-8">
-        <VariantSelector options={product.options} variants={product.variants} />
+        <VariantSelector
+          options={product.options}
+          variants={product.variants}
+          sizeChart={sizeChart}
+        />
       </div>
 
       <div className="mt-6">
