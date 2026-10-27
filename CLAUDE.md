@@ -1489,6 +1489,44 @@ sits after Shop by mood and the ticker under it (§5).
   pressed control unmounts with its pane - and a derived `aria-live` line
   reads out "Step n of N" plus the question.
 
+## 16. Size charts — the "Size guide" drawer
+
+Replaces the MP Size Chart theme app, which a headless site never ran
+(owner's setup, 2026-10-28). The charts are merchant data in Admin; the
+rules are `lib/shop/size-chart.ts`, the drawer
+`components/product/size-guide.tsx`, the frame copy `sizeGuide` in
+`site.ts`.
+
+- **`size_chart` metaobjects** (`name`, `unit`, `measurements`,
+  `how_to_measure` rich text, `guide_image`, `fit_note`), referenced by
+  **`custom.size_chart`** on a product or a collection. Live entries:
+  Bathrobe, Slippers, Furrie clothes, attached to `bathrobes`,
+  `ritual-kits`, `slippers` and `pet-clothing` plus products outside them.
+- **The table is multi-line text, not JSON**: one row per line, commas
+  between cells, the first line the headings, the first column the size.
+  The people typing it copy from a printed chart.
+- **A heading ending `(in)` / `(cm)` marks a measurement column**, the only
+  kind the cm/in toggle converts. `unit` is only the unit the drawer opens
+  in. Per-chart conversion is wrong: the slipper chart's US / UK / EU
+  columns are size systems. Converted precision follows the source (34 →
+  86, 8.7 → 22.1); a cell that is not a bare number or range is shown as
+  typed.
+- **Which chart:** the product's own wins outright; otherwise the first
+  collection chart whose sizes MATCH one of the product's options.
+  `ritual-kits` carries the bathrobe chart and also holds UK-sized slipper
+  kits, which must not be offered a robe table.
+- **Sizes match forgivingly** (`sizeKey`): case, spaces and dashes, a `UK`
+  prefix, and `XXL` = `2XL`. Measured spellings on the store: `S-M` /
+  `s-m` / `L- XL`, `UK 3-4` / `uk-3-4` / `3-4`. The guide sits under
+  whichever option matched (`Size`, `Slipper size`, `His Size`…) and washes
+  the picked size's row sage.
+- Its own query (`getProductSizeChart`), not a field on the product
+  fragment, which every listing and search spreads. It never throws: a
+  failed lookup is a missing link.
+- With a guide, that option's legend goes `sr-only` and a flex row carries
+  the visible label and the link. Absolutely pinning the link against the
+  fieldset ran it into the first row of pills below desktop.
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
