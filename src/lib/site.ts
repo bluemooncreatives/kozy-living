@@ -1044,7 +1044,7 @@ export const faq = {
  */
 export const letterBand = {
   label: "Letters from the studio",
-  heading: "A slower kind of inbox",
+  heading: "A mindful kind of inbox",
   body: "Rituals worth keeping, notes from the studio, and a first look at every new Kompanion.",
   note: "Unsubscribe whenever you like.",
   /** The same still as `kozyStory`'s "Slow mornings" frame. */
