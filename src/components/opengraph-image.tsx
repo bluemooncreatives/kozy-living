@@ -162,7 +162,10 @@ export default async function OpengraphImage(
             so on indigo it came out muddy. The site's own `.wordmark` is
             lowercase Franxurter and nothing else, which is exactly what this
             is: crisp at any size, correct on the palette, and free. */}
-          <div tw="flex items-center">
+          {/* Stacked, not side by side: the flag grew to "Handkrafted by
+              Indian kraft klusters" (2026-10-29), and in one row it broke the
+              wordmark onto two lines and wrapped itself. */}
+          <div tw="flex flex-col">
             <p
               tw="text-4xl"
               style={{ color: "#FFF6EB", letterSpacing: "-0.02em" }}
@@ -170,7 +173,7 @@ export default async function OpengraphImage(
               {`${site.name.toLowerCase()}`}
             </p>
             <p
-              tw="ml-6 text-2xl"
+              tw="mt-2 text-2xl"
               style={{ color: "#A9BDAF", letterSpacing: 0 }}
             >
               {hero.flag.toUpperCase()}

@@ -46,9 +46,12 @@ Read the VOICE note at the top of `src/lib/site.ts` before writing any copy.
   - The ordinary English word is still ordinary: "craft clusters",
     "craft-led", "handcrafted", "Craft Technique" are all correct as written.
     Only the standalone word *crafted* takes the K.
-  - One owner-requested exception: the "Handkrafted in India" flag
-    (`flag` / `flagMark` in `site.ts`) takes the K. Do not spread it to other
-    uses of "handcrafted".
+  - Owner-requested exceptions (2026-10-29), each confined to its line: the
+    hero flag reads "Handkrafted by Indian kraft klusters" (`flag` /
+    `flagMark` in `site.ts`), and the tagline / announcement read
+    "Reimagined Indian kraft to give you moments of rest". Those two lines
+    are the only places "kraft" and "klusters" take the K. Do not spread
+    them to other uses of "handcrafted", "craft" or "clusters".
 - **The K brand words** (owner's call, 2026-10-13). In our own copy these
   word families start with a K: kolour, komfort, kollection, kustom,
   konscious, konnect, Kompanion, korner, kozy (for cosy), kurated, krafted.

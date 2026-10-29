@@ -54,7 +54,7 @@ export const site = {
   name: "Kozy Living",
   wordmark: "KOZY",
   wordmarkAccent: "LIVING",
-  tagline: "Krafted to Give You Moments of Rest",
+  tagline: "Reimagined Indian Kraft to Give You Moments of Rest",
   /** The brand's own closing line. Used wherever one sentence has to carry it. */
   statement:
     "You don't need to add more to your day. Just do what you do with more intention.",
@@ -189,7 +189,7 @@ export const founderReel = [
  */
 
 /** The quiet line above the header. */
-export const announcement = "Krafted to give you moments of rest";
+export const announcement = "Reimagined Indian kraft to give you moments of rest";
 
 /* ------------------------------------------------------------------ homepage
    The sections below map one-to-one onto the homepage layout, in page order.
@@ -205,13 +205,13 @@ export const announcement = "Krafted to give you moments of rest";
  * instead.
  */
 export const hero = {
-  flag: "Handkrafted in India",
+  flag: "Handkrafted by Indian kraft klusters",
   /**
    * The same claim, split for the two-line origin mark on the hero plate.
    * Kept beside `flag` rather than derived from it: the social card (which
    * cannot read this layout) still wants the sentence whole.
    */
-  flagMark: { lead: "Handkrafted", place: "in India" },
+  flagMark: { lead: "Handkrafted", place: "by Indian kraft klusters" },
   blurb:
     "Kozy Living Textiles are your in-between Kompanions - krafted from 100% natural fibres to turn everyday moments into mindful daily rituals.",
   /**
